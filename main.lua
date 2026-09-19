@@ -190,30 +190,26 @@ task.spawn(function()
     end
 end)
 
--- AIMBOT (dari Falens)
+-- AIMBOT + WALLCHECK
 local GunAim = {
     Enabled = false, Holding = false, TargetMode = "Killer",
     Strength = 1, Predict = true, PredictStrength = 0.12,
-    FOV = 250, WallCheck = true, Target = nil,
+    FOV = 250, WallCheck = true,
 }
-
 local AttackAim = {
-    Enabled = false, Holding = false,
-    Strength = 1, Predict = true, PredictStrength = 0.12,
-    FOV = 250, WallCheck = true, Target = nil,
+    Enabled = false, Holding = false, Strength = 1,
+    Predict = true, PredictStrength = 0.12, FOV = 250, WallCheck = true,
 }
 
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        GunAim.Holding = true
-        AttackAim.Holding = true
+        GunAim.Holding = true; AttackAim.Holding = true
     end
 end)
 UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        GunAim.Holding = false
-        AttackAim.Holding = false
+        GunAim.Holding = false; AttackAim.Holding = false
     end
 end)
 
@@ -225,8 +221,7 @@ local function IsVisible(part)
     if not part then return false end
     RayParams.FilterDescendantsInstances = { LP.Character }
     local origin = Cam.CFrame.Position
-    local dir = part.Position - origin
-    local result = WS:Raycast(origin, dir, RayParams)
+    local result = WS:Raycast(origin, part.Position - origin, RayParams)
     if not result then return true end
     return result.Instance:IsDescendantOf(part.Parent)
 end
@@ -282,8 +277,7 @@ RS.RenderStepped:Connect(function()
             if GunAim.Predict then
                 pos = pos + (t.AssemblyLinearVelocity * GunAim.PredictStrength)
             end
-            local cf = CFrame.new(Cam.CFrame.Position, pos)
-            Cam.CFrame = Cam.CFrame:Lerp(cf, GunAim.Strength)
+            Cam.CFrame = Cam.CFrame:Lerp(CFrame.new(Cam.CFrame.Position, pos), GunAim.Strength)
         end
     end
     if AttackAim.Enabled and AttackAim.Holding then
@@ -296,7 +290,151 @@ RS.RenderStepped:Connect(function()
             Cam.CFrame = CFrame.new(Cam.CFrame.Position, pos)
         end
     end
-end)-- COPY AVATAR
+end)-- SILENT AIM PISTOL
+local SilentAim = {
+    Enabled = false, TargetMode = "Killer", FOV = 150, WallCheck = true,
+}
+
+local function SilentIsVisible(part)
+    if not SilentAim.WallCheck then return true end
+    if not part then return false end
+    RayParams.FilterDescendantsInstances = { LP.Character }
+    local result = WS:Raycast(Cam.CFrame.Position, part.Position - Cam.CFrame.Position, RayParams)
+    if not result then return true end
+    return result.Instance:IsDescendantOf(part.Parent)
+end
+
+local function GetSilentTarget()
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    local closest, shortest = nil, SilentAim.FOV
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team then
+            local valid = false
+            if SilentAim.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
+            elseif SilentAim.TargetMode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
+            if valid then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 and SilentIsVisible(hrp) then
+                    local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if d < shortest then shortest = d; closest = hrp end
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if SilentAim.Enabled and method == "FireServer" then
+        local n = self.Name:lower()
+        if n:find("gun") or n:find("pistol") or n:find("shoot") or n:find("fire") then
+            local target = GetSilentTarget()
+            if target then
+                local args = {...}
+                args[1] = target
+                return oldNamecall(self, unpack(args))
+            end
+        end
+    end
+    return oldNamecall(self, ...)
+end)
+
+-- FAST VAULT
+local FastVault = { Enabled = false, Speed = 30 }
+RS.Heartbeat:Connect(function()
+    if not FastVault.Enabled then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 8)
+    local hit = WS:FindPartOnRayWithIgnoreList(ray, {char})
+    if hit and (hit.Name == "Window" or hit.Name == "Pallet" or hit.Name == "Palletwrong") then
+        if hum.WalkSpeed ~= FastVault.Speed then hum.WalkSpeed = FastVault.Speed end
+    else
+        if hum.WalkSpeed == FastVault.Speed then hum.WalkSpeed = 16 end
+    end
+end)
+
+-- GOD MODE
+local GodMode = { Enabled = false }
+task.spawn(function()
+    while task.wait(0.3) do
+        if not GodMode.Enabled then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if hum.Health < hum.MaxHealth then
+                pcall(function() hum.Health = hum.MaxHealth end)
+            end
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Dead 
+            or state == Enum.HumanoidStateType.FallingDown 
+            or state == Enum.HumanoidStateType.Ragdoll then
+                pcall(function() hum:ChangeState(Enum.HumanoidStateType.Running) end)
+            end
+        end
+    end
+end)
+
+-- MOVEMENT
+local Movement = {
+    SpeedEnabled = false, SpeedValue = 20,
+    JumpEnabled = false, JumpValue = 50,
+    Noclip = false, NoclipConn = nil,
+}
+
+task.spawn(function()
+    while task.wait(0.1) do
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then continue end
+        if Movement.SpeedEnabled then
+            if hum.WalkSpeed ~= Movement.SpeedValue then
+                hum.WalkSpeed = Movement.SpeedValue
+            end
+        end
+        if Movement.JumpEnabled then
+            if hum.JumpPower ~= Movement.JumpValue then
+                hum.JumpPower = Movement.JumpValue
+                hum.UseJumpPower = true
+            end
+        end
+    end
+end)
+
+local function NoclipPart(p)
+    if p:IsA("BasePart") and p.CanCollide then p.CanCollide = false end
+end
+
+local function EnableNoclip()
+    if Movement.NoclipConn then Movement.NoclipConn:Disconnect() end
+    Movement.NoclipConn = RS.Stepped:Connect(function()
+        local char = LP.Character
+        if char and Movement.Noclip then
+            for _, p in ipairs(char:GetDescendants()) do pcall(NoclipPart, p) end
+        end
+    end)
+end
+
+local function DisableNoclip()
+    if Movement.NoclipConn then Movement.NoclipConn:Disconnect(); Movement.NoclipConn = nil end
+    local char = LP.Character
+    if char then
+        for _, p in ipairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = true end
+        end
+    end
+    end-- COPY AVATAR
 local AvatarStealer = { Original = nil, CurrentUserId = nil }
 
 local function RemoveClothes(char)
@@ -494,7 +632,76 @@ RS.RenderStepped:Connect(function()
         end)
         FPSLabel.Text = string.format("Yarhub | FPS: %d | Ping: %d ms", FPSPing.FPS, FPSPing.Ping)
     end
-end)-- ESP
+end)-- AUTO FLEE
+local AutoFlee = { Enabled = false, Range = 50, Cooldown = 0.5, LastFlee = 0 }
+
+local function GetNearestKiller()
+    local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return nil end
+    local closest, shortest = nil, math.huge
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and IsKiller(p) then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local d = (hrp.Position - root.Position).Magnitude
+                if d < shortest then shortest = d; closest = hrp end
+            end
+        end
+    end
+    return closest, shortest
+end
+
+local function GetFarthestGenPoint(killerRoot)
+    if not killerRoot then return nil end
+    local best, farthest = nil, 0
+    for _, obj in ipairs(WS:GetDescendants()) do
+        if obj:IsA("BasePart") and string.match(obj.Name, "^GeneratorPoint%d+$") then
+            local d = (obj.Position - killerRoot.Position).Magnitude
+            if d > farthest then farthest = d; best = obj end
+        end
+    end
+    return best
+end
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not AutoFlee.Enabled then continue end
+        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if not root then continue end
+        local killerRoot, dist = GetNearestKiller()
+        if killerRoot and dist <= AutoFlee.Range and tick() - AutoFlee.LastFlee > AutoFlee.Cooldown then
+            local point = GetFarthestGenPoint(killerRoot)
+            if point then
+                AutoFlee.LastFlee = tick()
+                root.CFrame = point.CFrame + Vector3.new(0, 5, 0)
+            end
+        end
+    end
+end)
+
+-- AUTO WIGGLE
+local AutoWiggle = { Enabled = false, Spam = 5 }
+local WiggleEvent = Rep:FindFirstChild("Remotes")
+    and Rep.Remotes:FindFirstChild("Carry")
+    and Rep.Remotes.Carry:FindFirstChild("SelfUnHookEvent")
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not AutoWiggle.Enabled then continue end
+        local char = LP.Character
+        if not char then continue end
+        local carried =
+            (char:FindFirstChild("IsCarried") and char.IsCarried.Value) or
+            (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
+        if carried and WiggleEvent then
+            for i = 1, AutoWiggle.Spam do
+                pcall(function() WiggleEvent:FireServer() end)
+            end
+        end
+    end
+end)
+
+-- ESP
 local ESP = {
     On = false, SV = true, KL = true, GN = true,
     SVc = Color3.fromRGB(0,255,0), KLc = Color3.fromRGB(255,0,0), GNc = Color3.fromRGB(255,105,180),
@@ -677,96 +884,6 @@ task.spawn(function()
         end
         Clean(used)
     end
-end)
-
--- SILENT AIM PISTOL
-local SilentAim = {
-    Enabled = false,
-    TargetMode = "Killer",
-    FOV = 150,
-    WallCheck = true,
-    RemoteNames = {"FireGunEvent", "GunFire", "ShootEvent", "FireEvent", "FirePistol"},
-}
-
-local function SilentIsVisible(part)
-    if not SilentAim.WallCheck then return true end
-    if not part then return false end
-    RayParams.FilterDescendantsInstances = { LP.Character }
-    local origin = Cam.CFrame.Position
-    local result = WS:Raycast(origin, part.Position - origin, RayParams)
-    if not result then return true end
-    return result.Instance:IsDescendantOf(part.Parent)
-end
-
-local function GetSilentTarget()
-    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
-    local closest, shortest = nil, SilentAim.FOV
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Team then
-            local valid = false
-            if SilentAim.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
-            elseif SilentAim.TargetMode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
-            if valid then
-                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                if hrp and hum and hum.Health > 0 and SilentIsVisible(hrp) then
-                    local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
-                    if vis then
-                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if d < shortest then shortest = d; closest = hrp end
-                    end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    if SilentAim.Enabled and method == "FireServer" then
-        local n = self.Name:lower()
-        local isGun = false
-        for _, rn in ipairs(SilentAim.RemoteNames) do
-            if n == rn:lower() or n:find("gun") or n:find("pistol") or n:find("shoot") then
-                isGun = true
-                break
-            end
-        end
-        if isGun then
-            local target = GetSilentTarget()
-            if target then
-                local args = {...}
-                args[1] = target
-                return oldNamecall(self, unpack(args))
-            end
-        end
-    end
-    return oldNamecall(self, ...)
-end)
-
--- FAST VAULT
-local FastVault = { Enabled = false, Speed = 30 }
-
-RS.Heartbeat:Connect(function()
-    if not FastVault.Enabled then return end
-    local char = LP.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum then return end
-    local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 8)
-    local hit = WS:FindPartOnRayWithIgnoreList(ray, {char})
-    if hit and (hit.Name == "Window" or hit.Name == "Pallet" or hit.Name == "Palletwrong") then
-        if hum.WalkSpeed ~= FastVault.Speed then
-            hum.WalkSpeed = FastVault.Speed
-        end
-    else
-        if hum.WalkSpeed == FastVault.Speed then
-            hum.WalkSpeed = 16
-        end
-    end
 end)-- MOONWALK (KODINGAN KAMU)
 local Moonwalk = {
     Enabled = false,
@@ -834,11 +951,7 @@ end
 
 local function setMoonwalk(state)
     Moonwalk.Enabled = state
-    if state then
-        startMoonwalk()
-    else
-        stopMoonwalk()
-    end
+    if state then startMoonwalk() else stopMoonwalk() end
 end
 
 local function createMoonwalkButton()
@@ -922,14 +1035,12 @@ end
 
 LP.CharacterAdded:Connect(function()
     task.wait(0.5)
-    if Moonwalk.Enabled then
-        startMoonwalk()
-    end
+    if Moonwalk.Enabled then startMoonwalk() end
 end)
 
 if Moonwalk.ShowButton then
     createMoonwalkButton()
-    end-- UI
+        end-- UI
 local Win = Rayfield:CreateWindow({
    Name = "Yarhub",
    LoadingTitle = "Yarhub",
@@ -951,6 +1062,7 @@ local SkillT = Win:CreateTab("Skillcheck")
 local ParryT = Win:CreateTab("Parry")
 local AimT   = Win:CreateTab("Aimbot")
 local EspT   = Win:CreateTab("ESP")
+local MoveT  = Win:CreateTab("Movement")
 local MwT    = Win:CreateTab("Moonwalk")
 local AvaT   = Win:CreateTab("Avatar")
 local InfoT  = Win:CreateTab("Informasi")
@@ -965,8 +1077,7 @@ MainT:CreateToggle({Name="No Fog", CurrentValue=false,
 MainT:CreateSection("FOV Changer")
 MainT:CreateToggle({Name="Aktifkan FOV", CurrentValue=false,
    Callback=function(v) ToggleFOV(v) end})
-MainT:CreateSlider({Name="FOV Value (50-120)",
-   Range={50,120}, Increment=1, CurrentValue=70,
+MainT:CreateSlider({Name="FOV Value", Range={50,120}, Increment=1, CurrentValue=70,
    Callback=function(v) FOV.Value = v end})
 
 LagT:CreateSection("Render")
@@ -987,9 +1098,7 @@ LagT:CreateToggle({Name="Post-Effects OFF", CurrentValue=false,
 LagT:CreateSection("Optimasi")
 LagT:CreateButton({Name="Hapus Partikel", Callback=function()
    for _,x in ipairs(WS:GetDescendants()) do
-      if x:IsA("ParticleEmitter") or x:IsA("Fire") or x:IsA("Smoke") then
-         x.Enabled = false
-      end
+      if x:IsA("ParticleEmitter") or x:IsA("Fire") or x:IsA("Smoke") then x.Enabled = false end
    end
 end})
 LagT:CreateButton({Name="Hapus Trails", Callback=function()
@@ -1009,10 +1118,6 @@ LagT:CreateButton({Name="Potato Mode", Callback=function()
          x.Material = Enum.Material.SmoothPlastic
          x.CastShadow = false
       end
-      if x:IsA("ParticleEmitter") or x:IsA("Fire") or x:IsA("Smoke") then
-         x.Enabled = false
-      end
-      if x:IsA("Trail") or x:IsA("Beam") then x.Enabled = false end
    end
    Lighting.GlobalShadows = false
 end})
@@ -1022,15 +1127,13 @@ SkillT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v) _G.SkillOn = v end})
 SkillT:CreateDropdown({Name="Mode", Options={"Instan","Perfect"},
    CurrentOption={"Perfect"},
-   Callback=function(Option) _G.SkillMode = Option[1] end})
+   Callback=function(O) _G.SkillMode = O[1] end})
 
 ParryT:CreateSection("Auto Parry")
 ParryT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v) AutoParry.Enabled = v end})
 ParryT:CreateSlider({Name="Jarak", Range={5,30}, Increment=1, CurrentValue=15,
    Callback=function(v) AutoParry.Range = v end})
-ParryT:CreateSlider({Name="Delay", Range={0.05,1}, Increment=0.05, CurrentValue=0.2,
-   Callback=function(v) AutoParry.Debounce = v end})
 ParryT:CreateToggle({Name="Lingkaran Visual", CurrentValue=true,
    Callback=function(v) AutoParry.ShowCircle = v end})
 
@@ -1038,24 +1141,19 @@ AimT:CreateSection("Gun Aimbot")
 AimT:CreateToggle({Name="Aktifkan Gun Aimbot", CurrentValue=false,
    Callback=function(v) GunAim.Enabled = v end})
 AimT:CreateDropdown({Name="Target", Options={"Killer","Survivor"},
-   CurrentOption={"Killer"},
-   Callback=function(O) GunAim.TargetMode = O[1] end})
+   CurrentOption={"Killer"}, Callback=function(O) GunAim.TargetMode = O[1] end})
 AimT:CreateSlider({Name="Strength", Range={0.05,1}, Increment=0.05, CurrentValue=1,
    Callback=function(v) GunAim.Strength = v end})
 AimT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=250,
    Callback=function(v) GunAim.FOV = v end})
-AimT:CreateToggle({Name="Prediction", CurrentValue=true,
-   Callback=function(v) GunAim.Predict = v end})
 AimT:CreateToggle({Name="Wallcheck", CurrentValue=true,
    Callback=function(v) GunAim.WallCheck = v end})
 
-AimT:CreateSection("Attack Aimbot (Killer)")
-AimT:CreateToggle({Name="Aktifkan Attack Aimbot", CurrentValue=false,
+AimT:CreateSection("Attack Aimbot")
+AimT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v) AttackAim.Enabled = v end})
 AimT:CreateSlider({Name="Strength Attack", Range={0.05,1}, Increment=0.05, CurrentValue=1,
    Callback=function(v) AttackAim.Strength = v end})
-AimT:CreateSlider({Name="FOV Attack", Range={50,500}, Increment=10, CurrentValue=250,
-   Callback=function(v) AttackAim.FOV = v end})
 AimT:CreateToggle({Name="Wallcheck Attack", CurrentValue=true,
    Callback=function(v) AttackAim.WallCheck = v end})
 
@@ -1063,13 +1161,10 @@ AimT:CreateSection("Silent Aim Pistol ⚠️")
 AimT:CreateToggle({Name="Aktifkan Silent Aim", CurrentValue=false,
    Callback=function(v)
       SilentAim.Enabled = v
-      if v then
-         Rayfield:Notify({Title="⚠️ Silent Aim", Content="Risiko tinggi kena anti-cheat!", Duration=4})
-      end
+      if v then Rayfield:Notify({Title="⚠️ Silent Aim", Content="Risiko tinggi!", Duration=4}) end
    end})
 AimT:CreateDropdown({Name="Target", Options={"Killer","Survivor"},
-   CurrentOption={"Killer"},
-   Callback=function(O) SilentAim.TargetMode = O[1] end})
+   CurrentOption={"Killer"}, Callback=function(O) SilentAim.TargetMode = O[1] end})
 AimT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=150,
    Callback=function(v) SilentAim.FOV = v end})
 AimT:CreateToggle({Name="Wallcheck", CurrentValue=true,
@@ -1095,8 +1190,6 @@ EspT:CreateSlider({Name="Ukuran Text", Range={8,32}, Increment=1, CurrentValue=1
    Callback=function(v) ESP.TextSize = v end})
 EspT:CreateSlider({Name="Jarak Max", Range={50,2000}, Increment=50, CurrentValue=500,
    Callback=function(v) ESP.MaxDist = v end})
-EspT:CreateSlider({Name="Update Rate", Range={0.1,2}, Increment=0.1, CurrentValue=0.6,
-   Callback=function(v) ESP.UpdateRate = v end})
 EspT:CreateSection("Warna")
 EspT:CreateColorPicker({Name="Survivor", Color=Color3.fromRGB(0,255,0),
    Callback=function(c) ESP.SVc = c end})
@@ -1104,6 +1197,42 @@ EspT:CreateColorPicker({Name="Killer", Color=Color3.fromRGB(255,0,0),
    Callback=function(c) ESP.KLc = c end})
 EspT:CreateColorPicker({Name="Generator", Color=Color3.fromRGB(255,105,180),
    Callback=function(c) ESP.GNc = c end})
+
+MoveT:CreateSection("God Mode")
+MoveT:CreateToggle({Name="Aktifkan God Mode ⚠️", CurrentValue=false,
+   Callback=function(v)
+      GodMode.Enabled = v
+      if v then Rayfield:Notify({Title="⚠️ God Mode", Content="Risiko ban!", Duration=4}) end
+   end})
+
+MoveT:CreateSection("Speed & Jump")
+MoveT:CreateToggle({Name="WalkSpeed ON", CurrentValue=false,
+   Callback=function(v) Movement.SpeedEnabled = v end})
+MoveT:CreateSlider({Name="WalkSpeed Value", Range={16,100}, Increment=2, CurrentValue=20,
+   Callback=function(v) Movement.SpeedValue = v end})
+MoveT:CreateToggle({Name="JumpPower ON", CurrentValue=false,
+   Callback=function(v) Movement.JumpEnabled = v end})
+MoveT:CreateSlider({Name="JumpPower Value", Range={50,200}, Increment=5, CurrentValue=50,
+   Callback=function(v) Movement.JumpValue = v end})
+
+MoveT:CreateSection("Noclip")
+MoveT:CreateToggle({Name="Noclip", CurrentValue=false,
+   Callback=function(v)
+      Movement.Noclip = v
+      if v then EnableNoclip() else DisableNoclip() end
+   end})
+
+MoveT:CreateSection("Auto Flee")
+MoveT:CreateToggle({Name="Aktifkan Auto Flee ⚠️", CurrentValue=false,
+   Callback=function(v) AutoFlee.Enabled = v end})
+MoveT:CreateSlider({Name="Detect Range", Range={20,100}, Increment=5, CurrentValue=50,
+   Callback=function(v) AutoFlee.Range = v end})
+
+MoveT:CreateSection("Auto Wiggle")
+MoveT:CreateToggle({Name="Aktifkan Auto Wiggle", CurrentValue=false,
+   Callback=function(v) AutoWiggle.Enabled = v end})
+MoveT:CreateSlider({Name="Spam per Detik", Range={1,20}, Increment=1, CurrentValue=5,
+   Callback=function(v) AutoWiggle.Spam = v end})
 
 MwT:CreateSection("Moonwalk")
 MwT:CreateToggle({Name="Aktifkan Moonwalk", CurrentValue=false,
@@ -1117,16 +1246,13 @@ MwT:CreateToggle({Name="Tampilkan Tombol MW", CurrentValue=true,
       if v then
          createMoonwalkButton()
       else
-         if MoonwalkButton then
-            MoonwalkButton:Destroy()
-            MoonwalkButton = nil
-         end
+         if MoonwalkButton then MoonwalkButton:Destroy(); MoonwalkButton = nil end
       end
    end})
 MwT:CreateToggle({Name="🔒 Lock Tombol MW", CurrentValue=false,
    Callback=function(v)
       MWLocked = v
-      Rayfield:Notify({Title="Yarhub", Content=v and "Tombol MW DILOCK" or "Tombol MW UNLOCK", Duration=2})
+      Rayfield:Notify({Title="Yarhub", Content=v and "Tombol DILOCK" or "Tombol UNLOCK", Duration=2})
    end})
 MwT:CreateSlider({Name="Spam Speed", Range={1,50}, Increment=1, CurrentValue=30,
    Callback=function(v) Moonwalk.SpamSpeed = v end})
@@ -1136,11 +1262,6 @@ MwT:CreateSlider({Name="Slow Speed", Range={1,30}, Increment=1, CurrentValue=13,
    Callback=function(v) Moonwalk.SlowSpeed = v end})
 MwT:CreateToggle({Name="Use Slow Speed", CurrentValue=true,
    Callback=function(v) Moonwalk.UseSlow = v end})
-MwT:CreateParagraph({Title="Cara Pakai",
-   Content="1. Toggle ON atau tekan tombol MW\n" ..
-           "2. Tekan joystick/WASD untuk gerak\n" ..
-           "3. Karakter gerak MUNDUR sambil goyang\n" ..
-           "4. Lock = tombol gak bisa digeser"})
 
 AvaT:CreateSection("Copy Avatar")
 AvaT:CreateInput({
@@ -1160,15 +1281,17 @@ InfoT:CreateToggle({Name="Tampilkan FPS/Ping", CurrentValue=true,
 InfoT:CreateSection("Tentang")
 InfoT:CreateParagraph({
    Title = "Yarhub Ultimate",
-   Content = "Fitur:\n" ..
-             "- Anti Lag\n" ..
-             "- Fullbright + No Fog\n" ..
+   Content = "Fitur Lengkap:\n" ..
+             "- Anti Lag + Fullbright + No Fog + FOV\n" ..
              "- Auto Skillcheck (2 Mode)\n" ..
              "- Auto Parry + Circle\n" ..
-             "- Aimbot (Gun + Attack + Wallcheck)\n" ..
+             "- Aimbot + Wallcheck\n" ..
              "- Silent Aim Pistol ⚠️\n" ..
              "- Fast Vault\n" ..
-             "- ESP\n" ..
+             "- God Mode ⚠️\n" ..
+             "- Movement (Speed/Jump/NoClip)\n" ..
+             "- Auto Flee + Auto Wiggle\n" ..
+             "- ESP (Player + Generator)\n" ..
              "- Moonwalk + Lock Tombol\n" ..
              "- Copy Avatar\n" ..
              "- FPS/Ping"

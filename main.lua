@@ -1,4 +1,4 @@
--- YARHUB ULTIMATE
+-- YARHUB ULTIMATE FINAL
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
@@ -81,146 +81,7 @@ local function IsKiller(p)
     if p:GetAttribute("Role") == "Killer" then return true end
     if p.Team and p.Team.Name == "Killer" then return true end
     return false
-end-- AUTO SKILLCHECK
-local Skill = { LastGoal = nil, Clicked = false, WasActive = false }
-local SkillBusy = false
-
-local function PressSkill()
-    if isMobile then
-        local btn = PG:FindFirstChild("check", true)
-        if btn and btn:IsA("GuiObject") then
-            local p, s = btn.AbsolutePosition, btn.AbsoluteSize
-            local ins = GS:GetGuiInset()
-            local x = p.X + s.X/2 + ins.X
-            local y = p.Y + s.Y/2 + ins.Y
-            pcall(function() VIM:SendTouchEvent(8822, 0, x, y) end)
-            task.wait(0.01)
-            pcall(function() VIM:SendTouchEvent(8822, 2, x, y) end)
-        end
-    else
-        pcall(function() VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game) end)
-        task.wait(0.01)
-        pcall(function() VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game) end)
-    end
-end
-
-local function GetCheck()
-    for _, n in ipairs({"SkillCheckPromptGui", "SkillCheckPromptGui-con"}) do
-        local g = PG:FindFirstChild(n, true)
-        if g then
-            local c = g:FindFirstChild("Check", true)
-            if c and c.Visible then
-                local l = c:FindFirstChild("Line", true)
-                local go = c:FindFirstChild("Goal", true)
-                if l and go then return l, go end
-            end
-        end
-    end
-end
-
-local function AngDiff(a, b)
-    local d = b - a
-    if d > 180 then d = d - 360 end
-    if d < -180 then d = d + 360 end
-    return d
-end
-
-local function UpdateSkill()
-    if SkillBusy then return end
-    local line, goal = GetCheck()
-    if not (line and goal) then
-        Skill.LastGoal = nil; Skill.Clicked = false; Skill.WasActive = false
-        return
-    end
-    local lr = line.Rotation % 360
-    local gr = goal.Rotation % 360
-    if _G.SkillMode == "Instan" then
-        if not Skill.WasActive then
-            Skill.WasActive = true
-            SkillBusy = true
-            task.spawn(function()
-                PressSkill()
-                task.wait(0.05)
-                SkillBusy = false
-            end)
-        end
-        Skill.LastGoal = gr
-        return
-    end
-    if not Skill.WasActive then
-        Skill.WasActive = true; Skill.LastGoal = gr; Skill.Clicked = false
-        return
-    end
-    if Skill.LastGoal and math.abs(AngDiff(Skill.LastGoal, gr)) > 5 then
-        Skill.Clicked = false
-    end
-    Skill.LastGoal = gr
-    if Skill.Clicked then return end
-    local sR = (gr + 102) % 360
-    local eR = (gr + 116) % 360
-    local inZone
-    if sR > eR then inZone = (lr >= sR or lr <= eR)
-    else inZone = (lr >= sR and lr <= eR) end
-    if inZone then
-        Skill.Clicked = true
-        SkillBusy = true
-        task.spawn(function()
-            PressSkill()
-            task.wait(0.05)
-            SkillBusy = false
-        end)
-    end
-end
-
-RS.RenderStepped:Connect(function()
-    if _G.SkillOn then UpdateSkill() end
-end)
-
--- FPS/PING
-local FPSPing = { Enabled = true, FPS = 0, Ping = 0, Frames = 0, LastTick = tick() }
-
-local FPSScreenGui = Instance.new("ScreenGui")
-FPSScreenGui.Name = "Yarhub_FPSPing"
-FPSScreenGui.ResetOnSpawn = false
-FPSScreenGui.Parent = CoreGui
-
-local FPSFrame = Instance.new("Frame")
-FPSFrame.Size = UDim2.new(0, 200, 0, 30)
-FPSFrame.Position = UDim2.new(0, 10, 0, 40)
-FPSFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
-FPSFrame.BackgroundTransparency = 0.3
-FPSFrame.BorderSizePixel = 0
-FPSFrame.Parent = FPSScreenGui
-
-Instance.new("UICorner", FPSFrame).CornerRadius = UDim.new(0, 8)
-
-local FPSStroke = Instance.new("UIStroke", FPSFrame)
-FPSStroke.Color = Color3.fromRGB(0, 120, 220)
-FPSStroke.Thickness = 1.5
-
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Size = UDim2.new(1, 0, 1, 0)
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-FPSLabel.Font = Enum.Font.GothamBold
-FPSLabel.TextSize = 14
-FPSLabel.Text = "Yarhub | FPS: 60 | Ping: 0 ms"
-FPSLabel.Parent = FPSFrame
-
-RS.RenderStepped:Connect(function()
-    if not FPSPing.Enabled then FPSFrame.Visible = false; return end
-    FPSFrame.Visible = true
-    FPSPing.Frames = FPSPing.Frames + 1
-    if tick() - FPSPing.LastTick >= 1 then
-        FPSPing.FPS = FPSPing.Frames
-        FPSPing.Frames = 0
-        FPSPing.LastTick = tick()
-        pcall(function()
-            FPSPing.Ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        end)
-        FPSLabel.Text = string.format("Yarhub | FPS: %d | Ping: %d ms", FPSPing.FPS, FPSPing.Ping)
-    end
-end)-- AUTO PARRY
+end-- AUTO PARRY
 local AutoParry = { Enabled = false, Range = 15, Debounce = 0.2, LastParry = 0, ShowCircle = true }
 
 local KillerAnims = {
@@ -329,7 +190,311 @@ task.spawn(function()
     end
 end)
 
--- ESP SETUP
+-- AIMBOT (dari Falens)
+local GunAim = {
+    Enabled = false, Holding = false, TargetMode = "Killer",
+    Strength = 1, Predict = true, PredictStrength = 0.12,
+    FOV = 250, WallCheck = true, Target = nil,
+}
+
+local AttackAim = {
+    Enabled = false, Holding = false,
+    Strength = 1, Predict = true, PredictStrength = 0.12,
+    FOV = 250, WallCheck = true, Target = nil,
+}
+
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        GunAim.Holding = true
+        AttackAim.Holding = true
+    end
+end)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        GunAim.Holding = false
+        AttackAim.Holding = false
+    end
+end)
+
+local RayParams = RaycastParams.new()
+RayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+local function IsVisible(part)
+    if not GunAim.WallCheck then return true end
+    if not part then return false end
+    RayParams.FilterDescendantsInstances = { LP.Character }
+    local origin = Cam.CFrame.Position
+    local dir = part.Position - origin
+    local result = WS:Raycast(origin, dir, RayParams)
+    if not result then return true end
+    return result.Instance:IsDescendantOf(part.Parent)
+end
+
+local function GetGunTarget()
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    local closest, shortest = nil, GunAim.FOV
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team then
+            local valid = false
+            if GunAim.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
+            elseif GunAim.TargetMode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
+            if valid then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 and IsVisible(hrp) then
+                    local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if d < shortest then shortest = d; closest = hrp end
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local function GetAttackTarget()
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    local closest, shortest = nil, AttackAim.FOV
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Team and p.Team.Name == "Survivors" and p.Character then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            if hrp and hum and hum.Health > 0 and IsVisible(hrp) then
+                local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                if vis then
+                    local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                    if d < shortest then shortest = d; closest = hrp end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RS.RenderStepped:Connect(function()
+    if GunAim.Enabled and GunAim.Holding then
+        local t = GetGunTarget()
+        if t then
+            local pos = t.Position
+            if GunAim.Predict then
+                pos = pos + (t.AssemblyLinearVelocity * GunAim.PredictStrength)
+            end
+            local cf = CFrame.new(Cam.CFrame.Position, pos)
+            Cam.CFrame = Cam.CFrame:Lerp(cf, GunAim.Strength)
+        end
+    end
+    if AttackAim.Enabled and AttackAim.Holding then
+        local t = GetAttackTarget()
+        if t then
+            local pos = t.Position
+            if AttackAim.Predict then
+                pos = pos + (t.AssemblyLinearVelocity * AttackAim.PredictStrength)
+            end
+            Cam.CFrame = CFrame.new(Cam.CFrame.Position, pos)
+        end
+    end
+end)-- COPY AVATAR
+local AvatarStealer = { Original = nil, CurrentUserId = nil }
+
+local function RemoveClothes(char)
+    for _, v in ipairs(char:GetDescendants()) do
+        if v:IsA("Accessory") or v:IsA("Shirt")
+        or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+            pcall(function() v:Destroy() end)
+        end
+    end
+end
+
+local function CopyAvatar(username)
+    if not username or username == "" then
+        Rayfield:Notify({Title="Yarhub", Content="Isi username dulu!", Duration=2})
+        return
+    end
+    local char = LP.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    AvatarStealer.Original = hum:GetAppliedDescription()
+    local ok, userId = pcall(function()
+        return Players:GetUserIdFromNameAsync(username)
+    end)
+    if not ok then
+        Rayfield:Notify({Title="Yarhub", Content="User tidak ditemukan!", Duration=3})
+        return
+    end
+    AvatarStealer.CurrentUserId = userId
+    task.spawn(function()
+        local ok2, desc = pcall(function()
+            return Players:GetHumanoidDescriptionFromUserId(userId)
+        end)
+        if not ok2 or not desc then return end
+        RemoveClothes(char)
+        task.wait(0.2)
+        local success = false
+        pcall(function() hum:ApplyDescriptionClientServer(desc); success = true end)
+        if not success then
+            pcall(function() hum:ApplyDescription(desc); success = true end)
+        end
+        if success then
+            Rayfield:Notify({Title="Yarhub", Content="✅ Avatar dicopy: "..username, Duration=3})
+        end
+    end)
+end
+
+local function ResetAvatar()
+    if not AvatarStealer.Original then return end
+    local char = LP.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        RemoveClothes(char)
+        pcall(function() hum:ApplyDescriptionClientServer(AvatarStealer.Original) end)
+        AvatarStealer.CurrentUserId = nil
+        Rayfield:Notify({Title="Yarhub", Content="Avatar di-reset!", Duration=3})
+    end
+end
+
+-- AUTO SKILLCHECK
+local Skill = { LastGoal = nil, Clicked = false, WasActive = false }
+local SkillBusy = false
+
+local function PressSkill()
+    if isMobile then
+        local btn = PG:FindFirstChild("check", true)
+        if btn and btn:IsA("GuiObject") then
+            local p, s = btn.AbsolutePosition, btn.AbsoluteSize
+            local ins = GS:GetGuiInset()
+            local x = p.X + s.X/2 + ins.X
+            local y = p.Y + s.Y/2 + ins.Y
+            pcall(function() VIM:SendTouchEvent(8822, 0, x, y) end)
+            task.wait(0.01)
+            pcall(function() VIM:SendTouchEvent(8822, 2, x, y) end)
+        end
+    else
+        pcall(function() VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game) end)
+        task.wait(0.01)
+        pcall(function() VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game) end)
+    end
+end
+
+local function GetCheck()
+    for _, n in ipairs({"SkillCheckPromptGui", "SkillCheckPromptGui-con"}) do
+        local g = PG:FindFirstChild(n, true)
+        if g then
+            local c = g:FindFirstChild("Check", true)
+            if c and c.Visible then
+                local l = c:FindFirstChild("Line", true)
+                local go = c:FindFirstChild("Goal", true)
+                if l and go then return l, go end
+            end
+        end
+    end
+end
+
+local function AngDiff(a, b)
+    local d = b - a
+    if d > 180 then d = d - 360 end
+    if d < -180 then d = d + 360 end
+    return d
+end
+
+local function UpdateSkill()
+    if SkillBusy then return end
+    local line, goal = GetCheck()
+    if not (line and goal) then
+        Skill.LastGoal = nil; Skill.Clicked = false; Skill.WasActive = false
+        return
+    end
+    local lr = line.Rotation % 360
+    local gr = goal.Rotation % 360
+    if _G.SkillMode == "Instan" then
+        if not Skill.WasActive then
+            Skill.WasActive = true
+            SkillBusy = true
+            task.spawn(function()
+                PressSkill()
+                task.wait(0.05)
+                SkillBusy = false
+            end)
+        end
+        Skill.LastGoal = gr
+        return
+    end
+    if not Skill.WasActive then
+        Skill.WasActive = true; Skill.LastGoal = gr; Skill.Clicked = false
+        return
+    end
+    if Skill.LastGoal and math.abs(AngDiff(Skill.LastGoal, gr)) > 5 then
+        Skill.Clicked = false
+    end
+    Skill.LastGoal = gr
+    if Skill.Clicked then return end
+    local sR = (gr + 102) % 360
+    local eR = (gr + 116) % 360
+    local inZone
+    if sR > eR then inZone = (lr >= sR or lr <= eR)
+    else inZone = (lr >= sR and lr <= eR) end
+    if inZone then
+        Skill.Clicked = true
+        SkillBusy = true
+        task.spawn(function()
+            PressSkill()
+            task.wait(0.05)
+            SkillBusy = false
+        end)
+    end
+end
+
+RS.RenderStepped:Connect(function()
+    if _G.SkillOn then UpdateSkill() end
+end)
+
+-- FPS/PING
+local FPSPing = { Enabled = true, FPS = 0, Ping = 0, Frames = 0, LastTick = tick() }
+local FPSScreenGui = Instance.new("ScreenGui")
+FPSScreenGui.Name = "Yarhub_FPSPing"
+FPSScreenGui.ResetOnSpawn = false
+FPSScreenGui.Parent = CoreGui
+
+local FPSFrame = Instance.new("Frame")
+FPSFrame.Size = UDim2.new(0, 200, 0, 30)
+FPSFrame.Position = UDim2.new(0, 10, 0, 40)
+FPSFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
+FPSFrame.BackgroundTransparency = 0.3
+FPSFrame.BorderSizePixel = 0
+FPSFrame.Parent = FPSScreenGui
+Instance.new("UICorner", FPSFrame).CornerRadius = UDim.new(0, 8)
+
+local FPSStroke = Instance.new("UIStroke", FPSFrame)
+FPSStroke.Color = Color3.fromRGB(0, 120, 220)
+FPSStroke.Thickness = 1.5
+
+local FPSLabel = Instance.new("TextLabel")
+FPSLabel.Size = UDim2.new(1, 0, 1, 0)
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+FPSLabel.Font = Enum.Font.GothamBold
+FPSLabel.TextSize = 14
+FPSLabel.Text = "Yarhub | FPS: 60 | Ping: 0 ms"
+FPSLabel.Parent = FPSFrame
+
+RS.RenderStepped:Connect(function()
+    if not FPSPing.Enabled then FPSFrame.Visible = false; return end
+    FPSFrame.Visible = true
+    FPSPing.Frames = FPSPing.Frames + 1
+    if tick() - FPSPing.LastTick >= 1 then
+        FPSPing.FPS = FPSPing.Frames
+        FPSPing.Frames = 0
+        FPSPing.LastTick = tick()
+        pcall(function()
+            FPSPing.Ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+        FPSLabel.Text = string.format("Yarhub | FPS: %d | Ping: %d ms", FPSPing.FPS, FPSPing.Ping)
+    end
+end)-- ESP
 local ESP = {
     On = false, SV = true, KL = true, GN = true,
     SVc = Color3.fromRGB(0,255,0), KLc = Color3.fromRGB(255,0,0), GNc = Color3.fromRGB(255,105,180),
@@ -430,71 +595,8 @@ local function GetProg(g)
     local po = g:FindFirstChild("Progress", true)
     if po and po:IsA("ValueBase") then return math.clamp(po.Value, 0, 100) end
     return 0
-  end-- COPY AVATAR
-local AvatarStealer = { Original = nil, CurrentUserId = nil }
-
-local function RemoveClothes(char)
-    for _, v in ipairs(char:GetDescendants()) do
-        if v:IsA("Accessory") or v:IsA("Shirt")
-        or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-            pcall(function() v:Destroy() end)
-        end
-    end
 end
 
-local function CopyAvatar(username)
-    if not username or username == "" then
-        Rayfield:Notify({Title="Yarhub", Content="Isi username dulu!", Duration=2})
-        return
-    end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    AvatarStealer.Original = hum:GetAppliedDescription()
-    local ok, userId = pcall(function()
-        return Players:GetUserIdFromNameAsync(username)
-    end)
-    if not ok then
-        Rayfield:Notify({Title="Yarhub", Content="User tidak ditemukan!", Duration=3})
-        return
-    end
-    AvatarStealer.CurrentUserId = userId
-    task.spawn(function()
-        local ok2, desc = pcall(function()
-            return Players:GetHumanoidDescriptionFromUserId(userId)
-        end)
-        if not ok2 or not desc then
-            Rayfield:Notify({Title="Yarhub", Content="Gagal ambil avatar!", Duration=3})
-            return
-        end
-        RemoveClothes(char)
-        task.wait(0.2)
-        local success = false
-        pcall(function() hum:ApplyDescriptionClientServer(desc); success = true end)
-        if not success then
-            pcall(function() hum:ApplyDescription(desc); success = true end)
-        end
-        if success then
-            Rayfield:Notify({Title="Yarhub", Content="✅ Avatar dicopy: "..username, Duration=3})
-        else
-            Rayfield:Notify({Title="Yarhub", Content="❌ Gagal copy", Duration=4})
-        end
-    end)
-end
-
-local function ResetAvatar()
-    if not AvatarStealer.Original then return end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        RemoveClothes(char)
-        pcall(function() hum:ApplyDescriptionClientServer(AvatarStealer.Original) end)
-        AvatarStealer.CurrentUserId = nil
-        Rayfield:Notify({Title="Yarhub", Content="Avatar di-reset!", Duration=3})
-    end
-    end-- ESP LOGIC
 task.spawn(function()
     while true do
         task.wait(ESP.UpdateRate)
@@ -577,7 +679,95 @@ task.spawn(function()
     end
 end)
 
--- MOONWALK (KODINGAN KAMU)
+-- SILENT AIM PISTOL
+local SilentAim = {
+    Enabled = false,
+    TargetMode = "Killer",
+    FOV = 150,
+    WallCheck = true,
+    RemoteNames = {"FireGunEvent", "GunFire", "ShootEvent", "FireEvent", "FirePistol"},
+}
+
+local function SilentIsVisible(part)
+    if not SilentAim.WallCheck then return true end
+    if not part then return false end
+    RayParams.FilterDescendantsInstances = { LP.Character }
+    local origin = Cam.CFrame.Position
+    local result = WS:Raycast(origin, part.Position - origin, RayParams)
+    if not result then return true end
+    return result.Instance:IsDescendantOf(part.Parent)
+end
+
+local function GetSilentTarget()
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    local closest, shortest = nil, SilentAim.FOV
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team then
+            local valid = false
+            if SilentAim.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
+            elseif SilentAim.TargetMode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
+            if valid then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 and SilentIsVisible(hrp) then
+                    local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if d < shortest then shortest = d; closest = hrp end
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if SilentAim.Enabled and method == "FireServer" then
+        local n = self.Name:lower()
+        local isGun = false
+        for _, rn in ipairs(SilentAim.RemoteNames) do
+            if n == rn:lower() or n:find("gun") or n:find("pistol") or n:find("shoot") then
+                isGun = true
+                break
+            end
+        end
+        if isGun then
+            local target = GetSilentTarget()
+            if target then
+                local args = {...}
+                args[1] = target
+                return oldNamecall(self, unpack(args))
+            end
+        end
+    end
+    return oldNamecall(self, ...)
+end)
+
+-- FAST VAULT
+local FastVault = { Enabled = false, Speed = 30 }
+
+RS.Heartbeat:Connect(function()
+    if not FastVault.Enabled then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 8)
+    local hit = WS:FindPartOnRayWithIgnoreList(ray, {char})
+    if hit and (hit.Name == "Window" or hit.Name == "Pallet" or hit.Name == "Palletwrong") then
+        if hum.WalkSpeed ~= FastVault.Speed then
+            hum.WalkSpeed = FastVault.Speed
+        end
+    else
+        if hum.WalkSpeed == FastVault.Speed then
+            hum.WalkSpeed = 16
+        end
+    end
+end)-- MOONWALK (KODINGAN KAMU)
 local Moonwalk = {
     Enabled = false,
     ShowButton = true,
@@ -589,6 +779,7 @@ local Moonwalk = {
 
 local MoonwalkConnection = nil
 local MoonwalkButton = nil
+local MWLocked = false
 
 local function getMWChar()
     local char = LP.Character
@@ -687,6 +878,7 @@ local function createMoonwalkButton()
     local startPos
 
     btn.InputBegan:Connect(function(input)
+        if MWLocked then return end
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -696,7 +888,7 @@ local function createMoonwalkButton()
     end)
 
     UIS.InputChanged:Connect(function(input)
-        if not dragging then return end
+        if not dragging or MWLocked then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement
         or input.UserInputType == Enum.UserInputType.Touch then
             local delta = input.Position - dragStart
@@ -737,7 +929,7 @@ end)
 
 if Moonwalk.ShowButton then
     createMoonwalkButton()
-      end-- UI
+    end-- UI
 local Win = Rayfield:CreateWindow({
    Name = "Yarhub",
    LoadingTitle = "Yarhub",
@@ -757,6 +949,7 @@ local MainT  = Win:CreateTab("Visual")
 local LagT   = Win:CreateTab("Anti Lag")
 local SkillT = Win:CreateTab("Skillcheck")
 local ParryT = Win:CreateTab("Parry")
+local AimT   = Win:CreateTab("Aimbot")
 local EspT   = Win:CreateTab("ESP")
 local MwT    = Win:CreateTab("Moonwalk")
 local AvaT   = Win:CreateTab("Avatar")
@@ -776,7 +969,7 @@ MainT:CreateSlider({Name="FOV Value (50-120)",
    Range={50,120}, Increment=1, CurrentValue=70,
    Callback=function(v) FOV.Value = v end})
 
-LagT:CreateSection("Render & Cahaya")
+LagT:CreateSection("Render")
 LagT:CreateToggle({Name="Global Shadows OFF", CurrentValue=false,
    Callback=function(v) Lighting.GlobalShadows = not v end})
 LagT:CreateToggle({Name="Atmosphere OFF", CurrentValue=false,
@@ -791,36 +984,24 @@ LagT:CreateToggle({Name="Post-Effects OFF", CurrentValue=false,
          if x:IsA("PostEffect") then x.Enabled = not v end
       end
    end})
-LagT:CreateSection("Objek & Partikel")
+LagT:CreateSection("Optimasi")
 LagT:CreateButton({Name="Hapus Partikel", Callback=function()
    for _,x in ipairs(WS:GetDescendants()) do
-      if x:IsA("ParticleEmitter") or x:IsA("Fire")
-         or x:IsA("Smoke") or x:IsA("Sparkles") then
+      if x:IsA("ParticleEmitter") or x:IsA("Fire") or x:IsA("Smoke") then
          x.Enabled = false
       end
    end
-   Rayfield:Notify({Title="Yarhub", Content="Partikel dihapus!", Duration=2})
 end})
 LagT:CreateButton({Name="Hapus Trails", Callback=function()
    for _,x in ipairs(WS:GetDescendants()) do
       if x:IsA("Trail") or x:IsA("Beam") then x.Enabled = false end
    end
-   Rayfield:Notify({Title="Yarhub", Content="Trails dihapus!", Duration=2})
 end})
-LagT:CreateButton({Name="CastShadow OFF", Callback=function()
-   for _,x in ipairs(WS:GetDescendants()) do
-      if x:IsA("BasePart") then x.CastShadow = false end
-   end
-   Rayfield:Notify({Title="Yarhub", Content="Shadow dihapus!", Duration=2})
-end})
-LagT:CreateSection("Optimasi")
 LagT:CreateButton({Name="Unlock FPS", Callback=function()
    pcall(function() setfpscap(999) end)
-   Rayfield:Notify({Title="Yarhub", Content="FPS di-unlock!", Duration=2})
 end})
 LagT:CreateButton({Name="Garbage Collection", Callback=function()
    collectgarbage("collect")
-   Rayfield:Notify({Title="Yarhub", Content="Memory dibersihkan!", Duration=2})
 end})
 LagT:CreateButton({Name="Potato Mode", Callback=function()
    for _,x in ipairs(WS:GetDescendants()) do
@@ -834,21 +1015,14 @@ LagT:CreateButton({Name="Potato Mode", Callback=function()
       if x:IsA("Trail") or x:IsA("Beam") then x.Enabled = false end
    end
    Lighting.GlobalShadows = false
-   Rayfield:Notify({Title="Yarhub", Content="Potato Mode!", Duration=2})
 end})
 
 SkillT:CreateSection("Auto Skillcheck")
 SkillT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v) _G.SkillOn = v end})
-SkillT:CreateDropdown({
-   Name = "Mode",
-   Options = {"Instan", "Perfect"},
-   CurrentOption = {"Perfect"},
-   Callback = function(Option)
-      _G.SkillMode = Option[1]
-      Rayfield:Notify({Title="Yarhub", Content="Mode: "..Option[1], Duration=2})
-   end,
-})
+SkillT:CreateDropdown({Name="Mode", Options={"Instan","Perfect"},
+   CurrentOption={"Perfect"},
+   Callback=function(Option) _G.SkillMode = Option[1] end})
 
 ParryT:CreateSection("Auto Parry")
 ParryT:CreateToggle({Name="Aktifkan", CurrentValue=false,
@@ -860,6 +1034,53 @@ ParryT:CreateSlider({Name="Delay", Range={0.05,1}, Increment=0.05, CurrentValue=
 ParryT:CreateToggle({Name="Lingkaran Visual", CurrentValue=true,
    Callback=function(v) AutoParry.ShowCircle = v end})
 
+AimT:CreateSection("Gun Aimbot")
+AimT:CreateToggle({Name="Aktifkan Gun Aimbot", CurrentValue=false,
+   Callback=function(v) GunAim.Enabled = v end})
+AimT:CreateDropdown({Name="Target", Options={"Killer","Survivor"},
+   CurrentOption={"Killer"},
+   Callback=function(O) GunAim.TargetMode = O[1] end})
+AimT:CreateSlider({Name="Strength", Range={0.05,1}, Increment=0.05, CurrentValue=1,
+   Callback=function(v) GunAim.Strength = v end})
+AimT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=250,
+   Callback=function(v) GunAim.FOV = v end})
+AimT:CreateToggle({Name="Prediction", CurrentValue=true,
+   Callback=function(v) GunAim.Predict = v end})
+AimT:CreateToggle({Name="Wallcheck", CurrentValue=true,
+   Callback=function(v) GunAim.WallCheck = v end})
+
+AimT:CreateSection("Attack Aimbot (Killer)")
+AimT:CreateToggle({Name="Aktifkan Attack Aimbot", CurrentValue=false,
+   Callback=function(v) AttackAim.Enabled = v end})
+AimT:CreateSlider({Name="Strength Attack", Range={0.05,1}, Increment=0.05, CurrentValue=1,
+   Callback=function(v) AttackAim.Strength = v end})
+AimT:CreateSlider({Name="FOV Attack", Range={50,500}, Increment=10, CurrentValue=250,
+   Callback=function(v) AttackAim.FOV = v end})
+AimT:CreateToggle({Name="Wallcheck Attack", CurrentValue=true,
+   Callback=function(v) AttackAim.WallCheck = v end})
+
+AimT:CreateSection("Silent Aim Pistol ⚠️")
+AimT:CreateToggle({Name="Aktifkan Silent Aim", CurrentValue=false,
+   Callback=function(v)
+      SilentAim.Enabled = v
+      if v then
+         Rayfield:Notify({Title="⚠️ Silent Aim", Content="Risiko tinggi kena anti-cheat!", Duration=4})
+      end
+   end})
+AimT:CreateDropdown({Name="Target", Options={"Killer","Survivor"},
+   CurrentOption={"Killer"},
+   Callback=function(O) SilentAim.TargetMode = O[1] end})
+AimT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=150,
+   Callback=function(v) SilentAim.FOV = v end})
+AimT:CreateToggle({Name="Wallcheck", CurrentValue=true,
+   Callback=function(v) SilentAim.WallCheck = v end})
+
+AimT:CreateSection("Fast Vault")
+AimT:CreateToggle({Name="Aktifkan Fast Vault", CurrentValue=false,
+   Callback=function(v) FastVault.Enabled = v end})
+AimT:CreateSlider({Name="Vault Speed", Range={16,50}, Increment=2, CurrentValue=30,
+   Callback=function(v) FastVault.Speed = v end})
+
 EspT:CreateSection("Target")
 EspT:CreateToggle({Name="Aktifkan ESP", CurrentValue=false,
    Callback=function(v) ESP.On = v end})
@@ -869,7 +1090,7 @@ EspT:CreateToggle({Name="Killer (Merah)", CurrentValue=true,
    Callback=function(v) ESP.KL = v end})
 EspT:CreateToggle({Name="Generator (Pink)", CurrentValue=true,
    Callback=function(v) ESP.GN = v end})
-EspT:CreateSection("Ukuran & Tampilan")
+EspT:CreateSection("Ukuran")
 EspT:CreateSlider({Name="Ukuran Text", Range={8,32}, Increment=1, CurrentValue=14,
    Callback=function(v) ESP.TextSize = v end})
 EspT:CreateSlider({Name="Jarak Max", Range={50,2000}, Increment=50, CurrentValue=500,
@@ -884,7 +1105,7 @@ EspT:CreateColorPicker({Name="Killer", Color=Color3.fromRGB(255,0,0),
 EspT:CreateColorPicker({Name="Generator", Color=Color3.fromRGB(255,105,180),
    Callback=function(c) ESP.GNc = c end})
 
-MwT:CreateSection("Moonwalk Control")
+MwT:CreateSection("Moonwalk")
 MwT:CreateToggle({Name="Aktifkan Moonwalk", CurrentValue=false,
    Callback=function(v)
       setMoonwalk(v)
@@ -902,6 +1123,11 @@ MwT:CreateToggle({Name="Tampilkan Tombol MW", CurrentValue=true,
          end
       end
    end})
+MwT:CreateToggle({Name="🔒 Lock Tombol MW", CurrentValue=false,
+   Callback=function(v)
+      MWLocked = v
+      Rayfield:Notify({Title="Yarhub", Content=v and "Tombol MW DILOCK" or "Tombol MW UNLOCK", Duration=2})
+   end})
 MwT:CreateSlider({Name="Spam Speed", Range={1,50}, Increment=1, CurrentValue=30,
    Callback=function(v) Moonwalk.SpamSpeed = v end})
 MwT:CreateSlider({Name="Intensity", Range={1,50}, Increment=1, CurrentValue=35,
@@ -911,7 +1137,10 @@ MwT:CreateSlider({Name="Slow Speed", Range={1,30}, Increment=1, CurrentValue=13,
 MwT:CreateToggle({Name="Use Slow Speed", CurrentValue=true,
    Callback=function(v) Moonwalk.UseSlow = v end})
 MwT:CreateParagraph({Title="Cara Pakai",
-   Content="1. Toggle ON atau tekan tombol MW\n2. Tekan joystick/WASD untuk gerak\n3. Karakter gerak MUNDUR sambil goyang"})
+   Content="1. Toggle ON atau tekan tombol MW\n" ..
+           "2. Tekan joystick/WASD untuk gerak\n" ..
+           "3. Karakter gerak MUNDUR sambil goyang\n" ..
+           "4. Lock = tombol gak bisa digeser"})
 
 AvaT:CreateSection("Copy Avatar")
 AvaT:CreateInput({
@@ -931,5 +1160,16 @@ InfoT:CreateToggle({Name="Tampilkan FPS/Ping", CurrentValue=true,
 InfoT:CreateSection("Tentang")
 InfoT:CreateParagraph({
    Title = "Yarhub Ultimate",
-   Content = "Fitur:\n- Anti Lag\n- Fullbright + No Fog\n- Auto Skillcheck (2 Mode)\n- Auto Parry + Circle\n- ESP\n- Moonwalk (tombol gambar MW)\n- Copy Avatar\n- FPS/Ping\n\nDibuat oleh: Yarhub"
+   Content = "Fitur:\n" ..
+             "- Anti Lag\n" ..
+             "- Fullbright + No Fog\n" ..
+             "- Auto Skillcheck (2 Mode)\n" ..
+             "- Auto Parry + Circle\n" ..
+             "- Aimbot (Gun + Attack + Wallcheck)\n" ..
+             "- Silent Aim Pistol ⚠️\n" ..
+             "- Fast Vault\n" ..
+             "- ESP\n" ..
+             "- Moonwalk + Lock Tombol\n" ..
+             "- Copy Avatar\n" ..
+             "- FPS/Ping"
 })

@@ -1,6 +1,6 @@
 -- ================================================================
--- YARHUB ULTIMATE - FULL EDITION
--- PART 1 of 8
+-- YARHUB ULTIMATE - REBUILD
+-- PART 1 of 6
 -- ================================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -14,7 +14,6 @@ local Rep = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local Stats = game:GetService("Stats")
-local HttpService = game:GetService("HttpService")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
@@ -27,15 +26,9 @@ _G.Fullbright = false
 _G.NoFog = false
 _G.AvaTarget = ""
 
--- ================================================================
--- HELPER FUNCTIONS
--- ================================================================
+-- HELPER
 local function GetRoot()
     return LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-end
-
-local function GetHum()
-    return LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
 end
 
 local function IsKiller(p)
@@ -49,61 +42,6 @@ local function IsSurvivor(p)
     if p.Team and p.Team.Name == "Survivors" then return true end
     return false
 end
-
-local function GetDowned()
-    local root = GetRoot()
-    if not root then return nil end
-    local best, dist = nil, math.huge
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and IsSurvivor(p) then
-            local hum = p.Character:FindFirstChildOfClass("Humanoid")
-            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-            if hum and hrp and hum.Health > 0 and hum.Health <= hum.MaxHealth * 0.25 then
-                local d = (hrp.Position - root.Position).Magnitude
-                if d < dist then dist = d; best = p.Character end
-            end
-        end
-    end
-    return best, dist
-end
-
-local function GetHook()
-    local root = GetRoot()
-    if not root then return nil end
-    local bestHook, shortest = nil, math.huge
-    for _, obj in pairs(WS:GetDescendants()) do
-        if obj.Name == "HookPoint" and obj:IsA("BasePart") then
-            local dist = (obj.Position - root.Position).Magnitude
-            if dist < shortest and dist < 400 then
-                shortest = dist
-                bestHook = obj
-            end
-        end
-    end
-    return bestHook
-end
-
--- ================================================================
--- REMOTES
--- ================================================================
-local CarryEvent = Rep:FindFirstChild("Remotes") 
-    and Rep.Remotes:FindFirstChild("Carry") 
-    and Rep.Remotes.Carry:FindFirstChild("CarrySurvivorEvent")
-local HookEvent = Rep:FindFirstChild("Remotes") 
-    and Rep.Remotes:FindFirstChild("Carry") 
-    and Rep.Remotes.Carry:FindFirstChild("HookEvent")
-local AttackEvent = Rep:FindFirstChild("Remotes") 
-    and Rep.Remotes:FindFirstChild("Attacks") 
-    and Rep.Remotes.Attacks:FindFirstChild("BasicAttack")
-local StalkEvent = Rep:FindFirstChild("Remotes") 
-    and Rep.Remotes:FindFirstChild("Killers") 
-    and Rep.Remotes.Killers:FindFirstChild("Stalker") 
-    and Rep.Remotes.Killers.Stalker:FindFirstChild("StartStalking")
-local WiggleEvent = Rep:FindFirstChild("Remotes") 
-    and Rep.Remotes:FindFirstChild("Carry") 
-    and Rep.Remotes.Carry:FindFirstChild("SelfUnHookEvent")-- ================================================================
--- PART 2 of 8 - Visual + ESP System
--- ================================================================
 
 -- FULLBRIGHT + NO FOG
 local OrigLight = {
@@ -148,7 +86,6 @@ local function ToggleNoFog(state)
     end
 end
 
--- FOV
 local FOV = { Enabled = false, Value = 70, Default = Cam.FieldOfView }
 
 RS.RenderStepped:Connect(function()
@@ -162,7 +99,16 @@ local function ToggleFOV(state)
     if not state and Cam then Cam.FieldOfView = FOV.Default end
 end
 
--- ESP SYSTEM
+-- REMOTES
+local CarryEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Carry") and Rep.Remotes.Carry:FindFirstChild("CarrySurvivorEvent")
+local HookEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Carry") and Rep.Remotes.Carry:FindFirstChild("HookEvent")
+local AttackEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Attacks") and Rep.Remotes.Attacks:FindFirstChild("BasicAttack")
+local StalkEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Killers") and Rep.Remotes.Killers:FindFirstChild("Stalker") and Rep.Remotes.Killers.Stalker:FindFirstChild("StartStalking")
+local WiggleEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Carry") and Rep.Remotes.Carry:FindFirstChild("SelfUnHookEvent")
+local RepairEvent = Rep:FindFirstChild("Remotes") and Rep.Remotes:FindFirstChild("Generator") and Rep.Remotes.Generator:FindFirstChild("RepairEvent")-- ================================================================
+-- PART 2 of 6 - ESP + Skillcheck
+-- ================================================================
+
 local ESP = {
     On = false, SV = true, KL = true, GN = true, SCP = false,
     SVc = Color3.fromRGB(0,255,0),
@@ -367,9 +313,7 @@ task.spawn(function()
         end
         CleanESP(used)
     end
-end)-- ================================================================
--- PART 3 of 8 - Skillcheck + Parry + Crosshair
--- ================================================================
+end)
 
 -- AUTO SKILLCHECK
 local Skill = { LastGoal = nil, Clicked = false, WasActive = false }
@@ -464,9 +408,10 @@ end
 
 RS.RenderStepped:Connect(function()
     if _G.SkillOn then UpdateSkill() end
-end)
+end)-- ================================================================
+-- PART 3 of 6 - Parry + Aimbot + Silent Veil
+-- ================================================================
 
--- AUTO PARRY + CIRCLE
 local AutoParry = { Enabled = false, Range = 15, Debounce = 0.2, LastParry = 0, ShowCircle = true }
 
 local KillerAnims = {
@@ -573,75 +518,6 @@ task.spawn(function()
         end
     end
 end)
-
--- CROSSHAIR
-local Crosshair = { Enabled = false, Size = 8, Thickness = 2, Color = Color3.fromRGB(0,255,100), Style = "Plus" }
-local CrosshairDrawings = {}
-local CrosshairCreated = false
-local LastCHStyle = nil
-
-local function ClearCrosshair()
-    for _, v in pairs(CrosshairDrawings) do
-        if v.Remove then v:Remove() end
-    end
-    CrosshairDrawings = {}
-    CrosshairCreated = false
-end
-
-RS.RenderStepped:Connect(function()
-    if not Crosshair.Enabled then
-        for _, v in pairs(CrosshairDrawings) do
-            if v then v.Visible = false end
-        end
-        return
-    end
-    if LastCHStyle ~= Crosshair.Style then
-        ClearCrosshair()
-        LastCHStyle = Crosshair.Style
-    end
-    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
-    if not CrosshairCreated then
-        CrosshairCreated = true
-        if Crosshair.Style == "Plus" then
-            for i = 1, 4 do
-                local line = Drawing.new("Line")
-                line.Visible = true
-                table.insert(CrosshairDrawings, line)
-            end
-        elseif Crosshair.Style == "Dot" then
-            local dot = Drawing.new("Circle")
-            dot.Filled = true; dot.Visible = true
-            table.insert(CrosshairDrawings, dot)
-        elseif Crosshair.Style == "Circle" then
-            local c = Drawing.new("Circle")
-            c.Filled = false; c.Visible = true
-            table.insert(CrosshairDrawings, c)
-        end
-    end
-    if Crosshair.Style == "Plus" then
-        for _, line in pairs(CrosshairDrawings) do
-            line.Color = Crosshair.Color
-            line.Thickness = Crosshair.Thickness
-        end
-        CrosshairDrawings[1].From = center + Vector2.new(-Crosshair.Size, 0)
-        CrosshairDrawings[1].To   = center + Vector2.new(-2, 0)
-        CrosshairDrawings[2].From = center + Vector2.new(Crosshair.Size, 0)
-        CrosshairDrawings[2].To   = center + Vector2.new(2, 0)
-        CrosshairDrawings[3].From = center + Vector2.new(0, -Crosshair.Size)
-        CrosshairDrawings[3].To   = center + Vector2.new(0, -2)
-        CrosshairDrawings[4].From = center + Vector2.new(0, Crosshair.Size)
-        CrosshairDrawings[4].To   = center + Vector2.new(0, 2)
-    elseif Crosshair.Style == "Dot" then
-        local d = CrosshairDrawings[1]
-        d.Position = center; d.Radius = Crosshair.Size/2; d.Color = Crosshair.Color
-    elseif Crosshair.Style == "Circle" then
-        local c = CrosshairDrawings[1]
-        c.Position = center; c.Radius = Crosshair.Size
-        c.Color = Crosshair.Color; c.Thickness = Crosshair.Thickness
-    end
-end)-- ================================================================
--- PART 4 of 8 - Aimbot + Silent Aim Veil
--- ================================================================
 
 -- AIMBOT
 local GunAim = { Enabled = false, Holding = false, TargetMode = "Killer", Strength = 1, Predict = true, PredictStrength = 0.12, FOV = 250, WallCheck = true }
@@ -750,7 +626,6 @@ local function ScanVeilRemotes()
             if n:find("spear") or n:find("veil") or n:find("throw") 
             or n:find("projectile") or n:find("ranged") then
                 table.insert(VeilRemotes, obj)
-                print("[Yarhub] Veil remote:", obj:GetFullName())
             end
         end
     end
@@ -811,7 +686,7 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     end
     return oldNamecall(self, ...)
 end)-- ================================================================
--- PART 5 of 8 - Killer Features
+-- PART 4 of 6 - Killer + Gen Boost
 -- ================================================================
 
 local AutoKill = { Enabled = false, Range = 500, Delay = 0.45, LastAttack = 0 }
@@ -819,7 +694,6 @@ local AutoStalk = { Enabled = false, Range = 150, Conn = nil }
 local AutoCarry = { Enabled = false, Range = 10 }
 local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
--- AUTO KILL ALL
 RS.Heartbeat:Connect(function()
     if not AutoKill.Enabled then return end
     local now = tick()
@@ -845,7 +719,6 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
--- AUTO STALK
 local function StartAutoStalk()
     if AutoStalk.Conn then AutoStalk.Conn:Disconnect() end
     AutoStalk.Conn = RS.Heartbeat:Connect(function()
@@ -876,7 +749,23 @@ local function StopAutoStalk()
     if AutoStalk.Conn then AutoStalk.Conn:Disconnect(); AutoStalk.Conn = nil end
 end
 
--- AUTO CARRY
+local function GetDowned()
+    local root = GetRoot()
+    if not root then return nil end
+    local best, dist = nil, math.huge
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and IsSurvivor(p) then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hrp and hum.Health > 0 and hum.Health <= hum.MaxHealth * 0.25 then
+                local d = (hrp.Position - root.Position).Magnitude
+                if d < dist then dist = d; best = p.Character end
+            end
+        end
+    end
+    return best, dist
+end
+
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoCarry.Enabled then continue end
@@ -889,7 +778,22 @@ task.spawn(function()
     end
 end)
 
--- AUTO HOOK
+local function GetHook()
+    local root = GetRoot()
+    if not root then return nil end
+    local bestHook, shortest = nil, math.huge
+    for _, obj in pairs(WS:GetDescendants()) do
+        if obj.Name == "HookPoint" and obj:IsA("BasePart") then
+            local dist = (obj.Position - root.Position).Magnitude
+            if dist < shortest and dist < 400 then
+                shortest = dist
+                bestHook = obj
+            end
+        end
+    end
+    return bestHook
+end
+
 local function AutoHookNearest()
     local downed = GetDowned()
     if not downed then
@@ -907,7 +811,6 @@ local function AutoHookNearest()
     Rayfield:Notify({Title="Yarhub", Content="Hook dikirim!", Duration=2})
 end
 
--- MASKED POWER
 local function SetMaskedPower(powerName)
     local powerRemote = Rep:FindFirstChild("Remotes") 
         and Rep.Remotes:FindFirstChild("Killers") 
@@ -923,7 +826,6 @@ local function SetMaskedPower(powerName)
     end
 end
 
--- AUTO WIGGLE
 local AutoWiggle = { Enabled = false, Spam = 5 }
 
 task.spawn(function()
@@ -939,11 +841,250 @@ task.spawn(function()
             end
         end
     end
-end)-- ================================================================
--- PART 6 of 8 - Movement + God Mode + FPS/Ping
+end)
+
+-- ==================== GEN BYPASS (KODINGAN KAMU) ====================
+GenBypass = {
+    Enabled = false,
+    Button = nil,
+    UI = nil,
+    Cache = {},
+    CacheTimer = 0,
+    Processed = {},
+    HotkeyCode = Enum.KeyCode.G,
+    Range = 8,
+}
+
+function GB_GetAllGenerators()
+    local now = tick()
+    if now - GenBypass.CacheTimer < 5 then
+        return GenBypass.Cache
+    end
+    GenBypass.Cache = {}
+    GenBypass.CacheTimer = now
+    local mapFolder = workspace:FindFirstChild("Map")
+    if not mapFolder then return GenBypass.Cache end
+    pcall(function()
+        for _, v in pairs(mapFolder:GetDescendants()) do
+            if v:IsA("Model") and v.Name == "Generator" then
+                local isReal = v:GetAttribute("RepairProgress") ~= nil
+                    or v:GetAttribute("kickcount") ~= nil
+                    or v:GetAttribute("ProgressRepair") ~= nil
+                if isReal then
+                    table.insert(GenBypass.Cache, v)
+                end
+            end
+        end
+    end)
+    return GenBypass.Cache
+end
+
+function GB_GetPoints(genModel)
+    local points = {}
+    pcall(function()
+        for _, obj in pairs(genModel:GetChildren()) do
+            if obj.Name:find("GeneratorPoint") and obj:IsA("BasePart") then
+                table.insert(points, obj)
+            end
+        end
+    end)
+    return points
+end
+
+function GB_WaitRepairing(point, timeout)
+    local start = tick()
+    while tick() - start < (timeout or 1) do
+        if point:GetAttribute("IsRepairing") == true then
+            return true
+        end
+        task.wait(0.05)
+    end
+    return false
+end
+
+function GB_DoRepair(targetPoint)
+    local genModel = targetPoint.Parent    if GenBypass.Processed[genModel] then return end
+    GenBypass.Processed[genModel] = true
+    local character = LP.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        GenBypass.Processed[genModel] = nil
+        return
+    end
+    local RepairEv = RepairEvent
+    local originalCFrame = hrp.CFrame
+    pcall(function()
+        for _, point in pairs(GB_GetPoints(genModel)) do
+            if point ~= targetPoint and point.Parent then
+                hrp.Anchored = true
+                hrp.CFrame = point.CFrame
+                task.wait(0.15)
+                pcall(function()
+                    if RepairEv then RepairEv:FireServer(point, true) end
+                end)
+                if not GB_WaitRepairing(point, 0.8) then
+                    pcall(function()
+                        if RepairEv then RepairEv:FireServer(point, false) end
+                    end)
+                    task.wait(0.1)
+                    hrp.CFrame = point.CFrame
+                    task.wait(0.15)
+                    pcall(function()
+                        if RepairEv then RepairEv:FireServer(point, true) end
+                    end)
+                    GB_WaitRepairing(point, 0.5)
+                end
+                hrp.Anchored = false
+                task.wait(0.05)
+            end
+        end
+    end)
+    pcall(function()
+        if hrp and hrp.Parent then
+            hrp.Anchored = false
+            hrp.CFrame = originalCFrame
+        end
+    end)
+    task.wait(0.1)
+    pcall(function()
+        if RepairEv then RepairEv:FireServer(targetPoint, false) end
+    end)
+end
+
+function GB_GetNearestPoint()
+    local character = LP.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local bestPoint = nil
+    local bestDist = math.huge
+    for _, gen in pairs(GB_GetAllGenerators()) do
+        for _, point in pairs(GB_GetPoints(gen)) do
+            local d = (hrp.Position - point.Position).Magnitude
+            if d < bestDist then
+                bestDist = d
+                bestPoint = point
+            end
+        end
+    end
+    return bestPoint, bestDist
+end
+
+function GB_IsPromptVisible()
+    local ok, frame = pcall(function()
+        return LP.PlayerGui.pcprompts.Frame.GeneratorRepair
+    end)
+    return ok and frame and frame.Visible
+end
+
+function GB_UpdateButton()
+    if GenBypass.Button then
+        GenBypass.Button.Visible = GenBypass.Enabled and isMobile
+    end
+end
+
+function GB_CreateButton()
+    local oldUI = LP.PlayerGui:FindFirstChild("BypassGenUI")
+    if oldUI then oldUI:Destroy() end
+    GenBypass.UI = Instance.new("ScreenGui")
+    GenBypass.UI.Name = "BypassGenUI"
+    GenBypass.UI.ResetOnSpawn = false
+    GenBypass.UI.IgnoreGuiInset = true
+    GenBypass.UI.Parent = LP:WaitForChild("PlayerGui")
+    GenBypass.Button = Instance.new("ImageButton")
+    GenBypass.Button.Name = "BypassGenButton"
+    GenBypass.Button.Size = UDim2.new(0, 60, 0, 60)
+    GenBypass.Button.Position = UDim2.new(0.88, 0, 0.55, 0)
+    GenBypass.Button.AnchorPoint = Vector2.new(0.5, 0.5)
+    GenBypass.Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    GenBypass.Button.BackgroundTransparency = 0.15
+    GenBypass.Button.AutoButtonColor = true
+    GenBypass.Button.Visible = false
+    GenBypass.Button.ZIndex = 10
+    GenBypass.Button.Parent = GenBypass.UI
+    Instance.new("UICorner", GenBypass.Button).CornerRadius = UDim.new(1, 0)
+    local s = Instance.new("UIStroke", GenBypass.Button)
+    s.Color = Color3.fromRGB(255, 255, 255)
+    s.Thickness = 2
+    s.Transparency = 0.2
+    local lbl = Instance.new("TextLabel", GenBypass.Button)
+    lbl.Size = UDim2.new(1, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "BYPASS"
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.TextScaled = true
+    lbl.Font = Enum.Font.GothamBlack
+    lbl.ZIndex = 11
+    GenBypass.Button.MouseButton1Click:Connect(function()
+        if not GenBypass.Enabled then return end
+        local bestPoint, bestDist = GB_GetNearestPoint()
+        if bestPoint and bestDist <= GenBypass.Range then
+            GB_DoRepair(bestPoint)
+        end
+    end)
+end
+
+GB_CreateButton()
+
+LP.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    GB_CreateButton()
+    GB_UpdateButton()
+end)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if gp or isMobile then return end
+    if input.KeyCode == GenBypass.HotkeyCode and GenBypass.Enabled then
+        if not GB_IsPromptVisible() then return end
+        local bestPoint, bestDist = GB_GetNearestPoint()
+        if not bestPoint or bestDist > GenBypass.Range then return end
+        if GenBypass.Processed[bestPoint.Parent] then return end
+        GB_DoRepair(bestPoint)
+    end
+end)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+    if not GenBypass.Enabled then return end
+    if not GB_IsPromptVisible() then return end
+    local bestPoint, bestDist = GB_GetNearestPoint()
+    if not bestPoint or bestDist > GenBypass.Range then return end
+    if GenBypass.Processed[bestPoint.Parent] then return end
+    GB_DoRepair(bestPoint)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(2)
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for genModel in pairs(GenBypass.Processed) do
+                if not genModel or not genModel.Parent then
+                    GenBypass.Processed[genModel] = nil
+                else
+                    local nearAny = false
+                    for _, point in pairs(GB_GetPoints(genModel)) do
+                        if point.Parent and (hrp.Position - point.Position).Magnitude <= 10 then
+                            nearAny = true
+                            break
+                        end
+                    end
+                    if not nearAny then
+                        GenBypass.Processed[genModel] = nil
+                    end
+                end
+            end
+        end
+    end
+end)
+
+function setGenBypass(v)
+    GenBypass.Enabled = v
+    GB_UpdateButton()
+end-- ================================================================
+-- PART 5 of 6 - Movement + God Mode + FPS/Ping
 -- ================================================================
 
--- MOVEMENT
 local Movement = {
     SpeedEnabled = false, SpeedValue = 20,
     JumpEnabled = false, JumpValue = 50,
@@ -994,7 +1135,6 @@ local function DisableNoclip()
     end
 end
 
--- GOD MODE
 local GodMode = { Enabled = false }
 task.spawn(function()
     while task.wait(0.3) do
@@ -1016,7 +1156,6 @@ task.spawn(function()
     end
 end)
 
--- FAST VAULT
 local FastVault = { Enabled = false, Speed = 30 }
 RS.Heartbeat:Connect(function()
     if not FastVault.Enabled then return end
@@ -1078,13 +1217,17 @@ RS.RenderStepped:Connect(function()
         FPSLabel.Text = string.format("YARHUB | FPS: %d | Ping: %d ms", FPSPing.FPS, FPSPing.Ping)
     end
 end)-- ================================================================
--- PART 7 of 8 - Moonwalk + Copy Avatar
+-- PART 6 of 6 - Moonwalk + UI Rayfield
 -- ================================================================
 
--- MOONWALK
+-- MOONWALK (KODINGAN KAMU)
 local Moonwalk = {
-    Enabled = false, ShowButton = true, SpamSpeed = 30,
-    Intensity = 35, SlowSpeed = 13, UseSlow = true
+    Enabled = false,
+    ShowButton = true,
+    SpamSpeed = 30,
+    Intensity = 35,
+    SlowSpeed = 13,
+    UseSlow = true
 }
 
 local MoonwalkConnection = nil
@@ -1123,7 +1266,7 @@ local function startMoonwalk()
         if not char then return end
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        local cam = WS.CurrentCamera
+        local cam = workspace.CurrentCamera
         if not humanoid or not hrp or not cam then return end
         if Moonwalk.UseSlow then
             if humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
@@ -1223,69 +1366,9 @@ if Moonwalk.ShowButton then
     createMoonwalkButton()
 end
 
--- COPY AVATAR
-local AvatarStealer = { Original = nil, CurrentUserId = nil }
-
-local function RemoveClothes(char)
-    for _, v in ipairs(char:GetDescendants()) do
-        if v:IsA("Accessory") or v:IsA("Shirt")
-        or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-            pcall(function() v:Destroy() end)
-        end
-    end
-end
-
-local function CopyAvatar(username)
-    if not username or username == "" then
-        Rayfield:Notify({Title="Yarhub", Content="Isi username dulu!", Duration=2})
-        return
-    end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    AvatarStealer.Original = hum:GetAppliedDescription()
-    local ok, userId = pcall(function()
-        return Players:GetUserIdFromNameAsync(username)
-    end)
-    if not ok then
-        Rayfield:Notify({Title="Yarhub", Content="User tidak ditemukan!", Duration=3})
-        return
-    end
-    AvatarStealer.CurrentUserId = userId
-    task.spawn(function()
-        local ok2, desc = pcall(function()
-            return Players:GetHumanoidDescriptionFromUserId(userId)
-        end)
-        if not ok2 or not desc then return end
-        RemoveClothes(char)
-        task.wait(0.2)
-        local success = false
-        pcall(function() hum:ApplyDescriptionClientServer(desc); success = true end)
-        if not success then
-            pcall(function() hum:ApplyDescription(desc); success = true end)
-        end
-        if success then
-            Rayfield:Notify({Title="Yarhub", Content="✅ Avatar dicopy: "..username, Duration=3})
-        end
-    end)
-end
-
-local function ResetAvatar()
-    if not AvatarStealer.Original then return end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        RemoveClothes(char)
-        pcall(function() hum:ApplyDescriptionClientServer(AvatarStealer.Original) end)
-        AvatarStealer.CurrentUserId = nil
-        Rayfield:Notify({Title="Yarhub", Content="Avatar di-reset!", Duration=3})
-    end
-end-- ================================================================
--- PART 8 of 8 - UI RAYFIELD
 -- ================================================================
-
+-- UI RAYFIELD
+-- ================================================================
 local Win = Rayfield:CreateWindow({
    Name = "Yarhub Ultimate",
    LoadingTitle = "Yarhub",
@@ -1301,16 +1384,16 @@ local Win = Rayfield:CreateWindow({
    }
 })
 
-local VisualT  = Win:CreateTab("Visual")
-local SkillT   = Win:CreateTab("Skillcheck")
-local ParryT   = Win:CreateTab("Parry")
-local AimT     = Win:CreateTab("Aimbot")
-local KillerT  = Win:CreateTab("Killer")
-local EspT     = Win:CreateTab("ESP")
-local MoveT    = Win:CreateTab("Movement")
-local MwT      = Win:CreateTab("Moonwalk")
-local AvaT     = Win:CreateTab("Avatar")
-local InfoT    = Win:CreateTab("Info")
+local VisualT = Win:CreateTab("Visual")
+local SkillT  = Win:CreateTab("Skillcheck")
+local ParryT  = Win:CreateTab("Parry")
+local AimT    = Win:CreateTab("Aimbot")
+local KillerT = Win:CreateTab("Killer")
+local EspT    = Win:CreateTab("ESP")
+local GenT    = Win:CreateTab("Gen Bypass")
+local MoveT   = Win:CreateTab("Movement")
+local MwT     = Win:CreateTab("Moonwalk")
+local InfoT   = Win:CreateTab("Info")
 
 Rayfield:Notify({Title="Yarhub Ultimate", Content="Semua fitur dimuat!", Duration=5})
 
@@ -1320,21 +1403,11 @@ VisualT:CreateToggle({Name="Fullbright", CurrentValue=false,
    Callback=function(v) ToggleFullbright(v) end})
 VisualT:CreateToggle({Name="No Fog", CurrentValue=false,
    Callback=function(v) ToggleNoFog(v) end})
-VisualT:CreateSection("FOV Changer")
+VisualT:CreateSection("FOV")
 VisualT:CreateToggle({Name="Aktifkan FOV", CurrentValue=false,
    Callback=function(v) ToggleFOV(v) end})
 VisualT:CreateSlider({Name="FOV Value", Range={50,120}, Increment=1, CurrentValue=70,
    Callback=function(v) FOV.Value = v end})
-VisualT:CreateSection("Crosshair")
-VisualT:CreateToggle({Name="Aktifkan Crosshair", CurrentValue=false,
-   Callback=function(v) Crosshair.Enabled = v end})
-VisualT:CreateDropdown({Name="Style", Options={"Plus","Dot","Circle"},
-   CurrentOption={"Plus"},
-   Callback=function(O) Crosshair.Style = O[1] end})
-VisualT:CreateSlider({Name="Ukuran", Range={3,20}, Increment=1, CurrentValue=8,
-   Callback=function(v) Crosshair.Size = v end})
-VisualT:CreateColorPicker({Name="Warna", Color=Color3.fromRGB(0,255,100),
-   Callback=function(c) Crosshair.Color = c end})
 
 -- SKILLCHECK
 SkillT:CreateSection("Auto Skillcheck")
@@ -1406,7 +1479,7 @@ KillerT:CreateSlider({Name="Kill Range", Range={50,1000}, Increment=50, CurrentV
 KillerT:CreateSlider({Name="Attack Delay", Range={0.1,2}, Increment=0.05, CurrentValue=0.45,
    Callback=function(v) AutoKill.Delay = v end})
 KillerT:CreateSection("Auto Stalk")
-KillerT:CreateToggle({Name="Aktifkan Auto Stalk", CurrentValue=false,
+KillerT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v)
       AutoStalk.Enabled = v
       if v then StartAutoStalk() else StopAutoStalk() end
@@ -1425,7 +1498,7 @@ for _, power in ipairs(MaskedPowers) do
    KillerT:CreateButton({Name=power, Callback=function() SetMaskedPower(power) end})
 end
 KillerT:CreateSection("Auto Wiggle")
-KillerT:CreateToggle({Name="Aktifkan Auto Wiggle", CurrentValue=false,
+KillerT:CreateToggle({Name="Aktifkan", CurrentValue=false,
    Callback=function(v) AutoWiggle.Enabled = v end})
 KillerT:CreateSlider({Name="Spam/detik", Range={1,20}, Increment=1, CurrentValue=5,
    Callback=function(v) AutoWiggle.Spam = v end})
@@ -1447,13 +1520,33 @@ EspT:CreateSlider({Name="Ukuran Text", Range={8,32}, Increment=1, CurrentValue=1
    Callback=function(v) ESP.TextSize = v end})
 EspT:CreateSlider({Name="Jarak Max", Range={50,2000}, Increment=50, CurrentValue=500,
    Callback=function(v) ESP.MaxDist = v end})
-EspT:CreateSection("Warna")
-EspT:CreateColorPicker({Name="Survivor", Color=Color3.fromRGB(0,255,0),
-   Callback=function(c) ESP.SVc = c end})
-EspT:CreateColorPicker({Name="Killer", Color=Color3.fromRGB(255,0,0),
-   Callback=function(c) ESP.KLc = c end})
-EspT:CreateColorPicker({Name="Generator", Color=Color3.fromRGB(255,170,0),
-   Callback=function(c) ESP.GNc = c end})
+
+-- GEN BYPASS
+GenT:CreateSection("Generator Bypass")
+GenT:CreateToggle({Name="Aktifkan Gen Bypass", CurrentValue=false,
+   Callback=function(v)
+      setGenBypass(v)
+      if v then Rayfield:Notify({Title="Yarhub", Content="Gen Bypass ON", Duration=2}) end
+   end})
+GenT:CreateSlider({Name="Jarak Bypass (stud)", Range={4,20}, Increment=1, CurrentValue=8,
+   Callback=function(v) GenBypass.Range = v end})
+GenT:CreateButton({Name="Repair Terdekat Manual",
+   Callback=function()
+      local p, d = GB_GetNearestPoint()
+      if p and d <= GenBypass.Range then
+         GB_DoRepair(p)
+         Rayfield:Notify({Title="Yarhub", Content="Repair dikirim!", Duration=2})
+      end
+   end})
+GenT:CreateButton({Name="Reset Cache",
+   Callback=function()
+      GenBypass.Cache = {}
+      GenBypass.Processed = {}
+      GenBypass.CacheTimer = 0
+      Rayfield:Notify({Title="Yarhub", Content="Cache di-reset", Duration=2})
+   end})
+GenT:CreateParagraph({Title="Cara Pakai",
+   Content="1. Aktifkan Gen Bypass\n2. Mobile: tap tombol BYPASS\n3. PC: pencet G atau klik mouse"})
 
 -- MOVEMENT
 MoveT:CreateSection("God Mode ⚠️")
@@ -1465,11 +1558,11 @@ MoveT:CreateToggle({Name="Aktifkan God Mode", CurrentValue=false,
 MoveT:CreateSection("Speed & Jump")
 MoveT:CreateToggle({Name="WalkSpeed ON", CurrentValue=false,
    Callback=function(v) Movement.SpeedEnabled = v end})
-MoveT:CreateSlider({Name="WalkSpeed Value", Range={16,100}, Increment=2, CurrentValue=20,
+MoveT:CreateSlider({Name="WalkSpeed", Range={16,100}, Increment=2, CurrentValue=20,
    Callback=function(v) Movement.SpeedValue = v end})
 MoveT:CreateToggle({Name="JumpPower ON", CurrentValue=false,
    Callback=function(v) Movement.JumpEnabled = v end})
-MoveT:CreateSlider({Name="JumpPower Value", Range={50,200}, Increment=5, CurrentValue=50,
+MoveT:CreateSlider({Name="JumpPower", Range={50,200}, Increment=5, CurrentValue=50,
    Callback=function(v) Movement.JumpValue = v end})
 MoveT:CreateSection("Noclip")
 MoveT:CreateToggle({Name="Noclip", CurrentValue=false,
@@ -1513,46 +1606,1303 @@ MwT:CreateSlider({Name="Slow Speed", Range={1,30}, Increment=1, CurrentValue=13,
 MwT:CreateToggle({Name="Use Slow Speed", CurrentValue=true,
    Callback=function(v) Moonwalk.UseSlow = v end})
 
--- AVATAR
-AvaT:CreateSection("Copy Avatar")
-AvaT:CreateInput({
-   Name = "Username Target",
-   PlaceholderText = "Masukkan username...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(text) _G.AvaTarget = text end,
-})
-AvaT:CreateButton({Name="Copy Avatar",
-   Callback=function()
-      if _G.AvaTarget then CopyAvatar(_G.AvaTarget) end
-   end})
-AvaT:CreateButton({Name="Reset Avatar",
-   Callback=function() ResetAvatar() end})
-
 -- INFO
 InfoT:CreateSection("FPS/Ping")
 InfoT:CreateToggle({Name="Tampilkan FPS/Ping", CurrentValue=true,
    Callback=function(v) FPSPing.Enabled = v end})
 InfoT:CreateSection("Tentang")
 InfoT:CreateParagraph({
-   Title = "Yarhub Ultimate - Full Edition",
-   Content = "Fitur Lengkap (60+):\n" ..
+   Title = "Yarhub Ultimate",
+   Content = "Fitur Lengkap:\n" ..
              "- Anti Lag + Fullbright + No Fog + FOV\n" ..
-             "- Crosshair Custom\n" ..
              "- Auto Skillcheck (2 Mode)\n" ..
              "- Auto Parry + Circle\n" ..
              "- Aimbot (Gun + Attack + Wallcheck)\n" ..
-             "- Silent Aim Veil Spear ⚠️\n" ..
+             "- Silent Aim Veil Spear\n" ..
              "- Auto Kill All + Auto Stalk\n" ..
-             "- Auto Carry + Auto Hook\n" ..
-             "- Masked Power Switch\n" ..
+             "- Auto Carry + Auto Hook + Masked Power\n" ..
              "- Auto Wiggle\n" ..
              "- ESP (Survivor + Killer + Generator + SCP)\n" ..
-             "- God Mode ⚠️\n" ..
-             "- Movement (Speed + Jump + NoClip)\n" ..
+             "- Gen Bypass (Auto Repair)\n" ..
+             "- God Mode + Speed + Jump + Noclip\n" ..
              "- Fast Vault\n" ..
              "- Moonwalk + Lock Tombol\n" ..
-             "- Copy Avatar\n" ..
              "- FPS/Ping Display\n\n" ..
-             "Total 10 Tab, 60+ Fitur\n" ..
+             "Total 10 Tab\n" ..
              "Dibuat oleh: Yarhub"
+})-- ================================================================
+-- PART 7 of 8 - EXTENDED FEATURES
+-- ================================================================
+
+-- ==================== ESP PRO ====================
+local ESPPro = {
+    Pallet = false, Window = false,
+    StatusBillboard = false, HealthBar = false, ItemESP = false,
+    MaxDist = 500,
+    PalletColor = Color3.fromRGB(74, 255, 181),
+    WindowColor = Color3.fromRGB(74, 255, 181),
+    ItemColor = Color3.fromRGB(255, 215, 0),
+}
+
+local espProFolder = Instance.new("Folder")
+espProFolder.Name = "Yarhub_ESPPro"
+espProFolder.Parent = CoreGui
+
+local ProESPObjects = {}
+local StatusBillboards = {}
+
+local function ProCreateESP(obj, color, key)
+    if ProESPObjects[key] then
+        ProESPObjects[key].FillColor = color
+        ProESPObjects[key].OutlineColor = color
+        return
+    end
+    local h = Instance.new("Highlight")
+    h.Adornee = obj
+    h.FillColor = color
+    h.OutlineColor = color
+    h.FillTransparency = 0.9
+    h.OutlineTransparency = 0.3
+    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    h.Parent = espProFolder
+    ProESPObjects[key] = h
+end
+
+local function ProRemoveESP(key)
+    if ProESPObjects[key] then
+        ProESPObjects[key]:Destroy()
+        ProESPObjects[key] = nil
+    end
+end
+
+local function CreateStatusBillboard(char, player, isDown, dist, hp)
+    if StatusBillboards[char] then
+        StatusBillboards[char]:Destroy()
+    end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    
+    local bb = Instance.new("BillboardGui")
+    bb.Size = UDim2.new(0, 130, 0, 60)
+    bb.AlwaysOnTop = true
+    bb.StudsOffset = Vector3.new(0, 2.5, 0)
+    bb.Parent = char
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = isDown and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(255, 255, 255)
+    label.TextStrokeTransparency = 0
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.Text = string.format("%s%s\nDist: %.0f\nHP: %.0f", 
+        isDown and "🔻 DOWN\n" or "",
+        player.Name, dist, hp)
+    label.Parent = bb
+    
+    bb.Adornee = head
+    StatusBillboards[char] = bb
+end
+
+task.spawn(function()
+    while task.wait(0.4) do
+        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if not root then task.wait(1) continue end
+        
+        for key, obj in pairs(ProESPObjects) do
+            if not obj.Adornee or not obj.Adornee.Parent then
+                ProRemoveESP(key)
+            end
+        end
+        
+        if ESPPro.Pallet then
+            for _, obj in ipairs(WS:GetDescendants()) do
+                if obj:IsA("Model") and (obj.Name == "Pallet" or obj.Name == "Palletwrong") then
+                    local pivot = obj:GetPivot()
+                    local dist = (pivot.Position - root.Position).Magnitude
+                    if dist <= ESPPro.MaxDist then
+                        ProCreateESP(obj, ESPPro.PalletColor, "P_" .. obj:GetDebugId())
+                    end
+                end
+            end
+        end
+        
+        if ESPPro.Window then
+            for _, obj in ipairs(WS:GetDescendants()) do
+                if obj:IsA("Model") and obj.Name == "Window" then
+                    local pivot = obj:GetPivot()
+                    local dist = (pivot.Position - root.Position).Magnitude
+                    if dist <= ESPPro.MaxDist then
+                        ProCreateESP(obj, ESPPro.WindowColor, "W_" .. obj:GetDebugId())
+                    end
+                end
+            end
+        end
+        
+        if ESPPro.ItemESP then
+            for _, obj in ipairs(WS:GetDescendants()) do
+                if obj:IsA("Tool") or obj.Name:find("Medkit") or obj.Name:find("Bandage") then
+                    local handle = obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")
+                    if handle then
+                        local dist = (handle.Position - root.Position).Magnitude
+                        if dist <= ESPPro.MaxDist then
+                            ProCreateESP(handle, ESPPro.ItemColor, "I_" .. obj:GetDebugId())
+                        end
+                    end
+                end
+            end
+        end
+        
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hum and hrp then
+                    local dist = (hrp.Position - root.Position).Magnitude
+                    if dist <= ESPPro.MaxDist then
+                        local isDown = hum.Health <= 0 or hum.Health < 2
+                            or p.Character:GetAttribute("Downed") == true
+                            or p.Character:GetAttribute("IsDown") == true
+                            or p.Character:GetAttribute("Knocked") == true
+                        
+                        if ESPPro.StatusBillboard then
+                            CreateStatusBillboard(p.Character, p, isDown, dist, hum.Health)
+                        end
+                        
+                        if ESPPro.HealthBar then
+                            ProCreateESP(p.Character, Color3.fromRGB(255, 100, 100), "H_" .. p.UserId)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== VISUAL PRO ====================
+local VisualPro = {
+    CleanSky = false, NoScreenEffects = false,
+    LowGraphics = false, RGBCharacter = false,
+    CameraZoom = false, MaxZoom = 1000,
+}
+
+local ScreenEffectTypes = {
+    "ColorCorrectionEffect", "DepthOfFieldEffect",
+    "BlurEffect", "SunRaysEffect", "BloomEffect"
+}
+
+local DisabledEffects = {}
+
+local function ApplyCleanSky(state)
+    if state then
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") then
+                v:Destroy()
+            end
+        end
+    end
+end
+
+local function ApplyNoScreenEffects(state)
+    if state then
+        for _, v in pairs(Lighting:GetChildren()) do
+            for _, t in pairs(ScreenEffectTypes) do
+                if v:IsA(t) then
+                    DisabledEffects[v] = v.Enabled
+                    v.Enabled = false
+                end
+            end
+        end
+    else
+        for obj, s in pairs(DisabledEffects) do
+            if obj and obj.Parent then obj.Enabled = s end
+        end
+        DisabledEffects = {}
+    end
+end
+
+local function ApplyLowGraphics(state)
+    pcall(function()
+        if state then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        else
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        end
+    end)
+end
+
+local function ApplyCameraZoom(state)
+    if state then
+        LP.CameraMaxZoomDistance = VisualPro.MaxZoom
+        LP.CameraMinZoomDistance = 0
+    else
+        LP.CameraMaxZoomDistance = 128
+        LP.CameraMinZoomDistance = 0.5
+    end
+end
+
+task.spawn(function()
+    local hue = 0
+    while task.wait(0.05) do
+        if VisualPro.RGBCharacter and LP.Character then
+            hue = (hue + 0.01) % 1
+            local color = Color3.fromHSV(hue, 1, 1)
+            for _, v in ipairs(LP.Character:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.Color = color
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== KILLER PRO ====================
+local KillerPro = {
+    NoStun = false, VaultSpeed = false, InfiniteLunge = false,
+    BurstAttack = false, InstantKill = false,
+    AutoFarm = false, AutoArm = false, ForceFlowstate = false,
+}
+
+-- No Stun (cegah state Stunned)
+task.spawn(function()
+    while task.wait(0.1) do
+        if not KillerPro.NoStun then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            pcall(function()
+                hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            end)
+        end
+    end
+end)
+
+-- Vault Speed (percepat lompat window/pallet)
+RS.Heartbeat:Connect(function()
+    if not KillerPro.VaultSpeed then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 8)
+    local hit = WS:FindPartOnRayWithIgnoreList(ray, {char})
+    if hit and (hit.Name == "Window" or hit.Name == "Pallet" or hit.Name == "Palletwrong") then
+        if hum.WalkSpeed ~= 30 then hum.WalkSpeed = 30 end
+    else
+        if hum.WalkSpeed == 30 then hum.WalkSpeed = 16 end
+    end
+end)
+
+-- Infinite Lunge (extend attack range)
+local originalAttackRange = nil
+task.spawn(function()
+    while task.wait(0.5) do
+        if not KillerPro.InfiniteLunge then continue end
+        for _, v in ipairs(WS:GetDescendants()) do
+            if v:IsA("NumberValue") and (v.Name:lower():find("range") or v.Name:lower():find("reach")) then
+                v.Value = 50
+            end
+        end
+    end
+end)
+
+-- Burst Attack (spam attack)
+task.spawn(function()
+    while task.wait(0.1) do
+        if not KillerPro.BurstAttack then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then continue end
+        pcall(function()
+            if AttackEvent then
+                AttackEvent:FireServer()
+            end
+        end)
+    end
+end)
+
+-- Instant Kill (spam attack dengan delay kecil)
+local InstantKillDelay = 0.05
+task.spawn(function()
+    while task.wait(InstantKillDelay) do
+        if not KillerPro.InstantKill then continue end
+        local root = GetRoot()
+        if not root then continue end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and IsSurvivor(p) then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and (hrp.Position - root.Position).Magnitude <= 15 then
+                    pcall(function()
+                        if AttackEvent then AttackEvent:FireServer(p.Character) end
+                    end)
+                    break
+                end
+            end
+        end
+    end
+end)
+
+-- Force Flowstate (trigger flowstate attribute)
+local function ApplyFlowstate(state)
+    local char = LP.Character
+    if not char then return end
+    if state then
+        pcall(function()
+            char:SetAttribute("Flowstate", true)
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:SetAttribute("Flowstate", true)
+            end
+        end)
+    else
+        pcall(function()
+            char:SetAttribute("Flowstate", false)
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:SetAttribute("Flowstate", false)
+            end
+        end)
+    end
+end
+
+-- ==================== COMBAT PRO ====================
+local CombatPro = {
+    AntiBlind = false, NoSlowdown = false,
+}
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not CombatPro.AntiBlind then continue end
+        local char = LP.Character
+        if not char then continue end
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") then
+                v.Enabled = false
+            end
+        end
+        for _, v in ipairs(char:GetDescendants()) do
+            if v:IsA("BlurEffect") then v.Enabled = false end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not CombatPro.NoSlowdown then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum and hum.WalkSpeed < 16 and hum.WalkSpeed > 0 then
+            -- Cek kalau bukan sengaja diset user
+            if not Movement.SpeedEnabled then
+                hum.WalkSpeed = 16
+            end
+        end
+    end
+end)
+
+-- Silent Aim Pistol
+local SilentPistol = { Enabled = false, TargetMode = "Killer", FOV = 200, WallCheck = true }
+
+local PistolRemotes = {}
+task.spawn(function()
+    while task.wait(5) do
+        PistolRemotes = {}
+        for _, obj in ipairs(Rep:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                local n = obj.Name:lower()
+                if n:find("gun") or n:find("pistol") or n:find("shoot") or n:find("fire") then
+                    table.insert(PistolRemotes, obj)
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== UTILITY PRO ====================
+local UtilityPro = {
+    AntiAFK = false, AntiFling = false,
+}
+
+-- Anti-AFK
+LP.Idled:Connect(function()
+    if UtilityPro.AntiAFK then
+        local vu = game:GetService("VirtualUser")
+        vu:CaptureController()
+        vu:ClickButton2(Vector2.new())
+    end
+end)
+
+-- Anti-Fling
+task.spawn(function()
+    while task.wait(0.5) do
+        if not UtilityPro.AntiFling then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local vel = hrp.Velocity.Magnitude
+            if vel > 500 then
+                hrp.Velocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+end)
+
+-- Server Hop / Rejoin / Copy Job ID
+local function ServerHop()
+    local TS = game:GetService("TeleportService")
+    local placeId = game.PlaceId
+    local success, err = pcall(function()
+        TS:Teleport(placeId, LP)
+    end)
+    if not success then
+        Rayfield:Notify({Title="Yarhub", Content="Gagal hop: "..tostring(err), Duration=3})
+    end
+end
+
+local function RejoinServer()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
+end
+
+local function CopyJobId()
+    local jobId = game.JobId
+    if setclipboard then
+        setclipboard(jobId)
+        Rayfield:Notify({Title="Yarhub", Content="Job ID dicopy: "..jobId, Duration=3})
+    else
+        Rayfield:Notify({Title="Yarhub", Content="Job ID: "..jobId, Duration=5})
+    end
+end
+
+-- ==================== FUN ====================
+local Fun = {
+    JerkTool = false, EmoteSpam = false,
+}
+
+-- Jerk Tool
+local currentJerkTool = nil
+local function CreateJerkTool()
+    if currentJerkTool then currentJerkTool:Destroy() end
+    local char = LP.Character
+    if not char then return end
+    local backpack = LP:FindFirstChildOfClass("Backpack")
+    if not backpack then return end
+    local tool = Instance.new("Tool")
+    tool.Name = "Jerk Off"
+    tool.RequiresHandle = false
+    tool.Parent = backpack
+    currentJerkTool = tool
+    tool.Equipped:Connect(function()
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            local anim = Instance.new("Animation")
+            anim.AnimationId = hum.RigType == Enum.HumanoidRigType.R15 
+                and "rbxassetid://698251653" 
+                or "rbxassetid://72042024"
+            local track = hum:LoadAnimation(anim)
+            track.Looped = true
+            track:Play()
+            tool.Unequipped:Connect(function() track:Stop() end)
+        end
+    end)
+end
+
+-- Emote System
+local Emotes = {
+    "Mannrobics", "Arm Swing", "Schadenfreude",
+    "Kyoufuu", "Backflip", "Griddy", "Friday Night",
+    "Floating Rest", "OnePlays", "Quick Combo",
+    "WarCry", "Wave"
+}
+
+local function PlayEmote(emoteName)
+    local char = LP.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+    local emoteRemote = Rep:FindFirstChild("Remotes")
+        and Rep.Remotes:FindFirstChild("Emotes")
+    if emoteRemote then
+        pcall(function()
+            emoteRemote:FireServer(emoteName)
+        end)
+    end
+end
+
+-- Avatar Blocky
+local function ApplyBlockyBody(state)
+    local char = LP.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    if state then
+        local desc = Instance.new("HumanoidDescription")
+        desc.BodyTypeScale = 1
+        desc.DepthScale = 1
+        desc.HeadScale = 1
+        desc.HeightScale = 1
+        desc.ProportionScale = 0
+        desc.WidthScale = 1
+        pcall(function()
+            hum:ApplyDescriptionClientServer(desc)
+        end)
+    end
+    end-- ================================================================
+-- PART 8 of 8 - UI EXTENDED
+-- ================================================================
+
+local ESPProT = Win:CreateTab("ESP Pro")
+local VisProT = Win:CreateTab("Visual Pro")
+local KillProT = Win:CreateTab("Killer Pro")
+local ComProT = Win:CreateTab("Combat Pro")
+local UtilProT = Win:CreateTab("Utility Pro")
+local FunT = Win:CreateTab("Fun")
+
+Rayfield:Notify({Title="Yarhub Extended", Content="35 fitur tambahan dimuat!", Duration=5})
+
+-- ESP PRO
+ESPProT:CreateSection("ESP Pallet & Window")
+ESPProT:CreateToggle({Name="ESP Pallet", CurrentValue=false,
+   Callback=function(v) ESPPro.Pallet = v end})
+ESPProT:CreateToggle({Name="ESP Window", CurrentValue=false,
+   Callback=function(v) ESPPro.Window = v end})
+ESPProT:CreateToggle({Name="ESP Item (Tool/Medkit)", CurrentValue=false,
+   Callback=function(v) ESPPro.ItemESP = v end})
+
+ESPProT:CreateSection("ESP Status Billboard")
+ESPProT:CreateToggle({Name="Status Billboard (Nama+Jarak+HP)", CurrentValue=false,
+   Callback=function(v) ESPPro.StatusBillboard = v end})
+ESPProT:CreateToggle({Name="Health Bar ESP", CurrentValue=false,
+   Callback=function(v) ESPPro.HealthBar = v end})
+
+ESPProT:CreateSection("Pengaturan")
+ESPProT:CreateSlider({Name="Jarak Max", Range={50,2000}, Increment=50, CurrentValue=500,
+   Callback=function(v) ESPPro.MaxDist = v end})
+ESPProT:CreateColorPicker({Name="Warna Pallet", Color=Color3.fromRGB(74,255,181),
+   Callback=function(c) ESPPro.PalletColor = c end})
+ESPProT:CreateColorPicker({Name="Warna Window", Color=Color3.fromRGB(74,255,181),
+   Callback=function(c) ESPPro.WindowColor = c end})
+ESPProT:CreateColorPicker({Name="Warna Item", Color=Color3.fromRGB(255,215,0),
+   Callback=function(c) ESPPro.ItemColor = c end})
+
+-- VISUAL PRO
+VisProT:CreateSection("FPS Boost")
+VisProT:CreateToggle({Name="Clean Sky (hapus skybox)", CurrentValue=false,
+   Callback=function(v)
+      VisualPro.CleanSky = v
+      ApplyCleanSky(v)
+   end})
+VisProT:CreateToggle({Name="No Screen Effects (blur, bloom)", CurrentValue=false,
+   Callback=function(v)
+      VisualPro.NoScreenEffects = v
+      ApplyNoScreenEffects(v)
+   end})
+VisProT:CreateToggle({Name="Low Graphics Mode ⚠️", CurrentValue=false,
+   Callback=function(v)
+      VisualPro.LowGraphics = v
+      ApplyLowGraphics(v)
+   end})
+
+VisProT:CreateSection("Camera & Karakter")
+VisProT:CreateToggle({Name="Camera Unlimited Zoom", CurrentValue=false,
+   Callback=function(v)
+      VisualPro.CameraZoom = v
+      ApplyCameraZoom(v)
+   end})
+VisProT:CreateSlider({Name="Max Zoom Distance", Range={200,5000}, Increment=100, CurrentValue=1000,
+   Callback=function(v)
+      VisualPro.MaxZoom = v
+      if VisualPro.CameraZoom then ApplyCameraZoom(true) end
+   end})
+VisProT:CreateToggle({Name="RGB Character 🎨", CurrentValue=false,
+   Callback=function(v) VisualPro.RGBCharacter = v end})
+
+-- KILLER PRO
+KillProT:CreateSection("Chase Tools")
+KillProT:CreateToggle({Name="No Stun ⚠️", CurrentValue=false,
+   Callback=function(v) KillerPro.NoStun = v end})
+KillProT:CreateToggle({Name="Vault Speed", CurrentValue=false,
+   Callback=function(v) KillerPro.VaultSpeed = v end})
+KillProT:CreateToggle({Name="Infinite Lunge ⚠️", CurrentValue=false,
+   Callback=function(v) KillerPro.InfiniteLunge = v end})
+KillProT:CreateToggle({Name="Force Flowstate Perk", CurrentValue=false,
+   Callback=function(v)
+      KillerPro.ForceFlowstate = v
+      ApplyFlowstate(v)
+   end})
+
+KillProT:CreateSection("Attack Tools ⚠️⚠️")
+KillProT:CreateToggle({Name="Burst Attack (spam) ⚠️", CurrentValue=false,
+   Callback=function(v)
+      KillerPro.BurstAttack = v
+      if v then Rayfield:Notify({Title="⚠️", Content="Burst - risiko ban!", Duration=4}) end
+   end})
+KillProT:CreateToggle({Name="Instant Kill ⚠️⚠️", CurrentValue=false,
+   Callback=function(v)
+      KillerPro.InstantKill = v
+      if v then Rayfield:Notify({Title="⚠️⚠️", Content="INSTANT KILL - SANGAT BERISIKO!", Duration=5}) end
+   end})
+
+-- COMBAT PRO
+ComProT:CreateSection("Defense")
+ComProT:CreateToggle({Name="Anti Blind", CurrentValue=false,
+   Callback=function(v) CombatPro.AntiBlind = v end})
+ComProT:CreateToggle({Name="No Slowdown", CurrentValue=false,
+   Callback=function(v) CombatPro.NoSlowdown = v end})
+
+ComProT:CreateSection("Silent Aim Pistol ⚠️")
+ComProT:CreateToggle({Name="Aktifkan Silent Aim Pistol", CurrentValue=false,
+   Callback=function(v)
+      SilentPistol.Enabled = v
+      if v then Rayfield:Notify({Title="⚠️ Silent", Content="Risiko ban!", Duration=4}) end
+   end})
+ComProT:CreateDropdown({Name="Target", Options={"Killer","Survivor","All"},
+   CurrentOption={"Killer"}, Callback=function(O) SilentPistol.TargetMode = O[1] end})
+ComProT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=200,
+   Callback=function(v) SilentPistol.FOV = v end})
+
+-- UTILITY PRO
+UtilProT:CreateSection("Anti & Auto")
+UtilProT:CreateToggle({Name="Anti-AFK", CurrentValue=false,
+   Callback=function(v)
+      UtilityPro.AntiAFK = v
+      Rayfield:Notify({Title="Yarhub", Content=v and "Anti-AFK ON" or "Anti-AFK OFF", Duration=2})
+   end})
+UtilProT:CreateToggle({Name="Anti-Fling", CurrentValue=false,
+   Callback=function(v) UtilityPro.AntiFling = v end})
+
+UtilProT:CreateSection("Server")
+UtilProT:CreateButton({Name="Server Hop", Callback=function()
+   Rayfield:Notify({Title="Yarhub", Content="Hop server...", Duration=2})
+   task.wait(1)
+   ServerHop()
+end})
+UtilProT:CreateButton({Name="Rejoin Server", Callback=function()
+   Rayfield:Notify({Title="Yarhub", Content="Rejoin...", Duration=2})
+   task.wait(1)
+   RejoinServer()
+end})
+UtilProT:CreateButton({Name="Copy Job ID", Callback=function() CopyJobId() end})
+
+-- FUN
+FunT:CreateSection("Fun Tools")
+FunT:CreateToggle({Name="Jerk Tool", CurrentValue=false,
+   Callback=function(v)
+      Fun.JerkTool = v
+      if v then CreateJerkTool() end
+   end})
+
+FunT:CreateSection("Emote")
+FunT:CreateDropdown({Name="Pilih Emote", Options=Emotes,
+   CurrentOption={"Mannrobics"},
+   Callback=function(O) Fun.SelectedEmote = O[1] end})
+FunT:CreateButton({Name="Play Emote", Callback=function()
+   if Fun.SelectedEmote then
+      PlayEmote(Fun.SelectedEmote)
+   else
+      PlayEmote("Mannrobics")
+   end
+end})
+
+FunT:CreateSection("Avatar")
+FunT:CreateToggle({Name="Blocky Body", CurrentValue=false,
+   Callback=function(v) ApplyBlockyBody(v) end})
+
+Rayfield:Notify({Title="Yarhub Extended", Content="35 fitur aktif! Test 1-1 ya!", Duration=6})-- ================================================================
+-- PART 9 - ADVANCED FEATURES
+-- ================================================================
+
+-- ==================== MOVEMENT ADVANCED ====================
+local MoveAdv = {
+    InfiniteJump = false,
+    BunnyHop = false,
+    Fly = false,
+    FlySpeed = 50,
+    TeleportToPlayer = false,
+    TeleportTarget = "",
+    NoGravity = false,
+}
+
+-- Infinite Jump
+UIS.JumpRequest:Connect(function()
+    if MoveAdv.InfiniteJump then
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- Bunny Hop
+task.spawn(function()
+    while task.wait(0.1) do
+        if not MoveAdv.BunnyHop then continue end
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum and hum.FloorMaterial ~= Enum.Material.Air then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- Fly
+local flyConn = nil
+local bodyVel = nil
+local bodyGyro = nil
+
+local function StartFly()
+    if flyConn then flyConn:Disconnect() end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    bodyVel = Instance.new("BodyVelocity")
+    bodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVel.Velocity = Vector3.new(0, 0, 0)
+    bodyVel.Parent = hrp
+    
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
+    
+    flyConn = RS.RenderStepped:Connect(function()
+        if not MoveAdv.Fly then return end
+        if not bodyVel or not bodyVel.Parent then return end
+        
+        local moveDir = Vector3.new(0, 0, 0)
+        local camCF = workspace.CurrentCamera.CFrame
+        
+        if UIS:IsKeyDown(Enum.KeyCode.W) then
+            moveDir = moveDir + camCF.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then
+            moveDir = moveDir - camCF.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then
+            moveDir = moveDir - camCF.RightVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then
+            moveDir = moveDir + camCF.RightVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then
+            moveDir = moveDir + Vector3.new(0, 1, 0)
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveDir = moveDir - Vector3.new(0, 1, 0)
+        end
+        
+        if moveDir.Magnitude > 0 then
+            moveDir = moveDir.Unit
+        end
+        
+        bodyVel.Velocity = moveDir * MoveAdv.FlySpeed
+        bodyGyro.CFrame = camCF
+    end)
+end
+
+local function StopFly()
+    if flyConn then flyConn:Disconnect() flyConn = nil end
+    if bodyVel then bodyVel:Destroy() bodyVel = nil end
+    if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+end
+
+-- No Gravity
+task.spawn(function()
+    while task.wait(0.1) do
+        if not MoveAdv.NoGravity then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+        end
+    end
+end)
+
+-- Teleport to Player
+local function TeleportToPlayerFunc(playerName)
+    if not playerName or playerName == "" then return end
+    local target = nil
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Name:lower():find(playerName:lower()) and p.Character then
+            target = p
+            break
+        end
+    end
+    if target and target.Character then
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        local targetHrp = target.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and targetHrp then
+            hrp.CFrame = targetHrp.CFrame + Vector3.new(0, 3, 0)
+            Rayfield:Notify({Title="Yarhub", Content="Teleport ke: "..target.Name, Duration=2})
+        end
+    else
+        Rayfield:Notify({Title="Yarhub", Content="Player gak ditemukan", Duration=2})
+    end
+end
+
+-- Teleport to Generator
+local function TeleportToGen()
+    local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local bestGen, bestDist = nil, math.huge
+    local map = WS:FindFirstChild("Map")
+    if map then
+        for _, v in pairs(map:GetDescendants()) do
+            if v:IsA("Model") and v.Name == "Generator" then
+                local pivot = v:GetPivot()
+                local dist = (pivot.Position - root.Position).Magnitude
+                if dist < bestDist then
+                    bestDist = dist
+                    bestGen = v
+                end
+            end
+        end
+    end
+    if bestGen then
+        root.CFrame = bestGen:GetPivot() + Vector3.new(0, 5, 0)
+        Rayfield:Notify({Title="Yarhub", Content="Teleport ke Generator", Duration=2})
+    end
+end
+
+-- ==================== COMBAT ADVANCED ====================
+local CombatAdv = {
+    AimAssist = false,
+    AimAssistStrength = 0.3,
+    AimAssistFOV = 150,
+    HitboxExpander = false,
+    HitboxSize = 10,
+    AutoDodge = false,
+    DodgeRange = 20,
+}
+
+-- Aim Assist (halus, gak lock)
+RS.RenderStepped:Connect(function()
+    if not CombatAdv.AimAssist then return end
+    if not UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then return end
+    
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    local closest, shortest = nil, CombatAdv.AimAssistFOV
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character then
+            local killer = IsKiller(p)
+            if killer then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if d < shortest then
+                            shortest = d
+                            closest = hrp
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if closest then
+        local targetCF = CFrame.new(Cam.CFrame.Position, closest.Position)
+        Cam.CFrame = Cam.CFrame:Lerp(targetCF, CombatAdv.AimAssistStrength * 0.1)
+    end
+end)
+
+-- Hitbox Expander
+local originalSizes = {}
+task.spawn(function()
+    while task.wait(0.5) do
+        if not CombatAdv.HitboxExpander then
+            -- Restore
+            for part, size in pairs(originalSizes) do
+                if part and part.Parent then
+                    part.Size = size
+                end
+            end
+            originalSizes = {}
+            continue
+        end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and IsKiller(p) then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    if not originalSizes[hrp] then
+                        originalSizes[hrp] = hrp.Size
+                    end
+                    hrp.Size = Vector3.new(
+                        CombatAdv.HitboxSize,
+                        CombatAdv.HitboxSize,
+                        CombatAdv.HitboxSize
+                    )
+                    hrp.Transparency = 0.5
+                    hrp.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+-- Auto Dodge
+task.spawn(function()
+    while task.wait(0.1) do
+        if not CombatAdv.AutoDodge then continue end
+        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if not root then continue end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and IsKiller(p) then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local dist = (hrp.Position - root.Position).Magnitude
+                    if dist <= CombatAdv.DodgeRange then
+                        -- Dodge ke samping
+                        local dodgeDir = root.CFrame.RightVector * (math.random() > 0.5 and 1 or -1)
+                        root.Velocity = dodgeDir * 50 + Vector3.new(0, 20, 0)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== UTILITY ADVANCED ====================
+local UtilAdv = {
+    ShowCoords = false,
+    TimePlayed = false,
+    AutoRejoin = false,
+    StartTime = tick(),
+}
+
+-- Show Coordinates
+local coordGui = Instance.new("ScreenGui")
+coordGui.Name = "Yarhub_Coords"
+coordGui.ResetOnSpawn = false
+coordGui.Parent = CoreGui
+
+local coordLabel = Instance.new("TextLabel")
+coordLabel.Size = UDim2.new(0, 250, 0, 25)
+coordLabel.Position = UDim2.new(0, 10, 0, 80)
+coordLabel.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
+coordLabel.BackgroundTransparency = 0.3
+coordLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+coordLabel.Font = Enum.Font.Code
+coordLabel.TextSize = 14
+coordLabel.Text = "X: 0 | Y: 0 | Z: 0"
+coordLabel.Visible = false
+coordLabel.Parent = coordGui
+
+local timeLabel = Instance.new("TextLabel")
+timeLabel.Size = UDim2.new(0, 250, 0, 25)
+timeLabel.Position = UDim2.new(0, 10, 0, 110)
+timeLabel.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
+timeLabel.BackgroundTransparency = 0.3
+timeLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+timeLabel.Font = Enum.Font.Code
+timeLabel.TextSize = 14
+timeLabel.Text = "Time: 00:00"
+timeLabel.Visible = false
+timeLabel.Parent = coordGui
+
+task.spawn(function()
+    while task.wait(0.2) do
+        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        
+        if UtilAdv.ShowCoords and root then
+            coordLabel.Visible = true
+            local p = root.Position
+            coordLabel.Text = string.format("X: %.0f | Y: %.0f | Z: %.0f", p.X, p.Y, p.Z)
+        else
+            coordLabel.Visible = false
+        end
+        
+        if UtilAdv.TimePlayed then
+            timeLabel.Visible = true
+            local elapsed = tick() - UtilAdv.StartTime
+            local mins = math.floor(elapsed / 60)
+            local secs = math.floor(elapsed % 60)
+            timeLabel.Text = string.format("Time: %02d:%02d", mins, secs)
+        else
+            timeLabel.Visible = false
+        end
+    end
+end)
+
+-- Auto Rejoin on Kick
+game:GetService("Players").PlayerRemoving:Connect(function(p)
+    if p == LP then
+        if UtilAdv.AutoRejoin then
+            task.wait(2)
+            game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
+        end
+    end
+end)
+
+-- ==================== ESP ADVANCED ====================
+local ESPAdv = {
+    Tracer = false,
+    Arrow = false,
+    TracerColor = Color3.fromRGB(0, 255, 100),
+    ArrowColor = Color3.fromRGB(255, 100, 100),
+}
+
+local tracerDrawings = {}
+local arrowDrawings = {}
+
+-- ESP Tracer
+RS.RenderStepped:Connect(function()
+    -- Cleanup yang gak kepake
+    for _, d in pairs(tracerDrawings) do
+        if d.Remove then d:Remove() end
+    end
+    tracerDrawings = {}
+    
+    if not ESPAdv.Tracer then return end
+    
+    local bottomCenter = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y)
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local killer = IsKiller(p)
+            if hrp and killer then
+                local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                if vis then
+                    local line = Drawing.new("Line")
+                    line.From = bottomCenter
+                    line.To = Vector2.new(pos.X, pos.Y)
+                    line.Color = ESPAdv.TracerColor
+                    line.Thickness = 1
+                    line.Transparency = 1
+                    line.Visible = true
+                    table.insert(tracerDrawings, line)
+                end
+            end
+        end
+    end
+end)
+
+-- ESP Arrow (panah arah)
+RS.RenderStepped:Connect(function()
+    for _, d in pairs(arrowDrawings) do
+        if d.Remove then d:Remove() end
+    end
+    arrowDrawings = {}
+    
+    if not ESPAdv.Arrow then return end
+    
+    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local killer = IsKiller(p)
+            if hrp and killer then
+                local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
+                if not vis then
+                    -- Target di luar layar, tunjukkan panah
+                    local targetScreen = Cam:WorldToViewportPoint(hrp.Position)
+                    local dir = Vector2.new(targetScreen.X, targetScreen.Y) - center
+                    local arrowPos = center + dir.Unit * 200
+                    
+                    local arrow = Drawing.new("Triangle")
+                    arrow.PointA = arrowPos + Vector2.new(0, -15)
+                    arrow.PointB = arrowPos + Vector2.new(-10, 10)
+                    arrow.PointC = arrowPos + Vector2.new(10, 10)
+                    arrow.Color = ESPAdv.ArrowColor
+                    arrow.Filled = true
+                    arrow.Visible = true
+                    table.insert(arrowDrawings, arrow)
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== SURVIVOR ADVANCED ====================
+local SurvAdv = {
+    AntiCarry = false,
+    AutoVault = false,
+    AutoHeal = false,
+    HealThreshold = 50,
+}
+
+-- Anti-Carry
+task.spawn(function()
+    while task.wait(0.1) do
+        if not SurvAdv.AntiCarry then continue end
+        local char = LP.Character
+        if not char then continue end
+        local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
+            or (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
+        if carried and WiggleEvent then
+            for i = 1, 10 do
+                pcall(function() WiggleEvent:FireServer() end)
+            end
+        end
+    end
+end)
+
+-- Auto Vault
+task.spawn(function()
+    while task.wait(0.3) do
+        if not SurvAdv.AutoVault then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum and hum.FloorMaterial == Enum.Material.Air then
+            -- Di udara, cek ada window/pallet dekat
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 5)
+                local hit = WS:FindPartOnRayWithIgnoreList(ray, {char})
+                if hit and (hit.Name == "Window" or hit.Name == "Pallet") then
+                    -- Auto vault trigger
+                    pcall(function()
+                        VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                        task.wait(0.05)
+                        VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- Auto Heal
+task.spawn(function()
+    while task.wait(0.5) do
+        if not SurvAdv.AutoHeal then continue end
+        local char = LP.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum and hum.Health < SurvAdv.HealThreshold and hum.Health > 0 then
+            -- Cari medkit di backpack
+            local backpack = LP:FindFirstChildOfClass("Backpack")
+            if backpack then
+                for _, tool in ipairs(backpack:GetChildren()) do
+                    if tool.Name:lower():find("med") or tool.Name:lower():find("heal") then
+                        local hum2 = char:FindFirstChildOfClass("Humanoid")
+                        if hum2 then
+                            hum2:EquipTool(tool)
+                            task.wait(0.1)
+                            pcall(function()
+                                tool:Activate()
+                            end)
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)-- ================================================================
+-- PART 9b - UI Advanced Features
+-- ================================================================
+
+local AdvMoveT = Win:CreateTab("Movement Adv")
+local AdvComT = Win:CreateTab("Combat Adv")
+local AdvUtilT = Win:CreateTab("Utility Adv")
+local AdvSurvT = Win:CreateTab("Survivor Adv")
+
+-- MOVEMENT ADV
+AdvMoveT:CreateSection("Jump Tools")
+AdvMoveT:CreateToggle({Name="Infinite Jump", CurrentValue=false,
+   Callback=function(v) MoveAdv.InfiniteJump = v end})
+AdvMoveT:CreateToggle({Name="Bunny Hop", CurrentValue=false,
+   Callback=function(v) MoveAdv.BunnyHop = v end})
+
+AdvMoveT:CreateSection("Fly ⚠️")
+AdvMoveT:CreateToggle({Name="Aktifkan Fly (WASD + Space/Ctrl)", CurrentValue=false,
+   Callback=function(v)
+      MoveAdv.Fly = v
+      if v then StartFly() else StopFly() end
+      Rayfield:Notify({Title="Yarhub", Content=v and "Fly ON" or "Fly OFF", Duration=2})
+   end})
+AdvMoveT:CreateSlider({Name="Fly Speed", Range={10,200}, Increment=10, CurrentValue=50,
+   Callback=function(v) MoveAdv.FlySpeed = v end})
+
+AdvMoveT:CreateSection("Gravity")
+AdvMoveT:CreateToggle({Name="No Gravity", CurrentValue=false,
+   Callback=function(v) MoveAdv.NoGravity = v end})
+
+AdvMoveT:CreateSection("Teleport ⚠️")
+AdvMoveT:CreateInput({
+   Name = "Nama Player Target",
+   PlaceholderText = "Contoh: Player123",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(text) MoveAdv.TeleportTarget = text end,
 })
+AdvMoveT:CreateButton({Name="Teleport ke Player",
+   Callback=function() TeleportToPlayerFunc(MoveAdv.TeleportTarget) end})
+AdvMoveT:CreateButton({Name="Teleport ke Generator Terdekat",
+   Callback=function() TeleportToGen() end})
+
+-- COMBAT ADV
+AdvComT:CreateSection("Aim Assist")
+AdvComT:CreateToggle({Name="Aim Assist (halus)", CurrentValue=false,
+   Callback=function(v) CombatAdv.AimAssist = v end})
+AdvComT:CreateSlider({Name="Strength", Range={0.1,1}, Increment=0.05, CurrentValue=0.3,
+   Callback=function(v) CombatAdv.AimAssistStrength = v end})
+AdvComT:CreateSlider({Name="FOV", Range={50,500}, Increment=10, CurrentValue=150,
+   Callback=function(v) CombatAdv.AimAssistFOV = v end})
+
+AdvComT:CreateSection("Hitbox Expander ⚠️")
+AdvComT:CreateToggle({Name="Hitbox Expander", CurrentValue=false,
+   Callback=function(v)
+      CombatAdv.HitboxExpander = v
+      if v then Rayfield:Notify({Title="⚠️ Hitbox", Content="Risiko ban!", Duration=4}) end
+   end})
+AdvComT:CreateSlider({Name="Hitbox Size", Range={5,30}, Increment=1, CurrentValue=10,
+   Callback=function(v) CombatAdv.HitboxSize = v end})
+
+AdvComT:CreateSection("Auto Dodge")
+AdvComT:CreateToggle({Name="Auto Dodge", CurrentValue=false,
+   Callback=function(v) CombatAdv.AutoDodge = v end})
+AdvComT:CreateSlider({Name="Dodge Range", Range={5,50}, Increment=1, CurrentValue=20,
+   Callback=function(v) CombatAdv.DodgeRange = v end})
+
+-- UTILITY ADV
+AdvUtilT:CreateSection("Info Display")
+AdvUtilT:CreateToggle({Name="Show Coordinates", CurrentValue=false,
+   Callback=function(v) UtilAdv.ShowCoords = v end})
+AdvUtilT:CreateToggle({Name="Time Played Counter", CurrentValue=false,
+   Callback=function(v) UtilAdv.TimePlayed = v end})
+
+AdvUtilT:CreateSection("Recovery")
+AdvUtilT:CreateToggle({Name="Auto Rejoin on Kick", CurrentValue=false,
+   Callback=function(v) UtilAdv.AutoRejoin = v end})
+
+AdvUtilT:CreateSection("ESP Advanced")
+AdvUtilT:CreateToggle({Name="ESP Tracer (garis ke killer)", CurrentValue=false,
+   Callback=function(v) ESPAdv.Tracer = v end})
+AdvUtilT:CreateColorPicker({Name="Warna Tracer", Color=Color3.fromRGB(0,255,100),
+   Callback=function(c) ESPAdv.TracerColor = c end})
+AdvUtilT:CreateToggle({Name="ESP Arrow (panah luar layar)", CurrentValue=false,
+   Callback=function(v) ESPAdv.Arrow = v end})
+AdvUtilT:CreateColorPicker({Name="Warna Arrow", Color=Color3.fromRGB(255,100,100),
+   Callback=function(c) ESPAdv.ArrowColor = c end})
+
+-- SURVIVOR ADV
+AdvSurvT:CreateSection("Anti-Carry")
+AdvSurvT:CreateToggle({Name="Anti-Carry (auto wiggle)", CurrentValue=false,
+   Callback=function(v) SurvAdv.AntiCarry = v end})
+
+AdvSurvT:CreateSection("Auto Vault")
+AdvSurvT:CreateToggle({Name="Auto Vault", CurrentValue=false,
+   Callback=function(v) SurvAdv.AutoVault = v end})
+
+AdvSurvT:CreateSection("Auto Heal")
+AdvSurvT:CreateToggle({Name="Auto Heal (pakai medkit)", CurrentValue=false,
+   Callback=function(v) SurvAdv.AutoHeal = v end})
+AdvSurvT:CreateSlider({Name="Heal Threshold (%)", Range={10,90}, Increment=5, CurrentValue=50,
+   Callback=function(v) SurvAdv.HealThreshold = v end})
+
+Rayfield:Notify({Title="Yarhub Part 9", Content="Advanced features dimuat!", Duration=5})

@@ -1,6 +1,6 @@
 -- ============================================
--- TIARHUB v11 - Bagian 1: Setup & Config
--- UI: Rayfield Gen2 | Rainbow All UI
+-- TIARHUB v12 - Bagian 1: Setup & Config
+-- UI: Rayfield Gen2 | Rainbow All TiarHub UI
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -12,13 +12,16 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Lighting = game:GetService("Lighting")
 local Stats = game:GetService("Stats")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ============ RAINBOW SYSTEM ============
 local RainbowHue = 0
+local RainbowSpeed = 0.008 -- kecepatan rainbow (makin besar makin cepat)
+
 RunService.Heartbeat:Connect(function()
-    RainbowHue = (RainbowHue + 0.005) % 1
+    RainbowHue = (RainbowHue + RainbowSpeed) % 1
 end)
 
 local function getRainbowColor()
@@ -53,7 +56,13 @@ local KillerWarning = { Enabled = false, Distance = 60, Color = Color3.fromRGB(2
 local WarningGui = nil
 
 -- ============ VISUAL CONFIG ============
-local Visual = { Fullbright = false, NoFog = false, NoShadow = false, NoBloom = false, NoBlur = false, ColorCorrection = false, Saturation = 0, Brightness = 0 }
+local Visual = {
+    Fullbright = false, NoFog = false, NoShadow = false,
+    NoBloom = false, NoBlur = false,
+    ColorCorrection = false,
+    Saturation = 0, Brightness = 0, Contrast = 0
+}
+
 local VisualOriginal = {
     Brightness = Lighting.Brightness, ClockTime = Lighting.ClockTime,
     Ambient = Lighting.Ambient, OutdoorAmbient = Lighting.OutdoorAmbient,
@@ -223,18 +232,6 @@ local function shouldDisableWalkSpeed()
     return false
 end
 
-local function GetGameValue(obj, name)
-    if not obj then return nil end
-    local attr = obj:GetAttribute(name)
-    if attr ~= nil then return attr end
-    local child = obj:FindFirstChild(name)
-    if child then
-        local ok, val = pcall(function() return child.Value end)
-        if ok then return val end
-    end
-    return nil
-end
-
 local function GetPos(obj)
     if not obj then return nil end
     if obj:IsA("BasePart") then return obj.Position end
@@ -252,8 +249,8 @@ local function getTeamLabel(plr)
     return plr.Team.Name
 end
 
-print("[TiarHub v11] Bagian 1 loaded.")-- ============================================
--- TIARHUB v11 - Bagian 2: ESP System
+print("[TiarHub v12] Bagian 1 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 2: ESP System
 -- ============================================
 
 local ESPObjects = {}
@@ -579,7 +576,7 @@ local function updateWarning()
     end)
 end
 
--- ============ FPS/PING WATERMARK + RAINBOW ============
+-- ============ FPS/PING WATERMARK ============
 RunService.RenderStepped:Connect(function()
     Frames = Frames + 1
     if tick() - LastTick >= 1 then
@@ -706,54 +703,74 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ RAINBOW APPLY TO ALL UI ============
+-- ============ RAINBOW APPLY (FILTERED - cuma UI TiarHub) ============
+-- Cari GUI Rayfield dengan nama "TiarHub" atau window "TiarHub | Violence District"
+local function isTiarHubGui(gui)
+    if not gui then return false end
+    -- Cek nama window
+    local name = gui.Name or ""
+    if name:find("TiarHub") or name:find("Rayfield") or name:find("rayfield") then
+        return true
+    end
+    -- Cek ada text "TiarHub" di title
+    for _, v in pairs(gui:GetDescendants()) do
+        if v:IsA("TextLabel") and v.Text and v.Text:find("TiarHub") then
+            return true
+        end
+    end
+    return false
+end
+
+local function rainbowifyGui(gui)
+    if not gui then return end
+    for _, v in pairs(gui:GetDescendants()) do
+        if v:IsA("TextLabel") or v:IsA("TextButton") then
+            task.spawn(function()
+                while v and v.Parent do
+                    pcall(function()
+                        v.TextColor3 = getRainbowColor()
+                    end)
+                    task.wait(0.08)
+                end
+            end)
+        end
+        -- UIStroke juga rainbow
+        if v:IsA("UIStroke") then
+            task.spawn(function()
+                while v and v.Parent do
+                    pcall(function()
+                        v.Color = getRainbowColor()
+                    end)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+end
+
 task.spawn(function()
     task.wait(3) -- tunggu Rayfield selesai load
-    local coreGui = game:GetService("CoreGui")
 
-    local function rainbowify(gui)
-        if not gui then return end
-        for _, v in pairs(gui:GetDescendants()) do
-            if v:IsA("TextLabel") or v:IsA("TextButton") then
-                task.spawn(function()
-                    while v and v.Parent do
-                        pcall(function()
-                            v.TextColor3 = getRainbowColor()
-                        end)
-                        task.wait(0.08)
-                    end
-                end)
-            end
-            -- UIStroke rainbow juga (opsional)
-            if v:IsA("UIStroke") then
-                task.spawn(function()
-                    while v and v.Parent do
-                        pcall(function()
-                            v.Color = getRainbowColor()
-                        end)
-                        task.wait(0.1)
-                    end
-                end)
-            end
+    -- Cari GUI Rayfield di CoreGui
+    for _, gui in pairs(CoreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and isTiarHubGui(gui) then
+            rainbowifyGui(gui)
         end
     end
 
-    -- Apply ke semua ScreenGui di CoreGui (Rayfield UI di sini)
-    for _, gui in pairs(coreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") then
-            rainbowify(gui)
-        end
-    end
-
-    -- Kalau ada GUI baru dibuat, rainbow-kan juga
-    coreGui.ChildAdded:Connect(function(child)
+    -- Kalau ada GUI baru dibuat, cek & rainbow-kan
+    CoreGui.ChildAdded:Connect(function(child)
         if child:IsA("ScreenGui") then
             task.wait(0.5)
-            rainbowify(child)
+            if isTiarHubGui(child) then
+                rainbowifyGui(child)
+            end
         end
     end)
-end)-- ============================================
--- TIARHUB v11 - Bagian 3: Auto Fitur Survivor
+end)
+
+print("[TiarHub v12] Bagian 2 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 3: Auto Fitur Survivor
 -- ============================================
 
 -- ============ AUTO PARRY 2 MODE (FIXED) ============
@@ -803,7 +820,7 @@ local function doParry()
     task.delay(0.25, function() ParryActive = false end)
 end
 
--- Cek jarak parry
+-- Cek jarak
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -812,7 +829,7 @@ local function isInParryRange(killerChar)
     return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
 end
 
--- Cek facing (Safety mode = cek arah, Aggressive = selalu true)
+-- Cek facing (Safety = cek arah, Aggressive = selalu true)
 local function isFacingTarget(targetChar)
     if not Auto.RequireFacing then return true end
     if Auto.FaceSensitivity <= -1 then return true end
@@ -1000,8 +1017,8 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v11] Bagian 3 loaded.")-- ============================================
--- TIARHUB v11 - Bagian 4: Aimbot System (FIXED)
+print("[TiarHub v12] Bagian 3 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 4: Aimbot System (FIXED)
 -- ============================================
 
 local Drawing = Drawing
@@ -1084,7 +1101,7 @@ local function getClosestGunTarget()
     return closest
 end
 
--- ============ GUN AIM LOOP (FIXED - pakai RenderStepped langsung) ============
+-- ============ GUN AIM LOOP (RenderStepped langsung) ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if not GunAim.Enabled then
@@ -1121,10 +1138,9 @@ RunService.RenderStepped:Connect(function()
             pos = pos + (target.AssemblyLinearVelocity * GunAim.PredictStrength)
         end
 
-        -- Lock kamera ke target
         cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), GunAim.Strength)
 
-        -- Tracer (ESP Laser)
+        -- Tracer
         if GunAim.ShowTracer and TracerLine then
             local screenPos, onScreen = cam:WorldToViewportPoint(target.Position)
             if onScreen then
@@ -1137,7 +1153,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ KILLER AIM (Lock saat Hit) ============
+-- ============ KILLER AIM ============
 local function getClosestSurvivorForKiller()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -1168,7 +1184,6 @@ end
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if not KillerAim.Enabled then return end
-
         local mouseHeld = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
         if not (KillerAim.Holding or mouseHeld) then return end
 
@@ -1200,8 +1215,8 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v11] Bagian 4 loaded.")-- ============================================
--- TIARHUB v11 - Bagian 5: Killer & Movement
+print("[TiarHub v12] Bagian 4 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 5: Killer & Movement
 -- ============================================
 
 -- ============ KILLER HELPERS ============
@@ -1442,11 +1457,10 @@ end)
 local function startMoonwalk()
     if MoonwalkConnection then return end
 
-    -- Matiin AutoRotate di awal
     local hum0 = getHum()
     if hum0 then hum0.AutoRotate = false end
 
-    -- Layer 1: RenderStepped
+    -- Layer 1: RenderStepped (visual)
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
         if not Moonwalk.Enabled or ParryActive or isDowned() then return end
         local char = LocalPlayer.Character
@@ -1456,11 +1470,9 @@ local function startMoonwalk()
         local cam = workspace.CurrentCamera
         if humanoid and hrp and cam then
             humanoid.AutoRotate = false
-
             if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
                 humanoid.WalkSpeed = Moonwalk.SlowSpeed
             end
-
             local look = cam.CFrame.LookVector
             local flatLook = Vector3.new(look.X, 0, look.Z)
             if flatLook.Magnitude > 0 then
@@ -1473,7 +1485,7 @@ local function startMoonwalk()
         end
     end)
 
-    -- Layer 2: Heartbeat — anti-override server
+    -- Layer 2: Heartbeat (anti-override server)
     if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect() end
     MoonwalkHeartbeat = RunService.Heartbeat:Connect(function()
         pcall(function()
@@ -1594,8 +1606,8 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
-print("[TiarHub v11] Bagian 5 loaded.")-- ============================================
--- TIARHUB v11 - Bagian 6: Visual & Anti-Lag
+print("[TiarHub v12] Bagian 5 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 6: Visual & Anti-Lag + Contrast
 -- ============================================
 
 -- ============ VISUAL FUNCTIONS ============
@@ -1603,7 +1615,6 @@ local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
 
 local function applyVisual(force)
     pcall(function()
-        -- FULLBRIGHT
         if force or LastVisualState.Fullbright ~= Visual.Fullbright then
             LastVisualState.Fullbright = Visual.Fullbright
             if Visual.Fullbright then
@@ -1618,8 +1629,6 @@ local function applyVisual(force)
                 Lighting.OutdoorAmbient = VisualOriginal.OutdoorAmbient
             end
         end
-
-        -- NO FOG
         if force or LastVisualState.NoFog ~= Visual.NoFog then
             LastVisualState.NoFog = Visual.NoFog
             if Visual.NoFog then
@@ -1631,8 +1640,6 @@ local function applyVisual(force)
                 Lighting.FogColor = VisualOriginal.FogColor
             end
         end
-
-        -- NO SHADOW
         if force or LastVisualState.NoShadow ~= Visual.NoShadow then
             LastVisualState.NoShadow = Visual.NoShadow
             Lighting.GlobalShadows = not Visual.NoShadow
@@ -1640,7 +1647,7 @@ local function applyVisual(force)
     end)
 end
 
--- ============ SCREEN EFFECTS (Bloom / Blur / DOF) ============
+-- ============ SCREEN EFFECTS ============
 local function toggleScreenEffects()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
@@ -1666,7 +1673,7 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
--- ============ COLOR CORRECTION ============
+-- ============ COLOR CORRECTION (Saturation + Brightness + Contrast) ============
 local ColorCorrection = nil
 
 local function applyColorCorrection()
@@ -1679,11 +1686,24 @@ local function applyColorCorrection()
         if Visual.ColorCorrection then
             ColorCorrection.Saturation = Visual.Saturation
             ColorCorrection.Brightness = Visual.Brightness
+            ColorCorrection.Contrast = Visual.Contrast
             ColorCorrection.Enabled = true
         else
             ColorCorrection.Enabled = false
         end
     end)
+end
+
+-- ============ RESET COLOR CORRECTION ============
+local function resetColorCorrection()
+    Visual.Saturation = 0
+    Visual.Brightness = 0
+    Visual.Contrast = 0
+    if ColorCorrection then
+        ColorCorrection.Saturation = 0
+        ColorCorrection.Brightness = 0
+        ColorCorrection.Contrast = 0
+    end
 end
 
 -- ============ ANTI-LAG APPLY ============
@@ -1712,7 +1732,6 @@ local function applyAntiLag()
         end
     end)
 
-    -- NO PARTICLES
     if AntiLag.NoParticles then
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
@@ -1727,7 +1746,6 @@ local function applyAntiLag()
         end
     end
 
-    -- NO TEXTURES
     if AntiLag.NoTextures then
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("Texture") or v:IsA("Decal") then
@@ -1790,8 +1808,8 @@ LocalPlayer.CharacterAdded:Connect(function()
     if AntiLag.Enabled then applyAntiLag() end
 end)
 
-print("[TiarHub v11] Bagian 6 loaded.")-- ============================================
--- TIARHUB v11 - Bagian 7: UI Menu
+print("[TiarHub v12] Bagian 6 loaded.")-- ============================================
+-- TIARHUB v12 - Bagian 7: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
@@ -1947,6 +1965,11 @@ VisualTab:CreateSection("Color Correction")
 VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, flag = "v_cc", callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
+VisualTab:CreateSlider({ name = "Contrast", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_contrast", callback = function(v) Visual.Contrast = v; applyColorCorrection() end })
+VisualTab:CreateButton({ name = "🔄 Reset Color", callback = function()
+    resetColorCorrection()
+    Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast sudah di-reset ke 0." })
+end })
 
 -- ============ ANTI-LAG TAB ============
 local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 0 })
@@ -1973,9 +1996,9 @@ CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment 
 
 -- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub v11",
-    content = "Script loaded! Rainbow UI + Auto Parry 2 Mode + Aimbot Fix + Moonwalk Fix.",
+    title = "TiarHub v12",
+    content = "Loaded! Rainbow UI + Parry 2 Mode + Aimbot Fix + Moonwalk Fix + Contrast.",
     duration = 6
 })
 
-print("[TiarHub v11] Bagian 7 loaded. All systems ready!")
+print("[TiarHub v12] Bagian 7 loaded. All systems ready!")

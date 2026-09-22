@@ -1,15 +1,9 @@
 -- ============================================
--- TIARHUB FULL v10 - Bagian 1: Setup & Config
+-- TIARHUB v11 - Bagian 1: Setup & Config
+-- UI: Rayfield Gen2 | Rainbow All UI
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
-
-local Window = Rayfield:CreateWindow({
-    name = "TiarHub | Violence District",
-    subtitle = "by Tiar",
-    sidebarLayout = true,
-    configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubFull" }
-})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,6 +14,24 @@ local Lighting = game:GetService("Lighting")
 local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ============ RAINBOW SYSTEM ============
+local RainbowHue = 0
+RunService.Heartbeat:Connect(function()
+    RainbowHue = (RainbowHue + 0.005) % 1
+end)
+
+local function getRainbowColor()
+    return Color3.fromHSV(RainbowHue, 1, 1)
+end
+
+-- ============ WINDOW ============
+local Window = Rayfield:CreateWindow({
+    name = "TiarHub | Violence District",
+    subtitle = "by Tiar",
+    sidebarLayout = true,
+    configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubFull" }
+})
 
 -- ============ ESP CONFIG ============
 local ESP = {
@@ -49,11 +61,34 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
--- ============ SURVIVOR CONFIG ============
-local Auto = {
-    Parry = false, ParryDistance = 15, FaceSensitivity = 0.7, RequireFacing = true,
-    SkillCheck = false, Wiggle = false, WiggleSpam = 5
+-- ============ AUTO PARRY 2 MODE ============
+local PARRY_PRESETS = {
+    Safety     = { Distance = 12, Debounce = 0.15, Face = 0.5,  RequireFacing = true },
+    Aggressive = { Distance = 20, Debounce = 0.05, Face = -1,   RequireFacing = false }
 }
+
+local Auto = {
+    Parry = false,
+    ParryMode = "Safety",
+    ParryDistance = 12,
+    FaceSensitivity = 0.5,
+    RequireFacing = true,
+    SkillCheck = false,
+    Wiggle = false,
+    WiggleSpam = 5
+}
+
+local PARRY_DEBOUNCE = 0.15
+
+local function applyParryPreset(mode)
+    local p = PARRY_PRESETS[mode]
+    if not p then return end
+    Auto.ParryDistance = p.Distance
+    Auto.FaceSensitivity = p.Face
+    Auto.RequireFacing = p.RequireFacing
+    PARRY_DEBOUNCE = p.Debounce
+end
+
 local ParryRangeVisual = { Enabled = false, Color = Color3.fromRGB(255, 80, 80), Transparency = 0.7 }
 local ParryCircle = nil
 local AutoFlee = { Enabled = false, DetectDistance = 50, Cooldown = 0.1 }
@@ -93,6 +128,7 @@ local Movement = {
 -- ============ MOONWALK CONFIG ============
 local Moonwalk = { Enabled = false, ShowButton = false, SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true }
 local MoonwalkConnection = nil
+local MoonwalkHeartbeat = nil
 local MoonwalkButton = nil
 local ParryActive = false
 
@@ -135,7 +171,7 @@ local KillerAnims = {
 ["rbxassetid://138720291317243"] = true
 }
 
--- ============ REMOTES (dari Fallens) ============
+-- ============ REMOTES ============
 local function findRemote(path)
     local cur = ReplicatedStorage
     for segment in string.gmatch(path, "[^%.]+") do
@@ -165,28 +201,6 @@ local function isDowned()
     local hum = getHum()
     if not hum then return false end
     return hum.Health <= 0 or hum.Health < 2
-end
-
-local function isInParryRange(killerChar)
-    local myRoot = getRoot()
-    if not myRoot or not killerChar then return false end
-    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
-    if not enemyRoot then return false end
-    return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
-end
-
-local function isFacingTarget(targetChar)
-    if not Auto.RequireFacing then return true end
-    local myChar = LocalPlayer.Character
-    if not myChar then return false end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot or not enemyRoot then return false end
-    local enemyForward = enemyRoot.CFrame.LookVector
-    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
-    local dot = enemyForward:Dot(directionToMe)
-    if Auto.FaceSensitivity <= -1 then return true end
-    return dot >= Auto.FaceSensitivity
 end
 
 local function shouldDisableWalkSpeed()
@@ -236,8 +250,10 @@ local function getTeamLabel(plr)
     if plr.Team.Name == "Killer" then return "KILLER" end
     if plr.Team.Name == "Survivors" or plr.Team.Name == "Survivor" then return "SURVIVOR" end
     return plr.Team.Name
-end-- ============================================
--- TIARHUB FULL v10 - Bagian 2: ESP System
+end
+
+print("[TiarHub v11] Bagian 1 loaded.")-- ============================================
+-- TIARHUB v11 - Bagian 2: ESP System
 -- ============================================
 
 local ESPObjects = {}
@@ -332,10 +348,10 @@ local function createESP(obj, color, showName, customName)
     end
 end
 
--- ============ GENERATOR ESP DENGAN PROGRESS ============
+-- ============ GENERATOR ESP ============
 local function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
-    
+
     if not ESP.Generator then
         local old = generator:FindFirstChild("GenHighlight")
         if old then old:Destroy() end
@@ -343,58 +359,40 @@ local function UpdateGenerator(generator)
         if oldName then oldName:Destroy() end
         return
     end
-    
+
     local percent = 0
     local found = false
-    
+
     local attr = generator:GetAttribute("Progress")
     if attr and type(attr) == "number" then percent = attr; found = true end
-    
     if not found then
         local attr2 = generator:GetAttribute("RepairProgress")
         if attr2 and type(attr2) == "number" then percent = attr2; found = true end
     end
-    
-    if not found then
-        local child = generator:FindFirstChild("Progress")
-        if child and child:IsA("ValueBase") then percent = child.Value; found = true end
-    end
-    
-    if not found then
-        local child = generator:FindFirstChild("RepairProgress")
-        if child and child:IsA("ValueBase") then percent = child.Value; found = true end
-    end
-    
     if not found then
         for _, v in ipairs(generator:GetDescendants()) do
             if v:IsA("ValueBase") and (v.Name == "Progress" or v.Name == "RepairProgress" or v.Name == "Percent") then
-                percent = v.Value
-                found = true
-                break
+                percent = v.Value; found = true; break
             end
         end
     end
-    
     if not found then
         for _, v in ipairs(generator:GetChildren()) do
             if v:IsA("NumberValue") then
-                percent = v.Value
-                found = true
-                break
+                percent = v.Value; found = true; break
             end
         end
     end
-    
+
     percent = math.clamp(percent, 0, 100)
-    
     local color = ESP.GeneratorColor
     local labelText = "Generator"
-    
+
     if found then
         color = ESP.GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), percent / 100)
         labelText = string.format("Gen %.0f%%", percent)
     end
-    
+
     local h = generator:FindFirstChild("GenHighlight") or Instance.new("Highlight")
     h.Name = "GenHighlight"
     h.Adornee = generator
@@ -409,7 +407,7 @@ local function UpdateGenerator(generator)
     end
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = generator
-    
+
     local bb = generator:FindFirstChild("GenNameTag")
     if not bb then
         bb = Instance.new("BillboardGui")
@@ -436,6 +434,7 @@ local function UpdateGenerator(generator)
     end
 end
 
+-- ============ STATUS ESP ============
 local function removeStatusESP(char)
     if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
 end
@@ -487,6 +486,7 @@ local function createStatusESP(player, char, root)
     end
 end
 
+-- ============ CACHE OBJECT ============
 local function cacheObject(obj)
     if not obj then return end
     if not obj:IsA("BasePart") and not obj:IsA("Model") then return end
@@ -510,6 +510,7 @@ workspace.DescendantRemoving:Connect(function(obj)
     removeESP(obj)
 end)
 
+-- ============ KILLER WARNING ============
 local function updateWarning()
     pcall(function()
         local root = getRoot()
@@ -578,7 +579,7 @@ local function updateWarning()
     end)
 end
 
--- ============ FPS/PING WATERMARK ============
+-- ============ FPS/PING WATERMARK + RAINBOW ============
 RunService.RenderStepped:Connect(function()
     Frames = Frames + 1
     if tick() - LastTick >= 1 then
@@ -682,6 +683,7 @@ RunService.RenderStepped:Connect(function()
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
 
+        -- PARRY CIRCLE
         if ParryRangeVisual.Enabled and root then
             if not ParryCircle then
                 ParryCircle = Instance.new("Part")
@@ -702,13 +704,60 @@ RunService.RenderStepped:Connect(function()
 
         updateWarning()
     end)
+end)
+
+-- ============ RAINBOW APPLY TO ALL UI ============
+task.spawn(function()
+    task.wait(3) -- tunggu Rayfield selesai load
+    local coreGui = game:GetService("CoreGui")
+
+    local function rainbowify(gui)
+        if not gui then return end
+        for _, v in pairs(gui:GetDescendants()) do
+            if v:IsA("TextLabel") or v:IsA("TextButton") then
+                task.spawn(function()
+                    while v and v.Parent do
+                        pcall(function()
+                            v.TextColor3 = getRainbowColor()
+                        end)
+                        task.wait(0.08)
+                    end
+                end)
+            end
+            -- UIStroke rainbow juga (opsional)
+            if v:IsA("UIStroke") then
+                task.spawn(function()
+                    while v and v.Parent do
+                        pcall(function()
+                            v.Color = getRainbowColor()
+                        end)
+                        task.wait(0.1)
+                    end
+                end)
+            end
+        end
+    end
+
+    -- Apply ke semua ScreenGui di CoreGui (Rayfield UI di sini)
+    for _, gui in pairs(coreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            rainbowify(gui)
+        end
+    end
+
+    -- Kalau ada GUI baru dibuat, rainbow-kan juga
+    coreGui.ChildAdded:Connect(function(child)
+        if child:IsA("ScreenGui") then
+            task.wait(0.5)
+            rainbowify(child)
+        end
+    end)
 end)-- ============================================
--- TIARHUB FULL v10 - Bagian 3: Auto Fitur Survivor
+-- TIARHUB v11 - Bagian 3: Auto Fitur Survivor
 -- ============================================
 
--- ============ AUTO PARRY (GACOR) ============
+-- ============ AUTO PARRY 2 MODE (FIXED) ============
 local lastParry = 0
-local PARRY_DEBOUNCE = 0.1
 
 local function pressRightClick()
     pcall(function()
@@ -739,8 +788,8 @@ local function pressParryButton()
                 VirtualInputManager:SendTouchEvent(8823, 2, pos.X + size.X/2 + inset.X, pos.Y + size.Y/2 + inset.Y)
             end)
         end
-    else 
-        pressRightClick() 
+    else
+        pressRightClick()
     end
 end
 
@@ -754,14 +803,43 @@ local function doParry()
     task.delay(0.25, function() ParryActive = false end)
 end
 
+-- Cek jarak parry
+local function isInParryRange(killerChar)
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
+end
+
+-- Cek facing (Safety mode = cek arah, Aggressive = selalu true)
+local function isFacingTarget(targetChar)
+    if not Auto.RequireFacing then return true end
+    if Auto.FaceSensitivity <= -1 then return true end
+
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot or not enemyRoot then return false end
+
+    local enemyForward = enemyRoot.CFrame.LookVector
+    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
+    local dot = enemyForward:Dot(directionToMe)
+    return dot >= Auto.FaceSensitivity
+end
+
 local hookedKillers = {}
+
 local function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
+
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
+
     animator.AnimationPlayed:Connect(function(track)
         if not Auto.Parry then return end
         local anim = track.Animation
@@ -769,14 +847,9 @@ local function hookKiller(char)
         local id = anim.AnimationId:match("%d+")
         if not id then return end
         if KillerAnims["rbxassetid://" .. id] then
-            local myRoot = getRoot()
-            local enemyRoot = char:FindFirstChild("HumanoidRootPart")
-            if myRoot and enemyRoot then
-                local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-                if dist <= Auto.ParryDistance then
-                    doParry()
-                end
-            end
+            if not isInParryRange(char) then return end
+            if not isFacingTarget(char) then return end
+            doParry()
         end
     end)
 end
@@ -787,8 +860,8 @@ task.spawn(function()
             if Auto.Parry then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character then
-                        if p.Team and p.Team.Name == "Killer" then 
-                            hookKiller(p.Character) 
+                        if p.Team and p.Team.Name == "Killer" then
+                            hookKiller(p.Character)
                         end
                     end
                 end
@@ -925,8 +998,10 @@ task.spawn(function()
             end
         end)
     end
-end)-- ============================================
--- TIARHUB FULL v10 - Bagian 4: Aimbot System
+end)
+
+print("[TiarHub v11] Bagian 3 loaded.")-- ============================================
+-- TIARHUB v11 - Bagian 4: Aimbot System (FIXED)
 -- ============================================
 
 local Drawing = Drawing
@@ -947,21 +1022,7 @@ local function createFOVCircle()
     FOVCircle.Transparency = 0.5
 end
 
-RunService.RenderStepped:Connect(function()
-    pcall(function()
-        if not Drawing then return end
-        if FOVCircle then
-            FOVCircle.Visible = GunAim.Enabled and GunAim.ShowFOV
-            FOVCircle.Radius = GunAim.FOV
-            FOVCircle.Position = Vector2.new(
-                workspace.CurrentCamera.ViewportSize.X / 2,
-                workspace.CurrentCamera.ViewportSize.Y / 2
-            )
-        end
-    end)
-end)
-
--- ============ TRACER (ESP LASER) ============
+-- ============ TRACER ============
 local function createTracer()
     if not Drawing then return end
     if TracerLine then TracerLine:Remove() end
@@ -973,7 +1034,7 @@ end
 
 createTracer()
 
--- ============ AIMBOT SYSTEM ============
+-- ============ RAYCAST / VISIBILITY ============
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -987,6 +1048,7 @@ local function isVisible(part)
     return result.Instance:IsDescendantOf(part.Parent)
 end
 
+-- ============ GET CLOSEST GUN TARGET ============
 local function getClosestGunTarget()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -1007,9 +1069,12 @@ local function getClosestGunTarget()
                     if visible then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
                         if dist < shortest then
-                            if GunAim.VisibilityCheck and not isVisible(hrp) then continue end
-                            shortest = dist
-                            closest = hrp
+                            if GunAim.VisibilityCheck and not isVisible(hrp) then
+                                -- skip
+                            else
+                                shortest = dist
+                                closest = hrp
+                            end
                         end
                     end
                 end
@@ -1019,25 +1084,48 @@ local function getClosestGunTarget()
     return closest
 end
 
--- ============ AIMBOT LOOP (SURVIVOR) ============
+-- ============ GUN AIM LOOP (FIXED - pakai RenderStepped langsung) ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
-        if TracerLine then TracerLine.Visible = false end
+        if not GunAim.Enabled then
+            if FOVCircle then FOVCircle.Visible = false end
+            if TracerLine then TracerLine.Visible = false end
+            return
+        end
 
-        if not GunAim.Enabled or not GunAim.Holding then return end
+        -- FOV Circle
+        if FOVCircle then
+            FOVCircle.Visible = GunAim.ShowFOV
+            FOVCircle.Radius = GunAim.FOV
+            FOVCircle.Position = Vector2.new(
+                workspace.CurrentCamera.ViewportSize.X / 2,
+                workspace.CurrentCamera.ViewportSize.Y / 2
+            )
+        end
+
+        -- Kalau nggak nahan RMB, jangan lock
+        if not GunAim.Holding then
+            if TracerLine then TracerLine.Visible = false end
+            return
+        end
 
         local cam = workspace.CurrentCamera
         local target = getClosestGunTarget()
-        if not target then return end
+        if not target then
+            if TracerLine then TracerLine.Visible = false end
+            return
+        end
 
         local pos = target.Position
         if GunAim.Predict then
             pos = pos + (target.AssemblyLinearVelocity * GunAim.PredictStrength)
         end
+
+        -- Lock kamera ke target
         cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), GunAim.Strength)
 
-        -- Tracer (ESP laser)
-        if GunAim.ShowTracer and TracerLine and Drawing then
+        -- Tracer (ESP Laser)
+        if GunAim.ShowTracer and TracerLine then
             local screenPos, onScreen = cam:WorldToViewportPoint(target.Position)
             if onScreen then
                 TracerLine.From = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y)
@@ -1049,7 +1137,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ KILLER AIM (Lock saat hit) ============
+-- ============ KILLER AIM (Lock saat Hit) ============
 local function getClosestSurvivorForKiller()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -1110,8 +1198,10 @@ UserInputService.InputEnded:Connect(function(input)
         GunAim.Holding = false
         KillerAim.Holding = false
     end
-end)-- ============================================
--- TIARHUB FULL v10 - Bagian 5: Killer & Movement
+end)
+
+print("[TiarHub v11] Bagian 4 loaded.")-- ============================================
+-- TIARHUB v11 - Bagian 5: Killer & Movement
 -- ============================================
 
 -- ============ KILLER HELPERS ============
@@ -1348,9 +1438,15 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- ============ MOONWALK ============
+-- ============ MOONWALK (FIXED - Anti Server Reset) ============
 local function startMoonwalk()
     if MoonwalkConnection then return end
+
+    -- Matiin AutoRotate di awal
+    local hum0 = getHum()
+    if hum0 then hum0.AutoRotate = false end
+
+    -- Layer 1: RenderStepped
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
         if not Moonwalk.Enabled or ParryActive or isDowned() then return end
         local char = LocalPlayer.Character
@@ -1359,9 +1455,12 @@ local function startMoonwalk()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
         if humanoid and hrp and cam then
+            humanoid.AutoRotate = false
+
             if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
                 humanoid.WalkSpeed = Moonwalk.SlowSpeed
             end
+
             local look = cam.CFrame.LookVector
             local flatLook = Vector3.new(look.X, 0, look.Z)
             if flatLook.Magnitude > 0 then
@@ -1373,13 +1472,23 @@ local function startMoonwalk()
             end
         end
     end)
+
+    -- Layer 2: Heartbeat — anti-override server
+    if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect() end
+    MoonwalkHeartbeat = RunService.Heartbeat:Connect(function()
+        pcall(function()
+            if not Moonwalk.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then humanoid.AutoRotate = false end
+        end)
+    end)
 end
 
 local function stopMoonwalk()
-    if MoonwalkConnection then
-        MoonwalkConnection:Disconnect()
-        MoonwalkConnection = nil
-    end
+    if MoonwalkConnection then MoonwalkConnection:Disconnect(); MoonwalkConnection = nil end
+    if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect(); MoonwalkHeartbeat = nil end
     local hum = getHum()
     if hum then
         hum.AutoRotate = true
@@ -1468,7 +1577,6 @@ RunService.RenderStepped:Connect(function() updateCrosshair() end)
 
 RunService.Heartbeat:Connect(function()
     pcall(function() AutoWiggle() end)
-    pcall(function() applyVisual() end)
 end)
 
 -- ============ EMOTE ============
@@ -1486,11 +1594,8 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1)
-    applyVisual(true)
-end)-- ============================================
--- TIARHUB FULL v10 - Bagian 6: Visual & Anti-Lag
+print("[TiarHub v11] Bagian 5 loaded.")-- ============================================
+-- TIARHUB v11 - Bagian 6: Visual & Anti-Lag
 -- ============================================
 
 -- ============ VISUAL FUNCTIONS ============
@@ -1498,6 +1603,7 @@ local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
 
 local function applyVisual(force)
     pcall(function()
+        -- FULLBRIGHT
         if force or LastVisualState.Fullbright ~= Visual.Fullbright then
             LastVisualState.Fullbright = Visual.Fullbright
             if Visual.Fullbright then
@@ -1512,6 +1618,8 @@ local function applyVisual(force)
                 Lighting.OutdoorAmbient = VisualOriginal.OutdoorAmbient
             end
         end
+
+        -- NO FOG
         if force or LastVisualState.NoFog ~= Visual.NoFog then
             LastVisualState.NoFog = Visual.NoFog
             if Visual.NoFog then
@@ -1523,6 +1631,8 @@ local function applyVisual(force)
                 Lighting.FogColor = VisualOriginal.FogColor
             end
         end
+
+        -- NO SHADOW
         if force or LastVisualState.NoShadow ~= Visual.NoShadow then
             LastVisualState.NoShadow = Visual.NoShadow
             Lighting.GlobalShadows = not Visual.NoShadow
@@ -1530,12 +1640,15 @@ local function applyVisual(force)
     end)
 end
 
--- ============ NO BLOOM / BLUR / DOF ============
-local function toggleScreenEffects(disable)
+-- ============ SCREEN EFFECTS (Bloom / Blur / DOF) ============
+local function toggleScreenEffects()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
-                v.Enabled = not disable
+            if v:IsA("BloomEffect") or v:IsA("SunRaysEffect") then
+                v.Enabled = not Visual.NoBloom
+            end
+            if v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") then
+                v.Enabled = not Visual.NoBlur
             end
         end
     end)
@@ -1573,6 +1686,63 @@ local function applyColorCorrection()
     end)
 end
 
+-- ============ ANTI-LAG APPLY ============
+local function applyAntiLag()
+    pcall(function()
+        if AntiLag.PhysicsThrottle then
+            settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.AlwaysThrottle
+        else
+            settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Default
+        end
+    end)
+
+    pcall(function()
+        if AntiLag.NoGlobalShadows then
+            Lighting.GlobalShadows = false
+        else
+            Lighting.GlobalShadows = VisualOriginal.GlobalShadows
+        end
+    end)
+
+    pcall(function()
+        if AntiLag.NetworkLag then
+            settings().Network.IncomingReplicationLag = -1000
+        else
+            settings().Network.IncomingReplicationLag = 0
+        end
+    end)
+
+    -- NO PARTICLES
+    if AntiLag.NoParticles then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
+                pcall(function() v.Enabled = false end)
+            end
+        end
+    else
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
+                pcall(function() v.Enabled = true end)
+            end
+        end
+    end
+
+    -- NO TEXTURES
+    if AntiLag.NoTextures then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Texture") or v:IsA("Decal") then
+                pcall(function() v.Transparency = 1 end)
+            end
+        end
+    else
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Texture") or v:IsA("Decal") then
+                pcall(function() v.Transparency = 0 end)
+            end
+        end
+    end
+end
+
 -- ============ ANTI-LAG MAIN LOOP ============
 local AntiLagConnection = nil
 
@@ -1601,262 +1771,211 @@ local function startAntiLag()
     end)
 end
 
--- ============ ANTI-LAG TOGGLE FUNCTIONS ============
-local function applyAntiLag()
-    pcall(function()
-        if AntiLag.PhysicsThrottle then
-            settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.AlwaysThrottle
-        else
-            settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Default
-        end
-    end)
-
-    pcall(function()
-        if AntiLag.NoGlobalShadows then
-            Lighting.GlobalShadows = false
-        else
-            Lighting.GlobalShadows = VisualOriginal.GlobalShadows
-        end
-    end)
-
-    pcall(function()
-        if AntiLag.NetworkLag then
-            settings().Network.IncomingReplicationLag = -1000
-        else
-            settings().Network.IncomingReplicationLag = 0
-        end
-    end)
-
-    if AntiLag.NoParticles then
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
-                pcall(function() v.Enabled = false end)
-            end
-        end
-    else
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
-                pcall(function() v.Enabled = true end)
-            end
-        end
-    end
-
-    if AntiLag.NoTextures then
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Texture") or v:IsA("Decal") then
-                pcall(function() v.Transparency = 1 end)
-            end
-        end
-    else
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Texture") or v:IsA("Decal") then
-                pcall(function() v.Transparency = 0 end)
-            end
-        end
-    end
-end
-
 startAntiLag()
 
--- ============ VISUAL APPLY EXTENDED ============
-local function applyVisualExtended()
-    pcall(function()
-        toggleScreenEffects(Visual.NoBloom)
-        
-        if Visual.NoBlur then
-            for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") then
-                    v.Enabled = false
-                end
-            end
-        else
-            for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") then
-                    v.Enabled = true
-                end
-            end
-        end
-    end)
-    applyColorCorrection()
-end
-
+-- ============ AUTO APPLY VISUAL SETIAP FRAME ============
 RunService.Heartbeat:Connect(function()
-    pcall(function() applyVisualExtended() end)
+    pcall(function()
+        applyVisual()
+        toggleScreenEffects()
+    end)
 end)
 
+-- ============ AUTO APPLY SAAT RESPAWN ============
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     applyVisual(true)
-    applyVisualExtended()
-end)-- ============================================
--- TIARHUB FULL v10 - Bagian 7: UI Menu
+    toggleScreenEffects()
+    applyColorCorrection()
+    if AntiLag.Enabled then applyAntiLag() end
+end)
+
+print("[TiarHub v11] Bagian 6 loaded.")-- ============================================
+-- TIARHUB v11 - Bagian 7: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
-local ESPTab = Window:CreateTab({ name = "ESP", icon = 4483362458 })
+local ESPTab = Window:CreateTab({ name = "ESP", icon = 0 })
 
 ESPTab:CreateSection("Player ESP")
-ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, callback = function(v) ESP.Survivor = v end })
-ESPTab:CreateColorPicker({ name = "Survivor Color", color = ESP.SurvivorColor, callback = function(c) ESP.SurvivorColor = c end })
-ESPTab:CreateToggle({ name = "ESP Killer", currentValue = false, callback = function(v) ESP.Killer = v end })
-ESPTab:CreateColorPicker({ name = "Killer Color", color = ESP.KillerColor, callback = function(c) ESP.KillerColor = c end })
+ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, flag = "esp_survivor", callback = function(v) ESP.Survivor = v end })
+ESPTab:CreateColorPicker({ name = "Survivor Color", color = ESP.SurvivorColor, flag = "esp_survivor_color", callback = function(c) ESP.SurvivorColor = c end })
+ESPTab:CreateToggle({ name = "ESP Killer", currentValue = false, flag = "esp_killer", callback = function(v) ESP.Killer = v end })
+ESPTab:CreateColorPicker({ name = "Killer Color", color = ESP.KillerColor, flag = "esp_killer_color", callback = function(c) ESP.KillerColor = c end })
 
 ESPTab:CreateSection("Map ESP")
-ESPTab:CreateToggle({ name = "ESP Generator (%)", currentValue = false, callback = function(v) ESP.Generator = v end })
-ESPTab:CreateColorPicker({ name = "Generator Color", color = ESP.GeneratorColor, callback = function(c) ESP.GeneratorColor = c end })
-ESPTab:CreateToggle({ name = "ESP Hook", currentValue = false, callback = function(v) ESP.Hook = v end })
-ESPTab:CreateToggle({ name = "ESP Pallet", currentValue = false, callback = function(v) ESP.Pallet = v end })
-ESPTab:CreateToggle({ name = "ESP Window", currentValue = false, callback = function(v) ESP.Window = v end })
-ESPTab:CreateToggle({ name = "ESP SCP", currentValue = false, callback = function(v) ESP.SCP = v end })
+ESPTab:CreateToggle({ name = "ESP Generator (%)", currentValue = false, flag = "esp_generator", callback = function(v) ESP.Generator = v end })
+ESPTab:CreateColorPicker({ name = "Generator Color", color = ESP.GeneratorColor, flag = "esp_gen_color", callback = function(c) ESP.GeneratorColor = c end })
+ESPTab:CreateToggle({ name = "ESP Hook", currentValue = false, flag = "esp_hook", callback = function(v) ESP.Hook = v end })
+ESPTab:CreateColorPicker({ name = "Hook Color", color = ESP.HookColor, flag = "esp_hook_color", callback = function(c) ESP.HookColor = c end })
+ESPTab:CreateToggle({ name = "ESP Pallet", currentValue = false, flag = "esp_pallet", callback = function(v) ESP.Pallet = v end })
+ESPTab:CreateColorPicker({ name = "Pallet Color", color = ESP.PalletColor, flag = "esp_pallet_color", callback = function(c) ESP.PalletColor = c end })
+ESPTab:CreateToggle({ name = "ESP Window", currentValue = false, flag = "esp_window", callback = function(v) ESP.Window = v end })
+ESPTab:CreateColorPicker({ name = "Window Color", color = ESP.WindowColor, flag = "esp_window_color", callback = function(c) ESP.WindowColor = c end })
+ESPTab:CreateToggle({ name = "ESP SCP", currentValue = false, flag = "esp_scp", callback = function(v) ESP.SCP = v end })
+ESPTab:CreateColorPicker({ name = "SCP Color", color = ESP.SCPColor, flag = "esp_scp_color", callback = function(c) ESP.SCPColor = c end })
 
 ESPTab:CreateSection("Style")
-ESPTab:CreateSlider({ name = "ESP Radius", range = {50, 2000}, increment = 50, suffix = "stud", currentValue = 300, callback = function(v) ESP.Distance = v end })
-ESPTab:CreateDropdown({ name = "ESP Mode", options = {"Highlight", "Outline", "Fill"}, currentOption = "Highlight", callback = function(opt) ESP.Mode = opt end })
-ESPTab:CreateToggle({ name = "Show Name Tag", currentValue = true, callback = function(v) ESP.ShowName = v end })
-ESPTab:CreateSlider({ name = "Name Size", range = {8, 30}, increment = 1, suffix = "px", currentValue = 14, callback = function(v) ESP.NameSize = v end })
+ESPTab:CreateSlider({ name = "ESP Radius", range = {50, 2000}, increment = 50, suffix = "stud", currentValue = 300, flag = "esp_radius", callback = function(v) ESP.Distance = v end })
+ESPTab:CreateDropdown({ name = "ESP Mode", options = {"Highlight", "Outline", "Fill"}, currentOption = "Highlight", flag = "esp_mode", callback = function(opt) ESP.Mode = opt end })
+ESPTab:CreateToggle({ name = "Show Name Tag", currentValue = true, flag = "esp_name", callback = function(v) ESP.ShowName = v end })
+ESPTab:CreateSlider({ name = "Name Size", range = {8, 30}, increment = 1, suffix = "px", currentValue = 14, flag = "esp_namesize", callback = function(v) ESP.NameSize = v end })
 
 ESPTab:CreateSection("ESP Status")
-ESPTab:CreateToggle({ name = "Enable Status ESP", currentValue = false, callback = function(v) ESPStatus.Enabled = v end })
-ESPTab:CreateToggle({ name = "Show Name", currentValue = true, callback = function(v) ESPStatus.ShowName = v end })
-ESPTab:CreateToggle({ name = "Show Distance", currentValue = true, callback = function(v) ESPStatus.ShowDistance = v end })
-ESPTab:CreateToggle({ name = "Show Health", currentValue = false, callback = function(v) ESPStatus.ShowHealth = v end })
+ESPTab:CreateToggle({ name = "Enable Status ESP", currentValue = false, flag = "espstatus_on", callback = function(v) ESPStatus.Enabled = v end })
+ESPTab:CreateToggle({ name = "Show Name", currentValue = true, flag = "espstatus_name", callback = function(v) ESPStatus.ShowName = v end })
+ESPTab:CreateToggle({ name = "Show Distance", currentValue = true, flag = "espstatus_dist", callback = function(v) ESPStatus.ShowDistance = v end })
+ESPTab:CreateToggle({ name = "Show Health", currentValue = false, flag = "espstatus_hp", callback = function(v) ESPStatus.ShowHealth = v end })
 
 ESPTab:CreateSection("Killer Warning")
-ESPTab:CreateToggle({ name = "Killer Warning", currentValue = false, callback = function(v) KillerWarning.Enabled = v end })
-ESPTab:CreateColorPicker({ name = "Warning Color", color = KillerWarning.Color, callback = function(c) KillerWarning.Color = c end })
-ESPTab:CreateSlider({ name = "Warning Distance", range = {20, 200}, increment = 5, suffix = "stud", currentValue = 60, callback = function(v) KillerWarning.Distance = v end })
+ESPTab:CreateToggle({ name = "Killer Warning", currentValue = false, flag = "kwarn_on", callback = function(v) KillerWarning.Enabled = v end })
+ESPTab:CreateColorPicker({ name = "Warning Color", color = KillerWarning.Color, flag = "kwarn_color", callback = function(c) KillerWarning.Color = c end })
+ESPTab:CreateSlider({ name = "Warning Distance", range = {20, 200}, increment = 5, suffix = "stud", currentValue = 60, flag = "kwarn_dist", callback = function(v) KillerWarning.Distance = v end })
 
 -- ============ SURVIVOR TAB ============
-local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 4483362458 })
+local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 0 })
 
 SurvivorTab:CreateSection("Auto Parry")
-SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, callback = function(v) Auto.Parry = v; ParryRangeVisual.Enabled = v end })
-SurvivorTab:CreateToggle({ name = "Show Parry Range", currentValue = false, callback = function(v) ParryRangeVisual.Enabled = v end })
-SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, callback = function(c) ParryRangeVisual.Color = c end })
-SurvivorTab:CreateSlider({ name = "Parry Distance", range = {5, 25}, increment = 1, suffix = "stud", currentValue = 15, callback = function(v) Auto.ParryDistance = v end })
-SurvivorTab:CreateSlider({ name = "Face Sensitivity", range = {-1, 1}, increment = 0.05, currentValue = 0.7, callback = function(v) Auto.FaceSensitivity = v end })
+SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, flag = "parry_on", callback = function(v) Auto.Parry = v end })
+SurvivorTab:CreateDropdown({
+    name = "Parry Mode",
+    options = {"Safety", "Aggressive"},
+    currentOption = "Safety",
+    flag = "parry_mode",
+    callback = function(opt)
+        Auto.ParryMode = opt
+        applyParryPreset(opt)
+        Rayfield:Notify({ title = "Parry Mode", content = "Mode: " .. opt })
+    end
+})
+SurvivorTab:CreateToggle({ name = "Show Parry Range", currentValue = false, flag = "parry_range", callback = function(v) ParryRangeVisual.Enabled = v end })
+SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, flag = "parry_color", callback = function(c) ParryRangeVisual.Color = c end })
+SurvivorTab:CreateSlider({ name = "Parry Distance (manual)", range = {5, 25}, increment = 1, suffix = "stud", currentValue = 12, flag = "parry_dist", callback = function(v) Auto.ParryDistance = v end })
+SurvivorTab:CreateSlider({ name = "Face Sensitivity (manual)", range = {-1, 1}, increment = 0.05, currentValue = 0.5, flag = "parry_face", callback = function(v) Auto.FaceSensitivity = v end })
 
 SurvivorTab:CreateSection("Auto Skill Check")
-SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, callback = function(v) Auto.SkillCheck = v; if v then startSkillCheck() end end })
+SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, flag = "skillcheck", callback = function(v) Auto.SkillCheck = v; if v then startSkillCheck() end end })
 
 SurvivorTab:CreateSection("Auto Wiggle / Flee")
-SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, callback = function(v) Auto.Wiggle = v end })
-SurvivorTab:CreateSlider({ name = "Wiggle Spam", range = {1, 10}, increment = 1, suffix = "x", currentValue = 5, callback = function(v) Auto.WiggleSpam = v end })
-SurvivorTab:CreateToggle({ name = "Auto Flee Killer", currentValue = false, callback = function(v) AutoFlee.Enabled = v end })
-SurvivorTab:CreateSlider({ name = "Flee Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 50, callback = function(v) AutoFlee.DetectDistance = v end })
+SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, flag = "wiggle", callback = function(v) Auto.Wiggle = v end })
+SurvivorTab:CreateSlider({ name = "Wiggle Spam", range = {1, 10}, increment = 1, suffix = "x", currentValue = 5, flag = "wiggle_spam", callback = function(v) Auto.WiggleSpam = v end })
+SurvivorTab:CreateToggle({ name = "Auto Flee Killer", currentValue = false, flag = "flee", callback = function(v) AutoFlee.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Flee Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 50, flag = "flee_dist", callback = function(v) AutoFlee.DetectDistance = v end })
 
 SurvivorTab:CreateSection("Fast Vault")
-SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, callback = function(v) FastVault.Enabled = v end })
-SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, callback = function(v) FastVault.Speed = v end })
+SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, flag = "vault", callback = function(v) FastVault.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, flag = "vault_speed", callback = function(v) FastVault.Speed = v end })
 
 -- ============ AIMBOT TAB ============
-local AimTab = Window:CreateTab({ name = "Aimbot", icon = 4483362458 })
+local AimTab = Window:CreateTab({ name = "Aimbot", icon = 0 })
 
 AimTab:CreateSection("Aimbot Survivor")
-AimTab:CreateToggle({ name = "Aimbot (Hold RMB)", currentValue = false, callback = function(v) GunAim.Enabled = v end })
-AimTab:CreateToggle({ name = "Show FOV Circle", currentValue = false, callback = function(v) GunAim.ShowFOV = v; if v and not FOVCircle then createFOVCircle() end end })
-AimTab:CreateToggle({ name = "Show Tracer (ESP Laser)", currentValue = false, callback = function(v) GunAim.ShowTracer = v; if v and not TracerLine then createTracer() end end })
-AimTab:CreateColorPicker({ name = "Tracer Color", color = GunAim.TracerColor, callback = function(c) GunAim.TracerColor = c; if TracerLine then TracerLine.Color = c end end })
-AimTab:CreateDropdown({ name = "Aimbot Target", options = {"Killer", "Survivor", "Both"}, currentOption = "Killer", callback = function(opt) GunAim.TargetMode = opt end })
-AimTab:CreateDropdown({ name = "Aim Part", options = {"Head", "HumanoidRootPart", "Torso"}, currentOption = "HumanoidRootPart", callback = function(opt) GunAim.AimPart = opt end })
-AimTab:CreateSlider({ name = "Aimbot FOV", range = {50, 1000}, increment = 10, currentValue = 250, callback = function(v) GunAim.FOV = v end })
-AimTab:CreateSlider({ name = "Aimbot Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 1, callback = function(v) GunAim.Strength = v end })
-AimTab:CreateSlider({ name = "Aimbot Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, callback = function(v) GunAim.PredictStrength = v end })
-AimTab:CreateToggle({ name = "Visibility Check", currentValue = false, callback = function(v) GunAim.VisibilityCheck = v end })
+AimTab:CreateToggle({ name = "Aimbot (Hold RMB)", currentValue = false, flag = "aim_on", callback = function(v) GunAim.Enabled = v end })
+AimTab:CreateToggle({ name = "Show FOV Circle", currentValue = false, flag = "aim_fovcircle", callback = function(v) GunAim.ShowFOV = v; if v and not FOVCircle then createFOVCircle() end end })
+AimTab:CreateToggle({ name = "Show Tracer", currentValue = false, flag = "aim_tracer", callback = function(v) GunAim.ShowTracer = v; if v and not TracerLine then createTracer() end end })
+AimTab:CreateColorPicker({ name = "Tracer Color", color = GunAim.TracerColor, flag = "aim_tracercolor", callback = function(c) GunAim.TracerColor = c; if TracerLine then TracerLine.Color = c end end })
+AimTab:CreateDropdown({ name = "Aimbot Target", options = {"Killer", "Survivor", "Both"}, currentOption = "Killer", flag = "aim_target", callback = function(opt) GunAim.TargetMode = opt end })
+AimTab:CreateDropdown({ name = "Aim Part", options = {"Head", "HumanoidRootPart", "Torso"}, currentOption = "HumanoidRootPart", flag = "aim_part", callback = function(opt) GunAim.AimPart = opt end })
+AimTab:CreateSlider({ name = "Aimbot FOV", range = {50, 1000}, increment = 10, currentValue = 250, flag = "aim_fov", callback = function(v) GunAim.FOV = v end })
+AimTab:CreateSlider({ name = "Aimbot Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 1, flag = "aim_smooth", callback = function(v) GunAim.Strength = v end })
+AimTab:CreateSlider({ name = "Aimbot Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "aim_predict", callback = function(v) GunAim.PredictStrength = v end })
+AimTab:CreateToggle({ name = "Visibility Check", currentValue = false, flag = "aim_vis", callback = function(v) GunAim.VisibilityCheck = v end })
 
 AimTab:CreateSection("Killer Aim (Lock saat Hit)")
-AimTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, callback = function(v) KillerAim.Enabled = v end })
-AimTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, callback = function(v) KillerAim.FOV = v end })
-AimTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, callback = function(v) KillerAim.Strength = v end })
+AimTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, flag = "kaim_on", callback = function(v) KillerAim.Enabled = v end })
+AimTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, flag = "kaim_fov", callback = function(v) KillerAim.FOV = v end })
+AimTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, flag = "kaim_smooth", callback = function(v) KillerAim.Strength = v end })
 
 -- ============ KILLER TAB ============
-local KillerTab = Window:CreateTab({ name = "Killer", icon = 4483362458 })
+local KillerTab = Window:CreateTab({ name = "Killer", icon = 0 })
 
 KillerTab:CreateSection("Attack")
-KillerTab:CreateToggle({ name = "Auto Attack", currentValue = false, callback = function(v) Killer.AutoAttack = v end })
-KillerTab:CreateToggle({ name = "Auto Kill All", currentValue = false, callback = function(v) Killer.KillAll = v end })
+KillerTab:CreateToggle({ name = "Auto Attack", currentValue = false, flag = "k_attack", callback = function(v) Killer.AutoAttack = v end })
+KillerTab:CreateToggle({ name = "Auto Kill All", currentValue = false, flag = "k_killall", callback = function(v) Killer.KillAll = v end })
 
 KillerTab:CreateSection("Carry & Hook")
-KillerTab:CreateToggle({ name = "Auto Carry Downed", currentValue = false, callback = function(v) Killer.AutoCarry = v end })
-KillerTab:CreateToggle({ name = "Auto Hook After Carry", currentValue = false, callback = function(v) Killer.AutoHook = v end })
+KillerTab:CreateToggle({ name = "Auto Carry Downed", currentValue = false, flag = "k_carry", callback = function(v) Killer.AutoCarry = v end })
+KillerTab:CreateToggle({ name = "Auto Hook After Carry", currentValue = false, flag = "k_hook", callback = function(v) Killer.AutoHook = v end })
 
 KillerTab:CreateSection("Stalk")
-KillerTab:CreateToggle({ name = "Auto Stalk", currentValue = false, callback = function(v) Killer.AutoStalk = v; if v then startAutoStalk() else stopAutoStalk() end end })
-KillerTab:CreateSlider({ name = "Stalk Range", range = {50, 500}, increment = 10, suffix = "stud", currentValue = 150, callback = function(v) Killer.StalkRange = v end })
+KillerTab:CreateToggle({ name = "Auto Stalk", currentValue = false, flag = "k_stalk", callback = function(v) Killer.AutoStalk = v; if v then startAutoStalk() else stopAutoStalk() end end })
+KillerTab:CreateSlider({ name = "Stalk Range", range = {50, 500}, increment = 10, suffix = "stud", currentValue = 150, flag = "k_stalk_range", callback = function(v) Killer.StalkRange = v end })
 
 KillerTab:CreateSection("Masked Power")
-KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, currentOption = "Cobra", callback = function(opt) Masked.CurrentPower = opt end })
+KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, currentOption = "Cobra", flag = "k_masked", callback = function(opt) Masked.CurrentPower = opt end })
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
 KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked })
 
 -- ============ MISC TAB ============
-local MiscTab = Window:CreateTab({ name = "Misc", icon = 4483362458 })
+local MiscTab = Window:CreateTab({ name = "Misc", icon = 0 })
 
 MiscTab:CreateSection("Walk Speed")
-MiscTab:CreateToggle({ name = "Enable Walk Speed", currentValue = false, callback = function(v) Movement.WalkSpeedEnabled = v; if v then applyWalkSpeed() else local hum = getHum(); if hum then hum.WalkSpeed = Movement.OriginalWalkSpeed end end end })
-MiscTab:CreateSlider({ name = "Walk Speed Value", range = {16, 100}, increment = 0.5, currentValue = 17.6, callback = function(v) Movement.WalkSpeedValue = v end })
+MiscTab:CreateToggle({ name = "Enable Walk Speed", currentValue = false, flag = "m_ws", callback = function(v) Movement.WalkSpeedEnabled = v; if v then applyWalkSpeed() else local hum = getHum(); if hum then hum.WalkSpeed = Movement.OriginalWalkSpeed end end end })
+MiscTab:CreateSlider({ name = "Walk Speed Value", range = {16, 100}, increment = 0.5, currentValue = 17.6, flag = "m_ws_val", callback = function(v) Movement.WalkSpeedValue = v end })
 
 MiscTab:CreateSection("Jump Power")
-MiscTab:CreateToggle({ name = "Enable Jump Power", currentValue = false, callback = function(v) Movement.JumpPowerEnabled = v; if v then applyJumpPower() else local hum = getHum(); if hum then hum.JumpPower = Movement.OriginalJumpPower end end end })
-MiscTab:CreateSlider({ name = "Jump Power Value", range = {0, 300}, increment = 5, currentValue = 50, callback = function(v) Movement.JumpPowerValue = v end })
-MiscTab:CreateToggle({ name = "Infinite Jump", currentValue = false, callback = function(v) Movement.InfiniteJump = v end })
+MiscTab:CreateToggle({ name = "Enable Jump Power", currentValue = false, flag = "m_jp", callback = function(v) Movement.JumpPowerEnabled = v; if v then applyJumpPower() else local hum = getHum(); if hum then hum.JumpPower = Movement.OriginalJumpPower end end end })
+MiscTab:CreateSlider({ name = "Jump Power Value", range = {0, 300}, increment = 5, currentValue = 50, flag = "m_jp_val", callback = function(v) Movement.JumpPowerValue = v end })
+MiscTab:CreateToggle({ name = "Infinite Jump", currentValue = false, flag = "m_ij", callback = function(v) Movement.InfiniteJump = v end })
 
 MiscTab:CreateSection("No Clip")
-MiscTab:CreateToggle({ name = "No Clip", currentValue = false, callback = function(v) toggleNoClip(v) end })
+MiscTab:CreateToggle({ name = "No Clip", currentValue = false, flag = "m_noclip", callback = function(v) toggleNoClip(v) end })
 
 MiscTab:CreateSection("Moonwalk")
-MiscTab:CreateToggle({ name = "Moonwalk", currentValue = false, callback = function(v) Moonwalk.Enabled = v; if v then if not MoonwalkConnection then startMoonwalk() end else stopMoonwalk() end end })
-MiscTab:CreateToggle({ name = "Moonwalk Button", currentValue = false, callback = function(v) Moonwalk.ShowButton = v; if v then createMoonwalkButton() else removeMoonwalkButton() end end })
-MiscTab:CreateSlider({ name = "Spam Speed", range = {1, 50}, increment = 1, currentValue = 30, callback = function(v) Moonwalk.SpamSpeed = v end })
-MiscTab:CreateSlider({ name = "Intensity", range = {1, 50}, increment = 1, currentValue = 35, callback = function(v) Moonwalk.Intensity = v end })
+MiscTab:CreateToggle({ name = "Moonwalk", currentValue = false, flag = "m_moonwalk", callback = function(v) Moonwalk.Enabled = v; if v then startMoonwalk() else stopMoonwalk() end end })
+MiscTab:CreateToggle({ name = "Moonwalk Button", currentValue = false, flag = "m_moonwalk_btn", callback = function(v) Moonwalk.ShowButton = v; if v then createMoonwalkButton() else removeMoonwalkButton() end end })
+MiscTab:CreateSlider({ name = "Spam Speed", range = {1, 50}, increment = 1, currentValue = 30, flag = "m_moon_spam", callback = function(v) Moonwalk.SpamSpeed = v end })
+MiscTab:CreateSlider({ name = "Intensity", range = {1, 50}, increment = 1, currentValue = 35, flag = "m_moon_int", callback = function(v) Moonwalk.Intensity = v end })
 
 MiscTab:CreateSection("Emote")
-MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", callback = function(opt) Emote.Selected = opt end })
+MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", flag = "m_emote", callback = function(opt) Emote.Selected = opt end })
 MiscTab:CreateButton({ name = "Play Emote", callback = function() playEmote(Emote.Selected) end })
 
 -- ============ VISUAL TAB ============
-local VisualTab = Window:CreateTab({ name = "Visual", icon = 4483362458 })
+local VisualTab = Window:CreateTab({ name = "Visual", icon = 0 })
 
 VisualTab:CreateSection("Lighting")
-VisualTab:CreateToggle({ name = "Fullbright", currentValue = false, callback = function(v) Visual.Fullbright = v; applyVisual() end })
-VisualTab:CreateToggle({ name = "No Fog", currentValue = false, callback = function(v) Visual.NoFog = v; applyVisual() end })
-VisualTab:CreateToggle({ name = "No Shadow", currentValue = false, callback = function(v) Visual.NoShadow = v; applyVisual() end })
+VisualTab:CreateToggle({ name = "Fullbright", currentValue = false, flag = "v_fb", callback = function(v) Visual.Fullbright = v; applyVisual(true) end })
+VisualTab:CreateToggle({ name = "No Fog", currentValue = false, flag = "v_nofog", callback = function(v) Visual.NoFog = v; applyVisual(true) end })
+VisualTab:CreateToggle({ name = "No Shadow", currentValue = false, flag = "v_noshadow", callback = function(v) Visual.NoShadow = v; applyVisual(true) end })
 
 VisualTab:CreateSection("Screen Effects")
-VisualTab:CreateToggle({ name = "No Bloom", currentValue = false, callback = function(v) Visual.NoBloom = v; applyVisualExtended() end })
-VisualTab:CreateToggle({ name = "No Blur / DOF", currentValue = false, callback = function(v) Visual.NoBlur = v; applyVisualExtended() end })
+VisualTab:CreateToggle({ name = "No Bloom", currentValue = false, flag = "v_nobloom", callback = function(v) Visual.NoBloom = v; toggleScreenEffects() end })
+VisualTab:CreateToggle({ name = "No Blur / DOF", currentValue = false, flag = "v_noblur", callback = function(v) Visual.NoBlur = v; toggleScreenEffects() end })
 
 VisualTab:CreateSection("Color Correction")
-VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
-VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
-VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
+VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, flag = "v_cc", callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
+VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
+VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
 
 -- ============ ANTI-LAG TAB ============
-local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 4483362458 })
+local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 0 })
 
 AntiLagTab:CreateSection("Anti-Lag Pack")
-AntiLagTab:CreateToggle({ name = "Enable Anti-Lag", currentValue = false, callback = function(v) AntiLag.Enabled = v; if v then startAntiLag() end end })
+AntiLagTab:CreateToggle({ name = "Enable Anti-Lag", currentValue = false, flag = "al_on", callback = function(v) AntiLag.Enabled = v; if v then startAntiLag() end end })
 
 AntiLagTab:CreateSection("Individual")
-AntiLagTab:CreateToggle({ name = "No Particles", currentValue = false, callback = function(v) AntiLag.NoParticles = v; applyAntiLag() end })
-AntiLagTab:CreateToggle({ name = "No Textures", currentValue = false, callback = function(v) AntiLag.NoTextures = v; applyAntiLag() end })
-AntiLagTab:CreateToggle({ name = "Physics Throttle", currentValue = false, callback = function(v) AntiLag.PhysicsThrottle = v; applyAntiLag() end })
-AntiLagTab:CreateToggle({ name = "No Global Shadows", currentValue = false, callback = function(v) AntiLag.NoGlobalShadows = v; applyAntiLag() end })
-AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false, callback = function(v) AntiLag.NetworkLag = v; applyAntiLag() end })
+AntiLagTab:CreateToggle({ name = "No Particles", currentValue = false, flag = "al_particles", callback = function(v) AntiLag.NoParticles = v; applyAntiLag() end })
+AntiLagTab:CreateToggle({ name = "No Textures", currentValue = false, flag = "al_textures", callback = function(v) AntiLag.NoTextures = v; applyAntiLag() end })
+AntiLagTab:CreateToggle({ name = "Physics Throttle", currentValue = false, flag = "al_physics", callback = function(v) AntiLag.PhysicsThrottle = v; applyAntiLag() end })
+AntiLagTab:CreateToggle({ name = "No Global Shadows", currentValue = false, flag = "al_shadows", callback = function(v) AntiLag.NoGlobalShadows = v; applyAntiLag() end })
+AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false, flag = "al_net", callback = function(v) AntiLag.NetworkLag = v; applyAntiLag() end })
 
 -- ============ CROSSHAIR TAB ============
-local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 4483362458 })
+local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 0 })
 
-CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, callback = function(v) Crosshair.Enabled = v end })
-CrosshairTab:CreateColorPicker({ name = "Color", color = Crosshair.Color, callback = function(c) Crosshair.Color = c end })
-CrosshairTab:CreateSlider({ name = "Size", range = {2, 30}, increment = 1, suffix = "px", currentValue = 8, callback = function(v) Crosshair.Size = v end })
-CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, suffix = "px", currentValue = 2, callback = function(v) Crosshair.Thickness = v end })
-CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetX = v end })
-CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetY = v end })
+CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, flag = "ch_on", callback = function(v) Crosshair.Enabled = v end })
+CrosshairTab:CreateColorPicker({ name = "Color", color = Crosshair.Color, flag = "ch_color", callback = function(c) Crosshair.Color = c end })
+CrosshairTab:CreateSlider({ name = "Size", range = {2, 30}, increment = 1, suffix = "px", currentValue = 8, flag = "ch_size", callback = function(v) Crosshair.Size = v end })
+CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, suffix = "px", currentValue = 2, flag = "ch_thick", callback = function(v) Crosshair.Thickness = v end })
+CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_x", callback = function(v) Crosshair.OffsetX = v end })
+CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_y", callback = function(v) Crosshair.OffsetY = v end })
 
 -- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub Full v10",
-    content = "Script loaded! Killer + Survivor + Aimbot + Visual + Anti-Lag + FPS/Ping.",
+    title = "TiarHub v11",
+    content = "Script loaded! Rainbow UI + Auto Parry 2 Mode + Aimbot Fix + Moonwalk Fix.",
     duration = 6
 })
+
+print("[TiarHub v11] Bagian 7 loaded. All systems ready!")

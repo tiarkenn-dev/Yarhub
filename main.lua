@@ -1,6 +1,6 @@
 -- ============================================
--- TIARHUB v12 - Bagian 1: Setup & Config
--- UI: Rayfield Gen2 | Rainbow All TiarHub UI
+-- TIARHUB v12.5 - Bagian 1: Setup & Config
+-- v12 + 3 Fake Perks + Aimlock Button
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -18,7 +18,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ============ RAINBOW SYSTEM ============
 local RainbowHue = 0
-local RainbowSpeed = 0.008 -- kecepatan rainbow (makin besar makin cepat)
+local RainbowSpeed = 0.008
 
 RunService.Heartbeat:Connect(function()
     RainbowHue = (RainbowHue + RainbowSpeed) % 1
@@ -141,6 +141,20 @@ local MoonwalkHeartbeat = nil
 local MoonwalkButton = nil
 local ParryActive = false
 
+-- ============ FAKE PERKS CONFIG (PATCH BARU) ============
+local FakePerks = {
+    Flowstate = { Enabled = false, Duration = 3, SpeedBoost = 20, Cooldown = 60, LastUse = 0 },
+    SnakeStep = { Enabled = false, SpeedBoost = 90, Cooldown = 0, LastUse = 0 },
+    QuickRecovery = { Enabled = false, Cooldown = 30, LastUse = 0 },
+    LastVault = 0, LastCrouchState = false
+}
+
+-- ============ AIMLOCK KILLER CONFIG (PATCH BARU) ============
+local AimlockKiller = {
+    Enabled = false, ShowButton = false,
+    LockRadius = 100, Smoothness = 0.5, Button = nil
+}
+
 -- ============ CROSSHAIR ============
 local Crosshair = { Enabled = false, Size = 8, Thickness = 2, Color = Color3.fromRGB(255, 255, 255), Style = "Plus", OffsetX = 0, OffsetY = 0 }
 
@@ -249,8 +263,8 @@ local function getTeamLabel(plr)
     return plr.Team.Name
 end
 
-print("[TiarHub v12] Bagian 1 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 2: ESP System
+print("[TiarHub v12.5] Bagian 1 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 2: ESP System
 -- ============================================
 
 local ESPObjects = {}
@@ -703,16 +717,13 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ RAINBOW APPLY (FILTERED - cuma UI TiarHub) ============
--- Cari GUI Rayfield dengan nama "TiarHub" atau window "TiarHub | Violence District"
+-- ============ RAINBOW APPLY (FILTERED) ============
 local function isTiarHubGui(gui)
     if not gui then return false end
-    -- Cek nama window
     local name = gui.Name or ""
     if name:find("TiarHub") or name:find("Rayfield") or name:find("rayfield") then
         return true
     end
-    -- Cek ada text "TiarHub" di title
     for _, v in pairs(gui:GetDescendants()) do
         if v:IsA("TextLabel") and v.Text and v.Text:find("TiarHub") then
             return true
@@ -734,7 +745,6 @@ local function rainbowifyGui(gui)
                 end
             end)
         end
-        -- UIStroke juga rainbow
         if v:IsA("UIStroke") then
             task.spawn(function()
                 while v and v.Parent do
@@ -749,16 +759,12 @@ local function rainbowifyGui(gui)
 end
 
 task.spawn(function()
-    task.wait(3) -- tunggu Rayfield selesai load
-
-    -- Cari GUI Rayfield di CoreGui
+    task.wait(3)
     for _, gui in pairs(CoreGui:GetChildren()) do
         if gui:IsA("ScreenGui") and isTiarHubGui(gui) then
             rainbowifyGui(gui)
         end
     end
-
-    -- Kalau ada GUI baru dibuat, cek & rainbow-kan
     CoreGui.ChildAdded:Connect(function(child)
         if child:IsA("ScreenGui") then
             task.wait(0.5)
@@ -769,11 +775,11 @@ task.spawn(function()
     end)
 end)
 
-print("[TiarHub v12] Bagian 2 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 3: Auto Fitur Survivor
+print("[TiarHub v12.5] Bagian 2 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 3: Auto Fitur Survivor + Fake Perks
 -- ============================================
 
--- ============ AUTO PARRY 2 MODE (FIXED) ============
+-- ============ AUTO PARRY 2 MODE ============
 local lastParry = 0
 
 local function pressRightClick()
@@ -820,7 +826,6 @@ local function doParry()
     task.delay(0.25, function() ParryActive = false end)
 end
 
--- Cek jarak
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -829,7 +834,6 @@ local function isInParryRange(killerChar)
     return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
 end
 
--- Cek facing (Safety = cek arah, Aggressive = selalu true)
 local function isFacingTarget(targetChar)
     if not Auto.RequireFacing then return true end
     if Auto.FaceSensitivity <= -1 then return true end
@@ -1017,8 +1021,108 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v12] Bagian 3 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 4: Aimbot System (FIXED)
+-- ============================================
+-- 3 FAKE PERKS (PATCH BARU)
+-- ============================================
+
+-- 1. FAKE FLOWSTATE
+local function hookFakeFlowstate(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+
+    animator.AnimationPlayed:Connect(function(track)
+        if not FakePerks.Flowstate.Enabled then return end
+        local now = tick()
+        if now - FakePerks.Flowstate.LastUse < FakePerks.Flowstate.Cooldown then return end
+
+        local anim = track.Animation
+        if not anim or not anim.AnimationId then return end
+        local id = anim.AnimationId:match("%d+")
+        if not id then return end
+
+        local vaultIds = {
+            ["rbxassetid://83873880822918"] = true,
+            ["rbxassetid://136962284480779"] = true,
+        }
+
+        if vaultIds["rbxassetid://" .. id] then
+            FakePerks.Flowstate.LastUse = now
+            local originalSpeed = hum.WalkSpeed
+            hum.WalkSpeed = originalSpeed * (1 + FakePerks.Flowstate.SpeedBoost / 100)
+            Rayfield:Notify({ title = "Fake Flowstate", content = "Speed boost aktif!", duration = 2 })
+            task.delay(FakePerks.Flowstate.Duration, function()
+                if hum and hum.Parent then
+                    hum.WalkSpeed = originalSpeed
+                end
+            end)
+        end
+    end)
+end
+
+-- 2. FAKE SNAKE STEP
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if not FakePerks.SnakeStep.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            local isCrouching = UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
+                or (hum.HipHeight and hum.HipHeight < 1.5)
+
+            if isCrouching and not FakePerks.LastCrouchState then
+                FakePerks.LastCrouchState = true
+                hum.WalkSpeed = FakePerks.SnakeStep.SpeedBoost
+            elseif not isCrouching and FakePerks.LastCrouchState then
+                FakePerks.LastCrouchState = false
+                if Movement.WalkSpeedEnabled then
+                    hum.WalkSpeed = Movement.WalkSpeedValue
+                else
+                    hum.WalkSpeed = 16
+                end
+            end
+        end)
+    end
+end)
+
+-- 3. FAKE QUICK RECOVERY
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if not FakePerks.QuickRecovery.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            local now = tick()
+            if now - FakePerks.QuickRecovery.LastUse < FakePerks.QuickRecovery.Cooldown then return end
+
+            if hum:GetState() == Enum.HumanoidStateType.FallingDown
+                or hum:GetState() == Enum.HumanoidStateType.Ragdoll
+                or hum.Health < hum.MaxHealth * 0.3 then
+                FakePerks.QuickRecovery.LastUse = now
+                pcall(function()
+                    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                end)
+                Rayfield:Notify({ title = "Quick Recovery", content = "Recovery aktif!", duration = 1.5 })
+            end
+        end)
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    pcall(function() hookFakeFlowstate(char) end)
+end)
+if LocalPlayer.Character then pcall(function() hookFakeFlowstate(LocalPlayer.Character) end) end
+
+print("[TiarHub v12.5] Bagian 3 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 4: Aimbot System + Aimlock Killer
 -- ============================================
 
 local Drawing = Drawing
@@ -1101,7 +1205,7 @@ local function getClosestGunTarget()
     return closest
 end
 
--- ============ GUN AIM LOOP (RenderStepped langsung) ============
+-- ============ GUN AIM LOOP ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if not GunAim.Enabled then
@@ -1110,7 +1214,6 @@ RunService.RenderStepped:Connect(function()
             return
         end
 
-        -- FOV Circle
         if FOVCircle then
             FOVCircle.Visible = GunAim.ShowFOV
             FOVCircle.Radius = GunAim.FOV
@@ -1120,7 +1223,6 @@ RunService.RenderStepped:Connect(function()
             )
         end
 
-        -- Kalau nggak nahan RMB, jangan lock
         if not GunAim.Holding then
             if TracerLine then TracerLine.Visible = false end
             return
@@ -1140,7 +1242,6 @@ RunService.RenderStepped:Connect(function()
 
         cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), GunAim.Strength)
 
-        -- Tracer
         if GunAim.ShowTracer and TracerLine then
             local screenPos, onScreen = cam:WorldToViewportPoint(target.Position)
             if onScreen then
@@ -1215,8 +1316,94 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v12] Bagian 4 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 5: Killer & Movement
+-- ============================================
+-- AIMLOCK KILLER BUTTON (PATCH BARU)
+-- ============================================
+local function getClosestKillerForLock()
+    local root = getRoot()
+    local cam = workspace.CurrentCamera
+    if not root or not cam then return nil end
+    local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local closest, shortest = nil, AimlockKiller.LockRadius
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Team and p.Team.Name == "Killer" then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            if hrp and hum and hum.Health > 0 then
+                local pos, visible = cam:WorldToViewportPoint(hrp.Position)
+                if visible then
+                    local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                    if dist < shortest then shortest = dist; closest = hrp end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if not AimlockKiller.Enabled then return end
+        local target = getClosestKillerForLock()
+        if not target then return end
+        local cam = workspace.CurrentCamera
+        local pos = target.Position
+        cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), AimlockKiller.Smoothness)
+    end)
+end)
+
+local function createAimlockButton()
+    pcall(function()
+        if AimlockKiller.Button then AimlockKiller.Button:Destroy() end
+        local gui = Instance.new("ScreenGui")
+        gui.Name = "AimlockButtonGui"
+        gui.ResetOnSpawn = false
+        gui.Parent = PlayerGui
+        local btn = Instance.new("ImageButton")
+        btn.Size = UDim2.new(0, 50, 0, 50)
+        btn.Position = UDim2.new(0.55, 0, 0.75, 0)
+        btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        btn.BackgroundTransparency = 0.9
+        btn.Parent = gui
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+        local stroke = Instance.new("UIStroke")
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Thickness = 1.2
+        stroke.Color = Color3.fromRGB(255, 255, 255)
+        stroke.Transparency = 0.8
+        stroke.Parent = btn
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(0, 60, 0, 20)
+        label.Position = UDim2.new(0.5, -30, -0.5, 0)
+        label.BackgroundTransparency = 1
+        label.Text = "AIM"
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextStrokeTransparency = 0.5
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 11
+        label.Parent = btn
+        btn.MouseButton1Click:Connect(function()
+            AimlockKiller.Enabled = not AimlockKiller.Enabled
+            if AimlockKiller.Enabled then
+                stroke.Color = Color3.fromRGB(255, 0, 0)
+                label.Text = "LOCK"
+                Rayfield:Notify({ title = "Aimlock Killer", content = "Aimlock ON", duration = 2 })
+            else
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                label.Text = "AIM"
+                Rayfield:Notify({ title = "Aimlock Killer", content = "Aimlock OFF", duration = 2 })
+            end
+        end)
+        AimlockKiller.Button = gui
+    end)
+end
+
+local function removeAimlockButton()
+    if AimlockKiller.Button then AimlockKiller.Button:Destroy(); AimlockKiller.Button = nil end
+end
+
+print("[TiarHub v12.5] Bagian 4 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 5: Killer & Movement
 -- ============================================
 
 -- ============ KILLER HELPERS ============
@@ -1453,14 +1640,13 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- ============ MOONWALK (FIXED - Anti Server Reset) ============
+-- ============ MOONWALK ============
 local function startMoonwalk()
     if MoonwalkConnection then return end
 
     local hum0 = getHum()
     if hum0 then hum0.AutoRotate = false end
 
-    -- Layer 1: RenderStepped (visual)
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
         if not Moonwalk.Enabled or ParryActive or isDowned() then return end
         local char = LocalPlayer.Character
@@ -1485,7 +1671,6 @@ local function startMoonwalk()
         end
     end)
 
-    -- Layer 2: Heartbeat (anti-override server)
     if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect() end
     MoonwalkHeartbeat = RunService.Heartbeat:Connect(function()
         pcall(function()
@@ -1606,8 +1791,8 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
-print("[TiarHub v12] Bagian 5 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 6: Visual & Anti-Lag + Contrast
+print("[TiarHub v12.5] Bagian 5 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 6: Visual & Anti-Lag + Contrast
 -- ============================================
 
 -- ============ VISUAL FUNCTIONS ============
@@ -1673,7 +1858,7 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
--- ============ COLOR CORRECTION (Saturation + Brightness + Contrast) ============
+-- ============ COLOR CORRECTION ============
 local ColorCorrection = nil
 
 local function applyColorCorrection()
@@ -1808,8 +1993,8 @@ LocalPlayer.CharacterAdded:Connect(function()
     if AntiLag.Enabled then applyAntiLag() end
 end)
 
-print("[TiarHub v12] Bagian 6 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 7: UI Menu
+print("[TiarHub v12.5] Bagian 6 loaded.")-- ============================================
+-- TIARHUB v12.5 - Bagian 7: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
@@ -1884,8 +2069,29 @@ SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, flag = "vault", callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, flag = "vault_speed", callback = function(v) FastVault.Speed = v end })
 
+SurvivorTab:CreateSection("Fake Perks")
+SurvivorTab:CreateToggle({ name = "Fake Flowstate (Speed Boost on Vault)", currentValue = false, flag = "fp_flow", callback = function(v) FakePerks.Flowstate.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Speed Boost (%)", range = {10, 50}, increment = 5, suffix = "%", currentValue = 20, flag = "fp_flow_speed", callback = function(v) FakePerks.Flowstate.SpeedBoost = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Duration", range = {1, 10}, increment = 0.5, suffix = "s", currentValue = 3, flag = "fp_flow_dur", callback = function(v) FakePerks.Flowstate.Duration = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 60, flag = "fp_flow_cd", callback = function(v) FakePerks.Flowstate.Cooldown = v end })
+
+SurvivorTab:CreateToggle({ name = "Fake Snake Step (Crouch Speed)", currentValue = false, flag = "fp_snake", callback = function(v) FakePerks.SnakeStep.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Snake Step Speed", range = {16, 150}, increment = 1, currentValue = 90, flag = "fp_snake_speed", callback = function(v) FakePerks.SnakeStep.SpeedBoost = v end })
+SurvivorTab:CreateSlider({ name = "Snake Step Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 0, flag = "fp_snake_cd", callback = function(v) FakePerks.SnakeStep.Cooldown = v end })
+
+SurvivorTab:CreateToggle({ name = "Fake Quick Recovery", currentValue = false, flag = "fp_recovery", callback = function(v) FakePerks.QuickRecovery.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Quick Recovery Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 30, flag = "fp_recovery_cd", callback = function(v) FakePerks.QuickRecovery.Cooldown = v end })
+
 -- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 0 })
+
+AimTab:CreateSection("Aimlock Killer (Button)")
+AimTab:CreateToggle({ name = "Show Aimlock Button", currentValue = false, flag = "al_show_btn", callback = function(v) 
+    AimlockKiller.ShowButton = v
+    if v then createAimlockButton() else removeAimlockButton() end
+end })
+AimTab:CreateSlider({ name = "Aimlock Lock Radius", range = {20, 500}, increment = 10, suffix = "stud", currentValue = 100, flag = "al_radius", callback = function(v) AimlockKiller.LockRadius = v end })
+AimTab:CreateSlider({ name = "Aimlock Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, flag = "al_smooth", callback = function(v) AimlockKiller.Smoothness = v end })
 
 AimTab:CreateSection("Aimbot Survivor")
 AimTab:CreateToggle({ name = "Aimbot (Hold RMB)", currentValue = false, flag = "aim_on", callback = function(v) GunAim.Enabled = v end })
@@ -1966,9 +2172,9 @@ VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false,
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Contrast", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_contrast", callback = function(v) Visual.Contrast = v; applyColorCorrection() end })
-VisualTab:CreateButton({ name = "🔄 Reset Color", callback = function()
+VisualTab:CreateButton({ name = "Reset Color", callback = function()
     resetColorCorrection()
-    Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast sudah di-reset ke 0." })
+    Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast di-reset ke 0." })
 end })
 
 -- ============ ANTI-LAG TAB ============
@@ -1996,9 +2202,9 @@ CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment 
 
 -- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub v12",
-    content = "Loaded! Rainbow UI + Parry 2 Mode + Aimbot Fix + Moonwalk Fix + Contrast.",
+    title = "TiarHub v12.5",
+    content = "Loaded! 3 Fake Perks + Aimlock Button ditambahkan.",
     duration = 6
 })
 
-print("[TiarHub v12] Bagian 7 loaded. All systems ready!")
+print("[TiarHub v12.5] Bagian 7 loaded. All systems ready!")

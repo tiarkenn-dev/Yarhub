@@ -1,5 +1,6 @@
 -- ============================================
--- ⚡ TIARHUB v17 - Part 1/5: Setup & Config
+-- ⚡ TIARHUB v18 - Part 1/5: Setup & Config
+-- + Aimlock Button + 4 Fake Perks + Copy Avatar Fix
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -13,7 +14,6 @@ local Lighting = game:GetService("Lighting")
 local Stats = game:GetService("Stats")
 local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
-local InsertService = game:GetService("InsertService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -29,12 +29,12 @@ end
 -- ============ WINDOW ============
 local Window = Rayfield:CreateWindow({
     name = "⚡ TiarHub ⚡",
-    subtitle = "Violence District | v17",
+    subtitle = "Violence District | v18",
     sidebarLayout = true,
-    configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubV17" }
+    configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubV18" }
 })
 
--- ============ CONFIG - ESP ============
+-- ============ ESP ============
 local ESP = {
     Survivor = false, Killer = false, Generator = false,
     Hook = false, Pallet = false, Window = false, SCP = false,
@@ -52,7 +52,7 @@ local ESP = {
 local ESPStatus = { Enabled = false, ShowName = true, ShowDistance = true, ShowHealth = false, Radius = 100 }
 local KillerWarning = { Enabled = false, Distance = 60, Color = Color3.fromRGB(255, 0, 0) }
 
--- ============ CONFIG - VISUAL ============
+-- ============ VISUAL ============
 local Visual = {
     Fullbright = false, NoFog = false, NoShadow = false,
     NoBloom = false, NoBlur = false,
@@ -73,7 +73,7 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
--- ============ CONFIG - AUTO PARRY ============
+-- ============ AUTO PARRY ============
 local PARRY_PRESETS = {
     Safety     = { Distance = 12, Debounce = 0.15, Face = 0.5, RequireFacing = true },
     Aggressive = { Distance = 20, Debounce = 0.05, Face = -1,  RequireFacing = false }
@@ -112,21 +112,45 @@ local FastVault = {
 }
 local VaultTracks = {}
 
--- ============ CONFIG - AUTO DODGE ABYSS ============
+-- ============ AUTO DODGE ABYSS ============
 local AutoDodgeAbyss = {
     Enabled = false, DetectRange = 18, Cooldown = 0.5,
     CrouchDuration = 0.3, LastDodge = 0, IsCrouching = false
 }
 
--- ============ CONFIG - FAKE PERKS ============
+-- ============ FAKE PERKS (4 MACAM) ============
 local FakePerks = {
-    Flowstate = { Enabled = false, Duration = 3, SpeedBoost = 20 },
-    SnakeStep = { Enabled = false, SpeedBoost = 90 },
-    QuickRecovery = { Enabled = false },
-    LastVault = 0, LastCrouchState = false
+    -- 1. FLOWSTATE: speed boost saat vault
+    Flowstate = {
+        Enabled = false,
+        SpeedBoost = 20,       -- % boost
+        Duration = 3,          -- detik
+        Cooldown = 60,         -- detik (asli: 60-70)
+        LastUse = 0
+    },
+    -- 2. SNAKE STEP: speed boost saat crouch
+    SnakeStep = {
+        Enabled = false,
+        SpeedBoost = 90,       -- walk speed saat crouch (asli: +60-80%)
+        Cooldown = 0,
+        LastUse = 0
+    },
+    -- 3. QUICK RECOVERY: recovery cepat
+    QuickRecovery = {
+        Enabled = false,
+        Cooldown = 30,
+        LastUse = 0
+    },
+    -- 4. PERFECT LANDING: anti damage jatuh
+    PerfectLanding = {
+        Enabled = false,
+        Cooldown = 45,
+        LastUse = 0
+    },
+    LastCrouchState = false
 }
 
--- ============ CONFIG - SILENT AIM VEIL SPEAR ============
+-- ============ SILENT AIM VEIL SPEAR ============
 local SilentAimSpear = {
     Enabled = false, TargetMode = "Killer",
     FOV = 250, AimPart = "HumanoidRootPart",
@@ -134,20 +158,31 @@ local SilentAimSpear = {
 }
 local SilentAimCircle = nil
 
--- ============ CONFIG - HIDE SPARK ============
+-- ============ AIMLOCK KILLER (BUTTON) ============
+local AimlockKiller = {
+    Enabled = false,       -- state toggle dari button
+    ShowButton = false,
+    LockRadius = 100,      -- radius lock
+    Smoothness = 0.5,      -- 0.1 - 1
+    Target = nil,
+    Button = nil,
+    LastToggle = 0
+}
+
+-- ============ HIDE SPARK ============
 local HideSpark = { Enabled = false }
 local HiddenSparkCache = {}
 
--- ============ CONFIG - TELEPORT ============
+-- ============ TELEPORT ============
 local Teleport = { LastTeleport = 0, Cooldown = 0.5 }
 
--- ============ CONFIG - AUTO ESCAPE ============
+-- ============ AUTO ESCAPE ============
 local AutoEscape = { Enabled = false, DetectDistance = 40, Cooldown = 0.8, LastEscape = 0 }
 
--- ============ CONFIG - SKILL CHECK ============
+-- ============ SKILL CHECK ============
 local SkillCheckMode = "Perfect"
 
--- ============ CONFIG - SOUND ============
+-- ============ SOUND ============
 local SoundFeedback = { Enabled = true, CurrentSound = "Click", Volume = 0.5, LastPlay = 0, Cooldown = 0.05 }
 
 local SoundList = {
@@ -184,13 +219,13 @@ end
 
 initSound()
 
--- ============ CONFIG - COPY AVATAR ============
+-- ============ COPY AVATAR ============
 local AvatarCopier = {
     Enabled = true, TargetUsername = "",
     OriginalDescription = nil, CurrentCopiedUserId = nil, BlockyBody = true
 }
 
--- ============ CONFIG - AIMBOT ============
+-- ============ AIMBOT ============
 local GunAim = {
     Enabled = false, Holding = false, TargetMode = "Killer",
     Strength = 1, Predict = true, PredictStrength = 0.12,
@@ -206,10 +241,9 @@ local FOVCircleColor = Color3.fromRGB(255, 255, 255)
 
 local KillerAim = { Enabled = false, FOV = 200, Strength = 0.5, Holding = false }
 
--- ============ CONFIG - KILLER ============
+-- ============ KILLER ============
 local Killer = {
-    AutoAttack = false,
-    AutoCarry = false, AutoHook = false, KillAll = false,
+    AutoAttack = false, AutoCarry = false, AutoHook = false, KillAll = false,
     AutoStalk = false, StalkRange = 150,
     AutoHookAllDowned = false, AutoHookAllRange = 500,
     AutoSprint = false, AutoSprintValue = 30,
@@ -230,13 +264,13 @@ local HitMarkerEnd = 0
 
 local ChaseDetector = { Enabled = false, Range = 30, LastNotify = 0, Cooldown = 2 }
 
--- ============ CONFIG - MOVEMENT ============
+-- ============ MOVEMENT ============
 local Movement = {
     WalkSpeedEnabled = false, WalkSpeedValue = 17.6, OriginalWalkSpeed = 16,
     NoClip = false
 }
 
--- ============ CONFIG - MOONWALK ============
+-- ============ MOONWALK ============
 local Moonwalk = {
     Enabled = false, ShowButton = false,
     SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true,
@@ -247,19 +281,19 @@ local MoonwalkHeartbeat = nil
 local MoonwalkButton = nil
 local ParryActive = false
 
--- ============ CONFIG - CROSSHAIR ============
+-- ============ CROSSHAIR ============
 local Crosshair = { Enabled = false, Size = 8, Thickness = 2, Color = Color3.fromRGB(255, 255, 255), OffsetX = 0, OffsetY = 0 }
 local CrosshairGui = nil
 
--- ============ CONFIG - EMOTE ============
+-- ============ EMOTE ============
 local Emote = { Selected = "Mannrobics" }
 local EmoteList = { "Mannrobics","Arm Swing","Schadenfreude","Kyoufuu","Backflip","Griddy","Friday Night","Floating Rest","OnePlays","Quick Combo","WarCry","Wave" }
 
--- ============ CONFIG - MASKED ============
+-- ============ MASKED ============
 local Masked = { CurrentPower = "Cobra" }
 local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
--- ============ CONFIG - ANTI-LAG ============
+-- ============ ANTI-LAG ============
 local AntiLag = {
     Enabled = false, NoParticles = false, NoTextures = false,
     PhysicsThrottle = false, NoGlobalShadows = false, NetworkLag = false
@@ -371,8 +405,8 @@ local function GetNearestKiller()
     return closest, shortest
 end
 
-print("[TiarHub v17] Part 1/5 loaded.")-- ============================================
--- ⚡ TIARHUB v17 - Part 2/5: ESP System
+print("[TiarHub v18] Part 1/5 loaded.")-- ============================================
+-- ⚡ TIARHUB v18 - Part 2/5: ESP System
 -- ============================================
 
 local ESPObjects = {}
@@ -740,7 +774,6 @@ RunService.RenderStepped:Connect(function()
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
 
-        -- PARRY CIRCLE (Double Ring + Pulse)
         if ParryRangeVisual.Enabled and root then
             if not ParryCircle then
                 ParryCircle = Instance.new("Part")
@@ -760,26 +793,21 @@ RunService.RenderStepped:Connect(function()
                 ParryCircleInner.Name = "ParryCircleInner"
                 ParryCircleInner.Parent = workspace
             end
-
             local baseSize = Auto.ParryDistance * 2
             local pulse = 0
             if ParryRangeVisual.PulseEnabled then
                 pulse = math.sin(tick() * 3) * 0.15
             end
-
             local sizeOuter = baseSize + pulse
             local sizeInner = baseSize - 0.8
             local yOffset = root.Size.Y / 2 + 1.5
             local cframe = CFrame.new(root.Position - Vector3.new(0, yOffset, 0)) * CFrame.Angles(0, 0, math.rad(90))
-
             ParryCircle.Size = Vector3.new(0.3, sizeOuter, sizeOuter)
             ParryCircle.CFrame = cframe
             ParryCircle.Transparency = ParryRangeVisual.Transparency
-
             ParryCircleInner.Size = Vector3.new(0.15, sizeInner, sizeInner)
             ParryCircleInner.CFrame = cframe
             ParryCircleInner.Transparency = ParryRangeVisual.Transparency + 0.15
-
             local color = ParryRangeVisual.Color
             if ParryRangeVisual.RainbowMode then color = getRainbowColor() end
             ParryCircle.Color = color
@@ -788,12 +816,11 @@ RunService.RenderStepped:Connect(function()
             if ParryCircle then ParryCircle:Destroy(); ParryCircle = nil end
             if ParryCircleInner then ParryCircleInner:Destroy(); ParryCircleInner = nil end
         end
-
         updateWarning()
     end)
 end)
 
--- ============ RAINBOW APPLY ============
+-- RAINBOW APPLY
 local function isTiarHubGui(gui)
     if not gui then return false end
     local name = gui.Name or ""
@@ -848,7 +875,7 @@ task.spawn(function()
     end)
 end)
 
--- ============ SOUND WRAPPER ============
+-- SOUND WRAPPER
 local function wrapCallbacks()
     local origToggle = Window.CreateToggle
     local origButton = Window.CreateButton
@@ -907,8 +934,8 @@ end
 
 pcall(wrapCallbacks)
 
-print("[TiarHub v17] Part 2/5 loaded.")-- ============================================
--- ⚡ TIARHUB v17 - Part 3/5: Survivor + Aimbot + Fake Perks
+print("[TiarHub v18] Part 2/5 loaded.")-- ============================================
+-- ⚡ TIARHUB v18 - Part 3/5: Survivor + Fake Perks + Aimbot
 -- ============================================
 
 -- ============ AUTO PARRY ============
@@ -963,12 +990,10 @@ local lastKillerParry = {}
 local function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
-
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
-
     animator.AnimationPlayed:Connect(function(track)
         if not Auto.Parry then return end
         local anim = track.Animation
@@ -976,18 +1001,14 @@ local function hookKiller(char)
         local id = anim.AnimationId:match("%d+")
         if not id then return end
         if not KillerAnims["rbxassetid://" .. id] then return end
-
         local myRoot = getRoot()
         local enemyRoot = char:FindFirstChild("HumanoidRootPart")
         if not myRoot or not enemyRoot then return end
-
         local dist = (enemyRoot.Position - myRoot.Position).Magnitude
         if dist > Auto.ParryDistance then return end
-
         local now = tick()
         if lastKillerParry[char] and now - lastKillerParry[char] < 0.4 then return end
         lastKillerParry[char] = now
-
         doParry()
     end)
 end
@@ -997,10 +1018,8 @@ task.spawn(function()
         pcall(function()
             if Auto.Parry then
                 for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character then
-                        if p.Team and p.Team.Name == "Killer" then
-                            hookKiller(p.Character)
-                        end
+                    if p ~= LocalPlayer and p.Character and p.Team and p.Team.Name == "Killer" then
+                        hookKiller(p.Character)
                     end
                 end
             end
@@ -1236,7 +1255,11 @@ task.spawn(function()
     end
 end)
 
--- ============ FAKE PERKS ============
+-- ============================================
+-- 🎭 FAKE PERKS (4 MACAM) - WITH COOLDOWN
+-- ============================================
+
+-- 1. FAKE FLOWSTATE
 local function hookFakeFlowstate(char)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
@@ -1245,6 +1268,10 @@ local function hookFakeFlowstate(char)
 
     animator.AnimationPlayed:Connect(function(track)
         if not FakePerks.Flowstate.Enabled then return end
+        local now = tick()
+        -- Cek cooldown
+        if now - FakePerks.Flowstate.LastUse < FakePerks.Flowstate.Cooldown then return end
+
         local anim = track.Animation
         if not anim or not anim.AnimationId then return end
         local id = anim.AnimationId:match("%d+")
@@ -1256,10 +1283,7 @@ local function hookFakeFlowstate(char)
         }
 
         if vaultIds["rbxassetid://" .. id] then
-            local now = tick()
-            if now - FakePerks.LastVault < 1 then return end
-            FakePerks.LastVault = now
-
+            FakePerks.Flowstate.LastUse = now
             local originalSpeed = hum.WalkSpeed
             hum.WalkSpeed = originalSpeed * (1 + FakePerks.Flowstate.SpeedBoost / 100)
 
@@ -1274,7 +1298,7 @@ local function hookFakeFlowstate(char)
     end)
 end
 
--- Fake Snake Step
+-- 2. FAKE SNAKE STEP
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
@@ -1302,7 +1326,7 @@ task.spawn(function()
     end
 end)
 
--- Fake Quick Recovery
+-- 3. FAKE QUICK RECOVERY
 task.spawn(function()
     while task.wait(0.2) do
         pcall(function()
@@ -1312,12 +1336,55 @@ task.spawn(function()
             local hum = char:FindFirstChildOfClass("Humanoid")
             if not hum then return end
 
+            local now = tick()
+            if now - FakePerks.QuickRecovery.LastUse < FakePerks.QuickRecovery.Cooldown then return end
+
             if hum:GetState() == Enum.HumanoidStateType.FallingDown
                 or hum:GetState() == Enum.HumanoidStateType.Ragdoll
                 or hum.Health < hum.MaxHealth * 0.3 then
+                FakePerks.QuickRecovery.LastUse = now
                 pcall(function()
                     hum:ChangeState(Enum.HumanoidStateType.GettingUp)
                 end)
+                Rayfield:Notify({ title = "Quick Recovery", content = "Recovery aktif!", duration = 1.5 })
+            end
+        end)
+    end
+end)
+
+-- 4. FAKE PERFECT LANDING
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if not FakePerks.PerfectLanding.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            local now = tick()
+            if now - FakePerks.PerfectLanding.LastUse < FakePerks.PerfectLanding.Cooldown then return end
+
+            -- Cek kalau karakter lagi falling dari ketinggian
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Freefall then
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    -- Cek velocity jatuh
+                    local velocity = hrp.AssemblyLinearVelocity
+                    if velocity.Y < -50 then
+                        FakePerks.PerfectLanding.LastUse = now
+                        -- Reset state biar nggak ambil damage
+                        pcall(function()
+                            hum:ChangeState(Enum.HumanoidStateType.Running)
+                        end)
+                        -- Set Health biar nggak drop
+                        pcall(function()
+                            hum.Health = hum.MaxHealth
+                        end)
+                        Rayfield:Notify({ title = "Perfect Landing", content = "Anti damage jatuh!", duration = 1.5 })
+                    end
+                end
             end
         end)
     end
@@ -1329,7 +1396,7 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 end)
 if LocalPlayer.Character then pcall(function() hookFakeFlowstate(LocalPlayer.Character) end) end
 
-print("[TiarHub v17] Part 3/5a loaded.")
+print("[TiarHub v18] Part 3/5a loaded.")
 
 -- ============ AIMBOT + FOV CIRCLE ============
 local Drawing = Drawing
@@ -1413,26 +1480,20 @@ local function getSilentAimTarget()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
     local closest, shortest = nil, SilentAimSpear.FOV
-
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and p.Team then
             local valid = false
             if SilentAimSpear.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
             elseif SilentAimSpear.TargetMode == "Survivor" and (p.Team.Name == "Survivors" or p.Team.Name == "Survivor") then valid = true
             elseif SilentAimSpear.TargetMode == "Both" then valid = true end
-
             if valid then
-                local hrp = p.Character:FindFirstChild(SilentAimSpear.AimPart)
-                    or p.Character:FindFirstChild("HumanoidRootPart")
+                local hrp = p.Character:FindFirstChild(SilentAimSpear.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
                 local hum = p.Character:FindFirstChildOfClass("Humanoid")
                 if hrp and hum and hum.Health > 0 then
                     local pos, visible = cam:WorldToViewportPoint(hrp.Position)
                     if visible then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = hrp
-                        end
+                        if dist < shortest then shortest = dist; closest = hrp end
                     end
                 end
             end
@@ -1451,25 +1512,19 @@ RunService.RenderStepped:Connect(function()
                 workspace.CurrentCamera.ViewportSize.Y / 2
             )
         end
-
         if not SilentAimSpear.Enabled then return end
         if not SilentAimSpear.Holding then return end
-
         local target = getSilentAimTarget()
         if not target then return end
-
         local cam = workspace.CurrentCamera
         local pos = target.Position
-
         if SilentAimSpear.Prediction > 0 then
             pos = pos + (target.AssemblyLinearVelocity * SilentAimSpear.Prediction)
         end
-
         cam.CFrame = CFrame.new(cam.CFrame.Position, pos)
     end)
 end)
 
--- Auto detect Veil Spear equipped
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
@@ -1485,6 +1540,94 @@ task.spawn(function()
         end)
     end
 end)
+
+-- ============ AIMLOCK KILLER BUTTON ============
+local function getClosestKillerForLock()
+    local root = getRoot()
+    local cam = workspace.CurrentCamera
+    if not root or not cam then return nil end
+    local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local closest, shortest = nil, AimlockKiller.LockRadius
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Team and p.Team.Name == "Killer" then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            if hrp and hum and hum.Health > 0 then
+                local pos, visible = cam:WorldToViewportPoint(hrp.Position)
+                if visible then
+                    local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                    if dist < shortest then shortest = dist; closest = hrp end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if not AimlockKiller.Enabled then return end
+        local target = getClosestKillerForLock()
+        if not target then return end
+        local cam = workspace.CurrentCamera
+        local pos = target.Position
+        cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), AimlockKiller.Smoothness)
+    end)
+end)
+
+local function createAimlockButton()
+    pcall(function()
+        if AimlockKiller.Button then AimlockKiller.Button:Destroy() end
+        local gui = Instance.new("ScreenGui")
+        gui.Name = "AimlockButtonGui"
+        gui.ResetOnSpawn = false
+        gui.Parent = PlayerGui
+        local btn = Instance.new("ImageButton")
+        btn.Size = UDim2.new(0, 50, 0, 50)
+        btn.Position = UDim2.new(0.55, 0, 0.75, 0) -- sebelah kiri moonwalk button
+        btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        btn.BackgroundTransparency = 0.9
+        btn.Parent = gui
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+        local stroke = Instance.new("UIStroke")
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Thickness = 1.2
+        stroke.Color = Color3.fromRGB(255, 255, 255)
+        stroke.Transparency = 0.8
+        stroke.Parent = btn
+
+        -- Label
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(0, 60, 0, 20)
+        label.Position = UDim2.new(0.5, -30, -0.5, 0)
+        label.BackgroundTransparency = 1
+        label.Text = "🎯 AIM"
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextStrokeTransparency = 0.5
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 11
+        label.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            AimlockKiller.Enabled = not AimlockKiller.Enabled
+            if AimlockKiller.Enabled then
+                stroke.Color = Color3.fromRGB(255, 0, 0)
+                label.Text = "🎯 LOCK"
+                Rayfield:Notify({ title = "Aimlock Killer", content = "Aimlock ON", duration = 2 })
+            else
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                label.Text = "🎯 AIM"
+                Rayfield:Notify({ title = "Aimlock Killer", content = "Aimlock OFF", duration = 2 })
+            end
+        end)
+
+        AimlockKiller.Button = gui
+    end)
+end
+
+local function removeAimlockButton()
+    if AimlockKiller.Button then AimlockKiller.Button:Destroy(); AimlockKiller.Button = nil end
+end
 
 -- ============ HIT MARKER ============
 local function createHitMarkerLines()
@@ -1539,7 +1682,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ RAYCAST / AIMBOT ============
+-- ============ AIMBOT ============
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -1672,8 +1815,8 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v17] Part 3/5 loaded.")-- ============================================
--- ⚡ TIARHUB v17 - Part 4/5: Killer + Movement + Visual
+print("[TiarHub v18] Part 3/5 loaded.")-- ============================================
+-- ⚡ TIARHUB v18 - Part 4/5: Killer + Movement + Visual
 -- ============================================
 
 local function GetDownedSurvivor()
@@ -2167,18 +2310,35 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
--- ============ COPY AVATAR ============
+-- ============ COPY AVATAR (FALLENS STYLE) ============
 local function saveOriginalAppearance()
     local char = LocalPlayer.Character
-    if not char then return false end
+    if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return false end
-    local ok, desc = pcall(function() return hum:GetAppliedDescription() end)
-    if ok and desc then
-        AvatarCopier.OriginalDescription = desc
-        return true
+    if hum then
+        AvatarCopier.OriginalDescription = hum:GetAppliedDescription()
     end
-    return false
+end
+
+local function applyBlockyBody(character)
+    local hum = character:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local desc = Instance.new("HumanoidDescription")
+    desc.BodyTypeScale = 1
+    desc.DepthScale = 1
+    desc.HeadScale = 1
+    desc.HeightScale = 1
+    desc.ProportionScale = 0
+    desc.WidthScale = 1
+    hum:ApplyDescriptionClientServer(desc)
+end
+
+local function removeAllClothingAndAccessories(character)
+    for _, v in pairs(character:GetDescendants()) do
+        if v:IsA("Accessory") or v:IsA("Clothing") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+            v:Destroy()
+        end
+    end
 end
 
 local function copyAvatar(username)
@@ -2188,11 +2348,11 @@ local function copyAvatar(username)
     end
     saveOriginalAppearance()
 
-    local ok, userId = pcall(function()
+    local success, userId = pcall(function()
         return Players:GetUserIdFromNameAsync(username)
     end)
-    if not ok or not userId then
-        Rayfield:Notify({ title = "Copy Avatar", content = "User '" .. username .. "' tidak ditemukan!" })
+    if not success or not userId then
+        Rayfield:Notify({ title = "Copy Avatar", content = "User tidak ditemukan!" })
         return false
     end
 
@@ -2203,126 +2363,38 @@ local function copyAvatar(username)
     if not hum then return false end
 
     task.spawn(function()
-        local okDesc, desc = pcall(function()
-            return Players:GetHumanoidDescriptionFromUserId(userId)
-        end)
-        if not okDesc or not desc then
-            Rayfield:Notify({ title = "Copy Avatar", content = "Gagal ambil deskripsi!" })
-            return
-        end
-
-        for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-                pcall(function() v:Destroy() end)
-            end
-        end
-        task.wait(0.2)
+        local desc = Players:GetHumanoidDescriptionFromUserId(userId)
 
         if AvatarCopier.BlockyBody then
-            pcall(function()
-                local bd = Instance.new("HumanoidDescription")
-                bd.BodyTypeScale = 1; bd.DepthScale = 1; bd.HeadScale = 1
-                bd.HeightScale = 1; bd.ProportionScale = 0; bd.WidthScale = 1
-                bd.HeadColor = desc.HeadColor; bd.TorsoColor = desc.TorsoColor
-                bd.LeftArmColor = desc.LeftArmColor; bd.RightArmColor = desc.RightArmColor
-                bd.LeftLegColor = desc.LeftLegColor; bd.RightLegColor = desc.RightLegColor
-                hum:ApplyDescriptionClientServer(bd)
-            end)
-            task.wait(0.5)
+            applyBlockyBody(char)
+            task.wait(0.3)
         end
 
-        local function loadAsset(assetId)
-            if not assetId or assetId == 0 or assetId == "0" then return nil end
-            local okAsset, asset = pcall(function()
-                return InsertService:LoadAsset(tonumber(assetId))
-            end)
-            if okAsset and asset then return asset end
-            return nil
-        end
+        removeAllClothingAndAccessories(char)
+        task.wait(0.2)
 
-        if desc.Shirt and tonumber(desc.Shirt) and tonumber(desc.Shirt) ~= 0 then
-            local asset = loadAsset(desc.Shirt)
-            if asset then
-                for _, v in pairs(asset:GetChildren()) do
-                    if v:IsA("Shirt") then v:Clone().Parent = char; break end
-                end
-                asset:Destroy()
-            else
-                pcall(function()
-                    local s = Instance.new("Shirt")
-                    s.ShirtTemplate = "rbxassetid://" .. tostring(desc.Shirt)
-                    s.Parent = char
-                end)
-            end
-        end
-        task.wait(0.3)
+        hum:ApplyDescriptionClientServer(desc)
 
-        if desc.Pants and tonumber(desc.Pants) and tonumber(desc.Pants) ~= 0 then
-            local asset = loadAsset(desc.Pants)
-            if asset then
-                for _, v in pairs(asset:GetChildren()) do
-                    if v:IsA("Pants") then v:Clone().Parent = char; break end
-                end
-                asset:Destroy()
-            else
-                pcall(function()
-                    local p = Instance.new("Pants")
-                    p.PantsTemplate = "rbxassetid://" .. tostring(desc.Pants)
-                    p.Parent = char
-                end)
-            end
-        end
-        task.wait(0.3)
-
-        if desc.GraphicTShirt and tonumber(desc.GraphicTShirt) and tonumber(desc.GraphicTShirt) ~= 0 then
-            pcall(function()
-                local st = Instance.new("ShirtGraphic")
-                st.Graphic = "rbxassetid://" .. tostring(desc.GraphicTShirt)
-                st.Parent = char
-            end)
-        end
-        task.wait(0.3)
-
-        if desc.AccessoryBlob and desc.AccessoryBlob ~= "" then
-            for assetId in string.gmatch(desc.AccessoryBlob, "[^;]+") do
-                local id = tonumber(assetId)
-                if id and id > 0 then
-                    local okAsset, asset = pcall(function()
-                        return InsertService:LoadAsset(id)
-                    end)
-                    if okAsset and asset then
-                        for _, v in pairs(asset:GetChildren()) do
-                            if v:IsA("Accessory") or v:IsA("Hat") then
-                                pcall(function() v:Clone().Parent = char end)
-                            end
-                        end
-                        asset:Destroy()
-                    end
-                    task.wait(0.1)
-                end
-            end
-        end
-
-        Rayfield:Notify({ title = "Copy Avatar", content = "Copy: " .. username .. " ✓" })
+        Rayfield:Notify({ title = "Copy Avatar", content = "Copy: " .. username })
     end)
+
     return true
 end
 
 local function resetAvatar()
-    if not AvatarCopier.OriginalDescription then return end
+    if not AvatarCopier.OriginalDescription then
+        Rayfield:Notify({ title = "Reset", content = "Avatar original belum disimpan!" })
+        return
+    end
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    for _, v in pairs(char:GetDescendants()) do
-        if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-            pcall(function() v:Destroy() end)
-        end
+    if hum then
+        removeAllClothingAndAccessories(char)
+        hum:ApplyDescriptionClientServer(AvatarCopier.OriginalDescription)
+        AvatarCopier.CurrentCopiedUserId = nil
+        Rayfield:Notify({ title = "Reset", content = "Avatar original balik!" })
     end
-    task.wait(0.1)
-    pcall(function() hum:ApplyDescriptionClientServer(AvatarCopier.OriginalDescription) end)
-    AvatarCopier.CurrentCopiedUserId = nil
-    Rayfield:Notify({ title = "Reset Avatar", content = "Avatar original balik!" })
 end
 
 LocalPlayer.CharacterAdded:Connect(function(char)
@@ -2330,17 +2402,17 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     if AvatarCopier.CurrentCopiedUserId then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
-            local okDesc, desc = pcall(function()
-                return Players:GetHumanoidDescriptionFromUserId(AvatarCopier.CurrentCopiedUserId)
-            end)
-            if okDesc and desc then
-                pcall(function() hum:ApplyDescriptionClientServer(desc) end)
+            local desc = Players:GetHumanoidDescriptionFromUserId(AvatarCopier.CurrentCopiedUserId)
+            if AvatarCopier.BlockyBody then
+                applyBlockyBody(char)
             end
+            removeAllClothingAndAccessories(char)
+            hum:ApplyDescriptionClientServer(desc)
         end
     end
 end)
 
-print("[TiarHub v17] Part 4/5a loaded.")
+print("[TiarHub v18] Part 4/5a loaded.")
 
 -- ============================================
 -- VISUAL + FIX CONTRAST
@@ -2378,7 +2450,6 @@ local function applyVisual(force)
             LastVisualState.NoShadow = Visual.NoShadow
             Lighting.GlobalShadows = not Visual.NoShadow
         end
-
         if Visual.AmbientColorEnabled then
             Lighting.Ambient = Visual.AmbientColor
             Lighting.OutdoorAmbient = Visual.AmbientColor
@@ -2403,7 +2474,6 @@ local function toggleScreenEffects()
     end)
 end
 
--- COLOR CORRECTION (FIX CONTRAST)
 local ColorCorrection = nil
 
 local function getOrCreateCC()
@@ -2521,7 +2591,8 @@ local function startAntiLag()
             if not AntiLag.Enabled then return end
             if AntiLag.NoParticles then
                 for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then                        if v.Enabled then v.Enabled = false end
+                    if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
+                        if v.Enabled then v.Enabled = false end
                     end
                 end
             end
@@ -2549,7 +2620,7 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- HIDE RED SPARK
+-- HIDE SPARK
 local function isRedSpark(obj)
     if not obj then return false end
     if not (obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
@@ -2595,7 +2666,7 @@ local function stopHideSpark()
     HiddenSparkCache = {}
 end
 
--- TELEPORT SYSTEM
+-- TELEPORT
 local function findNearestByNames(names, maxDist)
     local root = getRoot()
     if not root then return nil, math.huge end
@@ -2657,8 +2728,8 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v17] Part 4/5 loaded.")-- ============================================
--- ⚡ TIARHUB v17 - Part 5/5: UI Menu + Startup
+print("[TiarHub v18] Part 4/5 loaded.")-- ============================================
+-- ⚡ TIARHUB v18 - Part 5/5: UI Menu + Startup
 -- ============================================
 
 -- ============ ESP TAB ============
@@ -2726,13 +2797,22 @@ SurvivorTab:CreateSlider({ name = "Detect Range", range = {5, 50}, increment = 1
 SurvivorTab:CreateSlider({ name = "Cooldown", range = {0.1, 3}, increment = 0.1, suffix = "s", currentValue = 0.5, flag = "ad_abyss_cd", callback = function(v) AutoDodgeAbyss.Cooldown = v end })
 SurvivorTab:CreateSlider({ name = "Crouch Duration", range = {0.1, 2}, increment = 0.1, suffix = "s", currentValue = 0.3, flag = "ad_abyss_dur", callback = function(v) AutoDodgeAbyss.CrouchDuration = v end })
 
+-- ============ FAKE PERKS (SURVIVOR TAB) ============
 SurvivorTab:CreateSection("🎭 Fake Perks")
 SurvivorTab:CreateToggle({ name = "Fake Flowstate (Speed Boost on Vault)", currentValue = false, flag = "fp_flow", callback = function(v) FakePerks.Flowstate.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Flowstate Speed Boost (%)", range = {10, 50}, increment = 5, suffix = "%", currentValue = 20, flag = "fp_flow_speed", callback = function(v) FakePerks.Flowstate.SpeedBoost = v end })
 SurvivorTab:CreateSlider({ name = "Flowstate Duration", range = {1, 10}, increment = 0.5, suffix = "s", currentValue = 3, flag = "fp_flow_dur", callback = function(v) FakePerks.Flowstate.Duration = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 60, flag = "fp_flow_cd", callback = function(v) FakePerks.Flowstate.Cooldown = v end })
+
 SurvivorTab:CreateToggle({ name = "Fake Snake Step (Crouch Speed)", currentValue = false, flag = "fp_snake", callback = function(v) FakePerks.SnakeStep.Enabled = v end })
-SurvivorTab:CreateSlider({ name = "Snake Step Speed", range = {16, 100}, increment = 1, currentValue = 90, flag = "fp_snake_speed", callback = function(v) FakePerks.SnakeStep.SpeedBoost = v end })
+SurvivorTab:CreateSlider({ name = "Snake Step Speed", range = {16, 150}, increment = 1, currentValue = 90, flag = "fp_snake_speed", callback = function(v) FakePerks.SnakeStep.SpeedBoost = v end })
+SurvivorTab:CreateSlider({ name = "Snake Step Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 0, flag = "fp_snake_cd", callback = function(v) FakePerks.SnakeStep.Cooldown = v end })
+
 SurvivorTab:CreateToggle({ name = "Fake Quick Recovery", currentValue = false, flag = "fp_recovery", callback = function(v) FakePerks.QuickRecovery.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Quick Recovery Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 30, flag = "fp_recovery_cd", callback = function(v) FakePerks.QuickRecovery.Cooldown = v end })
+
+SurvivorTab:CreateToggle({ name = "Fake Perfect Landing (Anti Fall Damage)", currentValue = false, flag = "fp_landing", callback = function(v) FakePerks.PerfectLanding.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Perfect Landing Cooldown", range = {0, 100}, increment = 1, suffix = "s", currentValue = 45, flag = "fp_landing_cd", callback = function(v) FakePerks.PerfectLanding.Cooldown = v end })
 
 -- ============ TELEPORT TAB ============
 local TeleportTab = Window:CreateTab({ name = "Teleport", icon = 0 })
@@ -2769,14 +2849,22 @@ AvatarTab:CreateInput({ name = "Target Username", currentValue = "", placeholder
 AvatarTab:CreateButton({ name = "🎭 Copy Avatar", callback = function() copyAvatar(AvatarCopier.TargetUsername) end })
 AvatarTab:CreateButton({ name = "🔄 Reset to Original", callback = function() resetAvatar() end })
 AvatarTab:CreateButton({ name = "💾 Save Current as Original", callback = function()
-    if saveOriginalAppearance() then Rayfield:Notify({ title = "Save Avatar", content = "Avatar original disimpan!" })
-    else Rayfield:Notify({ title = "Save Avatar", content = "Gagal simpan avatar!" }) end
+    saveOriginalAppearance()
+    Rayfield:Notify({ title = "Save Avatar", content = "Avatar original disimpan!" })
 end })
 AvatarTab:CreateSection("Setting")
 AvatarTab:CreateToggle({ name = "Blocky Body (R6 Style)", currentValue = true, flag = "av_blocky", callback = function(v) AvatarCopier.BlockyBody = v end })
 
 -- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 0 })
+AimTab:CreateSection("🎯 Aimlock Killer (Button)")
+AimTab:CreateToggle({ name = "Show Aimlock Button", currentValue = false, flag = "al_show_btn", callback = function(v) 
+    AimlockKiller.ShowButton = v
+    if v then createAimlockButton() else removeAimlockButton() end
+end })
+AimTab:CreateSlider({ name = "Aimlock Lock Radius", range = {20, 500}, increment = 10, suffix = "stud", currentValue = 100, flag = "al_radius", callback = function(v) AimlockKiller.LockRadius = v end })
+AimTab:CreateSlider({ name = "Aimlock Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, flag = "al_smooth", callback = function(v) AimlockKiller.Smoothness = v end })
+
 AimTab:CreateSection("Aimbot Survivor")
 AimTab:CreateToggle({ name = "Aimbot (Hold RMB)", currentValue = false, flag = "aim_on", callback = function(v) GunAim.Enabled = v end })
 AimTab:CreateToggle({ name = "Show FOV Circle", currentValue = false, flag = "aim_fovcircle", callback = function(v) FOVCircleVisible = v; if v and not FOVCircle then createFOVCircle() end end })
@@ -2954,43 +3042,45 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end)
 end)
 
--- ============ NOTIFIKASI ============
+-- ============ NOTIFIKASI STARTUP ============
 task.wait(1)
 Rayfield:Notify({
     title = "⚡ TiarHub ⚡",
-    content = "Script loaded! v17 - Semua fitur siap dipakai.",
+    content = "Script loaded! v18 - Semua fitur siap dipakai.",
     duration = 8
 })
 
 task.wait(2)
 Rayfield:Notify({
-    title = "🎁 Fitur Baru",
-    content = "Fake Perks + Silent Aim Veil Spear + Moonwalk 2 Mode",
+    title = "🎁 Fitur Baru v18",
+    content = "4 Fake Perks + Aimlock Button + Copy Avatar Fix",
     duration = 8
 })
 
 task.wait(2)
 Rayfield:Notify({
     title = "💡 Tips",
-    content = "Survivor Tab → Fake Perks | Aimbot Tab → Silent Aim Veil Spear | Misc → Moonwalk",
+    content = "Survivor → Fake Perks | Aimbot → Aimlock Button | Avatar → Copy",
     duration = 8
 })
 
 -- ============ PRINT STATUS ============
 print("============================================")
-print("  ⚡ TIARHUB v17 - ALL LOADED ⚡")
+print("  ⚡ TIARHUB v18 - ALL LOADED ⚡")
 print("  ==========================================")
 print("  [✓] ESP System + Killer Warning")
 print("  [✓] Auto Parry (2 Mode) + Rainbow + Pulse")
 print("  [✓] Skill Check (Instant/Perfect)")
 print("  [✓] Auto Dodge Abyss")
-print("  [✓] Fake Perks (Flowstate/Snake/Recovery)")
+print("  [✓] 4 Fake Perks (Flow/Snake/Recovery/Landing)")
+print("  [✓] Fake Perks Cooldown (0-100)")
+print("  [✓] Aimlock Killer Button + Slider")
 print("  [✓] Silent Aim Veil Spear")
 print("  [✓] Aimbot + FOV Circle + Tracer")
 print("  [✓] Hit Marker")
 print("  [✓] Killer System + 5 Fitur Baru")
 print("  [✓] Movement + Moonwalk 2 Mode + FOV")
-print("  [✓] Copy Avatar (InsertService)")
+print("  [✓] Copy Avatar (Fallens Style - FIX)")
 print("  [✓] Teleport System + Auto Escape")
 print("  [✓] Visual + Fix Contrast")
 print("  [✓] Anti-Lag + Hide Spark")

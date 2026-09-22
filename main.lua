@@ -1,7 +1,3 @@
--- ============================================
--- TIARHUB FULL v12 - Bagian 1: Setup & Config
--- ============================================
-
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
 
 local Window = Rayfield:CreateWindow({
@@ -21,7 +17,6 @@ local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- ============ ESP CONFIG ============
 local ESP = {
     Survivor = false, Killer = false, Generator = false,
     Hook = false, Pallet = false, Window = false, SCP = false,
@@ -38,7 +33,6 @@ local ESP = {
 
 local ESPStatus = { Enabled = false, ShowName = true, ShowDistance = true, ShowHealth = false, Radius = 100 }
 
--- ============ VISUAL CONFIG ============
 local Visual = { Fullbright = false, NoFog = false, NoShadow = false, NoBloom = false, NoBlur = false, ColorCorrection = false, Saturation = 0, Brightness = 0 }
 local VisualOriginal = {
     Brightness = Lighting.Brightness, ClockTime = Lighting.ClockTime,
@@ -47,37 +41,19 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
--- ============ AUTO PARRY CONFIG (2 MODE) ============
 local Parry = {
-    Enabled = false,
-    Mode = "Safety",
-    SafetyDistance = 12,
-    SafetyDebounce = 0.15,
-    SafetyFaceSensitivity = 0.5,
-    AggressiveDistance = 20,
-    AggressiveDebounce = 0.05,
-    AggressiveFaceSensitivity = -1,
-    RequireFacing = true
+    Enabled = false, Mode = "Safety",
+    SafetyDistance = 12, SafetyDebounce = 0.15, SafetyFaceSensitivity = 0.5,
+    AggressiveDistance = 20, AggressiveDebounce = 0.05, AggressiveFaceSensitivity = -1
 }
 
--- ============ AUTO SKILL CHECK ============
 local SkillCheck = { Enabled = false }
-
--- ============ AUTO WIGGLE ============
 local Wiggle = { Enabled = false, Spam = 5 }
-
--- ============ AUTO FLEE ============
 local AutoFlee = { Enabled = false, DetectDistance = 50, Cooldown = 0.1 }
 local LastFlee = 0
-
--- ============ FAST VAULT ============
-local FastVault = {
-    Enabled = false, Speed = 1.2,
-    ReplaceMap = { ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779" }
-}
+local FastVault = { Enabled = false, Speed = 1.2, ReplaceMap = { ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779" } }
 local VaultTracks = {}
 
--- ============ AIMBOT CONFIG ============
 local GunAim = {
     Enabled = false, Holding = false, TargetMode = "Killer",
     Strength = 1, Predict = true, PredictStrength = 0.12,
@@ -85,11 +61,8 @@ local GunAim = {
     ShowFOV = false, ShowTracer = false, TracerColor = Color3.fromRGB(255, 0, 0)
 }
 
-local KillerAim = {
-    Enabled = false, FOV = 200, Strength = 0.5, Holding = false
-}
+local KillerAim = { Enabled = false, FOV = 200, Strength = 0.5, Holding = false }
 
--- ============ KILLER CONFIG ============
 local Killer = {
     AutoAttack = false, AttackDelay = 0.45,
     AutoCarry = false, AutoHook = false, KillAll = false,
@@ -99,43 +72,35 @@ local KillerBusy = false
 local KillerTarget = nil
 local StalkConnection = nil
 
--- ============ MOVEMENT CONFIG ============
 local Movement = {
     WalkSpeedEnabled = false, WalkSpeedValue = 17.6, OriginalWalkSpeed = 16,
     JumpPowerEnabled = false, JumpPowerValue = 50, OriginalJumpPower = 50,
     NoClip = false, InfiniteJump = false
 }
 
--- ============ MOONWALK CONFIG ============
 local Moonwalk = { Enabled = false, ShowButton = false, SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true }
 local MoonwalkConnection = nil
 local MoonwalkButton = nil
 local ParryActive = false
 
--- ============ CROSSHAIR ============
 local Crosshair = { Enabled = false, Size = 8, Thickness = 2, Color = Color3.fromRGB(255, 255, 255), Style = "Plus", OffsetX = 0, OffsetY = 0 }
 
--- ============ EMOTE ============
 local Emote = { Selected = "Mannrobics" }
 local EmoteList = { "Mannrobics","Arm Swing","Schadenfreude","Kyoufuu","Backflip","Griddy","Friday Night","Floating Rest","OnePlays","Quick Combo","WarCry","Wave" }
 
--- ============ MASKED ============
 local Masked = { CurrentPower = "Cobra" }
 local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
--- ============ ANTI-LAG CONFIG ============
 local AntiLag = {
     Enabled = false,
     NoParticles = false, NoTextures = false,
     PhysicsThrottle = false, NoGlobalShadows = false, NetworkLag = false
 }
 
--- ============ FPS/PING CONFIG ============
 local FPS = 0
 local Frames = 0
 local LastTick = tick()
 
--- ============ KILLER ANIM IDS ============
 local KillerAnims = {
 ["rbxassetid://105374834496520"] = true, ["rbxassetid://113255068724446"] = true,
 ["rbxassetid://118907603246885"] = true, ["rbxassetid://129784271201071"] = true,
@@ -151,7 +116,6 @@ local KillerAnims = {
 ["rbxassetid://138720291317243"] = true
 }
 
--- ============ REMOTES ============
 local function findRemote(path)
     local cur = ReplicatedStorage
     for segment in string.gmatch(path, "[^%.]+") do
@@ -166,7 +130,6 @@ local CarryEvent = findRemote("Remotes.Carry.CarrySurvivorEvent")
 local HookEvent = findRemote("Remotes.Carry.HookEvent")
 local EmoteRemote = findRemote("Remotes.EmoteHandler")
 
--- ============ HELPER ============
 local function getRoot()
     local char = LocalPlayer.Character
     return char and char:FindFirstChild("HumanoidRootPart")
@@ -181,18 +144,6 @@ local function isDowned()
     local hum = getHum()
     if not hum then return false end
     return hum.Health <= 0 or hum.Health < 2
-end
-
-local function GetGameValue(obj, name)
-    if not obj then return nil end
-    local attr = obj:GetAttribute(name)
-    if attr ~= nil then return attr end
-    local child = obj:FindFirstChild(name)
-    if child then
-        local ok, val = pcall(function() return child.Value end)
-        if ok then return val end
-    end
-    return nil
 end
 
 local function GetPos(obj)
@@ -225,11 +176,7 @@ end
 local function getParryFaceSensitivity()
     if Parry.Mode == "Aggressive" then return Parry.AggressiveFaceSensitivity
     else return Parry.SafetyFaceSensitivity end
-end-- ============================================
--- TIARHUB FULL v12 - Bagian 2: ESP System
--- ============================================
-
-local ESPObjects = {}
+endlocal ESPObjects = {}
 local ESPNames = {}
 local StatusESP = {}
 local CachedObjects = { Generators = {}, Hooks = {}, Pallets = {}, Windows = {} }
@@ -320,7 +267,6 @@ local function createESP(obj, color, showName, customName)
     end
 end
 
--- ============ GENERATOR ESP DENGAN PROGRESS ============
 local function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
     if not ESP.Generator then
@@ -479,7 +425,6 @@ workspace.DescendantRemoving:Connect(function(obj)
     removeESP(obj)
 end)
 
--- ============ FPS/PING WATERMARK ============
 RunService.RenderStepped:Connect(function()
     Frames = Frames + 1
     if tick() - LastTick >= 1 then
@@ -493,7 +438,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ============ MAIN ESP LOOP ============
 local lastUpdate = 0
 RunService.RenderStepped:Connect(function()
     pcall(function()
@@ -583,12 +527,7 @@ RunService.RenderStepped:Connect(function()
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
     end)
-end)-- ============================================
--- TIARHUB FULL v12 - Bagian 3: Auto Fitur Survivor
--- ============================================
-
--- ============ AUTO PARRY (2 MODE) ============
-local lastParry = 0
+end)local lastParry = 0
 
 local function pressRightClick()
     pcall(function()
@@ -695,7 +634,6 @@ task.spawn(function()
     end
 end)
 
--- ============ AUTO SKILL CHECK ============
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
 local busy = false
@@ -761,7 +699,6 @@ local function startSkillCheck()
     end)
 end
 
--- ============ AUTO WIGGLE ============
 local function AutoWiggle()
     if not Wiggle.Enabled then return end
     local char = LocalPlayer.Character
@@ -778,7 +715,6 @@ local function AutoWiggle()
     for i = 1, Wiggle.Spam do event:FireServer() end
 end
 
--- ============ AUTO FLEE ============
 local function GetNearestKiller()
     local root = getRoot()
     if not root then return nil end
@@ -825,7 +761,6 @@ task.spawn(function()
     end
 end)
 
--- ============ FAST VAULT ============
 local function normalizeId(id)
     local num = tostring(id):match("%d+")
     return num and ("rbxassetid://" .. num)
@@ -862,15 +797,10 @@ end
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5); pcall(function() hookVault(char) end)
 end)
-if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) end-- ============================================
--- TIARHUB FULL v12 - Bagian 4: Aimbot System
--- ============================================
-
-local Drawing = Drawing
+if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) endlocal Drawing = Drawing
 local FOVCircle = nil
 local TracerLine = nil
 
--- ============ FOV CIRCLE ============
 local function createFOVCircle()
     if not Drawing then return end
     if FOVCircle then FOVCircle:Remove() end
@@ -898,7 +828,6 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ TRACER ============
 local function createTracer()
     if not Drawing then return end
     if TracerLine then TracerLine:Remove() end
@@ -910,7 +839,6 @@ end
 
 createTracer()
 
--- ============ AIMBOT SYSTEM ============
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -956,7 +884,6 @@ local function getClosestGunTarget()
     return closest
 end
 
--- ============ AIMBOT LOOP ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if TracerLine then TracerLine.Visible = false end
@@ -981,7 +908,6 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ KILLER AIM ============
 local function getClosestSurvivorForKiller()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -1025,7 +951,6 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ INPUT DETECTION ============
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -1039,12 +964,7 @@ UserInputService.InputEnded:Connect(function(input)
         GunAim.Holding = false
         KillerAim.Holding = false
     end
-end)-- ============================================
--- TIARHUB FULL v12 - Bagian 5: Killer & Movement
--- ============================================
-
--- ============ KILLER HELPERS ============
-local function GetDownedSurvivor()
+end)local function GetDownedSurvivor()
     local root = getRoot()
     if not root then return nil end
     local best, dist = nil, math.huge
@@ -1092,7 +1012,6 @@ local function GetHook()
     return bestHook
 end
 
--- ============ AUTO STALK ============
 local function startAutoStalk()
     if StalkConnection then return end
     StalkConnection = RunService.Heartbeat:Connect(function()
@@ -1123,7 +1042,6 @@ local function stopAutoStalk()
     if StalkConnection then StalkConnection:Disconnect(); StalkConnection = nil end
 end
 
--- ============ KILLER HEARTBEAT ============
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if not getRoot() then return end
@@ -1184,7 +1102,6 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ============ MOVEMENT ============
 local WalkSpeedConnection = nil
 local function applyWalkSpeed()
     if WalkSpeedConnection then WalkSpeedConnection:Disconnect() end
@@ -1237,7 +1154,6 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- ============ MOONWALK ============
 local function startMoonwalk()
     if MoonwalkConnection then return end
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
@@ -1327,7 +1243,6 @@ local function removeMoonwalkButton()
     if MoonwalkButton then MoonwalkButton:Destroy(); MoonwalkButton = nil end
 end
 
--- ============ CROSSHAIR ============
 local CrosshairGui = nil
 local function updateCrosshair()
     pcall(function()
@@ -1368,12 +1283,10 @@ RunService.Heartbeat:Connect(function()
     pcall(function() applyVisual() end)
 end)
 
--- ============ EMOTE ============
 local function playEmote(name)
     if EmoteRemote then pcall(function() EmoteRemote:FireServer(name) end) end
 end
 
--- ============ MASKED ============
 local function activateMasked()
     local event = findRemote("Remotes.Killers.Masked.Activatepower")
     if event then pcall(function() event:FireServer(Masked.CurrentPower) end) end
@@ -1386,12 +1299,7 @@ end
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     applyVisual(true)
-end)-- ============================================
--- TIARHUB FULL v12 - Bagian 6: Visual & Anti-Lag
--- ============================================
-
--- ============ VISUAL FUNCTIONS ============
-local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
+end)local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
 
 local function applyVisual(force)
     pcall(function()
@@ -1427,7 +1335,6 @@ local function applyVisual(force)
     end)
 end
 
--- ============ NO BLOOM / BLUR / DOF ============
 local function toggleScreenEffects(disable)
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
@@ -1450,7 +1357,6 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
--- ============ COLOR CORRECTION ============
 local ColorCorrection = nil
 
 local function applyColorCorrection()
@@ -1470,7 +1376,6 @@ local function applyColorCorrection()
     end)
 end
 
--- ============ ANTI-LAG MAIN LOOP ============
 local AntiLagConnection = nil
 
 local function startAntiLag()
@@ -1498,7 +1403,6 @@ local function startAntiLag()
     end)
 end
 
--- ============ ANTI-LAG TOGGLE FUNCTIONS ============
 local function applyAntiLag()
     pcall(function()
         if AntiLag.PhysicsThrottle then
@@ -1555,7 +1459,6 @@ end
 
 startAntiLag()
 
--- ============ VISUAL APPLY EXTENDED ============
 local function applyVisualExtended()
     pcall(function()
         toggleScreenEffects(Visual.NoBloom)
@@ -1585,12 +1488,7 @@ LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     applyVisual(true)
     applyVisualExtended()
-end)-- ============================================
--- TIARHUB FULL v12 - Bagian 7: UI Menu Lengkap
--- ============================================
-
--- ============ ESP TAB ============
-local ESPTab = Window:CreateTab({ name = "ESP", icon = 4483362458 })
+end)local ESPTab = Window:CreateTab({ name = "ESP", icon = 4483362458 })
 
 ESPTab:CreateSection("Player ESP")
 ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, callback = function(v) ESP.Survivor = v end })
@@ -1618,7 +1516,6 @@ ESPTab:CreateToggle({ name = "Show Name", currentValue = true, callback = functi
 ESPTab:CreateToggle({ name = "Show Distance", currentValue = true, callback = function(v) ESPStatus.ShowDistance = v end })
 ESPTab:CreateToggle({ name = "Show Health", currentValue = false, callback = function(v) ESPStatus.ShowHealth = v end })
 
--- ============ SURVIVOR TAB ============
 local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 4483362458 })
 
 SurvivorTab:CreateSection("Auto Parry - Mode")
@@ -1656,7 +1553,6 @@ SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, callback = function(v) FastVault.Speed = v end })
 
--- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 4483362458 })
 
 AimTab:CreateSection("Aimbot Survivor")
@@ -1676,7 +1572,6 @@ AimTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, callback =
 AimTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, callback = function(v) KillerAim.FOV = v end })
 AimTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, callback = function(v) KillerAim.Strength = v end })
 
--- ============ KILLER TAB ============
 local KillerTab = Window:CreateTab({ name = "Killer", icon = 4483362458 })
 
 KillerTab:CreateSection("Attack")
@@ -1696,7 +1591,6 @@ KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, curren
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
 KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked })
 
--- ============ MISC TAB ============
 local MiscTab = Window:CreateTab({ name = "Misc", icon = 4483362458 })
 
 MiscTab:CreateSection("Walk Speed")
@@ -1721,7 +1615,6 @@ MiscTab:CreateSection("Emote")
 MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", callback = function(opt) Emote.Selected = opt end })
 MiscTab:CreateButton({ name = "Play Emote", callback = function() playEmote(Emote.Selected) end })
 
--- ============ VISUAL TAB ============
 local VisualTab = Window:CreateTab({ name = "Visual", icon = 4483362458 })
 
 VisualTab:CreateSection("Lighting")
@@ -1738,7 +1631,6 @@ VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false,
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
 
--- ============ ANTI-LAG TAB ============
 local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 4483362458 })
 
 AntiLagTab:CreateSection("Anti-Lag Pack")
@@ -1751,7 +1643,6 @@ AntiLagTab:CreateToggle({ name = "Physics Throttle", currentValue = false, callb
 AntiLagTab:CreateToggle({ name = "No Global Shadows", currentValue = false, callback = function(v) AntiLag.NoGlobalShadows = v; applyAntiLag() end })
 AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false, callback = function(v) AntiLag.NetworkLag = v; applyAntiLag() end })
 
--- ============ CROSSHAIR TAB ============
 local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 4483362458 })
 
 CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, callback = function(v) Crosshair.Enabled = v end })
@@ -1761,9 +1652,8 @@ CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, s
 CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetX = v end })
 CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetY = v end })
 
--- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub Full v12",
+    title = "TiarHub Full",
     content = "Script loaded! All features aktif.",
     duration = 6
 })

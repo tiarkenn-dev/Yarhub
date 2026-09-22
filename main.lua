@@ -1,6 +1,6 @@
 -- ============================================
--- TIARHUB v15 - Part 1/6: Setup & Config
--- Moonwalk 2 Mode + FOV Preset + 3D-ish UI + Parry Circle Upgrade
+-- ⚡ TIARHUB v16 - Part 1/6: Setup & Config
+-- Fake Perks + Silent Aim Veil Spear
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -33,7 +33,7 @@ end
 -- ============ WINDOW ============
 local Window = Rayfield:CreateWindow({
     name = "⚡ TiarHub ⚡",
-    subtitle = "Violence District | v15",
+    subtitle = "Violence District | v16",
     sidebarLayout = true,
     configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubFull" }
 })
@@ -68,11 +68,9 @@ local Visual = {
     ClockTimeEnabled = false,
     ClockTime = 14,
     FogControlEnabled = false,
-    FogEnd = 100000,
-    FogStart = 0,
+    FogEnd = 100000, FogStart = 0,
     FogColor = Color3.fromRGB(200, 200, 200),
-    NoCameraShake = false,
-    NoBlood = false
+    NoCameraShake = false, NoBlood = false
 }
 
 local VisualOriginal = {
@@ -89,14 +87,9 @@ local PARRY_PRESETS = {
 }
 
 local Auto = {
-    Parry = false,
-    ParryMode = "Safety",
-    ParryDistance = 12,
-    FaceSensitivity = 0.5,
-    RequireFacing = true,
-    SkillCheck = false,
-    Wiggle = false,
-    WiggleSpam = 5
+    Parry = false, ParryMode = "Safety",
+    ParryDistance = 12, FaceSensitivity = 0.5, RequireFacing = true,
+    SkillCheck = false, Wiggle = false, WiggleSpam = 5
 }
 
 local PARRY_DEBOUNCE = 0.15
@@ -110,13 +103,9 @@ local function applyParryPreset(mode)
     PARRY_DEBOUNCE = p.Debounce
 end
 
--- ============ PARRY CIRCLE VISUAL (UPGRADE) ============
 local ParryRangeVisual = { 
-    Enabled = false, 
-    Color = Color3.fromRGB(255, 80, 80), 
-    Transparency = 0.7,
-    RainbowMode = false,
-    PulseEnabled = true
+    Enabled = false, Color = Color3.fromRGB(255, 80, 80), Transparency = 0.7,
+    RainbowMode = false, PulseEnabled = true
 }
 local ParryCircle = nil
 local ParryCircleInner = nil
@@ -128,13 +117,26 @@ local VaultTracks = {}
 
 -- ============ AUTO DODGE ABYSS ============
 local AutoDodgeAbyss = {
-    Enabled = false,
-    DetectRange = 18,
-    Cooldown = 0.5,
-    CrouchDuration = 0.3,
-    LastDodge = 0,
-    IsCrouching = false
+    Enabled = false, DetectRange = 18, Cooldown = 0.5, CrouchDuration = 0.3,
+    LastDodge = 0, IsCrouching = false
 }
+
+-- ============ FAKE PERKS ============
+local FakePerks = {
+    Flowstate = { Enabled = false, Duration = 3, SpeedBoost = 20 },
+    SnakeStep = { Enabled = false, SpeedBoost = 90 },
+    QuickRecovery = { Enabled = false },
+    LastVault = 0, LastCrouchState = false
+}
+
+-- ============ SILENT AIM VEIL SPEAR ============
+local SilentAimSpear = {
+    Enabled = false, TargetMode = "Killer",
+    FOV = 250, Smoothness = 1, AimPart = "HumanoidRootPart",
+    Prediction = 0.12, Holding = false, ShowFOV = false
+}
+local SilentAimCircle = nil
+local SilentAimTarget = nil
 
 -- ============ HIDE SPARK ============
 local HideSpark = { Enabled = false }
@@ -146,16 +148,13 @@ local Teleport = { LastTeleport = 0, Cooldown = 0.5 }
 -- ============ AUTO ESCAPE ============
 local AutoEscape = { Enabled = false, DetectDistance = 40, Cooldown = 0.8, LastEscape = 0 }
 
--- ============ SKILL CHECK MODE ============
+-- ============ SKILL CHECK ============
 local SkillCheckMode = "Perfect"
 
 -- ============ SOUND FEEDBACK ============
 local SoundFeedback = {
-    Enabled = true,
-    CurrentSound = "Click",
-    Volume = 0.5,
-    LastPlay = 0,
-    Cooldown = 0.05
+    Enabled = true, CurrentSound = "Click",
+    Volume = 0.5, LastPlay = 0, Cooldown = 0.05
 }
 
 local SoundList = {
@@ -194,11 +193,8 @@ initSound()
 
 -- ============ COPY AVATAR ============
 local AvatarCopier = {
-    Enabled = true,
-    TargetUsername = "",
-    OriginalDescription = nil,
-    CurrentCopiedUserId = nil,
-    BlockyBody = true
+    Enabled = true, TargetUsername = "",
+    OriginalDescription = nil, CurrentCopiedUserId = nil, BlockyBody = true
 }
 
 -- ============ AIMBOT ============
@@ -232,19 +228,11 @@ local KillerTarget = nil
 local StalkConnection = nil
 
 local HitMarker = {
-    Enabled = false,
-    Color = Color3.fromRGB(255, 0, 0),
-    Size = 20,
-    Thickness = 2,
-    Duration = 0.15
+    Enabled = false, Color = Color3.fromRGB(255, 0, 0),
+    Size = 20, Thickness = 2, Duration = 0.15
 }
 
-local ChaseDetector = {
-    Enabled = false,
-    Range = 30,
-    LastNotify = 0,
-    Cooldown = 2
-}
+local ChaseDetector = { Enabled = false, Range = 30, LastNotify = 0, Cooldown = 2 }
 
 -- ============ MOVEMENT ============
 local Movement = {
@@ -254,14 +242,9 @@ local Movement = {
 
 -- ============ MOONWALK (2 MODE) ============
 local Moonwalk = { 
-    Enabled = false, 
-    ShowButton = false, 
-    SpamSpeed = 30, 
-    Intensity = 35, 
-    SlowSpeed = 13, 
-    UseSlow = true,
-    Mode = "Default", -- "Default" atau "Camera"
-    FOVPreset = 90   -- 70 / 90 / 120
+    Enabled = false, ShowButton = false,
+    SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true,
+    Mode = "Default", FOVPreset = 90
 }
 local MoonwalkConnection = nil
 local MoonwalkHeartbeat = nil
@@ -281,8 +264,7 @@ local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
 -- ============ ANTI-LAG ============
 local AntiLag = {
-    Enabled = false,
-    NoParticles = false, NoTextures = false,
+    Enabled = false, NoParticles = false, NoTextures = false,
     PhysicsThrottle = false, NoGlobalShadows = false, NetworkLag = false
 }
 
@@ -376,8 +358,8 @@ local function getTeamLabel(plr)
     return plr.Team.Name
 end
 
-print("[TiarHub v15] Part 1/6 loaded.")-- ============================================
--- TIARHUB v15 - Part 2/6: ESP System + Rainbow + 3D UI
+print("[TiarHub v16] Part 1/6 loaded.")-- ============================================
+-- ⚡ TIARHUB v16 - Part 2/6: ESP + Rainbow + Sound
 -- ============================================
 
 local ESPObjects = {}
@@ -666,7 +648,7 @@ RunService.RenderStepped:Connect(function()
         LastTick = tick()
         local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         pcall(function()
-            Rayfield:SetWatermark(string.format("TiarHub | FPS: %d | PING: %d ms", FPS, ping))
+            Rayfield:SetWatermark(string.format("⚡ TiarHub ⚡ | FPS: %d | PING: %d ms", FPS, ping))
         end)
     end
 end)
@@ -749,9 +731,8 @@ RunService.RenderStepped:Connect(function()
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
 
-        -- ============ PARRY CIRCLE UPGRADE (DOUBLE RING + PULSE) ============
+        -- PARRY CIRCLE UPGRADE (DOUBLE RING + PULSE)
         if ParryRangeVisual.Enabled and root then
-            -- Outer Circle
             if not ParryCircle then
                 ParryCircle = Instance.new("Part")
                 ParryCircle.Shape = Enum.PartType.Cylinder
@@ -761,7 +742,6 @@ RunService.RenderStepped:Connect(function()
                 ParryCircle.Name = "ParryCircleOuter"
                 ParryCircle.Parent = workspace
             end
-            -- Inner Circle (double ring)
             if not ParryCircleInner then
                 ParryCircleInner = Instance.new("Part")
                 ParryCircleInner.Shape = Enum.PartType.Cylinder
@@ -775,7 +755,7 @@ RunService.RenderStepped:Connect(function()
             local baseSize = Auto.ParryDistance * 2
             local pulse = 0
             if ParryRangeVisual.PulseEnabled then
-                pulse = math.sin(tick() * 3) * 0.15 -- pulse 0.15 stud
+                pulse = math.sin(tick() * 3) * 0.15
             end
 
             local sizeOuter = baseSize + pulse
@@ -792,7 +772,6 @@ RunService.RenderStepped:Connect(function()
             ParryCircleInner.CFrame = cframe
             ParryCircleInner.Transparency = ParryRangeVisual.Transparency + 0.15
 
-            -- Warna (rainbow atau custom)
             local color = ParryRangeVisual.Color
             if ParryRangeVisual.RainbowMode then
                 color = getRainbowColor()
@@ -827,7 +806,6 @@ local function rainbowifyGui(gui)
                 while v and v.Parent do
                     pcall(function() 
                         v.TextColor3 = getRainbowColor()
-                        -- 3D-ish: stroke tebal
                         if v.TextStrokeTransparency < 1 then
                             v.TextStrokeTransparency = 0.3
                             v.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -851,14 +829,11 @@ local function rainbowifyGui(gui)
     end
 end
 
--- 3D-ish: tambah stroke double layer ke semua Frame/Button
 local function apply3DStroke(gui)
     if not gui then return end
     for _, v in pairs(gui:GetDescendants()) do
         if v:IsA("Frame") or v:IsA("TextButton") or v:IsA("ImageButton") then
-            -- Skip kalau udah ada stroke 3D
             if v:FindFirstChild("3DStroke_Top") then continue end
-            -- Top highlight (stroke terang)
             local topStroke = Instance.new("UIStroke")
             topStroke.Name = "3DStroke_Top"
             topStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -866,7 +841,6 @@ local function apply3DStroke(gui)
             topStroke.Transparency = 0.7
             topStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
             pcall(function() topStroke.Parent = v end)
-            -- Bottom shadow (stroke gelap)
             local botStroke = Instance.new("UIStroke")
             botStroke.Name = "3DStroke_Bottom"
             botStroke.Color = Color3.fromRGB(0, 0, 0)
@@ -956,8 +930,8 @@ end
 
 pcall(wrapCallbacks)
 
-print("[TiarHub v15] Part 2/6 loaded.")-- ============================================
--- TIARHUB v15 - Part 3/6: Survivor + Aimbot
+print("[TiarHub v16] Part 2/6 loaded.")-- ============================================
+-- ⚡ TIARHUB v16 - Part 3/6: Survivor + Aimbot + Fake Perks
 -- ============================================
 
 local lastParry = 0
@@ -1198,10 +1172,8 @@ end)
 local function IsAbyssKiller(plr)
     if not plr or not plr.Character then return false end
     if not plr.Team or plr.Team.Name ~= "Killer" then return false end
-    local charName = plr.Character.Name
-    local plrName = plr.Name
-    if string.find(string.lower(charName), "abyss") then return true end
-    if string.find(string.lower(plrName), "abyss") then return true end
+    if string.find(string.lower(plr.Character.Name), "abyss") then return true end
+    if string.find(string.lower(plr.Name), "abyss") then return true end
     return false
 end
 
@@ -1301,9 +1273,106 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v15] Part 3/6a loaded.")
+-- ============ FAKE PERKS SYSTEM ============
+local function hookFakeFlowstate(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
 
--- ============ AIMBOT + FOV CIRCLE UPGRADE ============
+    animator.AnimationPlayed:Connect(function(track)
+        if not FakePerks.Flowstate.Enabled then return end
+        local anim = track.Animation
+        if not anim or not anim.AnimationId then return end
+        local id = anim.AnimationId:match("%d+")
+        if not id then return end
+
+        local vaultIds = {
+            ["rbxassetid://83873880822918"] = true,
+            ["rbxassetid://136962284480779"] = true,
+        }
+
+        if vaultIds["rbxassetid://" .. id] then
+            local now = tick()
+            if now - FakePerks.LastVault < 1 then return end
+            FakePerks.LastVault = now
+
+            local originalSpeed = hum.WalkSpeed
+            local boostedSpeed = originalSpeed * (1 + FakePerks.Flowstate.SpeedBoost / 100)
+            hum.WalkSpeed = boostedSpeed
+
+            Rayfield:Notify({ title = "Fake Flowstate", content = "Speed boost aktif!", duration = 2 })
+
+            task.delay(FakePerks.Flowstate.Duration, function()
+                if hum and hum.Parent then
+                    hum.WalkSpeed = originalSpeed
+                end
+            end)
+        end
+    end)
+end
+
+-- Fake Snake Step
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if not FakePerks.SnakeStep.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            local isCrouching = UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
+                or (hum.HipHeight and hum.HipHeight < 1.5)
+
+            if isCrouching and not FakePerks.LastCrouchState then
+                FakePerks.LastCrouchState = true
+                hum.WalkSpeed = FakePerks.SnakeStep.SpeedBoost
+            elseif not isCrouching and FakePerks.LastCrouchState then
+                FakePerks.LastCrouchState = false
+                if Movement.WalkSpeedEnabled then
+                    hum.WalkSpeed = Movement.WalkSpeedValue
+                else
+                    hum.WalkSpeed = 16
+                end
+            end
+        end)
+    end
+end)
+
+-- Fake Quick Recovery
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if not FakePerks.QuickRecovery.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            if hum:GetState() == Enum.HumanoidStateType.FallingDown
+                or hum:GetState() == Enum.HumanoidStateType.Ragdoll
+                or hum.Health < hum.MaxHealth * 0.3 then
+                pcall(function()
+                    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                end)
+            end
+        end)
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    pcall(function() hookFakeFlowstate(char) end)
+end)
+
+if LocalPlayer.Character then
+    pcall(function() hookFakeFlowstate(LocalPlayer.Character) end)
+end
+
+print("[TiarHub v16] Part 3/6a loaded.")
+
+-- ============ AIMBOT + FOV CIRCLE + SILENT AIM VEIL SPEAR ============
 local Drawing = Drawing
 local TracerLine = nil
 
@@ -1311,7 +1380,6 @@ local function createFOVCircle()
     if not Drawing then return end
     if FOVCircle then FOVCircle:Remove() end
     if FOVCircleInner then FOVCircleInner:Remove() end
-    -- Outer ring
     FOVCircle = Drawing.new("Circle")
     FOVCircle.Visible = false
     FOVCircle.Thickness = 2
@@ -1320,7 +1388,6 @@ local function createFOVCircle()
     FOVCircle.Filled = false
     FOVCircle.Color = FOVCircleColor
     FOVCircle.Transparency = 0.6
-    -- Inner ring (glow)
     FOVCircleInner = Drawing.new("Circle")
     FOVCircleInner.Visible = false
     FOVCircleInner.Thickness = 1
@@ -1366,6 +1433,99 @@ RunService.RenderStepped:Connect(function()
             if FOVCircleInner then FOVCircleInner.Visible = false end
         end
     end)
+end)
+
+-- ============ SILENT AIM VEIL SPEAR ============
+local function createSilentAimCircle()
+    if not Drawing then return end
+    if SilentAimCircle then SilentAimCircle:Remove() end
+    SilentAimCircle = Drawing.new("Circle")
+    SilentAimCircle.Visible = false
+    SilentAimCircle.Thickness = 2
+    SilentAimCircle.NumSides = 60
+    SilentAimCircle.Radius = SilentAimSpear.FOV
+    SilentAimCircle.Filled = false
+    SilentAimCircle.Color = Color3.fromRGB(150, 0, 255)
+    SilentAimCircle.Transparency = 0.6
+end
+
+createSilentAimCircle()
+
+local function getSilentAimTarget()
+    local cam = workspace.CurrentCamera
+    local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local closest, shortest = nil, SilentAimSpear.FOV
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Team then
+            local valid = false
+            if SilentAimSpear.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
+            elseif SilentAimSpear.TargetMode == "Survivor" and (p.Team.Name == "Survivors" or p.Team.Name == "Survivor") then valid = true
+            elseif SilentAimSpear.TargetMode == "Both" then valid = true end
+
+            if valid then
+                local hrp = p.Character:FindFirstChild(SilentAimSpear.AimPart)
+                    or p.Character:FindFirstChild("HumanoidRootPart")
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 then
+                    local pos, visible = cam:WorldToViewportPoint(hrp.Position)
+                    if visible then
+                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if dist < shortest then
+                            shortest = dist
+                            closest = hrp
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if SilentAimCircle then
+            SilentAimCircle.Visible = SilentAimSpear.Enabled and SilentAimSpear.ShowFOV
+            SilentAimCircle.Radius = SilentAimSpear.FOV
+            SilentAimCircle.Position = Vector2.new(
+                workspace.CurrentCamera.ViewportSize.X / 2,
+                workspace.CurrentCamera.ViewportSize.Y / 2
+            )
+        end
+
+        if not SilentAimSpear.Enabled then return end
+        if not SilentAimSpear.Holding then return end
+
+        local target = getSilentAimTarget()
+        if not target then return end
+
+        local cam = workspace.CurrentCamera
+        local pos = target.Position
+
+        if SilentAimSpear.Prediction > 0 then
+            pos = pos + (target.AssemblyLinearVelocity * SilentAimSpear.Prediction)
+        end
+
+        cam.CFrame = CFrame.new(cam.CFrame.Position, pos)
+    end)
+end)
+
+-- Auto detect Veil Spear equipped
+task.spawn(function()
+    while task.wait(0.5) do
+        pcall(function()
+            if not SilentAimSpear.Enabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local tool = char:FindFirstChildOfClass("Tool")
+            if tool and string.find(string.lower(tool.Name), "veil") then
+                if not SilentAimSpear.Holding then SilentAimSpear.Holding = true end
+            else
+                SilentAimSpear.Holding = false
+            end
+        end)
+    end
 end)
 
 -- ============ HIT MARKER ============
@@ -1559,8 +1719,8 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v15] Part 3/6 loaded.")-- ============================================
--- TIARHUB v15 - Part 4/6: Killer + Movement + Moonwalk
+print("[TiarHub v16] Part 3/6 loaded.")-- ============================================
+-- ⚡ TIARHUB v16 - Part 4/6: Killer + Movement + Visual
 -- ============================================
 
 local function GetDownedSurvivor()
@@ -1641,7 +1801,6 @@ local function stopAutoStalk()
     if StalkConnection then StalkConnection:Disconnect(); StalkConnection = nil end
 end
 
--- ============ KILLER HEARTBEAT ============
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if not getRoot() then return end
@@ -1922,7 +2081,6 @@ local function startMoonwalk()
         local baseCF
 
         if Moonwalk.Mode == "Camera" then
-            -- MODE 2: ngikutin kamera (karakter menghadap arah kamera)
             local camLook = cam.CFrame.LookVector
             local flatCam = Vector3.new(camLook.X, 0, camLook.Z)
             if flatCam.Magnitude > 0 then
@@ -1933,7 +2091,6 @@ local function startMoonwalk()
                 humanoid:Move(Vector3.new(0, 0, 1), true)
             end
         else
-            -- MODE 1: DEFAULT (muter badan)
             local look = cam.CFrame.LookVector
             local flatLook = Vector3.new(look.X, 0, look.Z)
             if flatLook.Magnitude > 0 then
@@ -1967,7 +2124,6 @@ local function stopMoonwalk()
         if Movement.WalkSpeedEnabled then hum.WalkSpeed = Movement.WalkSpeedValue
         else hum.WalkSpeed = Movement.OriginalWalkSpeed end
     end
-    -- Balikin FOV ke default
     local cam = workspace.CurrentCamera
     if cam then cam.FieldOfView = 70 end
 end
@@ -2061,7 +2217,7 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
--- ============ COPY AVATAR (FIX V2 - InsertService) ============
+-- ============ COPY AVATAR ============
 local function saveOriginalAppearance()
     local char = LocalPlayer.Character
     if not char then return false end
@@ -2112,7 +2268,6 @@ local function copyAvatar(username)
         end
         task.wait(0.2)
 
-        -- Apply body + warna blocky
         if AvatarCopier.BlockyBody then
             pcall(function()
                 local bd = Instance.new("HumanoidDescription")
@@ -2126,7 +2281,6 @@ local function copyAvatar(username)
             task.wait(0.5)
         end
 
-        -- Load Shirt / Pants / TShirt via InsertService
         local function loadAsset(assetId)
             if not assetId or assetId == 0 or assetId == "0" then return nil end
             local okAsset, asset = pcall(function()
@@ -2179,7 +2333,6 @@ local function copyAvatar(username)
         end
         task.wait(0.3)
 
-        -- Accessories via InsertService
         if desc.AccessoryBlob and desc.AccessoryBlob ~= "" then
             for assetId in string.gmatch(desc.AccessoryBlob, "[^;]+") do
                 local id = tonumber(assetId)
@@ -2237,7 +2390,7 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end
 end)
 
-print("[TiarHub v15] Part 4/6a loaded.")
+print("[TiarHub v16] Part 4/6a loaded.")
 
 -- ============================================
 -- VISUAL + FIX CONTRAST
@@ -2300,7 +2453,7 @@ local function toggleScreenEffects()
     end)
 end
 
--- ============ COLOR CORRECTION (FIX V2) ============
+-- COLOR CORRECTION (FIX CONTRAST)
 local ColorCorrection = nil
 
 local function getOrCreateCC()
@@ -2343,7 +2496,6 @@ local function resetColorCorrection()
     end
 end
 
--- ============ CAMERA SHAKE REMOVER ============
 local function applyCameraShake()
     pcall(function()
         if Visual.NoCameraShake then
@@ -2354,7 +2506,6 @@ local function applyCameraShake()
     end)
 end
 
--- ============ BLOOD REMOVAL ============
 local function removeBlood()
     pcall(function()
         if Visual.NoBlood then
@@ -2372,7 +2523,6 @@ local function removeBlood()
     end)
 end
 
--- ============ ANTI-LAG ============
 local function applyAntiLag()
     pcall(function()
         if AntiLag.PhysicsThrottle then
@@ -2450,7 +2600,7 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ============ HIDE RED SPARK ============
+-- HIDE RED SPARK
 local function isRedSpark(obj)
     if not obj then return false end
     if not (obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
@@ -2496,7 +2646,7 @@ local function stopHideSpark()
     HiddenSparkCache = {}
 end
 
--- ============ TELEPORT SYSTEM ============
+-- TELEPORT SYSTEM
 local function findNearestByNames(names, maxDist)
     local root = getRoot()
     if not root then return nil, math.huge end
@@ -2558,8 +2708,8 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v15] Part 4/6 loaded.")-- ============================================
--- TIARHUB v15 - Part 5/6: UI Menu
+print("[TiarHub v16] Part 4/6 loaded.")-- ============================================
+-- ⚡ TIARHUB v16 - Part 5/6: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
@@ -2627,6 +2777,17 @@ SurvivorTab:CreateSlider({ name = "Detect Range", range = {5, 50}, increment = 1
 SurvivorTab:CreateSlider({ name = "Cooldown", range = {0.1, 3}, increment = 0.1, suffix = "s", currentValue = 0.5, flag = "ad_abyss_cd", callback = function(v) AutoDodgeAbyss.Cooldown = v end })
 SurvivorTab:CreateSlider({ name = "Crouch Duration", range = {0.1, 2}, increment = 0.1, suffix = "s", currentValue = 0.3, flag = "ad_abyss_dur", callback = function(v) AutoDodgeAbyss.CrouchDuration = v end })
 
+-- ============ FAKE PERKS (SURVIVOR TAB) ============
+SurvivorTab:CreateSection("🎭 Fake Perks")
+SurvivorTab:CreateToggle({ name = "Fake Flowstate (Speed Boost on Vault)", currentValue = false, flag = "fp_flow", callback = function(v) FakePerks.Flowstate.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Speed Boost (%)", range = {10, 50}, increment = 5, suffix = "%", currentValue = 20, flag = "fp_flow_speed", callback = function(v) FakePerks.Flowstate.SpeedBoost = v end })
+SurvivorTab:CreateSlider({ name = "Flowstate Duration", range = {1, 10}, increment = 0.5, suffix = "s", currentValue = 3, flag = "fp_flow_dur", callback = function(v) FakePerks.Flowstate.Duration = v end })
+
+SurvivorTab:CreateToggle({ name = "Fake Snake Step (Crouch Speed)", currentValue = false, flag = "fp_snake", callback = function(v) FakePerks.SnakeStep.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Snake Step Speed", range = {16, 100}, increment = 1, currentValue = 90, flag = "fp_snake_speed", callback = function(v) FakePerks.SnakeStep.SpeedBoost = v end })
+
+SurvivorTab:CreateToggle({ name = "Fake Quick Recovery", currentValue = false, flag = "fp_recovery", callback = function(v) FakePerks.QuickRecovery.Enabled = v end })
+
 -- ============ TELEPORT TAB ============
 local TeleportTab = Window:CreateTab({ name = "Teleport", icon = 0 })
 TeleportTab:CreateSection("Teleport Cepat")
@@ -2684,6 +2845,14 @@ AimTab:CreateSlider({ name = "Aimbot FOV", range = {50, 1000}, increment = 10, c
 AimTab:CreateSlider({ name = "Aimbot Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 1, flag = "aim_smooth", callback = function(v) GunAim.Strength = v end })
 AimTab:CreateSlider({ name = "Aimbot Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "aim_predict", callback = function(v) GunAim.PredictStrength = v end })
 AimTab:CreateToggle({ name = "Visibility Check", currentValue = false, flag = "aim_vis", callback = function(v) GunAim.VisibilityCheck = v end })
+
+AimTab:CreateSection("🗡️ Silent Aim Veil Spear")
+AimTab:CreateToggle({ name = "Enable Silent Aim Spear", currentValue = false, flag = "silent_spear", callback = function(v) SilentAimSpear.Enabled = v end })
+AimTab:CreateToggle({ name = "Show Silent Aim FOV", currentValue = false, flag = "silent_fov", callback = function(v) SilentAimSpear.ShowFOV = v end })
+AimTab:CreateDropdown({ name = "Silent Aim Target", options = {"Killer", "Survivor", "Both"}, currentOption = "Killer", flag = "silent_target", callback = function(opt) SilentAimSpear.TargetMode = opt end })
+AimTab:CreateDropdown({ name = "Silent Aim Part", options = {"Head", "HumanoidRootPart", "Torso"}, currentOption = "HumanoidRootPart", flag = "silent_part", callback = function(opt) SilentAimSpear.AimPart = opt end })
+AimTab:CreateSlider({ name = "Silent Aim FOV", range = {50, 1000}, increment = 10, currentValue = 250, flag = "silent_fov_val", callback = function(v) SilentAimSpear.FOV = v end })
+AimTab:CreateSlider({ name = "Silent Aim Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "silent_pred", callback = function(v) SilentAimSpear.Prediction = v end })
 
 AimTab:CreateSection("Hit Marker")
 AimTab:CreateToggle({ name = "Enable Hit Marker", currentValue = false, flag = "hm_on", callback = function(v) HitMarker.Enabled = v; if v and #HitMarkerLines == 0 then createHitMarkerLines() end end })
@@ -2834,48 +3003,9 @@ UISettingsTab:CreateButton({ name = "🔊 Test Sound", callback = function()
     Rayfield:Notify({ title = "Sound", content = "Sound: " .. SoundFeedback.CurrentSound })
 end })
 
--- ============ NOTIFIKASI ============
-Rayfield:Notify({
-    title = "⚡ TiarHub ⚡",
-    content = "Loaded! Moonwalk 2 Mode + FOV Preset + Parry Upgrade + 3D UI",
-    duration = 6
-})
-
-print("[TiarHub v15] Part 5/6 loaded.")-- ============================================
--- TIARHUB v15 - Part 6/6: Final Touch & Startup
+print("[TiarHub v16] Part 5/6 loaded.")-- ============================================
+-- ⚡ TIARHUB v16 - Part 6/6: Final Touch
 -- ============================================
-
--- ============ 3D-ISH THEME APPLY (FINAL) ============
-task.spawn(function()
-    task.wait(4)
-    pcall(function()
-        for _, gui in pairs(CoreGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                for _, v in pairs(gui:GetDescendants()) do
-                    if v:IsA("Frame") or v:IsA("TextButton") or v:IsA("ImageButton") then
-                        if not v:FindFirstChild("3DStroke_Top") then
-                            local topStroke = Instance.new("UIStroke")
-                            topStroke.Name = "3DStroke_Top"
-                            topStroke.Color = Color3.fromRGB(255, 255, 255)
-                            topStroke.Thickness = 1
-                            topStroke.Transparency = 0.8
-                            topStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                            pcall(function() topStroke.Parent = v end)
-
-                            local botStroke = Instance.new("UIStroke")
-                            botStroke.Name = "3DStroke_Bottom"
-                            botStroke.Color = Color3.fromRGB(0, 0, 0)
-                            botStroke.Thickness = 1.5
-                            botStroke.Transparency = 0.6
-                            botStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                            pcall(function() botStroke.Parent = v end)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end)
 
 -- ============ AUTO APPLY ON RESPAWN ============
 LocalPlayer.CharacterAdded:Connect(function(char)
@@ -2890,22 +3020,33 @@ LocalPlayer.CharacterAdded:Connect(function(char)
             startMoonwalk()
             applyMoonwalkFOV()
         end
+        if FakePerks.Flowstate.Enabled then
+            hookFakeFlowstate(char)
+        end
     end)
 end)
 
--- ============ CLEANUP SAAT UNLOAD ============
+-- ============ CLEANUP FUNCTION ============
 local function cleanup()
     pcall(function()
         if ParryCircle then ParryCircle:Destroy() end
         if ParryCircleInner then ParryCircleInner:Destroy() end
         if FOVCircle then FOVCircle:Remove() end
         if FOVCircleInner then FOVCircleInner:Remove() end
+        if SilentAimCircle then SilentAimCircle:Remove() end
         if TracerLine then TracerLine:Remove() end
         for _, v in pairs(HitMarkerLines) do pcall(function() v:Remove() end) end
         if WarningGui then WarningGui:Destroy() end
         if CrosshairGui then CrosshairGui:Destroy() end
         if MoonwalkButton then MoonwalkButton:Destroy() end
         if ColorCorrection then ColorCorrection:Destroy() end
+        if HideSparkConn then HideSparkConn:Disconnect() end
+        if AntiLagConnection then AntiLagConnection:Disconnect() end
+        if WalkSpeedConnection then WalkSpeedConnection:Disconnect() end
+        if NoClipConnection then NoClipConnection:Disconnect() end
+        if MoonwalkConnection then MoonwalkConnection:Disconnect() end
+        if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect() end
+        if StalkConnection then StalkConnection:Disconnect() end
     end)
 end
 
@@ -2913,24 +3054,44 @@ end
 task.wait(1)
 Rayfield:Notify({
     title = "⚡ TiarHub ⚡",
-    content = "Script loaded successfully! Semua fitur siap dipakai.",
+    content = "Script loaded! Semua fitur siap dipakai.",
+    duration = 8
+})
+
+task.wait(2)
+Rayfield:Notify({
+    title = "🎁 Fitur Baru",
+    content = "Fake Perks (Flowstate/Snake Step/Quick Recovery) + Silent Aim Veil Spear",
     duration = 8
 })
 
 task.wait(2)
 Rayfield:Notify({
     title = "💡 Tips",
-    content = "Buka tab Misc → Moonwalk untuk 2 mode (Default/Camera) + FOV preset (70/90/120).",
+    content = "Buka Survivor Tab buat Fake Perks, Aimbot Tab buat Silent Aim Veil Spear",
     duration = 8
 })
 
+-- ============ PRINT STATUS ============
 print("============================================")
-print("  ⚡ TIARHUB v15 - ALL LOADED ⚡")
-print("  Moonwalk 2 Mode ✓")
-print("  FOV Preset (70/90/120) ✓")
-print("  Parry Circle Upgrade (Double Ring + Pulse) ✓")
-print("  3D-ish UI Theme ✓")
-print("  Copy Avatar Fix (InsertService) ✓")
-print("  5 Sound Feedback ✓")
-print("  Rainbow UI ✓")
+print("  ⚡ TIARHUB v16 - ALL LOADED ⚡")
+print("  ==========================================")
+print("  [✓] ESP System + Killer Warning")
+print("  [✓] Auto Parry (2 Mode) + Rainbow + Pulse")
+print("  [✓] Skill Check (Instant/Perfect)")
+print("  [✓] Auto Dodge Abyss")
+print("  [✓] Fake Perks (Flowstate/Snake/Recovery)")
+print("  [✓] Silent Aim Veil Spear")
+print("  [✓] Aimbot + FOV Circle + Tracer")
+print("  [✓] Hit Marker")
+print("  [✓] Killer System + 5 Fitur Baru")
+print("  [✓] Movement + Moonwalk 2 Mode + FOV")
+print("  [✓] Copy Avatar (InsertService)")
+print("  [✓] Teleport System + Auto Escape")
+print("  [✓] Visual + Fix Contrast")
+print("  [✓] Anti-Lag + Hide Spark")
+print("  [✓] Crosshair + Sound Feedback")
+print("  [✓] Rainbow UI + 3D Stroke")
+print("  ==========================================")
+print("  🎮 Violence District | by Tiar")
 print("============================================")

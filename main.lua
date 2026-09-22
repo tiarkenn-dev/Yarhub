@@ -1,3 +1,7 @@
+-- ============================================
+-- TIARHUB FULL v10 - Bagian 1: Setup & Config
+-- ============================================
+
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
 
 local Window = Rayfield:CreateWindow({
@@ -17,6 +21,7 @@ local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- ============ ESP CONFIG ============
 local ESP = {
     Survivor = false, Killer = false, Generator = false,
     Hook = false, Pallet = false, Window = false, SCP = false,
@@ -32,7 +37,10 @@ local ESP = {
 }
 
 local ESPStatus = { Enabled = false, ShowName = true, ShowDistance = true, ShowHealth = false, Radius = 100 }
+local KillerWarning = { Enabled = false, Distance = 60, Color = Color3.fromRGB(255, 0, 0) }
+local WarningGui = nil
 
+-- ============ VISUAL CONFIG ============
 local Visual = { Fullbright = false, NoFog = false, NoShadow = false, NoBloom = false, NoBlur = false, ColorCorrection = false, Saturation = 0, Brightness = 0 }
 local VisualOriginal = {
     Brightness = Lighting.Brightness, ClockTime = Lighting.ClockTime,
@@ -41,19 +49,19 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
-local Parry = {
-    Enabled = false, Mode = "Safety",
-    SafetyDistance = 12, SafetyDebounce = 0.15, SafetyFaceSensitivity = 0.5,
-    AggressiveDistance = 20, AggressiveDebounce = 0.05, AggressiveFaceSensitivity = -1
+-- ============ SURVIVOR CONFIG ============
+local Auto = {
+    Parry = false, ParryDistance = 15, FaceSensitivity = 0.7, RequireFacing = true,
+    SkillCheck = false, Wiggle = false, WiggleSpam = 5
 }
-
-local SkillCheck = { Enabled = false }
-local Wiggle = { Enabled = false, Spam = 5 }
+local ParryRangeVisual = { Enabled = false, Color = Color3.fromRGB(255, 80, 80), Transparency = 0.7 }
+local ParryCircle = nil
 local AutoFlee = { Enabled = false, DetectDistance = 50, Cooldown = 0.1 }
 local LastFlee = 0
 local FastVault = { Enabled = false, Speed = 1.2, ReplaceMap = { ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779" } }
 local VaultTracks = {}
 
+-- ============ AIMBOT CONFIG ============
 local GunAim = {
     Enabled = false, Holding = false, TargetMode = "Killer",
     Strength = 1, Predict = true, PredictStrength = 0.12,
@@ -61,8 +69,11 @@ local GunAim = {
     ShowFOV = false, ShowTracer = false, TracerColor = Color3.fromRGB(255, 0, 0)
 }
 
-local KillerAim = { Enabled = false, FOV = 200, Strength = 0.5, Holding = false }
+local KillerAim = {
+    Enabled = false, FOV = 200, Strength = 0.5, Holding = false
+}
 
+-- ============ KILLER CONFIG ============
 local Killer = {
     AutoAttack = false, AttackDelay = 0.45,
     AutoCarry = false, AutoHook = false, KillAll = false,
@@ -72,35 +83,43 @@ local KillerBusy = false
 local KillerTarget = nil
 local StalkConnection = nil
 
+-- ============ MOVEMENT CONFIG ============
 local Movement = {
     WalkSpeedEnabled = false, WalkSpeedValue = 17.6, OriginalWalkSpeed = 16,
     JumpPowerEnabled = false, JumpPowerValue = 50, OriginalJumpPower = 50,
     NoClip = false, InfiniteJump = false
 }
 
+-- ============ MOONWALK CONFIG ============
 local Moonwalk = { Enabled = false, ShowButton = false, SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true }
 local MoonwalkConnection = nil
 local MoonwalkButton = nil
 local ParryActive = false
 
+-- ============ CROSSHAIR ============
 local Crosshair = { Enabled = false, Size = 8, Thickness = 2, Color = Color3.fromRGB(255, 255, 255), Style = "Plus", OffsetX = 0, OffsetY = 0 }
 
+-- ============ EMOTE ============
 local Emote = { Selected = "Mannrobics" }
 local EmoteList = { "Mannrobics","Arm Swing","Schadenfreude","Kyoufuu","Backflip","Griddy","Friday Night","Floating Rest","OnePlays","Quick Combo","WarCry","Wave" }
 
+-- ============ MASKED ============
 local Masked = { CurrentPower = "Cobra" }
 local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
+-- ============ ANTI-LAG CONFIG ============
 local AntiLag = {
     Enabled = false,
     NoParticles = false, NoTextures = false,
     PhysicsThrottle = false, NoGlobalShadows = false, NetworkLag = false
 }
 
+-- ============ FPS/PING CONFIG ============
 local FPS = 0
 local Frames = 0
 local LastTick = tick()
 
+-- ============ KILLER ANIM IDS ============
 local KillerAnims = {
 ["rbxassetid://105374834496520"] = true, ["rbxassetid://113255068724446"] = true,
 ["rbxassetid://118907603246885"] = true, ["rbxassetid://129784271201071"] = true,
@@ -116,6 +135,7 @@ local KillerAnims = {
 ["rbxassetid://138720291317243"] = true
 }
 
+-- ============ REMOTES (dari Fallens) ============
 local function findRemote(path)
     local cur = ReplicatedStorage
     for segment in string.gmatch(path, "[^%.]+") do
@@ -130,6 +150,7 @@ local CarryEvent = findRemote("Remotes.Carry.CarrySurvivorEvent")
 local HookEvent = findRemote("Remotes.Carry.HookEvent")
 local EmoteRemote = findRemote("Remotes.EmoteHandler")
 
+-- ============ HELPER ============
 local function getRoot()
     local char = LocalPlayer.Character
     return char and char:FindFirstChild("HumanoidRootPart")
@@ -144,6 +165,60 @@ local function isDowned()
     local hum = getHum()
     if not hum then return false end
     return hum.Health <= 0 or hum.Health < 2
+end
+
+local function isInParryRange(killerChar)
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
+end
+
+local function isFacingTarget(targetChar)
+    if not Auto.RequireFacing then return true end
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot or not enemyRoot then return false end
+    local enemyForward = enemyRoot.CFrame.LookVector
+    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
+    local dot = enemyForward:Dot(directionToMe)
+    if Auto.FaceSensitivity <= -1 then return true end
+    return dot >= Auto.FaceSensitivity
+end
+
+local function shouldDisableWalkSpeed()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        local animator = hum:FindFirstChildOfClass("Animator")
+        if animator then
+            for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                local anim = track.Animation
+                if anim and anim.AnimationId then
+                    local id = anim.AnimationId:match("%d+")
+                    if id and KillerAnims["rbxassetid://" .. id] then return true end
+                end
+            end
+        end
+    end
+    if hum and (hum.Health <= 0 or hum.Health < 2) then return true end
+    return false
+end
+
+local function GetGameValue(obj, name)
+    if not obj then return nil end
+    local attr = obj:GetAttribute(name)
+    if attr ~= nil then return attr end
+    local child = obj:FindFirstChild(name)
+    if child then
+        local ok, val = pcall(function() return child.Value end)
+        if ok then return val end
+    end
+    return nil
 end
 
 local function GetPos(obj)
@@ -161,22 +236,11 @@ local function getTeamLabel(plr)
     if plr.Team.Name == "Killer" then return "KILLER" end
     if plr.Team.Name == "Survivors" or plr.Team.Name == "Survivor" then return "SURVIVOR" end
     return plr.Team.Name
-end
+end-- ============================================
+-- TIARHUB FULL v10 - Bagian 2: ESP System
+-- ============================================
 
-local function getParryDistance()
-    if Parry.Mode == "Aggressive" then return Parry.AggressiveDistance
-    else return Parry.SafetyDistance end
-end
-
-local function getParryDebounce()
-    if Parry.Mode == "Aggressive" then return Parry.AggressiveDebounce
-    else return Parry.SafetyDebounce end
-end
-
-local function getParryFaceSensitivity()
-    if Parry.Mode == "Aggressive" then return Parry.AggressiveFaceSensitivity
-    else return Parry.SafetyFaceSensitivity end
-endlocal ESPObjects = {}
+local ESPObjects = {}
 local ESPNames = {}
 local StatusESP = {}
 local CachedObjects = { Generators = {}, Hooks = {}, Pallets = {}, Windows = {} }
@@ -230,6 +294,7 @@ local function createESP(obj, color, showName, customName)
                     teamLabel = getTeamLabel(plr)
                 end
             end
+
             local displayText = playerName
             if teamLabel ~= "" then
                 displayText = string.format("[%s] %s", teamLabel, playerName)
@@ -267,8 +332,10 @@ local function createESP(obj, color, showName, customName)
     end
 end
 
+-- ============ GENERATOR ESP DENGAN PROGRESS ============
 local function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
+    
     if not ESP.Generator then
         local old = generator:FindFirstChild("GenHighlight")
         if old then old:Destroy() end
@@ -276,41 +343,58 @@ local function UpdateGenerator(generator)
         if oldName then oldName:Destroy() end
         return
     end
+    
     local percent = 0
     local found = false
+    
     local attr = generator:GetAttribute("Progress")
     if attr and type(attr) == "number" then percent = attr; found = true end
+    
     if not found then
         local attr2 = generator:GetAttribute("RepairProgress")
         if attr2 and type(attr2) == "number" then percent = attr2; found = true end
     end
+    
     if not found then
         local child = generator:FindFirstChild("Progress")
         if child and child:IsA("ValueBase") then percent = child.Value; found = true end
     end
+    
     if not found then
         local child = generator:FindFirstChild("RepairProgress")
         if child and child:IsA("ValueBase") then percent = child.Value; found = true end
     end
+    
     if not found then
         for _, v in ipairs(generator:GetDescendants()) do
             if v:IsA("ValueBase") and (v.Name == "Progress" or v.Name == "RepairProgress" or v.Name == "Percent") then
-                percent = v.Value; found = true; break
+                percent = v.Value
+                found = true
+                break
             end
         end
     end
+    
     if not found then
         for _, v in ipairs(generator:GetChildren()) do
-            if v:IsA("NumberValue") then percent = v.Value; found = true; break end
+            if v:IsA("NumberValue") then
+                percent = v.Value
+                found = true
+                break
+            end
         end
     end
+    
     percent = math.clamp(percent, 0, 100)
+    
     local color = ESP.GeneratorColor
     local labelText = "Generator"
+    
     if found then
         color = ESP.GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), percent / 100)
         labelText = string.format("Gen %.0f%%", percent)
     end
+    
     local h = generator:FindFirstChild("GenHighlight") or Instance.new("Highlight")
     h.Name = "GenHighlight"
     h.Adornee = generator
@@ -325,6 +409,7 @@ local function UpdateGenerator(generator)
     end
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = generator
+    
     local bb = generator:FindFirstChild("GenNameTag")
     if not bb then
         bb = Instance.new("BillboardGui")
@@ -425,6 +510,75 @@ workspace.DescendantRemoving:Connect(function(obj)
     removeESP(obj)
 end)
 
+local function updateWarning()
+    pcall(function()
+        local root = getRoot()
+        if not KillerWarning.Enabled or not root then
+            if WarningGui then WarningGui.Enabled = false end
+            return
+        end
+        local nearest, dist = nil, math.huge
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local isKiller = p.Team and p.Team.Name == "Killer"
+                if isKiller then
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local d = (hrp.Position - root.Position).Magnitude
+                        if d < dist then dist = d; nearest = p end
+                    end
+                end
+            end
+        end
+        if not WarningGui then
+            WarningGui = Instance.new("ScreenGui")
+            WarningGui.Name = "TiarKillerWarning"
+            WarningGui.ResetOnSpawn = false
+            WarningGui.IgnoreGuiInset = true
+            WarningGui.Parent = PlayerGui
+            local frame = Instance.new("Frame")
+            frame.Name = "Border"
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BackgroundTransparency = 1
+            frame.Parent = WarningGui
+            local stroke = Instance.new("UIStroke")
+            stroke.Name = "Stroke"
+            stroke.Thickness = 12
+            stroke.Color = KillerWarning.Color
+            stroke.Transparency = 0.5
+            stroke.Parent = frame
+            local text = Instance.new("TextLabel")
+            text.Name = "WarnText"
+            text.Size = UDim2.new(0, 400, 0, 60)
+            text.Position = UDim2.new(0.5, -200, 0, 40)
+            text.BackgroundTransparency = 1
+            text.Text = "KILLER DEKAT"
+            text.TextColor3 = KillerWarning.Color
+            text.TextStrokeTransparency = 0
+            text.TextStrokeColor3 = Color3.new(0, 0, 0)
+            text.Font = Enum.Font.GothamBlack
+            text.TextScaled = true
+            text.Visible = false
+            text.Parent = WarningGui
+        end
+        WarningGui.Enabled = true
+        local border = WarningGui:FindFirstChild("Border")
+        local stroke = border and border:FindFirstChild("Stroke")
+        local warnText = WarningGui:FindFirstChild("WarnText")
+        if dist <= KillerWarning.Distance then
+            if stroke then stroke.Transparency = 0.3 end
+            if warnText then
+                warnText.Visible = true
+                warnText.Text = string.format("KILLER DEKAT (%.0f stud)", dist)
+            end
+        else
+            if stroke then stroke.Transparency = 0.9 end
+            if warnText then warnText.Visible = false end
+        end
+    end)
+end
+
+-- ============ FPS/PING WATERMARK ============
 RunService.RenderStepped:Connect(function()
     Frames = Frames + 1
     if tick() - LastTick >= 1 then
@@ -438,6 +592,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- ============ MAIN ESP LOOP ============
 local lastUpdate = 0
 RunService.RenderStepped:Connect(function()
     pcall(function()
@@ -526,8 +681,34 @@ RunService.RenderStepped:Connect(function()
                 else removeESP(scp) end
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
+
+        if ParryRangeVisual.Enabled and root then
+            if not ParryCircle then
+                ParryCircle = Instance.new("Part")
+                ParryCircle.Shape = Enum.PartType.Cylinder
+                ParryCircle.Anchored = true
+                ParryCircle.CanCollide = false
+                ParryCircle.Material = Enum.Material.Neon
+                ParryCircle.Name = "ParryRangeCircle"
+                ParryCircle.Parent = workspace
+            end
+            local size = Auto.ParryDistance * 2
+            ParryCircle.Size = Vector3.new(0.2, size, size)
+            local yOffset = root.Size.Y / 2 + 1.5
+            ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0)) * CFrame.Angles(0, 0, math.rad(90))
+            ParryCircle.Color = ParryRangeVisual.Color
+            ParryCircle.Transparency = ParryRangeVisual.Transparency
+        elseif ParryCircle then ParryCircle:Destroy(); ParryCircle = nil end
+
+        updateWarning()
     end)
-end)local lastParry = 0
+end)-- ============================================
+-- TIARHUB FULL v10 - Bagian 3: Auto Fitur Survivor
+-- ============================================
+
+-- ============ AUTO PARRY (GACOR) ============
+local lastParry = 0
+local PARRY_DEBOUNCE = 0.1
 
 local function pressRightClick()
     pcall(function()
@@ -565,27 +746,12 @@ end
 
 local function doParry()
     local now = tick()
-    local debounce = getParryDebounce()
-    if now - lastParry < debounce then return end
+    if now - lastParry < PARRY_DEBOUNCE then return end
     lastParry = now
     ParryActive = true
     if Moonwalk.Enabled then Moonwalk.Enabled = false end
     pressParryButton()
     task.delay(0.25, function() ParryActive = false end)
-end
-
-local function isFacingTarget(targetChar)
-    local sensitivity = getParryFaceSensitivity()
-    if sensitivity <= -1 then return true end
-    local myChar = LocalPlayer.Character
-    if not myChar then return false end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot or not enemyRoot then return false end
-    local enemyForward = enemyRoot.CFrame.LookVector
-    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
-    local dot = enemyForward:Dot(directionToMe)
-    return dot >= sensitivity
 end
 
 local hookedKillers = {}
@@ -597,7 +763,7 @@ local function hookKiller(char)
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
     animator.AnimationPlayed:Connect(function(track)
-        if not Parry.Enabled then return end
+        if not Auto.Parry then return end
         local anim = track.Animation
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
@@ -607,11 +773,8 @@ local function hookKiller(char)
             local enemyRoot = char:FindFirstChild("HumanoidRootPart")
             if myRoot and enemyRoot then
                 local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-                local maxDist = getParryDistance()
-                if dist <= maxDist then
-                    if isFacingTarget(char) then
-                        doParry()
-                    end
+                if dist <= Auto.ParryDistance then
+                    doParry()
                 end
             end
         end
@@ -621,7 +784,7 @@ end
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
-            if Parry.Enabled then
+            if Auto.Parry then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character then
                         if p.Team and p.Team.Name == "Killer" then 
@@ -634,6 +797,7 @@ task.spawn(function()
     end
 end)
 
+-- ============ AUTO SKILL CHECK ============
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
 local busy = false
@@ -673,7 +837,7 @@ local function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
     SkillHeartbeat = RunService.RenderStepped:Connect(function()
         pcall(function()
-            if not SkillCheck.Enabled or busy then return end
+            if not Auto.SkillCheck or busy then return end
             local prompt = PlayerGui:FindFirstChild("SkillCheckPromptGui")
             if not prompt then return end
             local check = prompt:FindFirstChild("Check")
@@ -699,8 +863,9 @@ local function startSkillCheck()
     end)
 end
 
+-- ============ AUTO WIGGLE ============
 local function AutoWiggle()
-    if not Wiggle.Enabled then return end
+    if not Auto.Wiggle then return end
     local char = LocalPlayer.Character
     if not char then return end
     local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
@@ -712,9 +877,10 @@ local function AutoWiggle()
     if not carry then return end
     local event = carry:FindFirstChild("SelfUnHookEvent")
     if not event then return end
-    for i = 1, Wiggle.Spam do event:FireServer() end
+    for i = 1, Auto.WiggleSpam do event:FireServer() end
 end
 
+-- ============ AUTO FLEE ============
 local function GetNearestKiller()
     local root = getRoot()
     if not root then return nil end
@@ -759,48 +925,15 @@ task.spawn(function()
             end
         end)
     end
-end)
+end)-- ============================================
+-- TIARHUB FULL v10 - Bagian 4: Aimbot System
+-- ============================================
 
-local function normalizeId(id)
-    local num = tostring(id):match("%d+")
-    return num and ("rbxassetid://" .. num)
-end
-
-local function hookVault(char)
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then return end
-    animator.AnimationPlayed:Connect(function(track)
-        pcall(function()
-            if not FastVault.Enabled then return end
-            local anim = track.Animation
-            if not anim or not anim.AnimationId then return end
-            local id = normalizeId(anim.AnimationId)
-            if not id then return end
-            local replaceId = FastVault.ReplaceMap[id]
-            if not replaceId then return end
-            if VaultTracks[track] then return end
-            VaultTracks[track] = true
-            track:Stop()
-            local newAnim = Instance.new("Animation")
-            newAnim.AnimationId = replaceId
-            local newTrack = animator:LoadAnimation(newAnim)
-            newTrack.Priority = Enum.AnimationPriority.Action
-            newTrack:Play()
-            newTrack:AdjustSpeed(FastVault.Speed)
-            newTrack.Stopped:Connect(function() VaultTracks[track] = nil end)
-        end)
-    end)
-end
-
-LocalPlayer.CharacterAdded:Connect(function(char)
-    task.wait(0.5); pcall(function() hookVault(char) end)
-end)
-if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) endlocal Drawing = Drawing
+local Drawing = Drawing
 local FOVCircle = nil
 local TracerLine = nil
 
+-- ============ FOV CIRCLE ============
 local function createFOVCircle()
     if not Drawing then return end
     if FOVCircle then FOVCircle:Remove() end
@@ -828,6 +961,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
+-- ============ TRACER (ESP LASER) ============
 local function createTracer()
     if not Drawing then return end
     if TracerLine then TracerLine:Remove() end
@@ -839,6 +973,7 @@ end
 
 createTracer()
 
+-- ============ AIMBOT SYSTEM ============
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -884,18 +1019,24 @@ local function getClosestGunTarget()
     return closest
 end
 
+-- ============ AIMBOT LOOP (SURVIVOR) ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if TracerLine then TracerLine.Visible = false end
+
         if not GunAim.Enabled or not GunAim.Holding then return end
+
         local cam = workspace.CurrentCamera
         local target = getClosestGunTarget()
         if not target then return end
+
         local pos = target.Position
         if GunAim.Predict then
             pos = pos + (target.AssemblyLinearVelocity * GunAim.PredictStrength)
         end
         cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), GunAim.Strength)
+
+        -- Tracer (ESP laser)
         if GunAim.ShowTracer and TracerLine and Drawing then
             local screenPos, onScreen = cam:WorldToViewportPoint(target.Position)
             if onScreen then
@@ -908,6 +1049,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
+-- ============ KILLER AIM (Lock saat hit) ============
 local function getClosestSurvivorForKiller()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -938,10 +1080,13 @@ end
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if not KillerAim.Enabled then return end
+
         local mouseHeld = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
         if not (KillerAim.Holding or mouseHeld) then return end
+
         local target = getClosestSurvivorForKiller()
         if not target then return end
+
         local cam = workspace.CurrentCamera
         local pos = target.Position
         if GunAim.Predict then
@@ -951,6 +1096,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
+-- ============ INPUT DETECTION ============
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -964,7 +1110,12 @@ UserInputService.InputEnded:Connect(function(input)
         GunAim.Holding = false
         KillerAim.Holding = false
     end
-end)local function GetDownedSurvivor()
+end)-- ============================================
+-- TIARHUB FULL v10 - Bagian 5: Killer & Movement
+-- ============================================
+
+-- ============ KILLER HELPERS ============
+local function GetDownedSurvivor()
     local root = getRoot()
     if not root then return nil end
     local best, dist = nil, math.huge
@@ -1012,6 +1163,7 @@ local function GetHook()
     return bestHook
 end
 
+-- ============ AUTO STALK ============
 local function startAutoStalk()
     if StalkConnection then return end
     StalkConnection = RunService.Heartbeat:Connect(function()
@@ -1042,6 +1194,7 @@ local function stopAutoStalk()
     if StalkConnection then StalkConnection:Disconnect(); StalkConnection = nil end
 end
 
+-- ============ KILLER HEARTBEAT ============
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if not getRoot() then return end
@@ -1102,6 +1255,46 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
+-- ============ FAST VAULT ============
+local function normalizeId(id)
+    local num = tostring(id):match("%d+")
+    return num and ("rbxassetid://" .. num)
+end
+
+local function hookVault(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+    animator.AnimationPlayed:Connect(function(track)
+        pcall(function()
+            if not FastVault.Enabled then return end
+            local anim = track.Animation
+            if not anim or not anim.AnimationId then return end
+            local id = normalizeId(anim.AnimationId)
+            if not id then return end
+            local replaceId = FastVault.ReplaceMap[id]
+            if not replaceId then return end
+            if VaultTracks[track] then return end
+            VaultTracks[track] = true
+            track:Stop()
+            local newAnim = Instance.new("Animation")
+            newAnim.AnimationId = replaceId
+            local newTrack = animator:LoadAnimation(newAnim)
+            newTrack.Priority = Enum.AnimationPriority.Action
+            newTrack:Play()
+            newTrack:AdjustSpeed(FastVault.Speed)
+            newTrack.Stopped:Connect(function() VaultTracks[track] = nil end)
+        end)
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.5); pcall(function() hookVault(char) end)
+end)
+if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) end
+
+-- ============ MOVEMENT ============
 local WalkSpeedConnection = nil
 local function applyWalkSpeed()
     if WalkSpeedConnection then WalkSpeedConnection:Disconnect() end
@@ -1110,6 +1303,7 @@ local function applyWalkSpeed()
             if not Movement.WalkSpeedEnabled then return end
             local hum = getHum()
             if not hum then return end
+            if shouldDisableWalkSpeed() then return end
             if hum.WalkSpeed ~= Movement.WalkSpeedValue then hum.WalkSpeed = Movement.WalkSpeedValue end
         end)
     end)
@@ -1154,37 +1348,30 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
+-- ============ MOONWALK ============
 local function startMoonwalk()
     if MoonwalkConnection then return end
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
-        pcall(function()
-            if not Moonwalk.Enabled or ParryActive or isDowned() then return end
-            local char = LocalPlayer.Character
-            if not char or not char.Parent then return end
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            local cam = workspace.CurrentCamera
-            if not (humanoid and hrp and cam) then return end
-
-            humanoid.AutoRotate = false
-
+        if not Moonwalk.Enabled or ParryActive or isDowned() then return end
+        local char = LocalPlayer.Character
+        if not char or not char.Parent then return end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+        if humanoid and hrp and cam then
             if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
                 humanoid.WalkSpeed = Moonwalk.SlowSpeed
             end
-
             local look = cam.CFrame.LookVector
             local flatLook = Vector3.new(look.X, 0, look.Z)
-            if flatLook.Magnitude < 0.01 then return end
-            flatLook = flatLook.Unit
-
-            local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
-            local rotatedLook = (CFrame.Angles(0, math.rad(angle), 0) * flatLook)
-
-            humanoid:Move(rotatedLook, false)
-
-            local targetCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
-            hrp.CFrame = targetCF * CFrame.Angles(0, math.rad(angle), 0)
-        end)
+            if flatLook.Magnitude > 0 then
+                flatLook = flatLook.Unit
+                local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+                local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
+                hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+                humanoid:Move(Vector3.new(0, 0, 1), true)
+            end
+        end
     end)
 end
 
@@ -1243,6 +1430,7 @@ local function removeMoonwalkButton()
     if MoonwalkButton then MoonwalkButton:Destroy(); MoonwalkButton = nil end
 end
 
+-- ============ CROSSHAIR ============
 local CrosshairGui = nil
 local function updateCrosshair()
     pcall(function()
@@ -1283,10 +1471,12 @@ RunService.Heartbeat:Connect(function()
     pcall(function() applyVisual() end)
 end)
 
+-- ============ EMOTE ============
 local function playEmote(name)
     if EmoteRemote then pcall(function() EmoteRemote:FireServer(name) end) end
 end
 
+-- ============ MASKED ============
 local function activateMasked()
     local event = findRemote("Remotes.Killers.Masked.Activatepower")
     if event then pcall(function() event:FireServer(Masked.CurrentPower) end) end
@@ -1299,7 +1489,12 @@ end
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     applyVisual(true)
-end)local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
+end)-- ============================================
+-- TIARHUB FULL v10 - Bagian 6: Visual & Anti-Lag
+-- ============================================
+
+-- ============ VISUAL FUNCTIONS ============
+local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
 
 local function applyVisual(force)
     pcall(function()
@@ -1335,6 +1530,7 @@ local function applyVisual(force)
     end)
 end
 
+-- ============ NO BLOOM / BLUR / DOF ============
 local function toggleScreenEffects(disable)
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
@@ -1357,6 +1553,7 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
+-- ============ COLOR CORRECTION ============
 local ColorCorrection = nil
 
 local function applyColorCorrection()
@@ -1376,6 +1573,7 @@ local function applyColorCorrection()
     end)
 end
 
+-- ============ ANTI-LAG MAIN LOOP ============
 local AntiLagConnection = nil
 
 local function startAntiLag()
@@ -1403,6 +1601,7 @@ local function startAntiLag()
     end)
 end
 
+-- ============ ANTI-LAG TOGGLE FUNCTIONS ============
 local function applyAntiLag()
     pcall(function()
         if AntiLag.PhysicsThrottle then
@@ -1459,6 +1658,7 @@ end
 
 startAntiLag()
 
+-- ============ VISUAL APPLY EXTENDED ============
 local function applyVisualExtended()
     pcall(function()
         toggleScreenEffects(Visual.NoBloom)
@@ -1488,7 +1688,12 @@ LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     applyVisual(true)
     applyVisualExtended()
-end)local ESPTab = Window:CreateTab({ name = "ESP", icon = 4483362458 })
+end)-- ============================================
+-- TIARHUB FULL v10 - Bagian 7: UI Menu
+-- ============================================
+
+-- ============ ESP TAB ============
+local ESPTab = Window:CreateTab({ name = "ESP", icon = 4483362458 })
 
 ESPTab:CreateSection("Player ESP")
 ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, callback = function(v) ESP.Survivor = v end })
@@ -1516,36 +1721,27 @@ ESPTab:CreateToggle({ name = "Show Name", currentValue = true, callback = functi
 ESPTab:CreateToggle({ name = "Show Distance", currentValue = true, callback = function(v) ESPStatus.ShowDistance = v end })
 ESPTab:CreateToggle({ name = "Show Health", currentValue = false, callback = function(v) ESPStatus.ShowHealth = v end })
 
+ESPTab:CreateSection("Killer Warning")
+ESPTab:CreateToggle({ name = "Killer Warning", currentValue = false, callback = function(v) KillerWarning.Enabled = v end })
+ESPTab:CreateColorPicker({ name = "Warning Color", color = KillerWarning.Color, callback = function(c) KillerWarning.Color = c end })
+ESPTab:CreateSlider({ name = "Warning Distance", range = {20, 200}, increment = 5, suffix = "stud", currentValue = 60, callback = function(v) KillerWarning.Distance = v end })
+
+-- ============ SURVIVOR TAB ============
 local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 4483362458 })
 
-SurvivorTab:CreateSection("Auto Parry - Mode")
-SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, callback = function(v) Parry.Enabled = v end })
-SurvivorTab:CreateDropdown({ 
-    name = "Parry Mode", 
-    options = {"Safety", "Aggressive"}, 
-    currentOption = "Safety", 
-    callback = function(opt) Parry.Mode = opt end 
-})
-SurvivorTab:CreateParagraph({ title = "Mode Info", content = "Safety: dekat + cek arah. Aggressive: jauh + tanpa cek arah." })
-
-SurvivorTab:CreateSection("Auto Parry - Safety Mode")
-SurvivorTab:CreateSlider({ name = "Safety Distance", range = {5, 25}, increment = 1, suffix = "stud", currentValue = 12, callback = function(v) Parry.SafetyDistance = v end })
-SurvivorTab:CreateSlider({ name = "Safety Debounce", range = {0.05, 0.5}, increment = 0.05, suffix = "s", currentValue = 0.15, callback = function(v) Parry.SafetyDebounce = v end })
-SurvivorTab:CreateSlider({ name = "Safety Face Sens", range = {-1, 1}, increment = 0.05, currentValue = 0.5, callback = function(v) Parry.SafetyFaceSensitivity = v end })
-
-SurvivorTab:CreateSection("Auto Parry - Aggressive Mode")
-SurvivorTab:CreateSlider({ name = "Aggressive Distance", range = {10, 30}, increment = 1, suffix = "stud", currentValue = 20, callback = function(v) Parry.AggressiveDistance = v end })
-SurvivorTab:CreateSlider({ name = "Aggressive Debounce", range = {0.02, 0.2}, increment = 0.01, suffix = "s", currentValue = 0.05, callback = function(v) Parry.AggressiveDebounce = v end })
-SurvivorTab:CreateSlider({ name = "Aggressive Face Sens", range = {-1, 1}, increment = 0.05, currentValue = -1, callback = function(v) Parry.AggressiveFaceSensitivity = v end })
+SurvivorTab:CreateSection("Auto Parry")
+SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, callback = function(v) Auto.Parry = v; ParryRangeVisual.Enabled = v end })
+SurvivorTab:CreateToggle({ name = "Show Parry Range", currentValue = false, callback = function(v) ParryRangeVisual.Enabled = v end })
+SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, callback = function(c) ParryRangeVisual.Color = c end })
+SurvivorTab:CreateSlider({ name = "Parry Distance", range = {5, 25}, increment = 1, suffix = "stud", currentValue = 15, callback = function(v) Auto.ParryDistance = v end })
+SurvivorTab:CreateSlider({ name = "Face Sensitivity", range = {-1, 1}, increment = 0.05, currentValue = 0.7, callback = function(v) Auto.FaceSensitivity = v end })
 
 SurvivorTab:CreateSection("Auto Skill Check")
-SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, callback = function(v) SkillCheck.Enabled = v; if v then startSkillCheck() end end })
+SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, callback = function(v) Auto.SkillCheck = v; if v then startSkillCheck() end end })
 
-SurvivorTab:CreateSection("Auto Wiggle")
-SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, callback = function(v) Wiggle.Enabled = v end })
-SurvivorTab:CreateSlider({ name = "Wiggle Spam", range = {1, 10}, increment = 1, suffix = "x", currentValue = 5, callback = function(v) Wiggle.Spam = v end })
-
-SurvivorTab:CreateSection("Auto Flee Killer")
+SurvivorTab:CreateSection("Auto Wiggle / Flee")
+SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, callback = function(v) Auto.Wiggle = v end })
+SurvivorTab:CreateSlider({ name = "Wiggle Spam", range = {1, 10}, increment = 1, suffix = "x", currentValue = 5, callback = function(v) Auto.WiggleSpam = v end })
 SurvivorTab:CreateToggle({ name = "Auto Flee Killer", currentValue = false, callback = function(v) AutoFlee.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Flee Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 50, callback = function(v) AutoFlee.DetectDistance = v end })
 
@@ -1553,6 +1749,7 @@ SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, callback = function(v) FastVault.Speed = v end })
 
+-- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 4483362458 })
 
 AimTab:CreateSection("Aimbot Survivor")
@@ -1572,6 +1769,7 @@ AimTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, callback =
 AimTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, callback = function(v) KillerAim.FOV = v end })
 AimTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, callback = function(v) KillerAim.Strength = v end })
 
+-- ============ KILLER TAB ============
 local KillerTab = Window:CreateTab({ name = "Killer", icon = 4483362458 })
 
 KillerTab:CreateSection("Attack")
@@ -1591,6 +1789,7 @@ KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, curren
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
 KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked })
 
+-- ============ MISC TAB ============
 local MiscTab = Window:CreateTab({ name = "Misc", icon = 4483362458 })
 
 MiscTab:CreateSection("Walk Speed")
@@ -1615,6 +1814,7 @@ MiscTab:CreateSection("Emote")
 MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", callback = function(opt) Emote.Selected = opt end })
 MiscTab:CreateButton({ name = "Play Emote", callback = function() playEmote(Emote.Selected) end })
 
+-- ============ VISUAL TAB ============
 local VisualTab = Window:CreateTab({ name = "Visual", icon = 4483362458 })
 
 VisualTab:CreateSection("Lighting")
@@ -1631,6 +1831,7 @@ VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false,
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
 
+-- ============ ANTI-LAG TAB ============
 local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 4483362458 })
 
 AntiLagTab:CreateSection("Anti-Lag Pack")
@@ -1643,6 +1844,7 @@ AntiLagTab:CreateToggle({ name = "Physics Throttle", currentValue = false, callb
 AntiLagTab:CreateToggle({ name = "No Global Shadows", currentValue = false, callback = function(v) AntiLag.NoGlobalShadows = v; applyAntiLag() end })
 AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false, callback = function(v) AntiLag.NetworkLag = v; applyAntiLag() end })
 
+-- ============ CROSSHAIR TAB ============
 local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 4483362458 })
 
 CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, callback = function(v) Crosshair.Enabled = v end })
@@ -1652,8 +1854,9 @@ CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, s
 CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetX = v end })
 CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, callback = function(v) Crosshair.OffsetY = v end })
 
+-- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub Full",
-    content = "Script loaded! All features aktif.",
+    title = "TiarHub Full v10",
+    content = "Script loaded! Killer + Survivor + Aimbot + Visual + Anti-Lag + FPS/Ping.",
     duration = 6
 })

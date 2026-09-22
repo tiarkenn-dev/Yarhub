@@ -1,7 +1,5 @@
 -- ============================================
--- TIARHUB v13 FINAL - Bagian 1: Setup & Config
--- Anti Fake Hit + Skill Check 2 Mode + Teleport + Rainbow
--- UI: Rayfield Gen2
+-- TIARHUB v14 FINAL - Bagian 1: Setup & Config
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -14,6 +12,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Lighting = game:GetService("Lighting")
 local Stats = game:GetService("Stats")
 local CoreGui = game:GetService("CoreGui")
+local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -32,7 +31,7 @@ end
 -- ============ WINDOW ============
 local Window = Rayfield:CreateWindow({
     name = "TiarHub | Violence District",
-    subtitle = "by Tiar | v13",
+    subtitle = "by Tiar | v14",
     sidebarLayout = true,
     configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubFull" }
 })
@@ -71,46 +70,6 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
--- ============ ANTI FAKE HIT CONFIG ============
-local AntiFakeHit = {
-    Enabled = true,
-    FacingThreshold = 0.5,
-    MinRange = 8,
-    RequireMovement = true,
-    ShowDebug = false
-}
-local DebugGui = nil
-
-local function showDebug(text, color)
-    if not AntiFakeHit.ShowDebug then return end
-    if not DebugGui then
-        DebugGui = Instance.new("ScreenGui")
-        DebugGui.Name = "TiarDebug"
-        DebugGui.ResetOnSpawn = false
-        DebugGui.Parent = CoreGui
-        local lbl = Instance.new("TextLabel")
-        lbl.Name = "DebugLabel"
-        lbl.Size = UDim2.new(0, 300, 0, 30)
-        lbl.Position = UDim2.new(0.5, -150, 0, 100)
-        lbl.BackgroundTransparency = 0.5
-        lbl.BackgroundColor3 = Color3.new(0, 0, 0)
-        lbl.TextColor3 = Color3.new(1, 1, 1)
-        lbl.TextStrokeTransparency = 0
-        lbl.Font = Enum.Font.GothamBold
-        lbl.TextSize = 16
-        lbl.Text = ""
-        lbl.Parent = DebugGui
-    end
-    local lbl = DebugGui:FindFirstChild("DebugLabel")
-    if lbl then
-        lbl.Text = text
-        lbl.TextColor3 = color or Color3.new(1, 1, 1)
-        task.delay(0.5, function()
-            if lbl and lbl.Text == text then lbl.Text = "" end
-        end)
-    end
-end
-
 -- ============ AUTO PARRY 2 MODE ============
 local PARRY_PRESETS = {
     Safety     = { Distance = 12, Debounce = 0.15, Face = 0.5,  RequireFacing = true },
@@ -146,6 +105,16 @@ local LastFlee = 0
 local FastVault = { Enabled = false, Speed = 1.2, ReplaceMap = { ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779" } }
 local VaultTracks = {}
 
+-- ============ AUTO DODGE ABYSS ============
+local AutoDodgeAbyss = {
+    Enabled = false,
+    DetectRange = 18,
+    Cooldown = 0.5,
+    CrouchDuration = 0.3,
+    LastDodge = 0,
+    IsCrouching = false
+}
+
 -- ============ HIDE SPARK ============
 local HideSpark = { Enabled = false }
 local HiddenSparkCache = {}
@@ -158,6 +127,60 @@ local AutoEscape = { Enabled = false, DetectDistance = 40, Cooldown = 0.8, LastE
 
 -- ============ SKILL CHECK MODE ============
 local SkillCheckMode = "Perfect"
+
+-- ============ SOUND FEEDBACK ============
+local SoundFeedback = {
+    Enabled = true,
+    CurrentSound = "Click",
+    Volume = 0.5,
+    LastPlay = 0,
+    Cooldown = 0.05
+}
+
+local SoundList = {
+    Click  = "rbxassetid://6895079853",
+    Switch = "rbxassetid://876939830",
+    Beep   = "rbxassetid://4817809188",
+    Bell   = "rbxassetid://5156781795",
+    Whoosh = "rbxassetid://5063167535"
+}
+
+local SoundInstance = nil
+
+local function initSound()
+    if SoundInstance then return end
+    SoundInstance = Instance.new("Sound")
+    SoundInstance.Name = "TiarClickSound"
+    SoundInstance.Volume = SoundFeedback.Volume
+    pcall(function() SoundInstance.Parent = SoundService end)
+    if not SoundInstance.Parent then
+        SoundInstance.Parent = CoreGui
+    end
+end
+
+local function playClickSound()
+    if not SoundFeedback.Enabled then return end
+    local now = tick()
+    if now - SoundFeedback.LastPlay < SoundFeedback.Cooldown then return end
+    SoundFeedback.LastPlay = now
+    initSound()
+    pcall(function()
+        SoundInstance.SoundId = SoundList[SoundFeedback.CurrentSound] or SoundList.Click
+        SoundInstance.Volume = SoundFeedback.Volume
+        SoundInstance:Play()
+    end)
+end
+
+initSound()
+
+-- ============ COPY AVATAR ============
+local AvatarCopier = {
+    Enabled = true,
+    TargetUsername = "",
+    OriginalDescription = nil,
+    CurrentCopiedUserId = nil,
+    BlockyBody = true
+}
 
 -- ============ AIMBOT ============
 local GunAim = {
@@ -184,8 +207,7 @@ local StalkConnection = nil
 -- ============ MOVEMENT ============
 local Movement = {
     WalkSpeedEnabled = false, WalkSpeedValue = 17.6, OriginalWalkSpeed = 16,
-    JumpPowerEnabled = false, JumpPowerValue = 50, OriginalJumpPower = 50,
-    NoClip = false, InfiniteJump = false
+    NoClip = false
 }
 
 -- ============ MOONWALK ============
@@ -303,8 +325,8 @@ local function getTeamLabel(plr)
     return plr.Team.Name
 end
 
-print("[TiarHub v13] Bagian 1 loaded.")-- ============================================
--- TIARHUB v13 FINAL - Bagian 2: ESP System
+print("[TiarHub v14] Bagian 1 loaded.")-- ============================================
+-- TIARHUB v14 FINAL - Bagian 2: ESP System + Rainbow + Sound
 -- ============================================
 
 local ESPObjects = {}
@@ -744,9 +766,72 @@ task.spawn(function()
     end)
 end)
 
-print("[TiarHub v13] Bagian 2 loaded.")-- ============================================
--- TIARHUB v13 FINAL - Bagian 3: Auto Fitur Survivor
--- Anti Fake Hit + Skill Check 2 Mode
+-- ============ SOUND WRAPPER (AUTO PLAY DI SEMUA KOMPONEN) ============
+local function wrapCallbacks()
+    -- Simpan original
+    local originalCreateToggle = Window.CreateToggle
+    local originalCreateButton = Window.CreateButton
+    local originalCreateDropdown = Window.CreateDropdown
+    local originalCreateSlider = Window.CreateSlider
+
+    if originalCreateToggle then
+        Window.CreateToggle = function(self, config)
+            if config and config.callback then
+                local origCb = config.callback
+                config.callback = function(...)
+                    pcall(function() playClickSound() end)
+                    return origCb(...)
+                end
+            end
+            return originalCreateToggle(self, config)
+        end
+    end
+
+    if originalCreateButton then
+        Window.CreateButton = function(self, config)
+            if config and config.callback then
+                local origCb = config.callback
+                config.callback = function(...)
+                    pcall(function() playClickSound() end)
+                    return origCb(...)
+                end
+            end
+            return originalCreateButton(self, config)
+        end
+    end
+
+    if originalCreateDropdown then
+        Window.CreateDropdown = function(self, config)
+            if config and config.callback then
+                local origCb = config.callback
+                config.callback = function(...)
+                    pcall(function() playClickSound() end)
+                    return origCb(...)
+                end
+            end
+            return originalCreateDropdown(self, config)
+        end
+    end
+
+    if originalCreateSlider then
+        Window.CreateSlider = function(self, config)
+            if config and config.callback then
+                local origCb = config.callback
+                config.callback = function(...)
+                    pcall(function() playClickSound() end)
+                    return origCb(...)
+                end
+            end
+            return originalCreateSlider(self, config)
+        end
+    end
+end
+
+-- Aktifkan wrapper SEBELUM semua UI dibuat
+pcall(wrapCallbacks)
+
+print("[TiarHub v14] Bagian 2 loaded.")-- ============================================
+-- TIARHUB v14 FINAL - Bagian 3: Auto Fitur Survivor
 -- ============================================
 
 local lastParry = 0
@@ -795,29 +880,6 @@ local function doParry()
     task.delay(0.25, function() ParryActive = false end)
 end
 
-local function isInParryRange(killerChar)
-    local myRoot = getRoot()
-    if not myRoot or not killerChar then return false end
-    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
-    if not enemyRoot then return false end
-    return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
-end
-
-local function isFacingTarget(targetChar)
-    if not Auto.RequireFacing then return true end
-    if Auto.FaceSensitivity <= -1 then return true end
-    local myChar = LocalPlayer.Character
-    if not myChar then return false end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot or not enemyRoot then return false end
-    local enemyForward = enemyRoot.CFrame.LookVector
-    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
-    local dot = enemyForward:Dot(directionToMe)
-    return dot >= Auto.FaceSensitivity
-end
-
--- ============ HOOK KILLER (ANTI FAKE HIT) ============
 local hookedKillers = {}
 local lastKillerParry = {}
 
@@ -842,43 +904,13 @@ local function hookKiller(char)
         local enemyRoot = char:FindFirstChild("HumanoidRootPart")
         if not myRoot or not enemyRoot then return end
 
-        -- LAYER 1: RANGE
         local dist = (enemyRoot.Position - myRoot.Position).Magnitude
         if dist > Auto.ParryDistance then return end
 
-        -- LAYER 2: ANTI FAKE HIT
-        if AntiFakeHit.Enabled then
-            if dist > AntiFakeHit.MinRange then
-                showDebug("FAKE HIT (Terlalu jauh)", Color3.fromRGB(255, 200, 0))
-                return
-            end
-            local enemyLook = enemyRoot.CFrame.LookVector
-            local toMe = (myRoot.Position - enemyRoot.Position).Unit
-            local facing = enemyLook:Dot(toMe)
-            if facing < AntiFakeHit.FacingThreshold then
-                showDebug("FAKE HIT (Killer hadap arah lain)", Color3.fromRGB(255, 100, 100))
-                return
-            end
-            if AntiFakeHit.RequireMovement then
-                local velocity = enemyRoot.AssemblyLinearVelocity
-                local flatVel = Vector3.new(velocity.X, 0, velocity.Z)
-                local flatToMe = Vector3.new(toMe.X, 0, toMe.Z)
-                if flatVel.Magnitude > 2 then
-                    local velDot = flatVel.Unit:Dot(flatToMe.Unit)
-                    if velDot < 0 then
-                        showDebug("FAKE HIT (Killer lari mundur)", Color3.fromRGB(255, 100, 100))
-                        return
-                    end
-                end
-            end
-        end
-
-        -- LAYER 3: COOLDOWN
         local now = tick()
         if lastKillerParry[char] and now - lastKillerParry[char] < 0.4 then return end
         lastKillerParry[char] = now
 
-        showDebug("REAL HIT - PARRY!", Color3.fromRGB(100, 255, 100))
         doParry()
     end)
 end
@@ -1038,10 +1070,117 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v13] Bagian 3 loaded.")
+-- ============ AUTO DODGE ABYSS ============
+local function IsAbyssKiller(plr)
+    if not plr or not plr.Character then return false end
+    if not plr.Team or plr.Team.Name ~= "Killer" then return false end
+    local charName = plr.Character.Name
+    local plrName = plr.Name
+    if string.find(string.lower(charName), "abyss") then return true end
+    if string.find(string.lower(plrName), "abyss") then return true end
+    return false
+end
+
+local function GetNearestAbyss()
+    local root = getRoot()
+    if not root then return nil end
+    local closest, shortest = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and IsAbyssKiller(plr) then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local d = (hrp.Position - root.Position).Magnitude
+                if d < shortest then shortest = d; closest = hrp end
+            end
+        end
+    end
+    return closest, shortest
+end
+
+local function FindCrouchButton()
+    local paths = {
+        "Survivor-mob.Controls.Gui-mob.Crouch",
+        "Survivor-mob.Controls.Gui-mob.crouch",
+        "Survivor-mob.Controls.crouch",
+        "Survivor-mob.Controls.Crouch",
+        "Survivor-mob.Controls.action.crouch",
+        "Survivor-mob.Controls.action.Crouch",
+    }
+    for _, path in ipairs(paths) do
+        local cur = PlayerGui
+        for segment in string.gmatch(path, "[^%.]+") do
+            cur = cur and cur:FindFirstChild(segment)
+        end
+        if cur and cur:IsA("GuiObject") then return cur end
+    end
+    for _, v in ipairs(PlayerGui:GetDescendants()) do
+        if v:IsA("GuiObject") and string.find(string.lower(v.Name), "crouch") then
+            return v
+        end
+    end
+    return nil
+end
+
+local function PressCrouchButton()
+    local btn = FindCrouchButton()
+    if btn then
+        local pos = btn.AbsolutePosition
+        local size = btn.AbsoluteSize
+        local inset = game:GetService("GuiService"):GetGuiInset()
+        local x = pos.X + size.X/2 + inset.X
+        local y = pos.Y + size.Y/2 + inset.Y
+        pcall(function()
+            VirtualInputManager:SendTouchEvent(7777, 0, x, y)
+            task.wait(0.05)
+            VirtualInputManager:SendTouchEvent(7777, 2, x, y)
+        end)
+        return true
+    end
+    if not UserInputService.TouchEnabled then
+        pcall(function()
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game)
+            task.wait(0.05)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+        end)
+        return true
+    end
+    return false
+end
+
+local function DoDodgeAbyss()
+    if AutoDodgeAbyss.IsCrouching then return end
+    AutoDodgeAbyss.IsCrouching = true
+    PressCrouchButton()
+    task.delay(AutoDodgeAbyss.CrouchDuration, function()
+        if AutoDodgeAbyss.Enabled then
+            PressCrouchButton()
+        end
+        AutoDodgeAbyss.IsCrouching = false
+    end)
+end
+
+task.spawn(function()
+    while task.wait(0.15) do
+        pcall(function()
+            if not AutoDodgeAbyss.Enabled then return end
+            local root = getRoot()
+            if not root then return end
+            if isDowned() then return end
+            local abyssRoot, dist = GetNearestAbyss()
+            if not abyssRoot then return end
+            if dist > AutoDodgeAbyss.DetectRange then return end
+            local now = tick()
+            if now - AutoDodgeAbyss.LastDodge < AutoDodgeAbyss.Cooldown then return end
+            AutoDodgeAbyss.LastDodge = now
+            DoDodgeAbyss()
+        end)
+    end
+end)
+
+print("[TiarHub v14] Bagian 3 loaded.")
 
 -- ============================================
--- TIARHUB v13 FINAL - Bagian 4: Aimbot System
+-- TIARHUB v14 FINAL - Bagian 4: Aimbot System
 -- ============================================
 
 local Drawing = Drawing
@@ -1213,8 +1352,8 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v13] Bagian 4 loaded.")-- ============================================
--- TIARHUB v13 FINAL - Bagian 5: Killer & Movement
+print("[TiarHub v14] Bagian 4 loaded.")-- ============================================
+-- TIARHUB v14 FINAL - Bagian 5: Killer & Movement
 -- ============================================
 
 local function GetDownedSurvivor()
@@ -1404,12 +1543,6 @@ local function applyWalkSpeed()
     end)
 end
 
-local function applyJumpPower()
-    if not Movement.JumpPowerEnabled then return end
-    local hum = getHum()
-    if hum then hum.JumpPower = Movement.JumpPowerValue end
-end
-
 local NoClipConnection = nil
 local function toggleNoClip(state)
     Movement.NoClip = state
@@ -1435,13 +1568,6 @@ local function toggleNoClip(state)
         end
     end
 end
-
-UserInputService.JumpRequest:Connect(function()
-    if Movement.InfiniteJump then
-        local hum = getHum()
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
 
 -- ============ MOONWALK ============
 local function startMoonwalk()
@@ -1582,10 +1708,148 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
-print("[TiarHub v13] Bagian 5 loaded.")
+-- ============ COPY AVATAR ============
+local function saveOriginalAppearance()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return false end
+    local ok, desc = pcall(function() return hum:GetAppliedDescription() end)
+    if ok and desc then
+        AvatarCopier.OriginalDescription = desc
+        return true
+    end
+    return false
+end
+
+local function applyBlockyBody(character)
+    local hum = character:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local desc = Instance.new("HumanoidDescription")
+    desc.BodyTypeScale = 1
+    desc.DepthScale = 1
+    desc.HeadScale = 1
+    desc.HeightScale = 1
+    desc.ProportionScale = 0
+    desc.WidthScale = 1
+    pcall(function() hum:ApplyDescriptionClientServer(desc) end)
+end
+
+local function removeAllClothingAndAccessories(character)
+    for _, v in pairs(character:GetDescendants()) do
+        if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+            pcall(function() v:Destroy() end)
+        end
+    end
+end
+
+local function copyAvatar(username)
+    if not username or username == "" then
+        Rayfield:Notify({ title = "Copy Avatar", content = "Username kosong!" })
+        return false
+    end
+
+    saveOriginalAppearance()
+
+    local ok, userId = pcall(function()
+        return Players:GetUserIdFromNameAsync(username)
+    end)
+
+    if not ok or not userId then
+        Rayfield:Notify({ title = "Copy Avatar", content = "User '" .. username .. "' tidak ditemukan!" })
+        return false
+    end
+
+    AvatarCopier.CurrentCopiedUserId = userId
+
+    local char = LocalPlayer.Character
+    if not char then
+        Rayfield:Notify({ title = "Copy Avatar", content = "Karakter kamu belum spawn!" })
+        return false
+    end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then
+        Rayfield:Notify({ title = "Copy Avatar", content = "Humanoid tidak ditemukan!" })
+        return false
+    end
+
+    task.spawn(function()
+        local okDesc, desc = pcall(function()
+            return Players:GetHumanoidDescriptionFromUserId(userId)
+        end)
+
+        if not okDesc or not desc then
+            Rayfield:Notify({ title = "Copy Avatar", content = "Gagal ambil deskripsi avatar!" })
+            return
+        end
+
+        if AvatarCopier.BlockyBody then
+            applyBlockyBody(char)
+            task.wait(0.3)
+        end
+
+        removeAllClothingAndAccessories(char)
+        task.wait(0.2)
+
+        local okApply = pcall(function()
+            hum:ApplyDescriptionClientServer(desc)
+        end)
+
+        if okApply then
+            Rayfield:Notify({ title = "Copy Avatar", content = "Berhasil copy avatar: " .. username })
+        else
+            Rayfield:Notify({ title = "Copy Avatar", content = "Gagal apply avatar!" })
+        end
+    end)
+
+    return true
+end
+
+local function resetAvatar()
+    if not AvatarCopier.OriginalDescription then
+        Rayfield:Notify({ title = "Reset Avatar", content = "Avatar original belum disimpan!" })
+        return
+    end
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    removeAllClothingAndAccessories(char)
+    task.wait(0.1)
+    pcall(function()
+        hum:ApplyDescriptionClientServer(AvatarCopier.OriginalDescription)
+    end)
+    AvatarCopier.CurrentCopiedUserId = nil
+    Rayfield:Notify({ title = "Reset Avatar", content = "Avatar kembali ke original!" })
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1.5)
+    if AvatarCopier.CurrentCopiedUserId then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            local okDesc, desc = pcall(function()
+                return Players:GetHumanoidDescriptionFromUserId(AvatarCopier.CurrentCopiedUserId)
+            end)
+            if okDesc and desc then
+                if AvatarCopier.BlockyBody then
+                    applyBlockyBody(char)
+                    task.wait(0.3)
+                end
+                removeAllClothingAndAccessories(char)
+                task.wait(0.2)
+                pcall(function() hum:ApplyDescriptionClientServer(desc) end)
+            end
+        end
+    end
+end)
+
+print("[TiarHub v14] Bagian 5 loaded.")
 
 -- ============================================
--- TIARHUB v13 FINAL - Bagian 6: Visual & Anti-Lag
+-- TIARHUB v14 FINAL - Bagian 6: Visual & Anti-Lag
 -- ============================================
 
 local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
@@ -1644,10 +1908,17 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
+-- ============ COLOR CORRECTION (FIX CONTRAST) ============
 local ColorCorrection = nil
+
 local function applyColorCorrection()
     pcall(function()
-        if not ColorCorrection then
+        if not ColorCorrection or not ColorCorrection.Parent then
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("ColorCorrectionEffect") and v.Name == "TiarColorCorrection" then
+                    v:Destroy()
+                end
+            end
             ColorCorrection = Instance.new("ColorCorrectionEffect")
             ColorCorrection.Name = "TiarColorCorrection"
             ColorCorrection.Parent = Lighting
@@ -1666,10 +1937,13 @@ end
 local function resetColorCorrection()
     Visual.Saturation = 0; Visual.Brightness = 0; Visual.Contrast = 0
     if ColorCorrection then
-        ColorCorrection.Saturation = 0; ColorCorrection.Brightness = 0; ColorCorrection.Contrast = 0
+        ColorCorrection.Saturation = 0
+        ColorCorrection.Brightness = 0
+        ColorCorrection.Contrast = 0
     end
 end
 
+-- ============ ANTI-LAG ============
 local function applyAntiLag()
     pcall(function()
         if AntiLag.PhysicsThrottle then
@@ -1741,7 +2015,7 @@ end
 startAntiLag()
 
 RunService.Heartbeat:Connect(function()
-    pcall(function() applyVisual(); toggleScreenEffects() end)
+    pcall(function() applyVisual(); toggleScreenEffects(); applyColorCorrection() end)
 end)
 
 LocalPlayer.CharacterAdded:Connect(function()
@@ -1846,7 +2120,6 @@ local function teleportToWindow() return teleportTo(findNearestByNames({"Window"
 local function teleportToPallet() return teleportTo(findNearestByNames({"Pallet", "Palletwrong"})) end
 local function teleportToHook() return teleportTo(findNearestByNames({"HookPoint", "Hook"})) end
 
--- ============ AUTO ESCAPE ============
 task.spawn(function()
     while task.wait(0.2) do
         pcall(function()
@@ -1868,10 +2141,8 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v13] Bagian 6 loaded.")
-
--- ============================================
--- TIARHUB v13 FINAL - Bagian 7: UI Menu
+print("[TiarHub v14] Bagian 6 loaded.")-- ============================================
+-- TIARHUB v14 FINAL - Bagian 7: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
@@ -1912,14 +2183,6 @@ local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 0 })
 SurvivorTab:CreateSection("Auto Parry")
 SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, flag = "parry_on", callback = function(v) Auto.Parry = v end })
 SurvivorTab:CreateDropdown({ name = "Parry Mode", options = {"Safety", "Aggressive"}, currentOption = "Safety", flag = "parry_mode", callback = function(opt) Auto.ParryMode = opt; applyParryPreset(opt); Rayfield:Notify({ title = "Parry Mode", content = "Mode: " .. opt }) end })
-
-SurvivorTab:CreateSection("Anti Fake Hit")
-SurvivorTab:CreateToggle({ name = "Enable Anti Fake Hit", currentValue = true, flag = "afh_on", callback = function(v) AntiFakeHit.Enabled = v end })
-SurvivorTab:CreateSlider({ name = "Facing Threshold", range = {0.3, 1.0}, increment = 0.05, currentValue = 0.5, flag = "afh_facing", callback = function(v) AntiFakeHit.FacingThreshold = v end })
-SurvivorTab:CreateSlider({ name = "Min Range", range = {5, 20}, increment = 1, suffix = "stud", currentValue = 8, flag = "afh_range", callback = function(v) AntiFakeHit.MinRange = v end })
-SurvivorTab:CreateToggle({ name = "Require Movement", currentValue = true, flag = "afh_move", callback = function(v) AntiFakeHit.RequireMovement = v end })
-SurvivorTab:CreateToggle({ name = "Show Debug Indicator", currentValue = false, flag = "afh_debug", callback = function(v) AntiFakeHit.ShowDebug = v end })
-
 SurvivorTab:CreateToggle({ name = "Show Parry Range", currentValue = false, flag = "parry_range", callback = function(v) ParryRangeVisual.Enabled = v end })
 SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, flag = "parry_color", callback = function(c) ParryRangeVisual.Color = c end })
 
@@ -1936,6 +2199,12 @@ SurvivorTab:CreateSlider({ name = "Flee Detect Distance", range = {10, 200}, inc
 SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, flag = "vault", callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, flag = "vault_speed", callback = function(v) FastVault.Speed = v end })
+
+SurvivorTab:CreateSection("Auto Dodge Abyss")
+SurvivorTab:CreateToggle({ name = "Auto Dodge Abyss (Crouch)", currentValue = false, flag = "auto_dodge_abyss", callback = function(v) AutoDodgeAbyss.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Detect Range", range = {5, 50}, increment = 1, suffix = "stud", currentValue = 18, flag = "ad_abyss_range", callback = function(v) AutoDodgeAbyss.DetectRange = v end })
+SurvivorTab:CreateSlider({ name = "Cooldown", range = {0.1, 3}, increment = 0.1, suffix = "s", currentValue = 0.5, flag = "ad_abyss_cd", callback = function(v) AutoDodgeAbyss.Cooldown = v end })
+SurvivorTab:CreateSlider({ name = "Crouch Duration", range = {0.1, 2}, increment = 0.1, suffix = "s", currentValue = 0.3, flag = "ad_abyss_dur", callback = function(v) AutoDodgeAbyss.CrouchDuration = v end })
 
 -- ============ TELEPORT TAB ============
 local TeleportTab = Window:CreateTab({ name = "Teleport", icon = 0 })
@@ -1965,6 +2234,19 @@ TeleportTab:CreateSection("Auto Escape")
 TeleportTab:CreateToggle({ name = "Auto Escape (Kabur dari Killer)", currentValue = false, flag = "auto_escape", callback = function(v) AutoEscape.Enabled = v end })
 TeleportTab:CreateSlider({ name = "Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 40, flag = "escape_dist", callback = function(v) AutoEscape.DetectDistance = v end })
 TeleportTab:CreateSlider({ name = "Cooldown", range = {0.2, 3}, increment = 0.1, suffix = "s", currentValue = 0.8, flag = "escape_cd", callback = function(v) AutoEscape.Cooldown = v end })
+
+-- ============ AVATAR TAB ============
+local AvatarTab = Window:CreateTab({ name = "Avatar", icon = 0 })
+AvatarTab:CreateSection("Copy Avatar")
+AvatarTab:CreateInput({ name = "Target Username", currentValue = "", placeholder = "Ketik username (tanpa @)", flag = "av_username", callback = function(v) AvatarCopier.TargetUsername = v end })
+AvatarTab:CreateButton({ name = "🎭 Copy Avatar", callback = function() copyAvatar(AvatarCopier.TargetUsername) end })
+AvatarTab:CreateButton({ name = "🔄 Reset to Original", callback = function() resetAvatar() end })
+AvatarTab:CreateButton({ name = "💾 Save Current as Original", callback = function()
+    if saveOriginalAppearance() then Rayfield:Notify({ title = "Save Avatar", content = "Avatar original disimpan!" })
+    else Rayfield:Notify({ title = "Save Avatar", content = "Gagal simpan avatar!" }) end
+end })
+AvatarTab:CreateSection("Setting")
+AvatarTab:CreateToggle({ name = "Blocky Body (R6 Style)", currentValue = true, flag = "av_blocky", callback = function(v) AvatarCopier.BlockyBody = v end })
 
 -- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 0 })
@@ -2000,15 +2282,11 @@ KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, curren
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
 KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked })
 
--- ============ MISC TAB ============
+-- ============ MISC TAB (TANPA JUMP POWER & INFINITE JUMP) ============
 local MiscTab = Window:CreateTab({ name = "Misc", icon = 0 })
 MiscTab:CreateSection("Walk Speed")
 MiscTab:CreateToggle({ name = "Enable Walk Speed", currentValue = false, flag = "m_ws", callback = function(v) Movement.WalkSpeedEnabled = v; if v then applyWalkSpeed() else local hum = getHum(); if hum then hum.WalkSpeed = Movement.OriginalWalkSpeed end end end })
 MiscTab:CreateSlider({ name = "Walk Speed Value", range = {16, 100}, increment = 0.5, currentValue = 17.6, flag = "m_ws_val", callback = function(v) Movement.WalkSpeedValue = v end })
-MiscTab:CreateSection("Jump Power")
-MiscTab:CreateToggle({ name = "Enable Jump Power", currentValue = false, flag = "m_jp", callback = function(v) Movement.JumpPowerEnabled = v; if v then applyJumpPower() else local hum = getHum(); if hum then hum.JumpPower = Movement.OriginalJumpPower end end end })
-MiscTab:CreateSlider({ name = "Jump Power Value", range = {0, 300}, increment = 5, currentValue = 50, flag = "m_jp_val", callback = function(v) Movement.JumpPowerValue = v end })
-MiscTab:CreateToggle({ name = "Infinite Jump", currentValue = false, flag = "m_ij", callback = function(v) Movement.InfiniteJump = v end })
 MiscTab:CreateSection("No Clip")
 MiscTab:CreateToggle({ name = "No Clip", currentValue = false, flag = "m_noclip", callback = function(v) toggleNoClip(v) end })
 MiscTab:CreateSection("Moonwalk")
@@ -2031,9 +2309,21 @@ VisualTab:CreateToggle({ name = "No Bloom", currentValue = false, flag = "v_nobl
 VisualTab:CreateToggle({ name = "No Blur / DOF", currentValue = false, flag = "v_noblur", callback = function(v) Visual.NoBlur = v; toggleScreenEffects() end })
 VisualTab:CreateSection("Color Correction")
 VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, flag = "v_cc", callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
-VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
-VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
-VisualTab:CreateSlider({ name = "Contrast", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_contrast", callback = function(v) Visual.Contrast = v; applyColorCorrection() end })
+VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) 
+    Visual.Saturation = v
+    Visual.ColorCorrection = true
+    applyColorCorrection()
+end })
+VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) 
+    Visual.Brightness = v
+    Visual.ColorCorrection = true
+    applyColorCorrection()
+end })
+VisualTab:CreateSlider({ name = "Contrast", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_contrast", callback = function(v) 
+    Visual.Contrast = v
+    Visual.ColorCorrection = true
+    applyColorCorrection()
+end })
 VisualTab:CreateButton({ name = "🔄 Reset Color", callback = function() resetColorCorrection(); Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast sudah di-reset ke 0." }) end })
 VisualTab:CreateSection("Effect")
 VisualTab:CreateToggle({ name = "Hide Red Spark", currentValue = false, flag = "v_hide_spark", callback = function(v) HideSpark.Enabled = v; if v then startHideSpark() else stopHideSpark() end end })
@@ -2058,10 +2348,29 @@ CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, s
 CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_x", callback = function(v) Crosshair.OffsetX = v end })
 CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_y", callback = function(v) Crosshair.OffsetY = v end })
 
+-- ============ UI SETTINGS TAB ============
+local UISettingsTab = Window:CreateTab({ name = "UI Settings", icon = 0 })
+UISettingsTab:CreateSection("Sound Feedback")
+UISettingsTab:CreateToggle({ name = "Enable Click Sound", currentValue = true, flag = "sf_on", callback = function(v) SoundFeedback.Enabled = v end })
+UISettingsTab:CreateDropdown({ name = "Sound Type", options = {"Click", "Switch", "Beep", "Bell", "Whoosh"}, currentOption = "Click", flag = "sf_type", callback = function(opt)
+    SoundFeedback.CurrentSound = opt
+    playClickSound()
+end })
+UISettingsTab:CreateSlider({ name = "Volume", range = {0, 1}, increment = 0.05, currentValue = 0.5, flag = "sf_vol", callback = function(v)
+    SoundFeedback.Volume = v
+    if SoundInstance then SoundInstance.Volume = v end
+    playClickSound()
+end })
+UISettingsTab:CreateButton({ name = "🔊 Test Sound", callback = function()
+    playClickSound()
+    Rayfield:Notify({ title = "Sound", content = "Sound: " .. SoundFeedback.CurrentSound })
+end })
+
+-- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub v13",
-    content = "Loaded! Anti Fake Hit + Skill Check 2 Mode + Teleport + Rainbow UI.",
+    title = "TiarHub v14",
+    content = "Loaded! Sound + Auto Dodge Abyss + Copy Avatar + Fix Contrast + Rainbow",
     duration = 6
 })
 
-print("[TiarHub v13] ALL LOADED.")
+print("[TiarHub v14] ALL LOADED - READY!")

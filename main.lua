@@ -1,6 +1,7 @@
 -- ============================================
--- TIARHUB v12 - Bagian 1: Setup & Config
--- UI: Rayfield Gen2 | Rainbow All TiarHub UI
+-- TIARHUB v13 FINAL - Bagian 1: Setup & Config
+-- Anti Fake Hit + Skill Check 2 Mode + Teleport + Rainbow
+-- UI: Rayfield Gen2
 -- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
@@ -18,7 +19,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ============ RAINBOW SYSTEM ============
 local RainbowHue = 0
-local RainbowSpeed = 0.008 -- kecepatan rainbow (makin besar makin cepat)
+local RainbowSpeed = 0.008
 
 RunService.Heartbeat:Connect(function()
     RainbowHue = (RainbowHue + RainbowSpeed) % 1
@@ -31,7 +32,7 @@ end
 -- ============ WINDOW ============
 local Window = Rayfield:CreateWindow({
     name = "TiarHub | Violence District",
-    subtitle = "by Tiar",
+    subtitle = "by Tiar | v13",
     sidebarLayout = true,
     configuration = { autoSave = true, autoLoad = true, fileName = "TiarHubFull" }
 })
@@ -70,6 +71,46 @@ local VisualOriginal = {
     FogStart = Lighting.FogStart, FogColor = Lighting.FogColor
 }
 
+-- ============ ANTI FAKE HIT CONFIG ============
+local AntiFakeHit = {
+    Enabled = true,
+    FacingThreshold = 0.5,
+    MinRange = 8,
+    RequireMovement = true,
+    ShowDebug = false
+}
+local DebugGui = nil
+
+local function showDebug(text, color)
+    if not AntiFakeHit.ShowDebug then return end
+    if not DebugGui then
+        DebugGui = Instance.new("ScreenGui")
+        DebugGui.Name = "TiarDebug"
+        DebugGui.ResetOnSpawn = false
+        DebugGui.Parent = CoreGui
+        local lbl = Instance.new("TextLabel")
+        lbl.Name = "DebugLabel"
+        lbl.Size = UDim2.new(0, 300, 0, 30)
+        lbl.Position = UDim2.new(0.5, -150, 0, 100)
+        lbl.BackgroundTransparency = 0.5
+        lbl.BackgroundColor3 = Color3.new(0, 0, 0)
+        lbl.TextColor3 = Color3.new(1, 1, 1)
+        lbl.TextStrokeTransparency = 0
+        lbl.Font = Enum.Font.GothamBold
+        lbl.TextSize = 16
+        lbl.Text = ""
+        lbl.Parent = DebugGui
+    end
+    local lbl = DebugGui:FindFirstChild("DebugLabel")
+    if lbl then
+        lbl.Text = text
+        lbl.TextColor3 = color or Color3.new(1, 1, 1)
+        task.delay(0.5, function()
+            if lbl and lbl.Text == text then lbl.Text = "" end
+        end)
+    end
+end
+
 -- ============ AUTO PARRY 2 MODE ============
 local PARRY_PRESETS = {
     Safety     = { Distance = 12, Debounce = 0.15, Face = 0.5,  RequireFacing = true },
@@ -105,7 +146,20 @@ local LastFlee = 0
 local FastVault = { Enabled = false, Speed = 1.2, ReplaceMap = { ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779" } }
 local VaultTracks = {}
 
--- ============ AIMBOT CONFIG ============
+-- ============ HIDE SPARK ============
+local HideSpark = { Enabled = false }
+local HiddenSparkCache = {}
+
+-- ============ TELEPORT ============
+local Teleport = { LastTeleport = 0, Cooldown = 0.5 }
+
+-- ============ AUTO ESCAPE ============
+local AutoEscape = { Enabled = false, DetectDistance = 40, Cooldown = 0.8, LastEscape = 0 }
+
+-- ============ SKILL CHECK MODE ============
+local SkillCheckMode = "Perfect"
+
+-- ============ AIMBOT ============
 local GunAim = {
     Enabled = false, Holding = false, TargetMode = "Killer",
     Strength = 1, Predict = true, PredictStrength = 0.12,
@@ -117,7 +171,7 @@ local KillerAim = {
     Enabled = false, FOV = 200, Strength = 0.5, Holding = false
 }
 
--- ============ KILLER CONFIG ============
+-- ============ KILLER ============
 local Killer = {
     AutoAttack = false, AttackDelay = 0.45,
     AutoCarry = false, AutoHook = false, KillAll = false,
@@ -127,14 +181,14 @@ local KillerBusy = false
 local KillerTarget = nil
 local StalkConnection = nil
 
--- ============ MOVEMENT CONFIG ============
+-- ============ MOVEMENT ============
 local Movement = {
     WalkSpeedEnabled = false, WalkSpeedValue = 17.6, OriginalWalkSpeed = 16,
     JumpPowerEnabled = false, JumpPowerValue = 50, OriginalJumpPower = 50,
     NoClip = false, InfiniteJump = false
 }
 
--- ============ MOONWALK CONFIG ============
+-- ============ MOONWALK ============
 local Moonwalk = { Enabled = false, ShowButton = false, SpamSpeed = 30, Intensity = 35, SlowSpeed = 13, UseSlow = true }
 local MoonwalkConnection = nil
 local MoonwalkHeartbeat = nil
@@ -152,14 +206,14 @@ local EmoteList = { "Mannrobics","Arm Swing","Schadenfreude","Kyoufuu","Backflip
 local Masked = { CurrentPower = "Cobra" }
 local MaskedPowers = {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}
 
--- ============ ANTI-LAG CONFIG ============
+-- ============ ANTI-LAG ============
 local AntiLag = {
     Enabled = false,
     NoParticles = false, NoTextures = false,
     PhysicsThrottle = false, NoGlobalShadows = false, NetworkLag = false
 }
 
--- ============ FPS/PING CONFIG ============
+-- ============ FPS/PING ============
 local FPS = 0
 local Frames = 0
 local LastTick = tick()
@@ -249,8 +303,8 @@ local function getTeamLabel(plr)
     return plr.Team.Name
 end
 
-print("[TiarHub v12] Bagian 1 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 2: ESP System
+print("[TiarHub v13] Bagian 1 loaded.")-- ============================================
+-- TIARHUB v13 FINAL - Bagian 2: ESP System
 -- ============================================
 
 local ESPObjects = {}
@@ -268,24 +322,16 @@ local function createESP(obj, color, showName, customName)
     if not obj then return end
     if ESPObjects[obj] then
         local h = ESPObjects[obj]
-        if ESP.Mode == "Outline" then
-            h.FillTransparency = 1; h.OutlineTransparency = 0
-        elseif ESP.Mode == "Fill" then
-            h.FillTransparency = 0.5; h.OutlineTransparency = 1
-        else
-            h.FillTransparency = 0.9; h.OutlineTransparency = 0.3
-        end
+        if ESP.Mode == "Outline" then h.FillTransparency = 1; h.OutlineTransparency = 0
+        elseif ESP.Mode == "Fill" then h.FillTransparency = 0.5; h.OutlineTransparency = 1
+        else h.FillTransparency = 0.9; h.OutlineTransparency = 0.3 end
         h.FillColor = color; h.OutlineColor = color
     else
         local h = Instance.new("Highlight")
         h.FillColor = color; h.OutlineColor = color
-        if ESP.Mode == "Outline" then
-            h.FillTransparency = 1; h.OutlineTransparency = 0
-        elseif ESP.Mode == "Fill" then
-            h.FillTransparency = 0.5; h.OutlineTransparency = 1
-        else
-            h.FillTransparency = 0.9; h.OutlineTransparency = 0.3
-        end
+        if ESP.Mode == "Outline" then h.FillTransparency = 1; h.OutlineTransparency = 0
+        elseif ESP.Mode == "Fill" then h.FillTransparency = 0.5; h.OutlineTransparency = 1
+        else h.FillTransparency = 0.9; h.OutlineTransparency = 0.3 end
         h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         h.Parent = obj
         ESPObjects[obj] = h
@@ -293,7 +339,6 @@ local function createESP(obj, color, showName, customName)
             if not parent then removeESP(obj) end
         end)
     end
-
     if showName then
         local head = obj:FindFirstChild("Head")
         local adornee = head or (obj:IsA("BasePart") and obj)
@@ -302,26 +347,15 @@ local function createESP(obj, color, showName, customName)
             local teamLabel = ""
             if not customName then
                 local plr = Players:GetPlayerFromCharacter(obj)
-                if plr then
-                    playerName = plr.Name
-                    teamLabel = getTeamLabel(plr)
-                end
+                if plr then playerName = plr.Name; teamLabel = getTeamLabel(plr) end
             end
-
             local displayText = playerName
-            if teamLabel ~= "" then
-                displayText = string.format("[%s] %s", teamLabel, playerName)
-            end
-
+            if teamLabel ~= "" then displayText = string.format("[%s] %s", teamLabel, playerName) end
             if ESPNames[obj] then
                 local bb = ESPNames[obj]
                 bb.Size = UDim2.new(0, 250, 0, ESP.NameSize * 2)
                 local lbl = bb:FindFirstChildOfClass("TextLabel")
-                if lbl then
-                    lbl.Text = displayText
-                    lbl.TextSize = ESP.NameSize
-                    lbl.TextColor3 = color
-                end
+                if lbl then lbl.Text = displayText; lbl.TextSize = ESP.NameSize; lbl.TextColor3 = color end
             else
                 local bb = Instance.new("BillboardGui")
                 bb.Size = UDim2.new(0, 250, 0, ESP.NameSize * 2)
@@ -345,21 +379,15 @@ local function createESP(obj, color, showName, customName)
     end
 end
 
--- ============ GENERATOR ESP ============
 local function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
-
     if not ESP.Generator then
-        local old = generator:FindFirstChild("GenHighlight")
-        if old then old:Destroy() end
-        local oldName = generator:FindFirstChild("GenNameTag")
-        if oldName then oldName:Destroy() end
+        local old = generator:FindFirstChild("GenHighlight"); if old then old:Destroy() end
+        local oldName = generator:FindFirstChild("GenNameTag"); if oldName then oldName:Destroy() end
         return
     end
-
     local percent = 0
     local found = false
-
     local attr = generator:GetAttribute("Progress")
     if attr and type(attr) == "number" then percent = attr; found = true end
     if not found then
@@ -375,36 +403,26 @@ local function UpdateGenerator(generator)
     end
     if not found then
         for _, v in ipairs(generator:GetChildren()) do
-            if v:IsA("NumberValue") then
-                percent = v.Value; found = true; break
-            end
+            if v:IsA("NumberValue") then percent = v.Value; found = true; break end
         end
     end
-
     percent = math.clamp(percent, 0, 100)
     local color = ESP.GeneratorColor
     local labelText = "Generator"
-
     if found then
         color = ESP.GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), percent / 100)
         labelText = string.format("Gen %.0f%%", percent)
     end
-
     local h = generator:FindFirstChild("GenHighlight") or Instance.new("Highlight")
     h.Name = "GenHighlight"
     h.Adornee = generator
     h.FillColor = color
     h.OutlineColor = color
-    if ESP.Mode == "Outline" then
-        h.FillTransparency = 1; h.OutlineTransparency = 0
-    elseif ESP.Mode == "Fill" then
-        h.FillTransparency = 0.5; h.OutlineTransparency = 1
-    else
-        h.FillTransparency = 0.9; h.OutlineTransparency = 0.3
-    end
+    if ESP.Mode == "Outline" then h.FillTransparency = 1; h.OutlineTransparency = 0
+    elseif ESP.Mode == "Fill" then h.FillTransparency = 0.5; h.OutlineTransparency = 1
+    else h.FillTransparency = 0.9; h.OutlineTransparency = 0.3 end
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = generator
-
     local bb = generator:FindFirstChild("GenNameTag")
     if not bb then
         bb = Instance.new("BillboardGui")
@@ -425,13 +443,9 @@ local function UpdateGenerator(generator)
         lbl.Parent = bb
     end
     local lbl = bb:FindFirstChild("Label") or bb:FindFirstChildOfClass("TextLabel")
-    if lbl then
-        lbl.Text = labelText
-        lbl.TextColor3 = color
-    end
+    if lbl then lbl.Text = labelText; lbl.TextColor3 = color end
 end
 
--- ============ STATUS ESP ============
 local function removeStatusESP(char)
     if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
 end
@@ -483,7 +497,6 @@ local function createStatusESP(player, char, root)
     end
 end
 
--- ============ CACHE OBJECT ============
 local function cacheObject(obj)
     if not obj then return end
     if not obj:IsA("BasePart") and not obj:IsA("Model") then return end
@@ -507,7 +520,6 @@ workspace.DescendantRemoving:Connect(function(obj)
     removeESP(obj)
 end)
 
--- ============ KILLER WARNING ============
 local function updateWarning()
     pcall(function()
         local root = getRoot()
@@ -565,10 +577,7 @@ local function updateWarning()
         local warnText = WarningGui:FindFirstChild("WarnText")
         if dist <= KillerWarning.Distance then
             if stroke then stroke.Transparency = 0.3 end
-            if warnText then
-                warnText.Visible = true
-                warnText.Text = string.format("KILLER DEKAT (%.0f stud)", dist)
-            end
+            if warnText then warnText.Visible = true; warnText.Text = string.format("KILLER DEKAT (%.0f stud)", dist) end
         else
             if stroke then stroke.Transparency = 0.9 end
             if warnText then warnText.Visible = false end
@@ -576,7 +585,6 @@ local function updateWarning()
     end)
 end
 
--- ============ FPS/PING WATERMARK ============
 RunService.RenderStepped:Connect(function()
     Frames = Frames + 1
     if tick() - LastTick >= 1 then
@@ -590,7 +598,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ============ MAIN ESP LOOP ============
 local lastUpdate = 0
 RunService.RenderStepped:Connect(function()
     pcall(function()
@@ -611,10 +618,8 @@ RunService.RenderStepped:Connect(function()
                         if dist <= ESP.Distance then
                             local isKiller = p.Team and p.Team.Name == "Killer"
                             local isSurv = p.Team and (p.Team.Name == "Survivors" or p.Team.Name == "Survivor")
-                            if ESP.Survivor and isSurv then
-                                createESP(char, ESP.SurvivorColor, ESP.ShowName)
-                            elseif ESP.Killer and isKiller then
-                                createESP(char, ESP.KillerColor, ESP.ShowName)
+                            if ESP.Survivor and isSurv then createESP(char, ESP.SurvivorColor, ESP.ShowName)
+                            elseif ESP.Killer and isKiller then createESP(char, ESP.KillerColor, ESP.ShowName)
                             else removeESP(char) end
                         else removeESP(char) end
                     end
@@ -626,29 +631,23 @@ RunService.RenderStepped:Connect(function()
         if ESP.Generator then
             for gen in pairs(CachedObjects.Generators) do
                 local pos = GetPos(gen)
-                if pos and (pos - root.Position).Magnitude <= ESP.Distance then
-                    UpdateGenerator(gen)
+                if pos and (pos - root.Position).Magnitude <= ESP.Distance then UpdateGenerator(gen)
                 else
-                    local old = gen:FindFirstChild("GenHighlight")
-                    if old then old:Destroy() end
-                    local oldName = gen:FindFirstChild("GenNameTag")
-                    if oldName then oldName:Destroy() end
+                    local old = gen:FindFirstChild("GenHighlight"); if old then old:Destroy() end
+                    local oldName = gen:FindFirstChild("GenNameTag"); if oldName then oldName:Destroy() end
                 end
             end
         else
             for gen in pairs(CachedObjects.Generators) do
-                local old = gen:FindFirstChild("GenHighlight")
-                if old then old:Destroy() end
-                local oldName = gen:FindFirstChild("GenNameTag")
-                if oldName then oldName:Destroy() end
+                local old = gen:FindFirstChild("GenHighlight"); if old then old:Destroy() end
+                local oldName = gen:FindFirstChild("GenNameTag"); if oldName then oldName:Destroy() end
             end
         end
 
         if ESP.Hook then
             for hook in pairs(CachedObjects.Hooks) do
                 local pos = GetPos(hook)
-                if pos and (pos - root.Position).Magnitude <= ESP.Distance then
-                    createESP(hook, ESP.HookColor, false)
+                if pos and (pos - root.Position).Magnitude <= ESP.Distance then createESP(hook, ESP.HookColor, false)
                 else removeESP(hook) end
             end
         else for hook in pairs(CachedObjects.Hooks) do removeESP(hook) end end
@@ -656,8 +655,7 @@ RunService.RenderStepped:Connect(function()
         if ESP.Pallet then
             for pallet in pairs(CachedObjects.Pallets) do
                 local pos = GetPos(pallet)
-                if pos and (pos - root.Position).Magnitude <= ESP.Distance then
-                    createESP(pallet, ESP.PalletColor, false)
+                if pos and (pos - root.Position).Magnitude <= ESP.Distance then createESP(pallet, ESP.PalletColor, false)
                 else removeESP(pallet) end
             end
         else for pallet in pairs(CachedObjects.Pallets) do removeESP(pallet) end end
@@ -665,8 +663,7 @@ RunService.RenderStepped:Connect(function()
         if ESP.Window then
             for win in pairs(CachedObjects.Windows) do
                 local pos = GetPos(win)
-                if pos and (pos - root.Position).Magnitude <= ESP.Distance then
-                    createESP(win, ESP.WindowColor, false)
+                if pos and (pos - root.Position).Magnitude <= ESP.Distance then createESP(win, ESP.WindowColor, false)
                 else removeESP(win) end
             end
         else for win in pairs(CachedObjects.Windows) do removeESP(win) end end
@@ -674,13 +671,11 @@ RunService.RenderStepped:Connect(function()
         if ESP.SCP then
             for scp in pairs(CachedSCP) do
                 local pos = GetPos(scp)
-                if pos and (pos - root.Position).Magnitude <= ESP.Distance then
-                    createESP(scp, ESP.SCPColor, false)
+                if pos and (pos - root.Position).Magnitude <= ESP.Distance then createESP(scp, ESP.SCPColor, false)
                 else removeESP(scp) end
             end
         else for scp in pairs(CachedSCP) do removeESP(scp) end end
 
-        -- PARRY CIRCLE
         if ParryRangeVisual.Enabled and root then
             if not ParryCircle then
                 ParryCircle = Instance.new("Part")
@@ -703,20 +698,13 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ RAINBOW APPLY (FILTERED - cuma UI TiarHub) ============
--- Cari GUI Rayfield dengan nama "TiarHub" atau window "TiarHub | Violence District"
+-- ============ RAINBOW APPLY ============
 local function isTiarHubGui(gui)
     if not gui then return false end
-    -- Cek nama window
     local name = gui.Name or ""
-    if name:find("TiarHub") or name:find("Rayfield") or name:find("rayfield") then
-        return true
-    end
-    -- Cek ada text "TiarHub" di title
+    if name:find("TiarHub") or name:find("Rayfield") or name:find("rayfield") then return true end
     for _, v in pairs(gui:GetDescendants()) do
-        if v:IsA("TextLabel") and v.Text and v.Text:find("TiarHub") then
-            return true
-        end
+        if v:IsA("TextLabel") and v.Text and v.Text:find("TiarHub") then return true end
     end
     return false
 end
@@ -727,20 +715,15 @@ local function rainbowifyGui(gui)
         if v:IsA("TextLabel") or v:IsA("TextButton") then
             task.spawn(function()
                 while v and v.Parent do
-                    pcall(function()
-                        v.TextColor3 = getRainbowColor()
-                    end)
+                    pcall(function() v.TextColor3 = getRainbowColor() end)
                     task.wait(0.08)
                 end
             end)
         end
-        -- UIStroke juga rainbow
         if v:IsA("UIStroke") then
             task.spawn(function()
                 while v and v.Parent do
-                    pcall(function()
-                        v.Color = getRainbowColor()
-                    end)
+                    pcall(function() v.Color = getRainbowColor() end)
                     task.wait(0.1)
                 end
             end)
@@ -749,31 +732,23 @@ local function rainbowifyGui(gui)
 end
 
 task.spawn(function()
-    task.wait(3) -- tunggu Rayfield selesai load
-
-    -- Cari GUI Rayfield di CoreGui
+    task.wait(3)
     for _, gui in pairs(CoreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") and isTiarHubGui(gui) then
-            rainbowifyGui(gui)
-        end
+        if gui:IsA("ScreenGui") and isTiarHubGui(gui) then rainbowifyGui(gui) end
     end
-
-    -- Kalau ada GUI baru dibuat, cek & rainbow-kan
     CoreGui.ChildAdded:Connect(function(child)
         if child:IsA("ScreenGui") then
             task.wait(0.5)
-            if isTiarHubGui(child) then
-                rainbowifyGui(child)
-            end
+            if isTiarHubGui(child) then rainbowifyGui(child) end
         end
     end)
 end)
 
-print("[TiarHub v12] Bagian 2 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 3: Auto Fitur Survivor
+print("[TiarHub v13] Bagian 2 loaded.")-- ============================================
+-- TIARHUB v13 FINAL - Bagian 3: Auto Fitur Survivor
+-- Anti Fake Hit + Skill Check 2 Mode
 -- ============================================
 
--- ============ AUTO PARRY 2 MODE (FIXED) ============
 local lastParry = 0
 
 local function pressRightClick()
@@ -820,7 +795,6 @@ local function doParry()
     task.delay(0.25, function() ParryActive = false end)
 end
 
--- Cek jarak
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -829,24 +803,23 @@ local function isInParryRange(killerChar)
     return (enemyRoot.Position - myRoot.Position).Magnitude <= Auto.ParryDistance
 end
 
--- Cek facing (Safety = cek arah, Aggressive = selalu true)
 local function isFacingTarget(targetChar)
     if not Auto.RequireFacing then return true end
     if Auto.FaceSensitivity <= -1 then return true end
-
     local myChar = LocalPlayer.Character
     if not myChar then return false end
     local myRoot = myChar:FindFirstChild("HumanoidRootPart")
     local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
     if not myRoot or not enemyRoot then return false end
-
     local enemyForward = enemyRoot.CFrame.LookVector
     local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
     local dot = enemyForward:Dot(directionToMe)
     return dot >= Auto.FaceSensitivity
 end
 
+-- ============ HOOK KILLER (ANTI FAKE HIT) ============
 local hookedKillers = {}
+local lastKillerParry = {}
 
 local function hookKiller(char)
     if hookedKillers[char] then return end
@@ -863,11 +836,50 @@ local function hookKiller(char)
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-        if KillerAnims["rbxassetid://" .. id] then
-            if not isInParryRange(char) then return end
-            if not isFacingTarget(char) then return end
-            doParry()
+        if not KillerAnims["rbxassetid://" .. id] then return end
+
+        local myRoot = getRoot()
+        local enemyRoot = char:FindFirstChild("HumanoidRootPart")
+        if not myRoot or not enemyRoot then return end
+
+        -- LAYER 1: RANGE
+        local dist = (enemyRoot.Position - myRoot.Position).Magnitude
+        if dist > Auto.ParryDistance then return end
+
+        -- LAYER 2: ANTI FAKE HIT
+        if AntiFakeHit.Enabled then
+            if dist > AntiFakeHit.MinRange then
+                showDebug("FAKE HIT (Terlalu jauh)", Color3.fromRGB(255, 200, 0))
+                return
+            end
+            local enemyLook = enemyRoot.CFrame.LookVector
+            local toMe = (myRoot.Position - enemyRoot.Position).Unit
+            local facing = enemyLook:Dot(toMe)
+            if facing < AntiFakeHit.FacingThreshold then
+                showDebug("FAKE HIT (Killer hadap arah lain)", Color3.fromRGB(255, 100, 100))
+                return
+            end
+            if AntiFakeHit.RequireMovement then
+                local velocity = enemyRoot.AssemblyLinearVelocity
+                local flatVel = Vector3.new(velocity.X, 0, velocity.Z)
+                local flatToMe = Vector3.new(toMe.X, 0, toMe.Z)
+                if flatVel.Magnitude > 2 then
+                    local velDot = flatVel.Unit:Dot(flatToMe.Unit)
+                    if velDot < 0 then
+                        showDebug("FAKE HIT (Killer lari mundur)", Color3.fromRGB(255, 100, 100))
+                        return
+                    end
+                end
+            end
         end
+
+        -- LAYER 3: COOLDOWN
+        local now = tick()
+        if lastKillerParry[char] and now - lastKillerParry[char] < 0.4 then return end
+        lastKillerParry[char] = now
+
+        showDebug("REAL HIT - PARRY!", Color3.fromRGB(100, 255, 100))
+        doParry()
     end)
 end
 
@@ -887,7 +899,7 @@ task.spawn(function()
     end
 end)
 
--- ============ AUTO SKILL CHECK ============
+-- ============ AUTO SKILL CHECK (2 MODE) ============
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
 local busy = false
@@ -937,17 +949,26 @@ local function startSkillCheck()
             if not line or not goal then return end
             local lr = line.Rotation % 360
             local gr = goal.Rotation % 360
-            local startRange = (gr + 102) % 360
-            local endRange = (gr + 116) % 360
-            local success = (startRange > endRange and (lr >= startRange or lr <= endRange))
-                or (lr >= startRange and lr <= endRange)
-            if success then
+
+            if SkillCheckMode == "Instant" then
                 busy = true
                 task.spawn(function()
                     if UserInputService.TouchEnabled then TriggerMobileButton() else pressSpace() end
                     task.wait(0.05)
                     busy = false
                 end)
+            else
+                local centerGoal = (gr + 109) % 360
+                local diff = math.abs(lr - centerGoal)
+                if diff > 180 then diff = 360 - diff end
+                if diff <= 3 then
+                    busy = true
+                    task.spawn(function()
+                        if UserInputService.TouchEnabled then TriggerMobileButton() else pressSpace() end
+                        task.wait(0.05)
+                        busy = false
+                    end)
+                end
             end
         end)
     end)
@@ -1017,15 +1038,16 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v12] Bagian 3 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 4: Aimbot System (FIXED)
+print("[TiarHub v13] Bagian 3 loaded.")
+
+-- ============================================
+-- TIARHUB v13 FINAL - Bagian 4: Aimbot System
 -- ============================================
 
 local Drawing = Drawing
 local FOVCircle = nil
 local TracerLine = nil
 
--- ============ FOV CIRCLE ============
 local function createFOVCircle()
     if not Drawing then return end
     if FOVCircle then FOVCircle:Remove() end
@@ -1039,7 +1061,6 @@ local function createFOVCircle()
     FOVCircle.Transparency = 0.5
 end
 
--- ============ TRACER ============
 local function createTracer()
     if not Drawing then return end
     if TracerLine then TracerLine:Remove() end
@@ -1051,7 +1072,6 @@ end
 
 createTracer()
 
--- ============ RAYCAST / VISIBILITY ============
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -1065,19 +1085,16 @@ local function isVisible(part)
     return result.Instance:IsDescendantOf(part.Parent)
 end
 
--- ============ GET CLOSEST GUN TARGET ============
 local function getClosestGunTarget()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
     local closest, shortest = nil, GunAim.FOV
-
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and p.Team then
             local valid = false
             if GunAim.TargetMode == "Killer" and p.Team.Name == "Killer" then valid = true
             elseif GunAim.TargetMode == "Survivor" and (p.Team.Name == "Survivors" or p.Team.Name == "Survivor") then valid = true
             elseif GunAim.TargetMode == "Both" then valid = true end
-
             if valid then
                 local hrp = p.Character:FindFirstChild(GunAim.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
                 local hum = p.Character:FindFirstChildOfClass("Humanoid")
@@ -1087,7 +1104,6 @@ local function getClosestGunTarget()
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
                         if dist < shortest then
                             if GunAim.VisibilityCheck and not isVisible(hrp) then
-                                -- skip
                             else
                                 shortest = dist
                                 closest = hrp
@@ -1101,7 +1117,6 @@ local function getClosestGunTarget()
     return closest
 end
 
--- ============ GUN AIM LOOP (RenderStepped langsung) ============
 RunService.RenderStepped:Connect(function()
     pcall(function()
         if not GunAim.Enabled then
@@ -1109,8 +1124,6 @@ RunService.RenderStepped:Connect(function()
             if TracerLine then TracerLine.Visible = false end
             return
         end
-
-        -- FOV Circle
         if FOVCircle then
             FOVCircle.Visible = GunAim.ShowFOV
             FOVCircle.Radius = GunAim.FOV
@@ -1119,28 +1132,21 @@ RunService.RenderStepped:Connect(function()
                 workspace.CurrentCamera.ViewportSize.Y / 2
             )
         end
-
-        -- Kalau nggak nahan RMB, jangan lock
         if not GunAim.Holding then
             if TracerLine then TracerLine.Visible = false end
             return
         end
-
         local cam = workspace.CurrentCamera
         local target = getClosestGunTarget()
         if not target then
             if TracerLine then TracerLine.Visible = false end
             return
         end
-
         local pos = target.Position
         if GunAim.Predict then
             pos = pos + (target.AssemblyLinearVelocity * GunAim.PredictStrength)
         end
-
         cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, pos), GunAim.Strength)
-
-        -- Tracer
         if GunAim.ShowTracer and TracerLine then
             local screenPos, onScreen = cam:WorldToViewportPoint(target.Position)
             if onScreen then
@@ -1153,12 +1159,10 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ KILLER AIM ============
 local function getClosestSurvivorForKiller()
     local cam = workspace.CurrentCamera
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
     local closest, shortest = nil, KillerAim.FOV
-
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local isSurvivor = p.Team and (p.Team.Name == "Survivors" or p.Team.Name == "Survivor")
@@ -1169,10 +1173,7 @@ local function getClosestSurvivorForKiller()
                     local pos, visible = cam:WorldToViewportPoint(hrp.Position)
                     if visible then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = hrp
-                        end
+                        if dist < shortest then shortest = dist; closest = hrp end
                     end
                 end
             end
@@ -1186,10 +1187,8 @@ RunService.RenderStepped:Connect(function()
         if not KillerAim.Enabled then return end
         local mouseHeld = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
         if not (KillerAim.Holding or mouseHeld) then return end
-
         local target = getClosestSurvivorForKiller()
         if not target then return end
-
         local cam = workspace.CurrentCamera
         local pos = target.Position
         if GunAim.Predict then
@@ -1199,7 +1198,6 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- ============ INPUT DETECTION ============
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -1215,11 +1213,10 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v12] Bagian 4 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 5: Killer & Movement
+print("[TiarHub v13] Bagian 4 loaded.")-- ============================================
+-- TIARHUB v13 FINAL - Bagian 5: Killer & Movement
 -- ============================================
 
--- ============ KILLER HELPERS ============
 local function GetDownedSurvivor()
     local root = getRoot()
     if not root then return nil end
@@ -1268,7 +1265,6 @@ local function GetHook()
     return bestHook
 end
 
--- ============ AUTO STALK ============
 local function startAutoStalk()
     if StalkConnection then return end
     StalkConnection = RunService.Heartbeat:Connect(function()
@@ -1299,15 +1295,12 @@ local function stopAutoStalk()
     if StalkConnection then StalkConnection:Disconnect(); StalkConnection = nil end
 end
 
--- ============ KILLER HEARTBEAT ============
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if not getRoot() then return end
-
         if Killer.AutoAttack and AttackEvent then
             pcall(function() AttackEvent:FireServer(false) end)
         end
-
         if Killer.AutoCarry and not KillerBusy and CarryEvent then
             KillerBusy = true
             task.spawn(function()
@@ -1337,7 +1330,6 @@ RunService.Heartbeat:Connect(function()
                 KillerBusy = false
             end)
         end
-
         if Killer.KillAll and AttackEvent then
             local root = getRoot()
             if root then
@@ -1360,7 +1352,6 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ============ FAST VAULT ============
 local function normalizeId(id)
     local num = tostring(id):match("%d+")
     return num and ("rbxassetid://" .. num)
@@ -1399,7 +1390,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 end)
 if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) end
 
--- ============ MOVEMENT ============
 local WalkSpeedConnection = nil
 local function applyWalkSpeed()
     if WalkSpeedConnection then WalkSpeedConnection:Disconnect() end
@@ -1453,14 +1443,11 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- ============ MOONWALK (FIXED - Anti Server Reset) ============
+-- ============ MOONWALK ============
 local function startMoonwalk()
     if MoonwalkConnection then return end
-
     local hum0 = getHum()
     if hum0 then hum0.AutoRotate = false end
-
-    -- Layer 1: RenderStepped (visual)
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
         if not Moonwalk.Enabled or ParryActive or isDowned() then return end
         local char = LocalPlayer.Character
@@ -1484,8 +1471,6 @@ local function startMoonwalk()
             end
         end
     end)
-
-    -- Layer 2: Heartbeat (anti-override server)
     if MoonwalkHeartbeat then MoonwalkHeartbeat:Disconnect() end
     MoonwalkHeartbeat = RunService.Heartbeat:Connect(function()
         pcall(function()
@@ -1504,11 +1489,8 @@ local function stopMoonwalk()
     local hum = getHum()
     if hum then
         hum.AutoRotate = true
-        if Movement.WalkSpeedEnabled then
-            hum.WalkSpeed = Movement.WalkSpeedValue
-        else
-            hum.WalkSpeed = Movement.OriginalWalkSpeed
-        end
+        if Movement.WalkSpeedEnabled then hum.WalkSpeed = Movement.WalkSpeedValue
+        else hum.WalkSpeed = Movement.OriginalWalkSpeed end
     end
 end
 
@@ -1532,7 +1514,6 @@ local function createMoonwalkButton()
         stroke.Color = Color3.fromRGB(255, 255, 255)
         stroke.Transparency = 0.8
         stroke.Parent = btn
-
         btn.MouseButton1Click:Connect(function()
             Moonwalk.Enabled = not Moonwalk.Enabled
             if Moonwalk.Enabled then
@@ -1586,17 +1567,12 @@ local function updateCrosshair()
     end)
 end
 RunService.RenderStepped:Connect(function() updateCrosshair() end)
+RunService.Heartbeat:Connect(function() pcall(function() AutoWiggle() end) end)
 
-RunService.Heartbeat:Connect(function()
-    pcall(function() AutoWiggle() end)
-end)
-
--- ============ EMOTE ============
 local function playEmote(name)
     if EmoteRemote then pcall(function() EmoteRemote:FireServer(name) end) end
 end
 
--- ============ MASKED ============
 local function activateMasked()
     local event = findRemote("Remotes.Killers.Masked.Activatepower")
     if event then pcall(function() event:FireServer(Masked.CurrentPower) end) end
@@ -1606,11 +1582,12 @@ local function deactivateMasked()
     if event then pcall(function() event:FireServer() end) end
 end
 
-print("[TiarHub v12] Bagian 5 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 6: Visual & Anti-Lag + Contrast
+print("[TiarHub v13] Bagian 5 loaded.")
+
+-- ============================================
+-- TIARHUB v13 FINAL - Bagian 6: Visual & Anti-Lag
 -- ============================================
 
--- ============ VISUAL FUNCTIONS ============
 local LastVisualState = { Fullbright = nil, NoFog = nil, NoShadow = nil }
 
 local function applyVisual(force)
@@ -1632,8 +1609,7 @@ local function applyVisual(force)
         if force or LastVisualState.NoFog ~= Visual.NoFog then
             LastVisualState.NoFog = Visual.NoFog
             if Visual.NoFog then
-                Lighting.FogEnd = 100000
-                Lighting.FogStart = 100000
+                Lighting.FogEnd = 100000; Lighting.FogStart = 100000
             else
                 Lighting.FogEnd = VisualOriginal.FogEnd
                 Lighting.FogStart = VisualOriginal.FogStart
@@ -1647,16 +1623,11 @@ local function applyVisual(force)
     end)
 end
 
--- ============ SCREEN EFFECTS ============
 local function toggleScreenEffects()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("BloomEffect") or v:IsA("SunRaysEffect") then
-                v.Enabled = not Visual.NoBloom
-            end
-            if v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") then
-                v.Enabled = not Visual.NoBlur
-            end
+            if v:IsA("BloomEffect") or v:IsA("SunRaysEffect") then v.Enabled = not Visual.NoBloom end
+            if v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") then v.Enabled = not Visual.NoBlur end
         end
     end)
 end
@@ -1673,9 +1644,7 @@ Lighting.ChildAdded:Connect(function(v)
     end)
 end)
 
--- ============ COLOR CORRECTION (Saturation + Brightness + Contrast) ============
 local ColorCorrection = nil
-
 local function applyColorCorrection()
     pcall(function()
         if not ColorCorrection then
@@ -1694,19 +1663,13 @@ local function applyColorCorrection()
     end)
 end
 
--- ============ RESET COLOR CORRECTION ============
 local function resetColorCorrection()
-    Visual.Saturation = 0
-    Visual.Brightness = 0
-    Visual.Contrast = 0
+    Visual.Saturation = 0; Visual.Brightness = 0; Visual.Contrast = 0
     if ColorCorrection then
-        ColorCorrection.Saturation = 0
-        ColorCorrection.Brightness = 0
-        ColorCorrection.Contrast = 0
+        ColorCorrection.Saturation = 0; ColorCorrection.Brightness = 0; ColorCorrection.Contrast = 0
     end
 end
 
--- ============ ANTI-LAG APPLY ============
 local function applyAntiLag()
     pcall(function()
         if AntiLag.PhysicsThrottle then
@@ -1715,23 +1678,14 @@ local function applyAntiLag()
             settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Default
         end
     end)
-
     pcall(function()
-        if AntiLag.NoGlobalShadows then
-            Lighting.GlobalShadows = false
-        else
-            Lighting.GlobalShadows = VisualOriginal.GlobalShadows
-        end
+        if AntiLag.NoGlobalShadows then Lighting.GlobalShadows = false
+        else Lighting.GlobalShadows = VisualOriginal.GlobalShadows end
     end)
-
     pcall(function()
-        if AntiLag.NetworkLag then
-            settings().Network.IncomingReplicationLag = -1000
-        else
-            settings().Network.IncomingReplicationLag = 0
-        end
+        if AntiLag.NetworkLag then settings().Network.IncomingReplicationLag = -1000
+        else settings().Network.IncomingReplicationLag = 0 end
     end)
-
     if AntiLag.NoParticles then
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
@@ -1745,7 +1699,6 @@ local function applyAntiLag()
             end
         end
     end
-
     if AntiLag.NoTextures then
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("Texture") or v:IsA("Decal") then
@@ -1761,15 +1714,12 @@ local function applyAntiLag()
     end
 end
 
--- ============ ANTI-LAG MAIN LOOP ============
 local AntiLagConnection = nil
-
 local function startAntiLag()
     if AntiLagConnection then AntiLagConnection:Disconnect() end
     AntiLagConnection = RunService.Heartbeat:Connect(function()
         pcall(function()
             if not AntiLag.Enabled then return end
-
             if AntiLag.NoParticles then
                 for _, v in pairs(workspace:GetDescendants()) do
                     if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
@@ -1777,7 +1727,6 @@ local function startAntiLag()
                     end
                 end
             end
-
             if AntiLag.NoTextures then
                 for _, v in pairs(workspace:GetDescendants()) do
                     if v:IsA("Texture") or v:IsA("Decal") then
@@ -1791,36 +1740,147 @@ end
 
 startAntiLag()
 
--- ============ AUTO APPLY VISUAL SETIAP FRAME ============
 RunService.Heartbeat:Connect(function()
-    pcall(function()
-        applyVisual()
-        toggleScreenEffects()
-    end)
+    pcall(function() applyVisual(); toggleScreenEffects() end)
 end)
 
--- ============ AUTO APPLY SAAT RESPAWN ============
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
-    applyVisual(true)
-    toggleScreenEffects()
-    applyColorCorrection()
+    applyVisual(true); toggleScreenEffects(); applyColorCorrection()
     if AntiLag.Enabled then applyAntiLag() end
 end)
 
-print("[TiarHub v12] Bagian 6 loaded.")-- ============================================
--- TIARHUB v12 - Bagian 7: UI Menu
+-- ============ HIDE RED SPARK ============
+local function isRedSpark(obj)
+    if not obj then return false end
+    if not (obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
+            or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")) then
+        return false
+    end
+    local name = string.lower(obj.Name)
+    if name:find("parry") or name:find("spark") or name:find("blood")
+       or name:find("slash") or name:find("hit") or name:find("impact") then
+        return true
+    end
+    if obj:IsA("ParticleEmitter") then
+        local ok, c = pcall(function() return obj.Color end)
+        if ok and c and c.R > 0.5 and c.G < 0.4 and c.B < 0.4 then return true end
+    end
+    return false
+end
+
+local HideSparkConn = nil
+local function startHideSpark()
+    if HideSparkConn then return end
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if isRedSpark(v) then
+            HiddenSparkCache[v] = true
+            pcall(function() v.Enabled = false; if v.Transparency then v.Transparency = 1 end end)
+        end
+    end
+    HideSparkConn = RunService.Heartbeat:Connect(function()
+        pcall(function()
+            if not HideSpark.Enabled then return end
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if not HiddenSparkCache[v] and isRedSpark(v) then
+                    HiddenSparkCache[v] = true
+                    pcall(function() v.Enabled = false; if v.Transparency then v.Transparency = 1 end end)
+                end
+            end
+        end)
+    end)
+end
+
+local function stopHideSpark()
+    if HideSparkConn then HideSparkConn:Disconnect(); HideSparkConn = nil end
+    HiddenSparkCache = {}
+end
+
+workspace.DescendantAdded:Connect(function(obj)
+    if not HideSpark.Enabled then return end
+    task.wait(0.01)
+    if isRedSpark(obj) then
+        HiddenSparkCache[obj] = true
+        pcall(function() obj.Enabled = false; if obj.Transparency then obj.Transparency = 1 end end)
+    end
+end)
+
+-- ============ TELEPORT SYSTEM ============
+local function findNearestByNames(names, maxDist)
+    local root = getRoot()
+    if not root then return nil, math.huge end
+    local best, bestDist = nil, maxDist or math.huge
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            for _, target in ipairs(names) do
+                if obj.Name == target or string.find(obj.Name, target, 1, true) then
+                    local pos = GetPos(obj)
+                    if pos then
+                        local d = (pos - root.Position).Magnitude
+                        if d < bestDist then bestDist = d; best = obj end
+                    end
+                    break
+                end
+            end
+        end
+    end
+    return best, bestDist
+end
+
+local function teleportTo(obj)
+    if not obj then return false end
+    local now = tick()
+    if now - Teleport.LastTeleport < Teleport.Cooldown then return false end
+    Teleport.LastTeleport = now
+    local root = getRoot()
+    if not root then return false end
+    local pos = GetPos(obj)
+    if not pos then return false end
+    pcall(function() root.CFrame = CFrame.new(pos + Vector3.new(0, 5, 0)) end)
+    return true
+end
+
+local function teleportToGenerator() return teleportTo(findNearestByNames({"Generator", "GeneratorPoint"})) end
+local function teleportToGate() return teleportTo(findNearestByNames({"Gate", "Exit", "ExitGate", "fininshline", "FinishLine"})) end
+local function teleportToWindow() return teleportTo(findNearestByNames({"Window"})) end
+local function teleportToPallet() return teleportTo(findNearestByNames({"Pallet", "Palletwrong"})) end
+local function teleportToHook() return teleportTo(findNearestByNames({"HookPoint", "Hook"})) end
+
+-- ============ AUTO ESCAPE ============
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if not AutoEscape.Enabled then return end
+            local root = getRoot()
+            if not root then return end
+            local killerRoot, dist = GetNearestKiller()
+            if not killerRoot or dist > AutoEscape.DetectDistance then return end
+            if tick() - AutoEscape.LastEscape < AutoEscape.Cooldown then return end
+            local target = findNearestByNames({"Gate", "Exit", "ExitGate", "fininshline", "FinishLine"}, 1000)
+            if not target then target = findNearestByNames({"Window"}, 500) end
+            if not target then target = findNearestByNames({"Pallet", "Palletwrong"}, 500) end
+            if not target then target = findNearestByNames({"Generator"}, 500) end
+            if target then
+                AutoEscape.LastEscape = tick()
+                teleportTo(target)
+            end
+        end)
+    end
+end)
+
+print("[TiarHub v13] Bagian 6 loaded.")
+
+-- ============================================
+-- TIARHUB v13 FINAL - Bagian 7: UI Menu
 -- ============================================
 
 -- ============ ESP TAB ============
 local ESPTab = Window:CreateTab({ name = "ESP", icon = 0 })
-
 ESPTab:CreateSection("Player ESP")
 ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, flag = "esp_survivor", callback = function(v) ESP.Survivor = v end })
 ESPTab:CreateColorPicker({ name = "Survivor Color", color = ESP.SurvivorColor, flag = "esp_survivor_color", callback = function(c) ESP.SurvivorColor = c end })
 ESPTab:CreateToggle({ name = "ESP Killer", currentValue = false, flag = "esp_killer", callback = function(v) ESP.Killer = v end })
 ESPTab:CreateColorPicker({ name = "Killer Color", color = ESP.KillerColor, flag = "esp_killer_color", callback = function(c) ESP.KillerColor = c end })
-
 ESPTab:CreateSection("Map ESP")
 ESPTab:CreateToggle({ name = "ESP Generator (%)", currentValue = false, flag = "esp_generator", callback = function(v) ESP.Generator = v end })
 ESPTab:CreateColorPicker({ name = "Generator Color", color = ESP.GeneratorColor, flag = "esp_gen_color", callback = function(c) ESP.GeneratorColor = c end })
@@ -1832,19 +1892,16 @@ ESPTab:CreateToggle({ name = "ESP Window", currentValue = false, flag = "esp_win
 ESPTab:CreateColorPicker({ name = "Window Color", color = ESP.WindowColor, flag = "esp_window_color", callback = function(c) ESP.WindowColor = c end })
 ESPTab:CreateToggle({ name = "ESP SCP", currentValue = false, flag = "esp_scp", callback = function(v) ESP.SCP = v end })
 ESPTab:CreateColorPicker({ name = "SCP Color", color = ESP.SCPColor, flag = "esp_scp_color", callback = function(c) ESP.SCPColor = c end })
-
 ESPTab:CreateSection("Style")
 ESPTab:CreateSlider({ name = "ESP Radius", range = {50, 2000}, increment = 50, suffix = "stud", currentValue = 300, flag = "esp_radius", callback = function(v) ESP.Distance = v end })
 ESPTab:CreateDropdown({ name = "ESP Mode", options = {"Highlight", "Outline", "Fill"}, currentOption = "Highlight", flag = "esp_mode", callback = function(opt) ESP.Mode = opt end })
 ESPTab:CreateToggle({ name = "Show Name Tag", currentValue = true, flag = "esp_name", callback = function(v) ESP.ShowName = v end })
 ESPTab:CreateSlider({ name = "Name Size", range = {8, 30}, increment = 1, suffix = "px", currentValue = 14, flag = "esp_namesize", callback = function(v) ESP.NameSize = v end })
-
 ESPTab:CreateSection("ESP Status")
 ESPTab:CreateToggle({ name = "Enable Status ESP", currentValue = false, flag = "espstatus_on", callback = function(v) ESPStatus.Enabled = v end })
 ESPTab:CreateToggle({ name = "Show Name", currentValue = true, flag = "espstatus_name", callback = function(v) ESPStatus.ShowName = v end })
 ESPTab:CreateToggle({ name = "Show Distance", currentValue = true, flag = "espstatus_dist", callback = function(v) ESPStatus.ShowDistance = v end })
 ESPTab:CreateToggle({ name = "Show Health", currentValue = false, flag = "espstatus_hp", callback = function(v) ESPStatus.ShowHealth = v end })
-
 ESPTab:CreateSection("Killer Warning")
 ESPTab:CreateToggle({ name = "Killer Warning", currentValue = false, flag = "kwarn_on", callback = function(v) KillerWarning.Enabled = v end })
 ESPTab:CreateColorPicker({ name = "Warning Color", color = KillerWarning.Color, flag = "kwarn_color", callback = function(c) KillerWarning.Color = c end })
@@ -1852,27 +1909,23 @@ ESPTab:CreateSlider({ name = "Warning Distance", range = {20, 200}, increment = 
 
 -- ============ SURVIVOR TAB ============
 local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 0 })
-
 SurvivorTab:CreateSection("Auto Parry")
 SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, flag = "parry_on", callback = function(v) Auto.Parry = v end })
-SurvivorTab:CreateDropdown({
-    name = "Parry Mode",
-    options = {"Safety", "Aggressive"},
-    currentOption = "Safety",
-    flag = "parry_mode",
-    callback = function(opt)
-        Auto.ParryMode = opt
-        applyParryPreset(opt)
-        Rayfield:Notify({ title = "Parry Mode", content = "Mode: " .. opt })
-    end
-})
+SurvivorTab:CreateDropdown({ name = "Parry Mode", options = {"Safety", "Aggressive"}, currentOption = "Safety", flag = "parry_mode", callback = function(opt) Auto.ParryMode = opt; applyParryPreset(opt); Rayfield:Notify({ title = "Parry Mode", content = "Mode: " .. opt }) end })
+
+SurvivorTab:CreateSection("Anti Fake Hit")
+SurvivorTab:CreateToggle({ name = "Enable Anti Fake Hit", currentValue = true, flag = "afh_on", callback = function(v) AntiFakeHit.Enabled = v end })
+SurvivorTab:CreateSlider({ name = "Facing Threshold", range = {0.3, 1.0}, increment = 0.05, currentValue = 0.5, flag = "afh_facing", callback = function(v) AntiFakeHit.FacingThreshold = v end })
+SurvivorTab:CreateSlider({ name = "Min Range", range = {5, 20}, increment = 1, suffix = "stud", currentValue = 8, flag = "afh_range", callback = function(v) AntiFakeHit.MinRange = v end })
+SurvivorTab:CreateToggle({ name = "Require Movement", currentValue = true, flag = "afh_move", callback = function(v) AntiFakeHit.RequireMovement = v end })
+SurvivorTab:CreateToggle({ name = "Show Debug Indicator", currentValue = false, flag = "afh_debug", callback = function(v) AntiFakeHit.ShowDebug = v end })
+
 SurvivorTab:CreateToggle({ name = "Show Parry Range", currentValue = false, flag = "parry_range", callback = function(v) ParryRangeVisual.Enabled = v end })
 SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, flag = "parry_color", callback = function(c) ParryRangeVisual.Color = c end })
-SurvivorTab:CreateSlider({ name = "Parry Distance (manual)", range = {5, 25}, increment = 1, suffix = "stud", currentValue = 12, flag = "parry_dist", callback = function(v) Auto.ParryDistance = v end })
-SurvivorTab:CreateSlider({ name = "Face Sensitivity (manual)", range = {-1, 1}, increment = 0.05, currentValue = 0.5, flag = "parry_face", callback = function(v) Auto.FaceSensitivity = v end })
 
 SurvivorTab:CreateSection("Auto Skill Check")
 SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, flag = "skillcheck", callback = function(v) Auto.SkillCheck = v; if v then startSkillCheck() end end })
+SurvivorTab:CreateDropdown({ name = "Skill Check Mode", options = {"Instant", "Perfect"}, currentOption = "Perfect", flag = "skill_mode", callback = function(opt) SkillCheckMode = opt; Rayfield:Notify({ title = "Skill Check", content = "Mode: " .. opt }) end })
 
 SurvivorTab:CreateSection("Auto Wiggle / Flee")
 SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, flag = "wiggle", callback = function(v) Auto.Wiggle = v end })
@@ -1884,9 +1937,37 @@ SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, flag = "vault", callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, flag = "vault_speed", callback = function(v) FastVault.Speed = v end })
 
+-- ============ TELEPORT TAB ============
+local TeleportTab = Window:CreateTab({ name = "Teleport", icon = 0 })
+TeleportTab:CreateSection("Teleport Cepat")
+TeleportTab:CreateButton({ name = "📍 Teleport ke Generator", callback = function()
+    if teleportToGenerator() then Rayfield:Notify({ title = "Teleport", content = "Ke Generator ✓" })
+    else Rayfield:Notify({ title = "Teleport", content = "Generator tidak ditemukan" }) end
+end })
+TeleportTab:CreateButton({ name = "🚪 Teleport ke Gate / Exit", callback = function()
+    if teleportToGate() then Rayfield:Notify({ title = "Teleport", content = "Ke Gate ✓" })
+    else Rayfield:Notify({ title = "Teleport", content = "Gate tidak ditemukan" }) end
+end })
+TeleportTab:CreateButton({ name = "🪟 Teleport ke Window", callback = function()
+    if teleportToWindow() then Rayfield:Notify({ title = "Teleport", content = "Ke Window ✓" })
+    else Rayfield:Notify({ title = "Teleport", content = "Window tidak ditemukan" }) end
+end })
+TeleportTab:CreateButton({ name = "🟨 Teleport ke Pallet", callback = function()
+    if teleportToPallet() then Rayfield:Notify({ title = "Teleport", content = "Ke Pallet ✓" })
+    else Rayfield:Notify({ title = "Teleport", content = "Pallet tidak ditemukan" }) end
+end })
+TeleportTab:CreateButton({ name = "🪝 Teleport ke Hook", callback = function()
+    if teleportToHook() then Rayfield:Notify({ title = "Teleport", content = "Ke Hook ✓" })
+    else Rayfield:Notify({ title = "Teleport", content = "Hook tidak ditemukan" }) end
+end })
+
+TeleportTab:CreateSection("Auto Escape")
+TeleportTab:CreateToggle({ name = "Auto Escape (Kabur dari Killer)", currentValue = false, flag = "auto_escape", callback = function(v) AutoEscape.Enabled = v end })
+TeleportTab:CreateSlider({ name = "Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 40, flag = "escape_dist", callback = function(v) AutoEscape.DetectDistance = v end })
+TeleportTab:CreateSlider({ name = "Cooldown", range = {0.2, 3}, increment = 0.1, suffix = "s", currentValue = 0.8, flag = "escape_cd", callback = function(v) AutoEscape.Cooldown = v end })
+
 -- ============ AIMBOT TAB ============
 local AimTab = Window:CreateTab({ name = "Aimbot", icon = 0 })
-
 AimTab:CreateSection("Aimbot Survivor")
 AimTab:CreateToggle({ name = "Aimbot (Hold RMB)", currentValue = false, flag = "aim_on", callback = function(v) GunAim.Enabled = v end })
 AimTab:CreateToggle({ name = "Show FOV Circle", currentValue = false, flag = "aim_fovcircle", callback = function(v) GunAim.ShowFOV = v; if v and not FOVCircle then createFOVCircle() end end })
@@ -1898,7 +1979,6 @@ AimTab:CreateSlider({ name = "Aimbot FOV", range = {50, 1000}, increment = 10, c
 AimTab:CreateSlider({ name = "Aimbot Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 1, flag = "aim_smooth", callback = function(v) GunAim.Strength = v end })
 AimTab:CreateSlider({ name = "Aimbot Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "aim_predict", callback = function(v) GunAim.PredictStrength = v end })
 AimTab:CreateToggle({ name = "Visibility Check", currentValue = false, flag = "aim_vis", callback = function(v) GunAim.VisibilityCheck = v end })
-
 AimTab:CreateSection("Killer Aim (Lock saat Hit)")
 AimTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, flag = "kaim_on", callback = function(v) KillerAim.Enabled = v end })
 AimTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, flag = "kaim_fov", callback = function(v) KillerAim.FOV = v end })
@@ -1906,19 +1986,15 @@ AimTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, incremen
 
 -- ============ KILLER TAB ============
 local KillerTab = Window:CreateTab({ name = "Killer", icon = 0 })
-
 KillerTab:CreateSection("Attack")
 KillerTab:CreateToggle({ name = "Auto Attack", currentValue = false, flag = "k_attack", callback = function(v) Killer.AutoAttack = v end })
 KillerTab:CreateToggle({ name = "Auto Kill All", currentValue = false, flag = "k_killall", callback = function(v) Killer.KillAll = v end })
-
 KillerTab:CreateSection("Carry & Hook")
 KillerTab:CreateToggle({ name = "Auto Carry Downed", currentValue = false, flag = "k_carry", callback = function(v) Killer.AutoCarry = v end })
 KillerTab:CreateToggle({ name = "Auto Hook After Carry", currentValue = false, flag = "k_hook", callback = function(v) Killer.AutoHook = v end })
-
 KillerTab:CreateSection("Stalk")
 KillerTab:CreateToggle({ name = "Auto Stalk", currentValue = false, flag = "k_stalk", callback = function(v) Killer.AutoStalk = v; if v then startAutoStalk() else stopAutoStalk() end end })
 KillerTab:CreateSlider({ name = "Stalk Range", range = {50, 500}, increment = 10, suffix = "stud", currentValue = 150, flag = "k_stalk_range", callback = function(v) Killer.StalkRange = v end })
-
 KillerTab:CreateSection("Masked Power")
 KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, currentOption = "Cobra", flag = "k_masked", callback = function(opt) Masked.CurrentPower = opt end })
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
@@ -1926,57 +2002,46 @@ KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked 
 
 -- ============ MISC TAB ============
 local MiscTab = Window:CreateTab({ name = "Misc", icon = 0 })
-
 MiscTab:CreateSection("Walk Speed")
 MiscTab:CreateToggle({ name = "Enable Walk Speed", currentValue = false, flag = "m_ws", callback = function(v) Movement.WalkSpeedEnabled = v; if v then applyWalkSpeed() else local hum = getHum(); if hum then hum.WalkSpeed = Movement.OriginalWalkSpeed end end end })
 MiscTab:CreateSlider({ name = "Walk Speed Value", range = {16, 100}, increment = 0.5, currentValue = 17.6, flag = "m_ws_val", callback = function(v) Movement.WalkSpeedValue = v end })
-
 MiscTab:CreateSection("Jump Power")
 MiscTab:CreateToggle({ name = "Enable Jump Power", currentValue = false, flag = "m_jp", callback = function(v) Movement.JumpPowerEnabled = v; if v then applyJumpPower() else local hum = getHum(); if hum then hum.JumpPower = Movement.OriginalJumpPower end end end })
 MiscTab:CreateSlider({ name = "Jump Power Value", range = {0, 300}, increment = 5, currentValue = 50, flag = "m_jp_val", callback = function(v) Movement.JumpPowerValue = v end })
 MiscTab:CreateToggle({ name = "Infinite Jump", currentValue = false, flag = "m_ij", callback = function(v) Movement.InfiniteJump = v end })
-
 MiscTab:CreateSection("No Clip")
 MiscTab:CreateToggle({ name = "No Clip", currentValue = false, flag = "m_noclip", callback = function(v) toggleNoClip(v) end })
-
 MiscTab:CreateSection("Moonwalk")
 MiscTab:CreateToggle({ name = "Moonwalk", currentValue = false, flag = "m_moonwalk", callback = function(v) Moonwalk.Enabled = v; if v then startMoonwalk() else stopMoonwalk() end end })
 MiscTab:CreateToggle({ name = "Moonwalk Button", currentValue = false, flag = "m_moonwalk_btn", callback = function(v) Moonwalk.ShowButton = v; if v then createMoonwalkButton() else removeMoonwalkButton() end end })
 MiscTab:CreateSlider({ name = "Spam Speed", range = {1, 50}, increment = 1, currentValue = 30, flag = "m_moon_spam", callback = function(v) Moonwalk.SpamSpeed = v end })
 MiscTab:CreateSlider({ name = "Intensity", range = {1, 50}, increment = 1, currentValue = 35, flag = "m_moon_int", callback = function(v) Moonwalk.Intensity = v end })
-
 MiscTab:CreateSection("Emote")
 MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", flag = "m_emote", callback = function(opt) Emote.Selected = opt end })
 MiscTab:CreateButton({ name = "Play Emote", callback = function() playEmote(Emote.Selected) end })
 
 -- ============ VISUAL TAB ============
 local VisualTab = Window:CreateTab({ name = "Visual", icon = 0 })
-
 VisualTab:CreateSection("Lighting")
 VisualTab:CreateToggle({ name = "Fullbright", currentValue = false, flag = "v_fb", callback = function(v) Visual.Fullbright = v; applyVisual(true) end })
 VisualTab:CreateToggle({ name = "No Fog", currentValue = false, flag = "v_nofog", callback = function(v) Visual.NoFog = v; applyVisual(true) end })
 VisualTab:CreateToggle({ name = "No Shadow", currentValue = false, flag = "v_noshadow", callback = function(v) Visual.NoShadow = v; applyVisual(true) end })
-
 VisualTab:CreateSection("Screen Effects")
 VisualTab:CreateToggle({ name = "No Bloom", currentValue = false, flag = "v_nobloom", callback = function(v) Visual.NoBloom = v; toggleScreenEffects() end })
 VisualTab:CreateToggle({ name = "No Blur / DOF", currentValue = false, flag = "v_noblur", callback = function(v) Visual.NoBlur = v; toggleScreenEffects() end })
-
 VisualTab:CreateSection("Color Correction")
 VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, flag = "v_cc", callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Brightness", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_bright", callback = function(v) Visual.Brightness = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Contrast", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_contrast", callback = function(v) Visual.Contrast = v; applyColorCorrection() end })
-VisualTab:CreateButton({ name = "🔄 Reset Color", callback = function()
-    resetColorCorrection()
-    Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast sudah di-reset ke 0." })
-end })
+VisualTab:CreateButton({ name = "🔄 Reset Color", callback = function() resetColorCorrection(); Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast sudah di-reset ke 0." }) end })
+VisualTab:CreateSection("Effect")
+VisualTab:CreateToggle({ name = "Hide Red Spark", currentValue = false, flag = "v_hide_spark", callback = function(v) HideSpark.Enabled = v; if v then startHideSpark() else stopHideSpark() end end })
 
 -- ============ ANTI-LAG TAB ============
 local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 0 })
-
 AntiLagTab:CreateSection("Anti-Lag Pack")
 AntiLagTab:CreateToggle({ name = "Enable Anti-Lag", currentValue = false, flag = "al_on", callback = function(v) AntiLag.Enabled = v; if v then startAntiLag() end end })
-
 AntiLagTab:CreateSection("Individual")
 AntiLagTab:CreateToggle({ name = "No Particles", currentValue = false, flag = "al_particles", callback = function(v) AntiLag.NoParticles = v; applyAntiLag() end })
 AntiLagTab:CreateToggle({ name = "No Textures", currentValue = false, flag = "al_textures", callback = function(v) AntiLag.NoTextures = v; applyAntiLag() end })
@@ -1986,7 +2051,6 @@ AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false
 
 -- ============ CROSSHAIR TAB ============
 local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 0 })
-
 CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, flag = "ch_on", callback = function(v) Crosshair.Enabled = v end })
 CrosshairTab:CreateColorPicker({ name = "Color", color = Crosshair.Color, flag = "ch_color", callback = function(c) Crosshair.Color = c end })
 CrosshairTab:CreateSlider({ name = "Size", range = {2, 30}, increment = 1, suffix = "px", currentValue = 8, flag = "ch_size", callback = function(v) Crosshair.Size = v end })
@@ -1994,11 +2058,10 @@ CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, s
 CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_x", callback = function(v) Crosshair.OffsetX = v end })
 CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_y", callback = function(v) Crosshair.OffsetY = v end })
 
--- ============ NOTIFIKASI ============
 Rayfield:Notify({
-    title = "TiarHub v12",
-    content = "Loaded! Rainbow UI + Parry 2 Mode + Aimbot Fix + Moonwalk Fix + Contrast.",
+    title = "TiarHub v13",
+    content = "Loaded! Anti Fake Hit + Skill Check 2 Mode + Teleport + Rainbow UI.",
     duration = 6
 })
 
-print("[TiarHub v12] Bagian 7 loaded. All systems ready!")
+print("[TiarHub v13] ALL LOADED.")

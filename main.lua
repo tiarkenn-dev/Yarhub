@@ -371,9 +371,7 @@ local function GetNearestKiller()
     return closest, shortest
 end
 
-print("[TiarHub v17] Part 1/5 loaded.")
-
--- ============================================
+print("[TiarHub v17] Part 1/5 loaded.")-- ============================================
 -- ⚡ TIARHUB v17 - Part 2/5: ESP System
 -- ============================================
 
@@ -909,9 +907,7 @@ end
 
 pcall(wrapCallbacks)
 
-print("[TiarHub v17] Part 2/5 loaded.")
-
--- ============================================
+print("[TiarHub v17] Part 2/5 loaded.")-- ============================================
 -- ⚡ TIARHUB v17 - Part 3/5: Survivor + Aimbot + Fake Perks
 -- ============================================
 
@@ -1676,9 +1672,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("[TiarHub v17] Part 3/5 loaded.")
-
--- ============================================
+print("[TiarHub v17] Part 3/5 loaded.")-- ============================================
 -- ⚡ TIARHUB v17 - Part 4/5: Killer + Movement + Visual
 -- ============================================
 
@@ -2663,9 +2657,7 @@ task.spawn(function()
     end
 end)
 
-print("[TiarHub v17] Part 4/5 loaded.")
-
--- ============================================
+print("[TiarHub v17] Part 4/5 loaded.")-- ============================================
 -- ⚡ TIARHUB v17 - Part 5/5: UI Menu + Startup
 -- ============================================
 
@@ -2928,4 +2920,82 @@ CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment 
 -- ============ UI SETTINGS TAB ============
 local UISettingsTab = Window:CreateTab({ name = "UI Settings", icon = 0 })
 UISettingsTab:CreateSection("Sound Feedback")
-UISettingsTab:CreateToggle
+UISettingsTab:CreateToggle({ name = "Enable Click Sound", currentValue = true, flag = "sf_on", callback = function(v) SoundFeedback.Enabled = v end })
+UISettingsTab:CreateDropdown({ name = "Sound Type", options = {"Click", "Switch", "Beep", "Bell", "Whoosh"}, currentOption = "Click", flag = "sf_type", callback = function(opt)
+    SoundFeedback.CurrentSound = opt
+    playClickSound()
+end })
+UISettingsTab:CreateSlider({ name = "Volume", range = {0, 1}, increment = 0.05, currentValue = 0.5, flag = "sf_vol", callback = function(v)
+    SoundFeedback.Volume = v
+    if SoundInstance then SoundInstance.Volume = v end
+    playClickSound()
+end })
+UISettingsTab:CreateButton({ name = "🔊 Test Sound", callback = function()
+    playClickSound()
+    Rayfield:Notify({ title = "Sound", content = "Sound: " .. SoundFeedback.CurrentSound })
+end })
+
+-- ============ AUTO APPLY ON RESPAWN ============
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1.5)
+    pcall(function()
+        applyVisual(true)
+        toggleScreenEffects()
+        applyColorCorrection()
+        if AntiLag.Enabled then applyAntiLag() end
+        if Moonwalk.Enabled then
+            task.wait(0.5)
+            startMoonwalk()
+            applyMoonwalkFOV()
+        end
+        if FakePerks.Flowstate.Enabled then
+            hookFakeFlowstate(char)
+        end
+    end)
+end)
+
+-- ============ NOTIFIKASI ============
+task.wait(1)
+Rayfield:Notify({
+    title = "⚡ TiarHub ⚡",
+    content = "Script loaded! v17 - Semua fitur siap dipakai.",
+    duration = 8
+})
+
+task.wait(2)
+Rayfield:Notify({
+    title = "🎁 Fitur Baru",
+    content = "Fake Perks + Silent Aim Veil Spear + Moonwalk 2 Mode",
+    duration = 8
+})
+
+task.wait(2)
+Rayfield:Notify({
+    title = "💡 Tips",
+    content = "Survivor Tab → Fake Perks | Aimbot Tab → Silent Aim Veil Spear | Misc → Moonwalk",
+    duration = 8
+})
+
+-- ============ PRINT STATUS ============
+print("============================================")
+print("  ⚡ TIARHUB v17 - ALL LOADED ⚡")
+print("  ==========================================")
+print("  [✓] ESP System + Killer Warning")
+print("  [✓] Auto Parry (2 Mode) + Rainbow + Pulse")
+print("  [✓] Skill Check (Instant/Perfect)")
+print("  [✓] Auto Dodge Abyss")
+print("  [✓] Fake Perks (Flowstate/Snake/Recovery)")
+print("  [✓] Silent Aim Veil Spear")
+print("  [✓] Aimbot + FOV Circle + Tracer")
+print("  [✓] Hit Marker")
+print("  [✓] Killer System + 5 Fitur Baru")
+print("  [✓] Movement + Moonwalk 2 Mode + FOV")
+print("  [✓] Copy Avatar (InsertService)")
+print("  [✓] Teleport System + Auto Escape")
+print("  [✓] Visual + Fix Contrast")
+print("  [✓] Anti-Lag + Hide Spark")
+print("  [✓] Crosshair + Sound Feedback")
+print("  [✓] Rainbow UI")
+print("  ==========================================")
+print("  🎮 Violence District | by Tiar")
+print("============================================")

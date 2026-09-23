@@ -1,4 +1,4 @@
--- ⚡ TIARHUB FINAL - Part 1/4
+-- ⚡ TIARHUB v21 FINAL
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -17,9 +17,9 @@ local Camera = workspace.CurrentCamera
 
 local Window = Rayfield:CreateWindow({
     name = "⚡ TiarHub ⚡",
-    subtitle = "Violence District | FINAL",
+    subtitle = "Violence District | v21",
     sidebarLayout = true,
-    configuration = { autoSave = false, autoLoad = false, fileName = "TiarFinal" }
+    configuration = { autoSave = false, autoLoad = false, fileName = "TiarV21" }
 })
 
 local ESP = { Survivor=false, Killer=false, Generator=false, Hook=false, Pallet=false, Window=false, SCP=false, Distance=300, Mode="Highlight", ShowName=true, NameSize=14, SurvivorColor=Color3.fromRGB(60,255,120), KillerColor=Color3.fromRGB(255,60,60), GeneratorColor=Color3.fromRGB(255,170,0), HookColor=Color3.fromRGB(180,80,255), PalletColor=Color3.fromRGB(255,220,80), WindowColor=Color3.fromRGB(80,255,255), SCPColor=Color3.fromRGB(255,0,0) }
@@ -27,15 +27,12 @@ local ESPStatus = { Enabled=false, ShowName=true, ShowDistance=true, ShowHealth=
 local KillerWarning = { Enabled=false, Distance=60, Color=Color3.fromRGB(255,0,0) }
 local Visual = { Fullbright=false, NoFog=false, NoShadow=false, NoBloom=false, NoBlur=false, ColorCorrection=false, Saturation=0, Brightness=0, Contrast=0, NoBlood=false }
 local VisualOriginal = { Brightness=Lighting.Brightness, ClockTime=Lighting.ClockTime, Ambient=Lighting.Ambient, OutdoorAmbient=Lighting.OutdoorAmbient, GlobalShadows=Lighting.GlobalShadows, FogEnd=Lighting.FogEnd, FogStart=Lighting.FogStart, FogColor=Lighting.FogColor }
-
-local Auto = { Parry=false, ParryMode="Safety", ParryDistance=12, SkillCheck=false, Wiggle=false, WiggleSpam=5 }
-local PARRY_DEBOUNCE = 0.15
+local Auto = { Parry=false, ParryDistance=12, SkillCheck=false, Wiggle=false, WiggleSpam=5 }
 local AutoFlee = { Enabled=false, DetectDistance=50, Cooldown=0.1 }
 local LastFlee = 0
 local FastVault = { Enabled=false, Speed=1.2, ReplaceMap={ ["rbxassetid://83873880822918"]="rbxassetid://136962284480779" } }
 local VaultTracks = {}
 local AutoDodgeAbyss = { Enabled=false, DetectRange=18, Cooldown=0.5, CrouchDuration=0.3, LastDodge=0, IsCrouching=false }
-local FakePerks = { Flowstate={Enabled=false,Duration=3,SpeedBoost=20,Cooldown=30,LastUse=0}, SnakeStep={Enabled=false,SpeedBoost=90,Cooldown=30,LastUse=0}, QuickRecovery={Enabled=false,Cooldown=30,LastUse=0}, LastVault=0, LastCrouchState=false }
 local SilentAimSpear = { Enabled=false, TargetMode="Killer", FOV=250, AimPart="HumanoidRootPart", Prediction=0.12, Holding=false, ShowFOV=false }
 local Teleport = { LastTeleport=0, Cooldown=0.5 }
 local AutoEscape = { Enabled=false, DetectDistance=40, Cooldown=0.8, LastEscape=0 }
@@ -43,16 +40,20 @@ local SkillCheckMode = "Perfect"
 local SoundFeedback = { Enabled=true, CurrentSound="Click", Volume=0.5, LastPlay=0, Cooldown=0.05 }
 local SoundList = { Click="rbxassetid://6895079853", Switch="rbxassetid://876939830", Beep="rbxassetid://4817809188", Bell="rbxassetid://5156781795", Whoosh="rbxassetid://5063167535" }
 local SoundInstance = nil
-local function initSound() if SoundInstance then return end; SoundInstance = Instance.new("Sound"); SoundInstance.Name="TiarClickSound"; SoundInstance.Volume=SoundFeedback.Volume; pcall(function() SoundInstance.Parent=SoundService end); if not SoundInstance.Parent then SoundInstance.Parent=CoreGui end end
+local function initSound() if SoundInstance then return end; SoundInstance=Instance.new("Sound"); SoundInstance.Name="TiarClickSound"; SoundInstance.Volume=SoundFeedback.Volume; pcall(function() SoundInstance.Parent=SoundService end); if not SoundInstance.Parent then SoundInstance.Parent=CoreGui end end
 local function playClickSound() if not SoundFeedback.Enabled then return end; local now=tick(); if now-SoundFeedback.LastPlay<SoundFeedback.Cooldown then return end; SoundFeedback.LastPlay=now; initSound(); pcall(function() SoundInstance.SoundId=SoundList[SoundFeedback.CurrentSound] or SoundList.Click; SoundInstance.Volume=SoundFeedback.Volume; SoundInstance:Play() end) end
 initSound()
 
-local AvatarCopier = { Enabled=true, TargetUsername="", OriginalDescription=nil, CurrentCopiedUserId=nil, BlockyBody=true }
-local GunAim = { Enabled=false, Holding=false, TargetMode="Killer", Strength=1, Predict=true, PredictStrength=0.12, FOV=250, AimPart="HumanoidRootPart", ShowTracer=false, TracerColor=Color3.fromRGB(255,0,0) }
+local AvatarCopier = { TargetUsername="", OriginalDescription=nil, CurrentCopiedUserId=nil, BlockyBody=true }
+local GunAim = { Enabled=false, Holding=false, TargetMode="Killer", Strength=1, Predict=true, PredictStrength=0.12, FOV=250, AimPart="HumanoidRootPart" }
 local FOVCircle=nil; local FOVCircleInner=nil; local FOVCircleVisible=false; local FOVCircleSize=250; local FOVCircleColor=Color3.fromRGB(255,255,255)
 local KillerAim = { Enabled=false, FOV=200, Strength=0.5, Holding=false }
-local Aimlock = { Enabled=false, Mode="Killer", RadiusLock=250, AimPart="Head", Smoothness=0.35, Prediction=true, PredictStrength=0.12, ShowFOV=true, AutoSnap=false, Holding=false, Locked=false }
-local AimlockFOV = nil
+local AimlockKiller = { Enabled=false, FOV=200, Strength=0.35, Prediction=true, PredictStrength=0.12, AimPart="Head" }
+local AimlockKillerCircle = nil
+local AutoAimSurvivor = { Enabled=false, RadiusLock=250, AimPart="Head", Smoothness=0.4, ShowRadius=true, Locked=false }
+local AutoAimFOV = nil
+local ESPCircle = { Enabled=false, Radius=5, Color=Color3.fromRGB(0,255,100) }
+local ESPCircleDrawing = nil
 local Killer = { AutoAttack=false, AutoCarry=false, AutoHook=false, KillAll=false, AutoStalk=false, StalkRange=150, AutoHookAllDowned=false, AutoHookAllRange=500, AutoSprint=false, AutoSprintValue=30, AutoFaceTarget=false, AutoFaceRange=20, PredictionAttack=false, PredictStrength=0.15 }
 local KillerBusy=false; local KillerTarget=nil; local StalkConnection=nil
 local HitMarker = { Enabled=false, Color=Color3.fromRGB(255,0,0), Size=20, Thickness=2, Duration=0.15 }
@@ -63,12 +64,12 @@ local Moonwalk = { Enabled=false, SpamSpeed=30, Intensity=35, SlowSpeed=13, UseS
 local MoonwalkConnection=nil; local MoonwalkHeartbeat=nil
 local Crosshair = { Enabled=false, Size=8, Thickness=2, Color=Color3.fromRGB(255,255,255), OffsetX=0, OffsetY=0 }
 local CrosshairGui = nil
-local Emote = { Selected="Mannrobics" }
-local EmoteList = { "Mannrobics","Arm Swing","Schadenfreude","Kyoufuu","Backflip","Griddy","Friday Night","Floating Rest","OnePlays","Quick Combo","WarCry","Wave" }
 local Masked = { CurrentPower="Cobra" }
 local MaskedPowers = {"Cobra","Richter","Brandon","Rabbit","Alex"}
+local CameraZoom = { UnlimitedZoom=false, MaxDistance=1000, MinDistance=0, FOVEnabled=false, FOV=90, DefaultFOV=workspace.CurrentCamera.FieldOfView }
+local JerkTool = { Enabled=false }
+local currentJerkTool = nil
 local FPS=0; local Frames=0; local LastTick=tick()
-
 local KillerAnims = {
 ["rbxassetid://105374834496520"]=true,["rbxassetid://113255068724446"]=true,["rbxassetid://118907603246885"]=true,
 ["rbxassetid://129784271201071"]=true,["rbxassetid://117042998468241"]=true,["rbxassetid://122812055447896"]=true,
@@ -79,13 +80,11 @@ local KillerAnims = {
 ["rbxassetid://121216847022485"]=true,["rbxassetid://130593238885843"]=true,["rbxassetid://117070354890871"]=true,
 ["rbxassetid://106871536134254"]=true,["rbxassetid://138720291317243"]=true
 }
-
 local function findRemote(path) local cur=ReplicatedStorage; for seg in string.gmatch(path,"[^%.]+") do cur=cur and cur:FindFirstChild(seg); if not cur then return nil end end return cur end
 local AttackEvent = findRemote("Remotes.Attacks.BasicAttack")
 local CarryEvent = findRemote("Remotes.Carry.CarrySurvivorEvent")
 local HookEvent = findRemote("Remotes.Carry.HookEvent")
 local EmoteRemote = findRemote("Remotes.EmoteHandler")
-
 local function getRoot() local c=LocalPlayer.Character; return c and c:FindFirstChild("HumanoidRootPart") end
 local function getHum() local c=LocalPlayer.Character; return c and c:FindFirstChildOfClass("Humanoid") end
 local function isDowned() local h=getHum(); if not h then return false end; return h.Health<=0 or h.Health<2 end
@@ -247,7 +246,6 @@ workspace.DescendantRemoving:Connect(function(obj)
     CachedObjects.Pallets[obj]=nil; CachedObjects.Windows[obj]=nil
     CachedSCP[obj]=nil; removeESP(obj)
 end)
-
 local WarningGui=nil
 local function updateWarning()
     pcall(function()
@@ -289,16 +287,12 @@ local function updateWarning()
         end
     end)
 end
-
 RunService.RenderStepped:Connect(function()
     Frames=Frames+1
     if tick()-LastTick>=1 then
         FPS=Frames; Frames=0; LastTick=tick()
-        local ping=math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        pcall(function() Rayfield:SetWatermark(string.format("⚡ TiarHub FINAL ⚡ | FPS: %d | PING: %d ms",FPS,ping)) end)
     end
 end)
-
 local lastUpdate=0
 RunService.RenderStepped:Connect(function()
     pcall(function()
@@ -334,65 +328,59 @@ RunService.RenderStepped:Connect(function()
         updateWarning()
     end)
 end)
-
-print("[TiarHub FINAL] Part 1/4 loaded.")-- AUTO PARRY
+print("[TiarHub v21] Part 1/5 loaded.")-- AUTO PARRY (Semua Arah)
 local lastParry = 0
-local function pressRightClick()
-    pcall(function()
-        VirtualInputManager:SendMouseButtonEvent(0,0,1,true,game,0); task.wait()
-        VirtualInputManager:SendMouseButtonEvent(0,0,1,false,game,0)
-    end)
-end
+local ParryActive2 = false
 local function GetParryButton()
     local cur = PlayerGui
     for seg in string.gmatch("Survivor-mob.Controls.Gui-mob","[^%.]+") do cur = cur and cur:FindFirstChild(seg) end
     return cur
 end
 local function pressParryButton()
-    if UserInputService.TouchEnabled then
-        local btn = GetParryButton()
-        if btn and btn:IsA("GuiObject") then
-            local pos = btn.AbsolutePosition; local size = btn.AbsoluteSize
-            local inset = game:GetService("GuiService"):GetGuiInset()
-            pcall(function()
-                VirtualInputManager:SendTouchEvent(8823,0,pos.X+size.X/2+inset.X,pos.Y+size.Y/2+inset.Y)
-                task.wait(0.01)
-                VirtualInputManager:SendTouchEvent(8823,2,pos.X+size.X/2+inset.X,pos.Y+size.Y/2+inset.Y)
-            end)
-        end
-    else pressRightClick() end
-end
-local function doParry()
-    local now = tick()
-    if now - lastParry < PARRY_DEBOUNCE then return end
-    lastParry = now; pressParryButton()
-end
-local hookedKillers = {}; local lastKillerParry = {}
-local function hookKiller(char)
-    if hookedKillers[char] then return end
-    hookedKillers[char] = true
-    local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator"); if not animator then return end
-    animator.AnimationPlayed:Connect(function(track)
-        if not Auto.Parry then return end
-        local anim = track.Animation; if not anim then return end
-        local id = anim.AnimationId:match("%d+"); if not id then return end
-        if not KillerAnims["rbxassetid://"..id] then return end
-        local myRoot = getRoot(); local enemyRoot = char:FindFirstChild("HumanoidRootPart")
-        if not myRoot or not enemyRoot then return end
-        local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-        if dist > Auto.ParryDistance then return end
-        local now = tick()
-        if lastKillerParry[char] and now-lastKillerParry[char]<0.4 then return end
-        lastKillerParry[char] = now; doParry()
-    end)
+    local btn = GetParryButton()
+    if btn and btn:IsA("GuiObject") then
+        local pos = btn.AbsolutePosition; local size = btn.AbsoluteSize
+        local inset = game:GetService("GuiService"):GetGuiInset()
+        pcall(function()
+            VirtualInputManager:SendTouchEvent(8823,0,pos.X+size.X/2+inset.X,pos.Y+size.Y/2+inset.Y)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(8823,2,pos.X+size.X/2+inset.X,pos.Y+size.Y/2+inset.Y)
+        end)
+    end
 end
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.05) do
         pcall(function()
-            if Auto.Parry then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Team and p.Team.Name=="Killer" then hookKiller(p.Character) end
+            if not Auto.Parry then return end
+            if ParryActive2 then return end
+            local myRoot = getRoot(); if not myRoot then return end
+            local myHum = getHum(); if not myHum or myHum.Health <= 0 then return end
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= LocalPlayer and plr.Character and plr.Team and plr.Team.Name == "Killer" then
+                    local kHum = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local kRoot = plr.Character:FindFirstChild("HumanoidRootPart")
+                    if kHum and kRoot and kHum.Health > 0 then
+                        local animator = kHum:FindFirstChildOfClass("Animator")
+                        if animator then
+                            local isAttacking = false
+                            for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                                local anim = track.Animation
+                                if anim and anim.AnimationId then
+                                    local id = anim.AnimationId:match("%d+")
+                                    if id and KillerAnims["rbxassetid://"..id] then isAttacking = true; break end
+                                end
+                            end
+                            if isAttacking then
+                                local dist = (kRoot.Position - myRoot.Position).Magnitude
+                                if dist <= Auto.ParryDistance then
+                                    ParryActive2 = true
+                                    pressParryButton()
+                                    task.delay(0.3, function() ParryActive2 = false end)
+                                    break
+                                end
+                            end
+                        end
+                    end
                 end
             end
         end)
@@ -564,69 +552,38 @@ task.spawn(function()
     end
 end)
 
--- FAKE PERKS
-local function hookFakeFlowstate(char)
+-- FAST VAULT
+local function normalizeId(id)
+    local n = tostring(id):match("%d+")
+    return n and ("rbxassetid://"..n)
+end
+local function hookVault(char)
     local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator"); if not animator then return end
     animator.AnimationPlayed:Connect(function(track)
-        if not FakePerks.Flowstate.Enabled then return end
-        local now = tick()
-        if now - FakePerks.Flowstate.LastUse < FakePerks.Flowstate.Cooldown then return end
-        local anim = track.Animation; if not anim or not anim.AnimationId then return end
-        local id = anim.AnimationId:match("%d+"); if not id then return end
-        local vaultIds = { ["rbxassetid://83873880822918"]=true, ["rbxassetid://136962284480779"]=true }
-        if vaultIds["rbxassetid://"..id] then
-            if now - FakePerks.LastVault < 1 then return end
-            FakePerks.LastVault = now; FakePerks.Flowstate.LastUse = now
-            local orig = hum.WalkSpeed
-            hum.WalkSpeed = orig * (1 + FakePerks.Flowstate.SpeedBoost/100)
-            Rayfield:Notify({ title="Fake Flowstate", content="Speed boost!", duration=2 })
-            task.delay(FakePerks.Flowstate.Duration, function()
-                if hum and hum.Parent then hum.WalkSpeed = orig end
-            end)
-        end
+        pcall(function()
+            if not FastVault.Enabled then return end
+            local anim = track.Animation
+            if not anim or not anim.AnimationId then return end
+            local id = normalizeId(anim.AnimationId); if not id then return end
+            local replaceId = FastVault.ReplaceMap[id]; if not replaceId then return end
+            if VaultTracks[track] then return end
+            VaultTracks[track] = true
+            track:Stop()
+            local na = Instance.new("Animation"); na.AnimationId = replaceId
+            local nt = animator:LoadAnimation(na)
+            nt.Priority = Enum.AnimationPriority.Action
+            nt:Play(); nt:AdjustSpeed(FastVault.Speed)
+            nt.Stopped:Connect(function() VaultTracks[track]=nil end)
+        end)
     end)
 end
-task.spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if not FakePerks.SnakeStep.Enabled then return end
-            local char = LocalPlayer.Character; if not char then return end
-            local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-            local crouch = UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or (hum.HipHeight and hum.HipHeight<1.5)
-            local now = tick()
-            if crouch and not FakePerks.LastCrouchState then
-                if now - FakePerks.SnakeStep.LastUse < FakePerks.SnakeStep.Cooldown then return end
-                FakePerks.SnakeStep.LastUse = now; FakePerks.LastCrouchState = true
-                hum.WalkSpeed = FakePerks.SnakeStep.SpeedBoost
-            elseif not crouch and FakePerks.LastCrouchState then
-                FakePerks.LastCrouchState = false
-                if Movement.WalkSpeedEnabled then hum.WalkSpeed = Movement.WalkSpeedValue else hum.WalkSpeed = 16 end
-            end
-        end)
-    end
-end)
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            if not FakePerks.QuickRecovery.Enabled then return end
-            local char = LocalPlayer.Character; if not char then return end
-            local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-            local now = tick()
-            if now - FakePerks.QuickRecovery.LastUse < FakePerks.QuickRecovery.Cooldown then return end
-            if hum:GetState()==Enum.HumanoidStateType.FallingDown or hum:GetState()==Enum.HumanoidStateType.Ragdoll or hum.Health<hum.MaxHealth*0.3 then
-                FakePerks.QuickRecovery.LastUse = now
-                pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
-            end
-        end)
-    end
-end)
 LocalPlayer.CharacterAdded:Connect(function(char)
-    task.wait(1); pcall(function() hookFakeFlowstate(char) end)
+    task.wait(0.5); pcall(function() hookVault(char) end)
 end)
-if LocalPlayer.Character then pcall(function() hookFakeFlowstate(LocalPlayer.Character) end) end
+if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) end
 
--- FOV CIRCLE + TRACER
+-- FOV CIRCLE + TRACER (Aimbot Survivor)
 local Drawing = Drawing
 local TracerLine = nil
 local function createFOVCircle()
@@ -638,12 +595,7 @@ local function createFOVCircle()
     FOVCircleInner = Drawing.new("Circle"); FOVCircleInner.Visible=false; FOVCircleInner.Thickness=1; FOVCircleInner.NumSides=80
     FOVCircleInner.Radius=FOVCircleSize-3; FOVCircleInner.Filled=false; FOVCircleInner.Color=FOVCircleColor; FOVCircleInner.Transparency=0.3
 end
-local function createTracer()
-    if not Drawing then return end
-    if TracerLine then TracerLine:Remove() end
-    TracerLine = Drawing.new("Line"); TracerLine.Visible=false; TracerLine.Thickness=1; TracerLine.Color=GunAim.TracerColor
-end
-createTracer(); createFOVCircle()
+createFOVCircle()
 
 RunService.RenderStepped:Connect(function()
     pcall(function()
@@ -662,58 +614,7 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- AIMLOCK
-if Drawing then
-    AimlockFOV = Drawing.new("Circle"); AimlockFOV.Visible=false; AimlockFOV.Thickness=2; AimlockFOV.NumSides=80
-    AimlockFOV.Radius=Aimlock.RadiusLock; AimlockFOV.Filled=false; AimlockFOV.Color=Color3.fromRGB(255,60,60); AimlockFOV.Transparency=0.6
-end
-local function getAimlockTarget()
-    local root = getRoot(); if not root then return nil end
-    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-    local c, s = nil, Aimlock.RadiusLock
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local team = plr.Team and plr.Team.Name or "?"
-            local valid = false
-            if Aimlock.Mode=="Killer" and team=="Killer" then valid=true
-            elseif Aimlock.Mode=="Survivor" and (team=="Survivors" or team=="Survivor") then valid=true
-            elseif Aimlock.Mode=="Auto" then valid=true end
-            if valid then
-                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                local ap = plr.Character:FindFirstChild(Aimlock.AimPart) or hrp
-                if hrp and hum and hum.Health>0 and ap then
-                    local pos, onScreen = Camera:WorldToViewportPoint(ap.Position)
-                    if onScreen then
-                        local d = (Vector2.new(pos.X,pos.Y)-center).Magnitude
-                        if d<s then s=d; c=ap end
-                    end
-                end
-            end
-        end
-    end
-    return c
-end
-RunService.RenderStepped:Connect(function()
-    pcall(function()
-        if AimlockFOV then
-            AimlockFOV.Visible = Aimlock.ShowFOV and Aimlock.Enabled
-            AimlockFOV.Radius = Aimlock.RadiusLock
-            AimlockFOV.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-        end
-        if not Aimlock.Enabled then return end
-        if not Aimlock.Holding and not Aimlock.AutoSnap and not Aimlock.Locked then return end
-        local target = getAimlockTarget(); if not target then return end
-        local pos = target.Position
-        if Aimlock.Prediction then pos = pos + (target.AssemblyLinearVelocity * Aimlock.PredictStrength) end
-        local cf = CFrame.new(Camera.CFrame.Position, pos)
-        if Aimlock.AutoSnap or Aimlock.Locked then Camera.CFrame = cf
-        else Camera.CFrame = Camera.CFrame:Lerp(cf, Aimlock.Smoothness) end
-    end)
-end)
-
--- AIMBOT SURVIVOR + KILLER AIM
-local RayParams = RaycastParams.new(); RayParams.FilterType = Enum.RaycastFilterType.Blacklist
+-- AIMBOT SURVIVOR
 local function getClosestGunTarget()
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
     local c, s = nil, GunAim.FOV
@@ -749,16 +650,17 @@ RunService.RenderStepped:Connect(function()
         local pos = t.Position
         if GunAim.Predict then pos = pos + (t.AssemblyLinearVelocity * GunAim.PredictStrength) end
         Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), GunAim.Strength)
-        if GunAim.ShowTracer and TracerLine then
-            local sp, on = Camera:WorldToViewportPoint(t.Position)
-            if on then
-                TracerLine.From = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
-                TracerLine.To = Vector2.new(sp.X, sp.Y)
-                TracerLine.Color = GunAim.TracerColor; TracerLine.Visible = true
-            end
-        end
     end)
 end)
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then GunAim.Holding=true end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then GunAim.Holding=false end
+end)
+
+-- KILLER AIM (Lock saat Hit)
 local function getClosestSurvivorForKiller()
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
     local c, s = nil, KillerAim.FOV
@@ -787,19 +689,208 @@ RunService.RenderStepped:Connect(function()
         if not (KillerAim.Holding or mh) then return end
         local t = getClosestSurvivorForKiller(); if not t then return end
         local pos = t.Position
-        if GunAim.Predict then pos = pos + (t.AssemblyLinearVelocity * GunAim.PredictStrength) end
         Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), KillerAim.Strength)
     end)
 end)
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then GunAim.Holding=true; KillerAim.Holding=true end
+
+-- SILENT AIM VEIL SPEAR
+local SilentAimCircle = nil
+if Drawing then
+    SilentAimCircle = Drawing.new("Circle")
+    SilentAimCircle.Visible=false; SilentAimCircle.Thickness=2; SilentAimCircle.NumSides=60
+    SilentAimCircle.Radius=SilentAimSpear.FOV; SilentAimCircle.Filled=false
+    SilentAimCircle.Color=Color3.fromRGB(150,0,255); SilentAimCircle.Transparency=0.6
+end
+local function getSilentAimTarget()
+    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+    local c, s = nil, SilentAimSpear.FOV
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Team then
+            local valid = false
+            if SilentAimSpear.TargetMode=="Killer" and p.Team.Name=="Killer" then valid=true
+            elseif SilentAimSpear.TargetMode=="Survivor" and (p.Team.Name=="Survivors" or p.Team.Name=="Survivor") then valid=true
+            elseif SilentAimSpear.TargetMode=="Both" then valid=true end
+            if valid then
+                local hrp = p.Character:FindFirstChild(SilentAimSpear.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health>0 then
+                    local pos, vis = Camera:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X,pos.Y)-center).Magnitude
+                        if d<s then s=d; c=hrp end
+                    end
+                end
+            end
+        end
+    end
+    return c
+end
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if SilentAimCircle then
+            SilentAimCircle.Visible = SilentAimSpear.Enabled and SilentAimSpear.ShowFOV
+            SilentAimCircle.Radius = SilentAimSpear.FOV
+            SilentAimCircle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+        end
+        if not SilentAimSpear.Enabled or not SilentAimSpear.Holding then return end
+        local t = getSilentAimTarget(); if not t then return end
+        local pos = t.Position
+        if SilentAimSpear.Prediction > 0 then pos = pos + (t.AssemblyLinearVelocity * SilentAimSpear.Prediction) end
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, pos)
+    end)
 end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then GunAim.Holding=false; KillerAim.Holding=false end
+task.spawn(function()
+    while task.wait(0.5) do
+        pcall(function()
+            if not SilentAimSpear.Enabled then return end
+            local char = LocalPlayer.Character; if not char then return end
+            local tool = char:FindFirstChildOfClass("Tool")
+            if tool and string.find(string.lower(tool.Name),"veil") then SilentAimSpear.Holding = true
+            else SilentAimSpear.Holding = false end
+        end)
+    end
 end)
 
-print("[TiarHub FINAL] Part 2/4 loaded.")-- KILLER HELPERS
+-- HIT MARKER
+local function createHitMarkerLines()
+    if not Drawing then return end
+    for _, v in pairs(HitMarkerLines) do pcall(function() v:Remove() end) end
+    HitMarkerLines = {}
+    for i = 1, 4 do
+        local line = Drawing.new("Line")
+        line.Visible=false; line.Thickness=HitMarker.Thickness; line.Color=HitMarker.Color
+        table.insert(HitMarkerLines, line)
+    end
+end
+createHitMarkerLines()
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if not Drawing then return end
+        if not HitMarker.Enabled then
+            for _, v in pairs(HitMarkerLines) do v.Visible=false end
+            return
+        end
+        if not HitMarkerActive or tick() > HitMarkerEnd then
+            for _, v in pairs(HitMarkerLines) do v.Visible=false end
+            return
+        end
+        local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+        local s = HitMarker.Size
+        for _, v in pairs(HitMarkerLines) do
+            v.Thickness=HitMarker.Thickness; v.Color=HitMarker.Color; v.Visible=true
+        end
+        HitMarkerLines[1].From=center+Vector2.new(-s,-s); HitMarkerLines[1].To=center+Vector2.new(-s/2,-s/2)
+        HitMarkerLines[2].From=center+Vector2.new(s,-s); HitMarkerLines[2].To=center+Vector2.new(s/2,-s/2)
+        HitMarkerLines[3].From=center+Vector2.new(-s,s); HitMarkerLines[3].To=center+Vector2.new(-s/2,s/2)
+        HitMarkerLines[4].From=center+Vector2.new(s,s); HitMarkerLines[4].To=center+Vector2.new(s/2,s/2)
+    end)
+end)
+
+-- AIMLOCK KILLER
+if Drawing then
+    AimlockKillerCircle = Drawing.new("Circle")
+    AimlockKillerCircle.Visible=false; AimlockKillerCircle.Thickness=2; AimlockKillerCircle.NumSides=80
+    AimlockKillerCircle.Radius=AimlockKiller.FOV; AimlockKillerCircle.Filled=false
+    AimlockKillerCircle.Color=Color3.fromRGB(255,60,60); AimlockKillerCircle.Transparency=0.6
+end
+local function getAimlockKillerTarget()
+    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+    local c, s = nil, AimlockKiller.FOV
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local isK = p.Team and p.Team.Name=="Killer"
+            if isK then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local ap = p.Character:FindFirstChild(AimlockKiller.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
+                if hum and hum.Health>0 and ap then
+                    local pos, vis = Camera:WorldToViewportPoint(ap.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X,pos.Y)-center).Magnitude
+                        if d<s then s=d; c=ap end
+                    end
+                end
+            end
+        end
+    end
+    return c
+end
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if AimlockKillerCircle then
+            AimlockKillerCircle.Visible = AimlockKiller.Enabled
+            AimlockKillerCircle.Radius = AimlockKiller.FOV
+            AimlockKillerCircle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+        end
+        if not AimlockKiller.Enabled then return end
+        local t = getAimlockKillerTarget(); if not t then return end
+        local pos = t.Position
+        if AimlockKiller.Prediction then pos = pos + (t.AssemblyLinearVelocity * AimlockKiller.PredictStrength) end
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), AimlockKiller.Strength)
+    end)
+end)
+
+-- AUTO AIM LOCK SURVIVOR (buat killer)
+if Drawing then
+    AutoAimFOV = Drawing.new("Circle")
+    AutoAimFOV.Visible=false; AutoAimFOV.Thickness=2; AutoAimFOV.NumSides=80
+    AutoAimFOV.Filled=false; AutoAimFOV.Color=Color3.fromRGB(255,100,100); AutoAimFOV.Transparency=0.6
+end
+local function getAutoAimTarget()
+    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+    local c, s = nil, AutoAimSurvivor.RadiusLock
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Team then
+            local isS = p.Team.Name=="Survivors" or p.Team.Name=="Survivor"
+            if isS then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local ap = p.Character:FindFirstChild(AutoAimSurvivor.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
+                if hum and hum.Health>0 and ap then
+                    local pos, vis = Camera:WorldToViewportPoint(ap.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X,pos.Y)-center).Magnitude
+                        if d<s then s=d; c=ap end
+                    end
+                end
+            end
+        end
+    end
+    return c
+end
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if AutoAimFOV then
+            AutoAimFOV.Visible = AutoAimSurvivor.Enabled and AutoAimSurvivor.ShowRadius
+            AutoAimFOV.Radius = AutoAimSurvivor.RadiusLock
+            AutoAimFOV.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+        end
+        if not AutoAimSurvivor.Enabled or not AutoAimSurvivor.Locked then return end
+        local t = getAutoAimTarget(); if not t then return end
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t.Position), AutoAimSurvivor.Smoothness)
+    end)
+end)
+
+-- ESP CIRCLE (Lock ke Tubuh — garis)
+if Drawing then
+    ESPCircleDrawing = Drawing.new("Circle")
+    ESPCircleDrawing.Visible=false; ESPCircleDrawing.Thickness=2; ESPCircleDrawing.NumSides=60
+    ESPCircleDrawing.Filled=false; ESPCircleDrawing.Color=ESPCircle.Color; ESPCircleDrawing.Transparency=1
+    ESPCircleDrawing.Radius=ESPCircle.Radius
+end
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if not ESPCircleDrawing then return end
+        if not ESPCircle.Enabled then ESPCircleDrawing.Visible = false; return end
+        local root = getRoot(); if not root then ESPCircleDrawing.Visible = false; return end
+        local pos, onScreen = Camera:WorldToViewportPoint(root.Position)
+        if not onScreen then ESPCircleDrawing.Visible = false; return end
+        ESPCircleDrawing.Visible = true
+        ESPCircleDrawing.Position = Vector2.new(pos.X, pos.Y)
+        ESPCircleDrawing.Radius = ESPCircle.Radius
+        ESPCircleDrawing.Color = ESPCircle.Color
+    end)
+end)
+
+print("[TiarHub v21] Part 2/5 loaded.")-- KILLER HELPERS
 local function GetDownedSurvivor()
     local root = getRoot(); if not root then return nil end
     local best, dist = nil, math.huge
@@ -876,7 +967,6 @@ RunService.Heartbeat:Connect(function()
         if not getRoot() then return end
         if Killer.AutoAttack and AttackEvent then
             pcall(function() AttackEvent:FireServer(false) end)
-            if HitMarker.Enabled and math.random(1,3)==1 then triggerHitMarker() end
         end
         if Killer.AutoHookAllDowned and HookEvent and not KillerBusy then
             local root = getRoot()
@@ -997,7 +1087,6 @@ RunService.Heartbeat:Connect(function()
                             if mh then mh.AutoRotate = false end
                             root.CFrame = CFrame.new(root.Position, pp)
                             pcall(function() AttackEvent:FireServer(false) end)
-                            if HitMarker.Enabled then triggerHitMarker() end
                         end
                     end
                 end
@@ -1030,37 +1119,6 @@ RunService.Heartbeat:Connect(function()
         end
     end)
 end)
-
--- FAST VAULT
-local function normalizeId(id)
-    local n = tostring(id):match("%d+")
-    return n and ("rbxassetid://"..n)
-end
-local function hookVault(char)
-    local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator"); if not animator then return end
-    animator.AnimationPlayed:Connect(function(track)
-        pcall(function()
-            if not FastVault.Enabled then return end
-            local anim = track.Animation
-            if not anim or not anim.AnimationId then return end
-            local id = normalizeId(anim.AnimationId); if not id then return end
-            local replaceId = FastVault.ReplaceMap[id]; if not replaceId then return end
-            if VaultTracks[track] then return end
-            VaultTracks[track] = true
-            track:Stop()
-            local na = Instance.new("Animation"); na.AnimationId = replaceId
-            local nt = animator:LoadAnimation(na)
-            nt.Priority = Enum.AnimationPriority.Action
-            nt:Play(); nt:AdjustSpeed(FastVault.Speed)
-            nt.Stopped:Connect(function() VaultTracks[track]=nil end)
-        end)
-    end)
-end
-LocalPlayer.CharacterAdded:Connect(function(char)
-    task.wait(0.5); pcall(function() hookVault(char) end)
-end)
-if LocalPlayer.Character then pcall(function() hookVault(LocalPlayer.Character) end) end
 
 -- WALKSPEED + NOCLIP
 local WalkSpeedConnection = nil
@@ -1354,25 +1412,14 @@ local function copyAvatar(username)
             end)
             task.wait(0.5)
         end
-        local function loadA(id)
-            if not id or id==0 or id=="0" then return nil end
-            local ok, a = pcall(function() return InsertService:LoadAsset(tonumber(id)) end)
-            if ok and a then return a end
-        end
-        if desc.Shirt and tonumber(desc.Shirt) and tonumber(desc.Shirt)~=0 then
-            local a = loadA(desc.Shirt)
-            if a then for _, v in pairs(a:GetChildren()) do if v:IsA("Shirt") then v:Clone().Parent=char; break end end; a:Destroy()
-            else pcall(function() local s=Instance.new("Shirt"); s.ShirtTemplate="rbxassetid://"..tostring(desc.Shirt); s.Parent=char end) end
-        end
-        task.wait(0.3)
-        if desc.Pants and tonumber(desc.Pants) and tonumber(desc.Pants)~=0 then
-            local a = loadA(desc.Pants)
-            if a then for _, v in pairs(a:GetChildren()) do if v:IsA("Pants") then v:Clone().Parent=char; break end end; a:Destroy()
-            else pcall(function() local p=Instance.new("Pants"); p.PantsTemplate="rbxassetid://"..tostring(desc.Pants); p.Parent=char end) end
-        end
-        task.wait(0.3)
-        if desc.GraphicTShirt and tonumber(desc.GraphicTShirt) and tonumber(desc.GraphicTShirt)~=0 then
-            pcall(function() local st=Instance.new("ShirtGraphic"); st.Graphic="rbxassetid://"..tostring(desc.GraphicTShirt); st.Parent=char end)
+        pcall(function() hum:ApplyDescriptionClientServer(desc) end)
+        task.wait(0.5)
+        if desc.Face and tonumber(desc.Face) and tonumber(desc.Face)>0 then
+            local head = char:FindFirstChild("Head")
+            if head then
+                local of = head:FindFirstChildOfClass("Decal"); if of then of:Destroy() end
+                pcall(function() local f=Instance.new("Decal"); f.Name="face"; f.Face=Enum.NormalId.Front; f.Texture="rbxassetid://"..tostring(desc.Face); f.Parent=head end)
+            end
         end
         task.wait(0.3)
         if desc.AccessoryBlob and desc.AccessoryBlob~="" then
@@ -1390,7 +1437,7 @@ local function copyAvatar(username)
                 end
             end
         end
-        Rayfield:Notify({ title="Copy Avatar", content="✓ Copy: "..username })
+        Rayfield:Notify({ title="Copy Avatar", content="✓ Copy: "..username.." (FULL)" })
     end)
     return true
 end
@@ -1417,7 +1464,148 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end
 end)
 
-print("[TiarHub FINAL] Part 3/4 loaded.")-- ============ UI TABS ============
+print("[TiarHub v21] Part 3/5 loaded.")-- CAMERA ZOOM + FOV
+local function applyUnlimitedZoom()
+    if CameraZoom.UnlimitedZoom then
+        LocalPlayer.CameraMaxZoomDistance = CameraZoom.MaxDistance
+        LocalPlayer.CameraMinZoomDistance = CameraZoom.MinDistance
+    else
+        LocalPlayer.CameraMaxZoomDistance = 128
+        LocalPlayer.CameraMinZoomDistance = 0.5
+    end
+end
+local function applyCameraFOV()
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+    if CameraZoom.FOVEnabled then
+        cam.FieldOfView = CameraZoom.FOV
+    else
+        cam.FieldOfView = CameraZoom.DefaultFOV
+    end
+end
+RunService.RenderStepped:Connect(function()
+    if CameraZoom.FOVEnabled then
+        local cam = workspace.CurrentCamera
+        if cam and cam.FieldOfView ~= CameraZoom.FOV then
+            cam.FieldOfView = CameraZoom.FOV
+        end
+    end
+end)
+
+-- JERK TOOL
+local function createJerkTool()
+    if currentJerkTool then currentJerkTool:Destroy() end
+    local character = LocalPlayer.Character
+    if not character then return end
+    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+    local backpack = LocalPlayer:FindFirstChildWhichIsA("Backpack")
+    if not humanoid or not backpack then return end
+
+    local tool = Instance.new("Tool")
+    tool.Name = "Jerk Off"
+    tool.ToolTip = "in the stripped club. straight up 'jorking it'. and by 'it', haha, well. let's just say. My peanits."
+    tool.RequiresHandle = false
+    tool.Parent = backpack
+    currentJerkTool = tool
+
+    local jorkin = false
+    local track = nil
+
+    local function stopTomfoolery()
+        jorkin = false
+        if track then track:Stop(); track = nil end
+    end
+
+    tool.Equipped:Connect(function() jorkin = true end)
+    tool.Unequipped:Connect(stopTomfoolery)
+    humanoid.Died:Connect(stopTomfoolery)
+
+    task.spawn(function()
+        while task.wait() do
+            if not JerkTool.Enabled or not jorkin then
+                if track then track:Stop() end
+                continue
+            end
+            local isR15 = humanoid.RigType == Enum.HumanoidRigType.R15
+            if not track then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = not isR15 and "rbxassetid://72042024" or "rbxassetid://698251653"
+                track = humanoid:LoadAnimation(anim)
+            end
+            track:Play()
+            track:AdjustSpeed(isR15 and 0.7 or 0.65)
+            track.TimePosition = 0.6
+            task.wait(0.1)
+            while track and track.TimePosition < (not isR15 and 0.65 or 0.7) do
+                task.wait(0.1)
+            end
+            if track then track:Stop() end
+        end
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    if JerkTool.Enabled then createJerkTool() end
+end)
+
+-- WATERMARK BAGUS (Gradient + FPS/Ping)
+local BeautifulWM = Instance.new("ScreenGui")
+BeautifulWM.Name = "TiarWM"
+BeautifulWM.ResetOnSpawn = false
+BeautifulWM.IgnoreGuiInset = true
+BeautifulWM.Parent = PlayerGui
+
+local wmFrame = Instance.new("Frame")
+wmFrame.Name = "WM"
+wmFrame.Size = UDim2.new(0, 240, 0, 40)
+wmFrame.Position = UDim2.new(0.5, -120, 0, 10)
+wmFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+wmFrame.BackgroundTransparency = 0.15
+wmFrame.BorderSizePixel = 0
+wmFrame.Parent = BeautifulWM
+
+local wmCorner = Instance.new("UICorner")
+wmCorner.CornerRadius = UDim.new(0, 12)
+wmCorner.Parent = wmFrame
+
+local wmStroke = Instance.new("UIStroke")
+wmStroke.Color = Color3.fromRGB(90, 120, 210)
+wmStroke.Thickness = 2
+wmStroke.Transparency = 0.3
+wmStroke.Parent = wmFrame
+
+local wmLabel = Instance.new("TextLabel")
+wmLabel.Size = UDim2.new(1, 0, 1, 0)
+wmLabel.BackgroundTransparency = 1
+wmLabel.Text = "⚡ TiarHub ⚡ | FPS: 60 | PING: 30"
+wmLabel.TextColor3 = Color3.fromRGB(220, 230, 255)
+wmLabel.TextStrokeTransparency = 0.5
+wmLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+wmLabel.Font = Enum.Font.GothamBold
+wmLabel.TextSize = 13
+wmLabel.Parent = wmFrame
+
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            wmLabel.Text = string.format("⚡ TiarHub ⚡ | FPS: %d | PING: %d", FPS, ping)
+        end)
+    end
+end)
+
+-- Efek glow gradient watermark
+task.spawn(function()
+    while task.wait(0.05) do
+        pcall(function()
+            local hue = (tick() * 0.1) % 1
+            wmStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+        end)
+    end
+end)
+
+print("[TiarHub v21] Part 4/5 loaded.")-- ============ UI TABS ============
 local ESPTab = Window:CreateTab({ name="ESP", icon=0 })
 ESPTab:CreateSection("Player ESP")
 ESPTab:CreateToggle({ name="ESP Survivor", currentValue=false, flag="esp_surv", callback=function(v) ESP.Survivor=v end })
@@ -1450,13 +1638,15 @@ ESPTab:CreateToggle({ name="Killer Warning", currentValue=false, flag="kwarn_on"
 ESPTab:CreateColorPicker({ name="Warning Color", color=KillerWarning.Color, flag="kwarn_c", callback=function(c) KillerWarning.Color=c end })
 ESPTab:CreateSlider({ name="Warning Distance", range={20,200}, increment=5, suffix="stud", currentValue=60, flag="kwarn_d", callback=function(v) KillerWarning.Distance=v end })
 
+-- SURVIVOR TAB
 local SurvivorTab = Window:CreateTab({ name="Survivor", icon=0 })
-SurvivorTab:CreateSection("Auto Parry")
+SurvivorTab:CreateSection("Auto Parry (Semua Arah)")
 SurvivorTab:CreateToggle({ name="Auto Parry", currentValue=false, flag="parry_on", callback=function(v) Auto.Parry=v end })
 SurvivorTab:CreateSlider({ name="Parry Distance", range={5,50}, increment=1, suffix="stud", currentValue=12, flag="parry_d", callback=function(v) Auto.ParryDistance=v end })
+SurvivorTab:CreateParagraph({ title="Info", content="Auto Parry work di semua arah (depan, samping, belakang)." })
 SurvivorTab:CreateSection("Auto Skill Check")
 SurvivorTab:CreateToggle({ name="Auto Skill Check", currentValue=false, flag="skillcheck", callback=function(v) Auto.SkillCheck=v; if v then startSkillCheck() end end })
-SurvivorTab:CreateDropdown({ name="Skill Check Mode", options={"Instant","Perfect"}, currentOption="Perfect", flag="skill_mode", callback=function(opt) SkillCheckMode=opt; Rayfield:Notify({ title="Skill Check", content="Mode: "..opt }) end })
+SurvivorTab:CreateDropdown({ name="Skill Check Mode", options={"Instant","Perfect"}, currentOption="Perfect", flag="skill_mode", callback=function(opt) SkillCheckMode=opt end })
 SurvivorTab:CreateSection("Auto Wiggle / Flee")
 SurvivorTab:CreateToggle({ name="Auto Wiggle", currentValue=false, flag="wiggle", callback=function(v) Auto.Wiggle=v end })
 SurvivorTab:CreateSlider({ name="Wiggle Spam", range={1,10}, increment=1, suffix="x", currentValue=5, flag="wiggle_spam", callback=function(v) Auto.WiggleSpam=v end })
@@ -1468,9 +1658,15 @@ SurvivorTab:CreateSlider({ name="Animation Speed", range={1,5}, increment=0.1, s
 SurvivorTab:CreateSection("Auto Dodge Abyss")
 SurvivorTab:CreateToggle({ name="Auto Dodge Abyss", currentValue=false, flag="ad_abyss", callback=function(v) AutoDodgeAbyss.Enabled=v end })
 SurvivorTab:CreateSlider({ name="Detect Range", range={5,50}, increment=1, suffix="stud", currentValue=18, flag="ad_r", callback=function(v) AutoDodgeAbyss.DetectRange=v end })
+SurvivorTab:CreateSection("🌙 Tombol Floating MW (Moonwalk)")
+SurvivorTab:CreateToggle({ name="Show MW Button (Moonwalk)", currentValue=false, flag="show_mw", callback=function(v)
+    if MWButton then MWButton.Visible = v end
+end })
+SurvivorTab:CreateParagraph({ title="Info", content="Toggle ON → tombol MW muncul di layar. OFF → hilang." })
 
+-- AIMBOT TAB
 local AimTab = Window:CreateTab({ name="Aimbot", icon=0 })
-AimTab:CreateSection("Aimbot Survivor")
+AimTab:CreateSection("Aimbot Survivor (buat nembak)")
 AimTab:CreateToggle({ name="Aimbot (Hold RMB)", currentValue=false, flag="gun_on", callback=function(v) GunAim.Enabled=v end })
 AimTab:CreateToggle({ name="Show FOV Circle", currentValue=false, flag="gun_fovc", callback=function(v) FOVCircleVisible=v; if v and not FOVCircle then createFOVCircle() end end })
 AimTab:CreateSlider({ name="FOV Circle Size", range={50,1000}, increment=10, suffix="px", currentValue=250, flag="gun_fovsz", callback=function(v) FOVCircleSize=v end })
@@ -1480,30 +1676,50 @@ AimTab:CreateDropdown({ name="Aim Part", options={"Head","HumanoidRootPart","Tor
 AimTab:CreateSlider({ name="Aimbot FOV", range={50,1000}, increment=10, currentValue=250, flag="gun_fov", callback=function(v) GunAim.FOV=v end })
 AimTab:CreateSlider({ name="Smoothness", range={0.1,1}, increment=0.05, currentValue=1, flag="gun_sm", callback=function(v) GunAim.Strength=v end })
 AimTab:CreateSlider({ name="Prediction", range={0,1}, increment=0.01, currentValue=0.12, flag="gun_pr", callback=function(v) GunAim.PredictStrength=v end })
-AimTab:CreateSection("Silent Aim Veil Spear")
+
+AimTab:CreateSection("🎯 Auto Aim Lock Survivor")
+AimTab:CreateToggle({ name="Enable Auto Aim Lock", currentValue=false, flag="aal_on", callback=function(v) AutoAimSurvivor.Enabled=v end })
+AimTab:CreateToggle({ name="Lock Radius (auto snap)", currentValue=false, flag="aal_lock", callback=function(v) AutoAimSurvivor.Locked=v end })
+AimTab:CreateSlider({ name="Radius Lock", range={50,1000}, increment=10, suffix="px", currentValue=250, flag="aal_rad", callback=function(v) AutoAimSurvivor.RadiusLock=v end })
+AimTab:CreateDropdown({ name="Aim Part", options={"Head","UpperTorso","HumanoidRootPart"}, currentOption="Head", flag="aal_part", callback=function(opt) AutoAimSurvivor.AimPart=opt end })
+AimTab:CreateSlider({ name="Smoothness", range={0.05,1}, increment=0.05, currentValue=0.4, flag="aal_sm", callback=function(v) AutoAimSurvivor.Smoothness=v end })
+AimTab:CreateToggle({ name="Show Radius Circle", currentValue=true, flag="aal_show", callback=function(v) AutoAimSurvivor.ShowRadius=v end })
+
+AimTab:CreateSection("🗡️ Silent Aim Veil Spear")
 AimTab:CreateToggle({ name="Enable Silent Aim Spear", currentValue=false, flag="silent_on", callback=function(v) SilentAimSpear.Enabled=v end })
 AimTab:CreateToggle({ name="Show FOV", currentValue=false, flag="silent_fov", callback=function(v) SilentAimSpear.ShowFOV=v end })
 AimTab:CreateDropdown({ name="Silent Target", options={"Killer","Survivor","Both"}, currentOption="Killer", flag="silent_tgt", callback=function(opt) SilentAimSpear.TargetMode=opt end })
 AimTab:CreateSlider({ name="Silent FOV", range={50,1000}, increment=10, currentValue=250, flag="silent_fovv", callback=function(v) SilentAimSpear.FOV=v end })
-AimTab:CreateSection("Killer Aim (Lock saat Hit)")
+
+AimTab:CreateSection("🎯 Killer Aim (Lock saat Hit)")
 AimTab:CreateToggle({ name="Killer Aim Lock", currentValue=false, flag="kaim_on", callback=function(v) KillerAim.Enabled=v end })
 AimTab:CreateSlider({ name="Killer Aim FOV", range={50,500}, increment=10, currentValue=200, flag="kaim_fov", callback=function(v) KillerAim.FOV=v end })
 
+AimTab:CreateSection("🔒 Tombol Floating AIM")
+AimTab:CreateToggle({ name="Show AIM Button (Auto Aim)", currentValue=false, flag="show_aim", callback=function(v)
+    if AIMButton then AIMButton.Visible = v end
+end })
+
+-- AIMLOCK TAB
 local AimlockTab = Window:CreateTab({ name="Aimlock", icon=0 })
-AimlockTab:CreateSection("🎯 Target Lock")
-AimlockTab:CreateDropdown({ name="Target Mode", options={"Killer","Survivor","Auto"}, currentOption="Killer", flag="aim_mode", callback=function(opt) Aimlock.Mode=opt end })
-AimlockTab:CreateSlider({ name="Radius Lock", range={50,1000}, increment=10, suffix="stud", currentValue=250, flag="aim_radius", callback=function(v) Aimlock.RadiusLock=v end })
-AimlockTab:CreateDropdown({ name="Aim Part", options={"Head","UpperTorso","HumanoidRootPart"}, currentOption="Head", flag="aim_part", callback=function(opt) Aimlock.AimPart=opt end })
-AimlockTab:CreateSection("⚙️ Behavior")
-AimlockTab:CreateToggle({ name="Enable Aimlock", currentValue=false, flag="aim_on", callback=function(v) Aimlock.Enabled=v; Aimlock.Holding=v end })
-AimlockTab:CreateToggle({ name="Auto Snap", currentValue=false, flag="aim_snap", callback=function(v) Aimlock.AutoSnap=v end })
-AimlockTab:CreateSlider({ name="Smoothness", range={0.05,1}, increment=0.05, currentValue=0.35, flag="aim_smooth", callback=function(v) Aimlock.Smoothness=v end })
-AimlockTab:CreateToggle({ name="Show Radius Circle", currentValue=true, flag="aim_fov", callback=function(v) Aimlock.ShowFOV=v end })
-AimlockTab:CreateSection("🔒 AK Button")
-AimlockTab:CreateToggle({ name="Show AK Button di Screen", currentValue=false, flag="ak_btn", callback=function(v)
+AimlockTab:CreateSection("🎯 Aimlock Killer")
+AimlockTab:CreateToggle({ name="Enable Aimlock Killer", currentValue=false, flag="ak_on", callback=function(v) AimlockKiller.Enabled=v end })
+AimlockTab:CreateDropdown({ name="Aim Part", options={"Head","UpperTorso","HumanoidRootPart"}, currentOption="Head", flag="ak_part", callback=function(opt) AimlockKiller.AimPart=opt end })
+AimlockTab:CreateSlider({ name="FOV Radius", range={50,1000}, increment=10, suffix="px", currentValue=200, flag="ak_fovsz", callback=function(v) AimlockKiller.FOV=v end })
+AimlockTab:CreateSlider({ name="Smoothness", range={0.05,1}, increment=0.05, currentValue=0.35, flag="ak_sm", callback=function(v) AimlockKiller.Strength=v end })
+AimlockTab:CreateSlider({ name="Prediction", range={0,1}, increment=0.01, currentValue=0.12, flag="ak_pred", callback=function(v) AimlockKiller.PredictStrength=v end })
+
+AimlockTab:CreateSection("⚪ ESP Circle (Lock ke Tubuh)")
+AimlockTab:CreateToggle({ name="Enable ESP Circle", currentValue=false, flag="ec_on", callback=function(v) ESPCircle.Enabled=v end })
+AimlockTab:CreateSlider({ name="Circle Radius", range={2,50}, increment=1, suffix="px", currentValue=5, flag="ec_r", callback=function(v) ESPCircle.Radius=v end })
+AimlockTab:CreateColorPicker({ name="Circle Color", color=ESPCircle.Color, flag="ec_c", callback=function(c) ESPCircle.Color=c end })
+
+AimlockTab:CreateSection("🔒 Tombol Floating AK")
+AimlockTab:CreateToggle({ name="Show AK Button (Aimlock)", currentValue=false, flag="show_ak", callback=function(v)
     if AKButton then AKButton.Visible = v end
 end })
 
+-- KILLER TAB
 local KillerTab = Window:CreateTab({ name="Killer", icon=0 })
 KillerTab:CreateSection("Attack")
 KillerTab:CreateToggle({ name="Auto Attack", currentValue=false, flag="k_attack", callback=function(v) Killer.AutoAttack=v end })
@@ -1521,9 +1737,10 @@ KillerTab:CreateToggle({ name="Auto Stalk", currentValue=false, flag="k_stalk", 
 KillerTab:CreateSlider({ name="Stalk Range", range={50,500}, increment=10, suffix="stud", currentValue=150, flag="k_stalk_r", callback=function(v) Killer.StalkRange=v end })
 KillerTab:CreateSection("Masked Power")
 KillerTab:CreateDropdown({ name="Select Power", options=MaskedPowers, currentOption="Cobra", flag="k_masked", callback=function(opt) Masked.CurrentPower=opt end })
-KillerTab:CreateButton({ name="Activate Power", callback=activateMasked })
-KillerTab:CreateButton({ name="Deactivate Power", callback=deactivateMasked })
+KillerTab:CreateButton({ name="⚡ Activate Power", callback=activateMasked })
+KillerTab:CreateButton({ name="🛑 Deactivate Power", callback=deactivateMasked })
 
+-- TELEPORT TAB
 local TeleportTab = Window:CreateTab({ name="Teleport", icon=0 })
 TeleportTab:CreateSection("Teleport Cepat")
 TeleportTab:CreateButton({ name="📍 Ke Generator", callback=function() if teleportToGenerator() then Rayfield:Notify({ title="TP", content="Generator ✓" }) else Rayfield:Notify({ title="TP", content="Gak ketemu" }) end end })
@@ -1535,16 +1752,36 @@ TeleportTab:CreateSection("Auto Escape")
 TeleportTab:CreateToggle({ name="Auto Escape", currentValue=false, flag="auto_esc", callback=function(v) AutoEscape.Enabled=v end })
 TeleportTab:CreateSlider({ name="Detect Distance", range={10,200}, increment=5, suffix="stud", currentValue=40, flag="esc_d", callback=function(v) AutoEscape.DetectDistance=v end })
 
+-- AVATAR TAB
 local AvatarTab = Window:CreateTab({ name="Avatar", icon=0 })
-AvatarTab:CreateSection("Copy Avatar")
+AvatarTab:CreateSection("Copy Avatar Full")
 AvatarTab:CreateInput({ name="Target Username", currentValue="", placeholder="Ketik username", flag="av_user", callback=function(v) AvatarCopier.TargetUsername=v end })
-AvatarTab:CreateButton({ name="🎭 Copy Avatar", callback=function() copyAvatar(AvatarCopier.TargetUsername) end })
+AvatarTab:CreateButton({ name="🎭 Copy Avatar (FULL)", callback=function() copyAvatar(AvatarCopier.TargetUsername) end })
 AvatarTab:CreateButton({ name="🔄 Reset to Original", callback=function() resetAvatar() end })
 AvatarTab:CreateButton({ name="💾 Save Current as Original", callback=function()
     if saveOriginalAppearance() then Rayfield:Notify({ title="Save", content="Original disimpan!" }) else Rayfield:Notify({ title="Save", content="Gagal!" }) end
 end })
 AvatarTab:CreateToggle({ name="Blocky Body", currentValue=true, flag="av_blocky", callback=function(v) AvatarCopier.BlockyBody=v end })
 
+-- CAMERA ZOOM TAB
+local ZoomTab = Window:CreateTab({ name="Camera Zoom", icon=0 })
+ZoomTab:CreateSection("Zoom Out")
+ZoomTab:CreateToggle({ name="Unlimited Zoom Out", currentValue=false, flag="cz_unlim", callback=function(v) CameraZoom.UnlimitedZoom=v; applyUnlimitedZoom() end })
+ZoomTab:CreateSlider({ name="Max Zoom Distance", range={100,5000}, increment=100, suffix="stud", currentValue=1000, flag="cz_max", callback=function(v) CameraZoom.MaxDistance=v; if CameraZoom.UnlimitedZoom then applyUnlimitedZoom() end end })
+ZoomTab:CreateSection("FOV")
+ZoomTab:CreateDropdown({ name="FOV Preset", options={"70","90","120"}, currentOption="90", flag="cz_fovp", callback=function(opt)
+    CameraZoom.FOV = tonumber(opt); CameraZoom.FOVEnabled = true; applyCameraFOV()
+    Rayfield:Notify({ title="FOV", content="Set ke "..opt })
+end })
+ZoomTab:CreateToggle({ name="Enable Custom FOV", currentValue=false, flag="cz_fovon", callback=function(v) CameraZoom.FOVEnabled=v; applyCameraFOV() end })
+ZoomTab:CreateSlider({ name="FOV Value", range={40,150}, increment=5, currentValue=90, flag="cz_fov", callback=function(v) CameraZoom.FOV=v; if CameraZoom.FOVEnabled then applyCameraFOV() end end })
+ZoomTab:CreateButton({ name="🔄 Reset Zoom + FOV", callback=function()
+    CameraZoom.UnlimitedZoom=false; CameraZoom.FOVEnabled=false
+    applyUnlimitedZoom(); applyCameraFOV()
+    Rayfield:Notify({ title="Reset", content="Zoom + FOV normal" })
+end })
+
+-- MISC TAB
 local MiscTab = Window:CreateTab({ name="Misc", icon=0 })
 MiscTab:CreateSection("Walk Speed")
 MiscTab:CreateToggle({ name="Enable Walk Speed", currentValue=false, flag="m_ws", callback=function(v) Movement.WalkSpeedEnabled=v; if v then applyWalkSpeed() else local hum=getHum(); if hum then hum.WalkSpeed=16 end end end })
@@ -1556,10 +1793,14 @@ MiscTab:CreateToggle({ name="Moonwalk", currentValue=false, flag="m_moon", callb
 MiscTab:CreateDropdown({ name="Moonwalk Mode", options={"Default","Camera"}, currentOption="Default", flag="m_moon_mode", callback=function(opt) Moonwalk.Mode=opt end })
 MiscTab:CreateSlider({ name="Spam Speed", range={1,50}, increment=1, currentValue=30, flag="m_moon_spam", callback=function(v) Moonwalk.SpamSpeed=v end })
 MiscTab:CreateSlider({ name="Intensity", range={1,50}, increment=1, currentValue=35, flag="m_moon_int", callback=function(v) Moonwalk.Intensity=v end })
-MiscTab:CreateSection("Emote")
-MiscTab:CreateDropdown({ name="Select Emote", options=EmoteList, currentOption="Mannrobics", flag="m_emote", callback=function(opt) Emote.Selected=opt end })
-MiscTab:CreateButton({ name="Play Emote", callback=function() playEmote(Emote.Selected) end })
+MiscTab:CreateSection("🎭 Jerk Tool")
+MiscTab:CreateToggle({ name="Enable Jerk Tool", currentValue=false, flag="jerk_on", callback=function(v)
+    JerkTool.Enabled = v
+    if v then createJerkTool(); Rayfield:Notify({ title="Jerk Tool", content="Cek backpack!" })
+    else if currentJerkTool then currentJerkTool:Destroy(); currentJerkTool=nil end end
+end })
 
+-- VISUAL TAB
 local VisualTab = Window:CreateTab({ name="Visual", icon=0 })
 VisualTab:CreateSection("Lighting")
 VisualTab:CreateToggle({ name="Fullbright", currentValue=false, flag="v_fb", callback=function(v) Visual.Fullbright=v; applyVisual(true) end })
@@ -1574,16 +1815,16 @@ VisualTab:CreateToggle({ name="Enable CC", currentValue=false, flag="v_cc", call
 VisualTab:CreateSlider({ name="Saturation", range={-1,1}, increment=0.05, currentValue=0, flag="v_sat", callback=function(v) Visual.Saturation=v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name="Brightness", range={-1,1}, increment=0.05, currentValue=0, flag="v_bright", callback=function(v) Visual.Brightness=v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name="Contrast", range={-1,1}, increment=0.05, currentValue=0, flag="v_contrast", callback=function(v) Visual.Contrast=v; applyColorCorrection() end })
-VisualTab:CreateButton({ name="🔄 Reset Color", callback=function() resetColorCorrection(); Rayfield:Notify({ title="Color", content="Reset OK" }) end })
+VisualTab:CreateButton({ name="🔄 Reset Color", callback=function() resetColorCorrection() end })
 
+-- CROSSHAIR TAB
 local CrosshairTab = Window:CreateTab({ name="Crosshair", icon=0 })
 CrosshairTab:CreateToggle({ name="Enable Crosshair", currentValue=false, flag="ch_on", callback=function(v) Crosshair.Enabled=v end })
 CrosshairTab:CreateColorPicker({ name="Color", color=Crosshair.Color, flag="ch_c", callback=function(c) Crosshair.Color=c end })
 CrosshairTab:CreateSlider({ name="Size", range={2,30}, increment=1, suffix="px", currentValue=8, flag="ch_s", callback=function(v) Crosshair.Size=v end })
 CrosshairTab:CreateSlider({ name="Thickness", range={1,5}, increment=1, suffix="px", currentValue=2, flag="ch_t", callback=function(v) Crosshair.Thickness=v end })
-CrosshairTab:CreateSlider({ name="Pos X", range={-100,100}, increment=1, suffix="px", currentValue=0, flag="ch_x", callback=function(v) Crosshair.OffsetX=v end })
-CrosshairTab:CreateSlider({ name="Pos Y", range={-100,100}, increment=1, suffix="px", currentValue=0, flag="ch_y", callback=function(v) Crosshair.OffsetY=v end })
 
+-- UI SETTINGS TAB
 local UISettingsTab = Window:CreateTab({ name="UI Settings", icon=0 })
 UISettingsTab:CreateSection("Sound Feedback")
 UISettingsTab:CreateToggle({ name="Enable Click Sound", currentValue=true, flag="sf_on", callback=function(v) SoundFeedback.Enabled=v end })
@@ -1593,6 +1834,7 @@ UISettingsTab:CreateSection("Config Manual (Auto-Save OFF)")
 UISettingsTab:CreateButton({ name="💾 Save Config", callback=function() Rayfield:SaveConfiguration(); Rayfield:Notify({ title="Save", content="Config disimpan!" }) end })
 UISettingsTab:CreateButton({ name="🔄 Load Config", callback=function() Rayfield:LoadConfiguration(); Rayfield:Notify({ title="Load", content="Config diload!" }) end })
 
+-- QUICK ACTIONS TAB
 local QuickTab = Window:CreateTab({ name="Quick Actions", icon=0 })
 QuickTab:CreateSection("⚡ Mode Preset")
 QuickTab:CreateButton({ name="🟢 Survivor Mode ON", callback=function()
@@ -1613,43 +1855,38 @@ QuickTab:CreateButton({ name="🛑 Panic Mode (OFF semua)", callback=function()
     ESP.Survivor=false; ESP.Killer=false; ESP.Generator=false; ESP.Hook=false; ESP.Pallet=false; ESP.Window=false; ESP.SCP=false
     Killer.AutoAttack=false; Killer.AutoCarry=false; Killer.AutoHook=false; Killer.KillAll=false
     Movement.WalkSpeedEnabled=false; Movement.NoClip=false; toggleNoClip(false)
-    Aimlock.Enabled=false; Aimlock.Holding=false; Aimlock.Locked=false
+    AimlockKiller.Enabled=false; AutoAimSurvivor.Enabled=false; AutoAimSurvivor.Locked=false
     Moonwalk.Enabled=false; stopMoonwalk()
     Rayfield:Notify({ title="Mode", content="Panic! Semua OFF.", duration=3 })
 end })
 
--- ============ TOMBOL FLOATING ============
-local FPGui = Instance.new("ScreenGui")
-FPGui.Name="TiarFloating"; FPGui.ResetOnSpawn=false
-FPGui.IgnoreGuiInset=true; FPGui.Parent=PlayerGui
+-- ============ TOMBOL FLOATING (MW + AIM + AK) ============
+local FloatGui = Instance.new("ScreenGui")
+FloatGui.Name = "TiarFloat"
+FloatGui.ResetOnSpawn = false
+FloatGui.IgnoreGuiInset = true
+FloatGui.Parent = PlayerGui
 
-local FPHp = {
-    Flowstate = { On=false, SpeedBoost=20, Duration=3, Cooldown=30, LastUse=0 },
-    SnakeStep = { On=false, SpeedBoost=90, Cooldown=30, LastUse=0 },
-    QuickRecovery = { On=false, Cooldown=30, LastUse=0 }
+local FloatPos = {
+    MW = UDim2.new(0.05, 0, 0.45, 0),
+    AIM = UDim2.new(0.05, 0, 0.55, 0),
+    AK = UDim2.new(0.05, 0, 0.65, 0)
 }
-local PosFS = UDim2.new(0.05,0,0.65,0)
-local PosSS = UDim2.new(0.05,0,0.75,0)
-local PosQR = UDim2.new(0.05,0,0.85,0)
-local PosAK = UDim2.new(0.05,0,0.55,0)
-
 pcall(function()
-    if isfile and isfile("TiarFloating.json") then
-        local d = HttpService:JSONDecode(readfile("TiarFloating.json"))
-        if d.FS then PosFS = UDim2.new(d.FS[1],d.FS[2],d.FS[3],d.FS[4]) end
-        if d.SS then PosSS = UDim2.new(d.SS[1],d.SS[2],d.SS[3],d.SS[4]) end
-        if d.QR then PosQR = UDim2.new(d.QR[1],d.QR[2],d.QR[3],d.QR[4]) end
-        if d.AK then PosAK = UDim2.new(d.AK[1],d.AK[2],d.AK[3],d.AK[4]) end
+    if isfile and isfile("TiarFloat.json") then
+        local d = HttpService:JSONDecode(readfile("TiarFloat.json"))
+        if d.MW then FloatPos.MW = UDim2.new(d.MW[1],d.MW[2],d.MW[3],d.MW[4]) end
+        if d.AIM then FloatPos.AIM = UDim2.new(d.AIM[1],d.AIM[2],d.AIM[3],d.AIM[4]) end
+        if d.AK then FloatPos.AK = UDim2.new(d.AK[1],d.AK[2],d.AK[3],d.AK[4]) end
     end
 end)
 local function saveFloatPos()
     pcall(function()
         if writefile then
-            writefile("TiarFloating.json", HttpService:JSONEncode({
-                FS={PosFS.X.Scale,PosFS.X.Offset,PosFS.Y.Scale,PosFS.Y.Offset},
-                SS={PosSS.X.Scale,PosSS.X.Offset,PosSS.Y.Scale,PosSS.Y.Offset},
-                QR={PosQR.X.Scale,PosQR.X.Offset,PosQR.Y.Scale,PosQR.Y.Offset},
-                AK={PosAK.X.Scale,PosAK.X.Offset,PosAK.Y.Scale,PosAK.Y.Offset}
+            writefile("TiarFloat.json", HttpService:JSONEncode({
+                MW={FloatPos.MW.X.Scale,FloatPos.MW.X.Offset,FloatPos.MW.Y.Scale,FloatPos.MW.Y.Offset},
+                AIM={FloatPos.AIM.X.Scale,FloatPos.AIM.X.Offset,FloatPos.AIM.Y.Scale,FloatPos.AIM.Y.Offset},
+                AK={FloatPos.AK.X.Scale,FloatPos.AK.X.Offset,FloatPos.AK.Y.Scale,FloatPos.AK.Y.Offset}
             }))
         end
     end)
@@ -1671,10 +1908,9 @@ local function makeDraggable(frame, which)
         if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then
             if dragging then
                 dragging=false
-                if which=="FS" then PosFS=frame.Position
-                elseif which=="SS" then PosSS=frame.Position
-                elseif which=="QR" then PosQR=frame.Position
-                elseif which=="AK" then PosAK=frame.Position end
+                if which=="MW" then FloatPos.MW=frame.Position
+                elseif which=="AIM" then FloatPos.AIM=frame.Position
+                elseif which=="AK" then FloatPos.AK=frame.Position end
                 saveFloatPos()
             end
         end
@@ -1685,7 +1921,8 @@ local function makeBtn(name,text,pos,color,which,onClick)
     btn.Name=name; btn.Text=text; btn.Size=UDim2.fromOffset(55,55); btn.Position=pos
     btn.BackgroundColor3=Color3.fromRGB(18,18,22); btn.BackgroundTransparency=0.1
     btn.TextColor3=color; btn.Font=Enum.Font.GothamBlack; btn.TextSize=16
-    btn.AutoButtonColor=false; btn.Parent=FPGui
+    btn.AutoButtonColor=false; btn.Parent=FloatGui
+    btn.Visible = false
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1,0)
     local stroke = Instance.new("UIStroke")
     stroke.Color=color; stroke.Thickness=2; stroke.Transparency=0.2; stroke.Parent=btn
@@ -1698,67 +1935,35 @@ local function makeBtn(name,text,pos,color,which,onClick)
     return btn
 end
 
-local FSButton = makeBtn("FSButton","FS",PosFS,Color3.fromRGB(0,255,200),"FS",function(btn,stroke)
-    local hum = getHum(); if not hum then return end
-    if not FPHp.Flowstate.On then
-        local now = tick()
-        if now - FPHp.Flowstate.LastUse < FPHp.Flowstate.Cooldown then Rayfield:Notify({ title="FS", content="Cooldown!", duration=2 }); return end
-        FPHp.Flowstate.LastUse = now; FPHp.Flowstate.On = true
-        local orig = hum.WalkSpeed
-        hum.WalkSpeed = orig * (1 + FPHp.Flowstate.SpeedBoost/100)
+local MWButton = makeBtn("MWButton","MW",FloatPos.MW,Color3.fromRGB(170,0,255),"MW",function(btn,stroke)
+    Moonwalk.Enabled = not Moonwalk.Enabled
+    if Moonwalk.Enabled then
         stroke.Color=Color3.fromRGB(0,255,100); btn.TextColor3=Color3.fromRGB(0,255,100)
-        task.delay(FPHp.Flowstate.Duration, function()
-            if FPHp.Flowstate.On then
-                FPHp.Flowstate.On=false
-                local h=getHum(); if h and h.Parent then h.WalkSpeed=16 end
-                stroke.Color=Color3.fromRGB(0,255,200); btn.TextColor3=Color3.fromRGB(0,255,200)
-            end
-        end)
+        startMoonwalk(); applyMoonwalkFOV()
     else
-        FPHp.Flowstate.On=false; hum.WalkSpeed=16
-        stroke.Color=Color3.fromRGB(0,255,200); btn.TextColor3=Color3.fromRGB(0,255,200)
-    end
-end)
-
-local SSButton = makeBtn("SSButton","SS",PosSS,Color3.fromRGB(255,170,0),"SS",function(btn,stroke)
-    local hum = getHum(); if not hum then return end
-    if not FPHp.SnakeStep.On then
-        local now = tick()
-        if now - FPHp.SnakeStep.LastUse < FPHp.SnakeStep.Cooldown then Rayfield:Notify({ title="SS", content="Cooldown!", duration=2 }); return end
-        FPHp.SnakeStep.LastUse = now; FPHp.SnakeStep.On = true
-        hum.WalkSpeed = FPHp.SnakeStep.SpeedBoost
-        stroke.Color=Color3.fromRGB(0,255,100); btn.TextColor3=Color3.fromRGB(0,255,100)
-    else
-        FPHp.SnakeStep.On=false; hum.WalkSpeed=16
-        stroke.Color=Color3.fromRGB(255,170,0); btn.TextColor3=Color3.fromRGB(255,170,0)
-    end
-end)
-
-local QRButton = makeBtn("QRButton","QR",PosQR,Color3.fromRGB(170,0,255),"QR",function(btn,stroke)
-    local hum = getHum(); if not hum then return end
-    local now = tick()
-    if now - FPHp.QuickRecovery.LastUse < FPHp.QuickRecovery.Cooldown then Rayfield:Notify({ title="QR", content="Cooldown!", duration=2 }); return end
-    FPHp.QuickRecovery.LastUse = now
-    pcall(function()
-        hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-        hum:ChangeState(Enum.HumanoidStateType.Running)
-    end)
-    stroke.Color=Color3.fromRGB(0,255,100); btn.TextColor3=Color3.fromRGB(0,255,100)
-    task.delay(0.5, function()
         stroke.Color=Color3.fromRGB(170,0,255); btn.TextColor3=Color3.fromRGB(170,0,255)
-    end)
+        stopMoonwalk()
+    end
 end)
 
-local AKButton = makeBtn("AKButton","AK",PosAK,Color3.fromRGB(255,60,60),"AK",function(btn,stroke)
-    Aimlock.Enabled = not Aimlock.Enabled
-    Aimlock.Holding = Aimlock.Enabled
-    if Aimlock.Enabled then
+local AIMButton = makeBtn("AIMButton","AIM",FloatPos.AIM,Color3.fromRGB(255,100,100),"AIM",function(btn,stroke)
+    AutoAimSurvivor.Enabled = not AutoAimSurvivor.Enabled
+    AutoAimSurvivor.Locked = AutoAimSurvivor.Enabled
+    if AutoAimSurvivor.Enabled then
+        stroke.Color=Color3.fromRGB(0,255,100); btn.TextColor3=Color3.fromRGB(0,255,100)
+    else
+        stroke.Color=Color3.fromRGB(255,100,100); btn.TextColor3=Color3.fromRGB(255,100,100)
+    end
+end)
+
+local AKButton = makeBtn("AKButton","AK",FloatPos.AK,Color3.fromRGB(255,60,60),"AK",function(btn,stroke)
+    AimlockKiller.Enabled = not AimlockKiller.Enabled
+    if AimlockKiller.Enabled then
         stroke.Color=Color3.fromRGB(0,255,100); btn.TextColor3=Color3.fromRGB(0,255,100)
     else
         stroke.Color=Color3.fromRGB(255,60,60); btn.TextColor3=Color3.fromRGB(255,60,60)
     end
 end)
-AKButton.Visible = false
 
 -- AUTO RESPAWN
 LocalPlayer.CharacterAdded:Connect(function(char)
@@ -1766,39 +1971,38 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     pcall(function()
         applyVisual(true); toggleScreenEffects(); applyColorCorrection()
         if Moonwalk.Enabled then task.wait(0.5); startMoonwalk(); applyMoonwalkFOV() end
-        if FakePerks.Flowstate.Enabled then hookFakeFlowstate(char) end
-        FPHp.Flowstate.On=false; FPHp.SnakeStep.On=false
-        if FSButton then FSButton.TextColor3=Color3.fromRGB(0,255,200) end
-        if SSButton then SSButton.TextColor3=Color3.fromRGB(255,170,0) end
     end)
 end)
 
 -- NOTIFIKASI
 task.wait(1)
-Rayfield:Notify({ title="⚡ TiarHub FINAL ⚡", content="Script loaded! Tombol FS/SS/QR muncul.", duration=8 })
+Rayfield:Notify({ title="⚡ TiarHub v21 ⚡", content="Script loaded! Semua fitur siap.", duration=8 })
 task.wait(2)
-Rayfield:Notify({ title="🎯 Tombol AK", content="Buka tab Aimlock → ON-in 'Show AK Button'", duration=8 })
-task.wait(2)
-Rayfield:Notify({ title="💡 Tips", content="Drag tombol buat pindah posisi. Auto-save.", duration=8 })
+Rayfield:Notify({ title="💡 Tombol Floating", content="Buka Survivor/Aimbot/Aimlock → toggle Show Button", duration=8 })
 
 print("============================================")
-print("  ⚡ TIARHUB FINAL - ALL LOADED ⚡")
+print("  ⚡ TIARHUB v21 FINAL - LOADED ⚡")
 print("  ==========================================")
-print("  [✓] ESP System + Killer Warning")
-print("  [✓] Auto Parry + Skill Check")
-print("  [✓] Fake Perks + Cooldown 70s")
-print("  [✓] Silent Aim Veil Spear")
-print("  [✓] Aimbot + FOV + Tracer")
-print("  [✓] Aimlock (Killer/Survivor/Auto)")
+print("  [✓] ESP + Killer Warning")
+print("  [✓] Auto Parry (Semua Arah)")
+print("  [✓] Auto Skill Check / Wiggle / Flee")
+print("  [✓] Fast Vault + Dodge Abyss")
+print("  [✓] Aimbot + Silent Aim + Killer Aim")
+print("  [✓] Auto Aim Lock Survivor + Radius")
+print("  [✓] Aimlock Killer")
+print("  [✓] ESP Circle (Lock Tubuh)")
 print("  [✓] Killer System + Stalk")
-print("  [✓] Movement + Moonwalk")
+print("  [✓] Movement + Moonwalk + NoClip")
 print("  [✓] Copy Avatar Full")
 print("  [✓] Teleport + Auto Escape")
+print("  [✓] Camera Zoom + FOV (70/90/120)")
+print("  [✓] Jerk Tool + Masked Power")
 print("  [✓] Visual + Color Correction")
 print("  [✓] Crosshair + Sound")
-print("  [✓] Tombol FS / SS / QR / AK")
+print("  [✓] Tombol Floating MW/AIM/AK")
+print("  [✓] Watermark Gradient")
 print("  [✓] Quick Actions (Preset Mode)")
-print("  [✓] Auto-Save DIMATIIN")
+print("  [✓] Auto-Save OFF")
 print("  ==========================================")
-print("  🎮 Violence District | TiarHub FINAL")
+print("  🎮 Violence District | TiarHub v21")
 print("============================================")

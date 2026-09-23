@@ -2998,4 +2998,162 @@ print("  [✓] Crosshair + Sound Feedback")
 print("  [✓] Rainbow UI")
 print("  ==========================================")
 print("  🎮 Violence District | by Tiar")
+print("============================================")-- ============================================
+-- ⚡ TIARHUB v17 - Part 6/6: 🌈 FULL RAINBOW UI
+-- ============================================
+-- Rainbow theme untuk SEMUA elemen UI Rayfield
+-- (sidebar, tab, toggle, slider, button, text, stroke, gradient)
+-- ============================================
+
+-- ============ KONFIGURASI RAINBOW ============
+local TiarRainbow = {
+    Speed         = 0.008,   -- kecepatan ganti warna (kecil = lambat)
+    Interval      = 0.05,    -- interval update (detik)
+    Text          = true,    -- text ikut rainbow
+    Stroke        = true,    -- border/stroke ikut rainbow
+    Background    = true,    -- background ikut rainbow (soft)
+    Gradient      = true,    -- gradient sidebar/window ikut rainbow
+    Icons         = true,    -- icon/image ikut rainbow
+    SoftBg        = true,    -- background pakai warna soft (biar text kebaca)
+    BgSaturation  = 0.7,     -- saturasi background (0-1)
+    BgValue       = 0.5,     -- kecerahan background (0-1)
+    HueOffsetBg   = 0.15,    -- offset hue background dari text
+}
+
+local TiarRainbowHue = 0
+
+-- ============ CARI GUI RAYFIELD ============
+local function getTiarRayfieldGuis()
+    local guis = {}
+    local function scan(container)
+        for _, gui in pairs(container:GetChildren()) do
+            if gui:IsA("ScreenGui") 
+               and (gui.Name:find("Rayfield") or gui.Name:find("TiarHub") or gui.Name:find("rayfield")) then
+                table.insert(guis, gui)
+            end
+        end
+    end
+    scan(CoreGui)
+    if #guis == 0 then scan(PlayerGui) end
+    return guis
+end
+
+-- ============ HELPER: cek text utama ============
+local function isTiarMainText(obj)
+    if not (obj:IsA("TextLabel") or obj:IsA("TextButton")) then return false end
+    if not obj.Text or obj.Text == "" then return false end
+    -- skip text placeholder/loading
+    if obj.Text == "Loading..." or obj.Text == "..." then return false end
+    return true
+end
+
+-- ============ HELPER: cek background yang perlu diwarnai ============
+local function shouldColorBg(obj)
+    if not (obj:IsA("Frame") or obj:IsA("TextButton") or obj:IsA("ImageButton")) then 
+        return false 
+    end
+    if obj.BackgroundTransparency >= 0.95 then return false end
+
+    local n = string.lower(obj.Name or "")
+    -- Hanya warnai elemen tertentu (biar gak norak total)
+    if n == "background" or n == "bg" or n == "frame" 
+       or n:find("sidebar") or n:find("tab") or n:find("button") 
+       or n:find("fill") or n:find("knob") or n:find("toggle")
+       or n:find("slider") or n:find("item") or n:find("section") 
+       or n:find("dropdown") or n:find("input") then
+        return true
+    end
+    return false
+end
+
+-- ============ MAIN LOOP ============
+task.spawn(function()
+    task.wait(4)  -- tunggu Rayfield + semua Part selesai load
+
+    -- Notif kalau rainbow udah aktif
+    pcall(function()
+        Rayfield:Notify({
+            title = "🌈 Rainbow UI",
+            content = "Semua warna menu udah jadi rainbow!",
+            duration = 5
+        })
+    end)
+
+    while task.wait(TiarRainbow.Interval) do
+        pcall(function()
+            -- Update hue
+            TiarRainbowHue = (TiarRainbowHue + TiarRainbow.Speed) % 1
+            
+            -- Warna text (terang & vivid)
+            local textColor = Color3.fromHSV(TiarRainbowHue, 1, 1)
+            local textColor2 = Color3.fromHSV((TiarRainbowHue + 0.5) % 1, 1, 1)
+            
+            -- Warna background (soft, hue offset biar beda dari text)
+            local bgHue = (TiarRainbowHue + TiarRainbow.HueOffsetBg) % 1
+            local bgColor = Color3.fromHSV(bgHue, TiarRainbow.BgSaturation, TiarRainbow.BgValue)
+
+            -- Loop semua GUI Rayfield
+            local guis = getTiarRayfieldGuis()
+            for _, gui in ipairs(guis) do
+                for _, v in pairs(gui:GetDescendants()) do
+                    
+                    -- 🌈 TEXT
+                    if TiarRainbow.Text and isTiarMainText(v) then
+                        v.TextColor3 = textColor
+                    end
+
+                    -- 🌈 STROKE (border)
+                    if TiarRainbow.Stroke and v:IsA("UIStroke") then
+                        v.Color = textColor
+                    end
+
+                    -- 🌈 BACKGROUND (soft)
+                    if TiarRainbow.Background and shouldColorBg(v) then
+                        v.BackgroundColor3 = TiarRainbow.SoftBg and bgColor or textColor
+                    end
+
+                    -- 🌈 GRADIENT
+                    if TiarRainbow.Gradient and v:IsA("UIGradient") then
+                        v.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, textColor),
+                            ColorSequenceKeypoint.new(1, textColor2),
+                        })
+                    end
+
+                    -- 🌈 ICON / IMAGE
+                    if TiarRainbow.Icons and (v:IsA("ImageLabel") or v:IsA("ImageButton")) then
+                        -- Skip image yang warnanya hitam (biasanya shadow/outline)
+                        local imgColor = v.ImageColor3
+                        if imgColor and not (imgColor.R < 0.05 and imgColor.G < 0.05 and imgColor.B < 0.05) then
+                            v.ImageColor3 = textColor
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- ============ AUTO RE-APPLY SAAT GUI BARU MUNCUL ============
+task.spawn(function()
+    task.wait(4)
+    local function hookContainer(container)
+        container.ChildAdded:Connect(function(child)
+            if child:IsA("ScreenGui") 
+               and (child.Name:find("Rayfield") or child.Name:find("TiarHub")) then
+                task.wait(0.5)
+                -- Loop rainbow akan otomatis handle karena getTiarRayfieldGuis() selalu re-scan
+            end
+        end)
+    end
+    pcall(function() hookContainer(CoreGui) end)
+    pcall(function() hookContainer(PlayerGui) end)
+end)
+
+print("[TiarHub v17] Part 6/6 loaded. 🌈 Rainbow UI active.")
+print("============================================")
+print("  🌈 RAINBOW UI FULL ACTIVE")
+print("  → Sidebar, Tab, Toggle, Slider, Button")
+print("  → Text, Stroke, Gradient, Icon")
+print("  → Speed: " .. tostring(TiarRainbow.Speed))
 print("============================================")

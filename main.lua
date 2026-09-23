@@ -2839,333 +2839,108 @@ print("  [✓] Tab Quick Actions (NEW)")
 print("  [✓] Tombol Floating AM & MW (NEW)")
 print("  ==========================================")
 print("  🎮 Violence District | TiarHub v18")
-print("============================================")-- ============================================
--- ⚡ TIARHUB v18 - Part 5/5 (PATCH)
--- Cooldown Fake Perks + Copy Avatar Full + Tombol LOCK
--- Paste di bawah Part 4, execute SEKALI
--- ============================================
-
--- ============ COOLDOWN FAKE PERKS (MAX 70) ============
--- Override Quick Recovery dengan cooldown
-local QuickRecoveryLast = 0
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            if not FakePerks or not FakePerks.QuickRecovery then return end
-            if not FakePerks.QuickRecovery.Enabled then return end
-            local char = LocalPlayer.Character; if not char then return end
-            local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-            local now = tick()
-            if now - QuickRecoveryLast < (_G.QRCooldown or 30) then return end
-            if hum:GetState()==Enum.HumanoidStateType.FallingDown
-                or hum:GetState()==Enum.HumanoidStateType.Ragdoll
-                or hum.Health < hum.MaxHealth*0.3 then
-                QuickRecoveryLast = now
-                pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
-            end
-        end)
+print("============================================")local QRLast=0
+task.spawn(function() while task.wait(0.2) do pcall(function()
+    if not FakePerks or not FakePerks.QuickRecovery or not FakePerks.QuickRecovery.Enabled then return end
+    local c=LocalPlayer.Character; local h=c and c:FindFirstChildOfClass("Humanoid"); if not h then return end
+    if tick()-QRLast < (_G.QRCooldown or 30) then return end
+    if h:GetState()==Enum.HumanoidStateType.FallingDown or h:GetState()==Enum.HumanoidStateType.Ragdoll or h.Health < h.MaxHealth*0.3 then
+        QRLast=tick(); pcall(function() h:ChangeState(Enum.HumanoidStateType.GettingUp) end)
     end
-end)
-
--- ============ COPY AVATAR FULL (PORT FALLENS) ============
-local function saveOriginalAppearance()
-    local char = LocalPlayer.Character; if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then AvatarCopier.OriginalDescription = hum:GetAppliedDescription() end
-end
-
-local function removeAllClothingAndAccessories(character)
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("Accessory") or v:IsA("Clothing") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-            v:Destroy()
-        end
-    end
-end
-
-local function loadAsset(assetId)
-    if not assetId or assetId==0 or assetId=="0" then return nil end
-    local okAsset, asset = pcall(function() return InsertService:LoadAsset(tonumber(assetId)) end)
-    if okAsset and asset then return asset end
-    return nil
-end
-
-local function copyAvatarFull(username)
-    if not username or username=="" then
-        Rayfield:Notify({ title="Copy Avatar", content="Username kosong!" })
-        return
-    end
-    saveOriginalAppearance()
-    local success, userId = pcall(function() return Players:GetUserIdFromNameAsync(username) end)
-    if not success or not userId then
-        Rayfield:Notify({ title="Copy Avatar", content="User '"..username.."' gak ketemu!" })
-        return
-    end
-    AvatarCopier.CurrentCopiedUserId = userId
-    local char = LocalPlayer.Character; if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-
+end) end end)
+local function saveOrig() local c=LocalPlayer.Character; if not c then return end; local h=c:FindFirstChildOfClass("Humanoid"); if h then AvatarCopier.OriginalDescription=h:GetAppliedDescription() end end
+local function rmClothes(c) for _,v in pairs(c:GetDescendants()) do if v:IsA("Accessory") or v:IsA("Clothing") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then v:Destroy() end end end
+local function loadA(id) if not id or id==0 or id=="0" then return nil end; local o,a=pcall(function() return InsertService:LoadAsset(tonumber(id)) end); if o and a then return a end end
+local function copyAvatarFull(u)
+    if not u or u=="" then Rayfield:Notify({title="Copy Avatar",content="Username kosong!"}); return end
+    saveOrig()
+    local ok,uid=pcall(function() return Players:GetUserIdFromNameAsync(u) end)
+    if not ok or not uid then Rayfield:Notify({title="Copy Avatar",content="User '"..u.."' gak ketemu!"}); return end
+    AvatarCopier.CurrentCopiedUserId=uid
+    local c=LocalPlayer.Character; if not c then return end
+    local h=c:FindFirstChildOfClass("Humanoid"); if not h then return end
     task.spawn(function()
-        local okDesc, desc = pcall(function() return Players:GetHumanoidDescriptionFromUserId(userId) end)
-        if not okDesc or not desc then
-            Rayfield:Notify({ title="Copy Avatar", content="Gagal ambil deskripsi!" })
-            return
-        end
-
-        -- 1. Hapus semua dulu
-        for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-                pcall(function() v:Destroy() end)
-            end
-        end
+        local okD,d=pcall(function() return Players:GetHumanoidDescriptionFromUserId(uid) end)
+        if not okD or not d then Rayfield:Notify({title="Copy Avatar",content="Gagal ambil deskripsi!"}); return end
+        for _,v in pairs(c:GetDescendants()) do if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then pcall(function() v:Destroy() end) end end
         task.wait(0.2)
-
-        -- 2. Blocky body + warna
         if AvatarCopier.BlockyBody then
             pcall(function()
-                local bd = Instance.new("HumanoidDescription")
-                bd.BodyTypeScale=1; bd.DepthScale=1; bd.HeadScale=1
-                bd.HeightScale=1; bd.ProportionScale=0; bd.WidthScale=1
-                bd.HeadColor=desc.HeadColor; bd.TorsoColor=desc.TorsoColor
-                bd.LeftArmColor=desc.LeftArmColor; bd.RightArmColor=desc.RightArmColor
-                bd.LeftLegColor=desc.LeftLegColor; bd.RightLegColor=desc.RightLegColor
-                hum:ApplyDescriptionClientServer(bd)
+                local b=Instance.new("HumanoidDescription")
+                b.BodyTypeScale=1; b.DepthScale=1; b.HeadScale=1; b.HeightScale=1; b.ProportionScale=0; b.WidthScale=1
+                b.HeadColor=d.HeadColor; b.TorsoColor=d.TorsoColor; b.LeftArmColor=d.LeftArmColor; b.RightArmColor=d.RightArmColor; b.LeftLegColor=d.LeftLegColor; b.RightLegColor=d.RightLegColor
+                h:ApplyDescriptionClientServer(b)
             end)
             task.wait(0.5)
         end
-
-        -- 3. Apply description dasar
-        pcall(function() hum:ApplyDescriptionClientServer(desc) end)
+        pcall(function() h:ApplyDescriptionClientServer(d) end)
         task.wait(0.5)
-
-        -- 4. Shirt
-        if desc.Shirt and tonumber(desc.Shirt) and tonumber(desc.Shirt)>0 then
-            local asset = loadAsset(desc.Shirt)
-            if asset then
-                for _, v in pairs(asset:GetChildren()) do
-                    if v:IsA("Shirt") then v:Clone().Parent=char; break end
-                end
-                asset:Destroy()
-            else
-                pcall(function()
-                    local s = Instance.new("Shirt")
-                    s.ShirtTemplate = "rbxassetid://"..tostring(desc.Shirt)
-                    s.Parent = char
-                end)
-            end
+        if d.Shirt and tonumber(d.Shirt) and tonumber(d.Shirt)>0 then
+            local a=loadA(d.Shirt)
+            if a then for _,v in pairs(a:GetChildren()) do if v:IsA("Shirt") then v:Clone().Parent=c; break end end; a:Destroy()
+            else pcall(function() local s=Instance.new("Shirt"); s.ShirtTemplate="rbxassetid://"..tostring(d.Shirt); s.Parent=c end) end
         end
         task.wait(0.3)
-
-        -- 5. Pants
-        if desc.Pants and tonumber(desc.Pants) and tonumber(desc.Pants)>0 then
-            local asset = loadAsset(desc.Pants)
-            if asset then
-                for _, v in pairs(asset:GetChildren()) do
-                    if v:IsA("Pants") then v:Clone().Parent=char; break end
-                end
-                asset:Destroy()
-            else
-                pcall(function()
-                    local p = Instance.new("Pants")
-                    p.PantsTemplate = "rbxassetid://"..tostring(desc.Pants)
-                    p.Parent = char
-                end)
-            end
+        if d.Pants and tonumber(d.Pants) and tonumber(d.Pants)>0 then
+            local a=loadA(d.Pants)
+            if a then for _,v in pairs(a:GetChildren()) do if v:IsA("Pants") then v:Clone().Parent=c; break end end; a:Destroy()
+            else pcall(function() local p=Instance.new("Pants"); p.PantsTemplate="rbxassetid://"..tostring(d.Pants); p.Parent=c end) end
         end
         task.wait(0.3)
-
-        -- 6. GraphicTShirt
-        if desc.GraphicTShirt and tonumber(desc.GraphicTShirt) and tonumber(desc.GraphicTShirt)>0 then
-            pcall(function()
-                local st = Instance.new("ShirtGraphic")
-                st.Graphic = "rbxassetid://"..tostring(desc.GraphicTShirt)
-                st.Parent = char
-            end)
+        if d.GraphicTShirt and tonumber(d.GraphicTShirt) and tonumber(d.GraphicTShirt)>0 then
+            pcall(function() local st=Instance.new("ShirtGraphic"); st.Graphic="rbxassetid://"..tostring(d.GraphicTShirt); st.Parent=c end)
         end
         task.wait(0.3)
-
-        -- 7. AccessoryBlob (topi, rambut, kacamata)
-        if desc.AccessoryBlob and desc.AccessoryBlob ~= "" then
-            for assetId in string.gmatch(desc.AccessoryBlob, "[^;]+") do
-                local id = tonumber(assetId)
-                if id and id>0 then
-                    local okAsset, asset = pcall(function() return InsertService:LoadAsset(id) end)
-                    if okAsset and asset then
-                        for _, v in pairs(asset:GetChildren()) do
-                            if v:IsA("Accessory") or v:IsA("Hat") then
-                                pcall(function() v:Clone().Parent=char end)
-                            end
-                        end
-                        asset:Destroy()
-                    end
+        if d.AccessoryBlob and d.AccessoryBlob~="" then
+            for id in string.gmatch(d.AccessoryBlob,"[^;]+") do
+                local n=tonumber(id)
+                if n and n>0 then
+                    local o,a=pcall(function() return InsertService:LoadAsset(n) end)
+                    if o and a then for _,v in pairs(a:GetChildren()) do if v:IsA("Accessory") or v:IsA("Hat") then pcall(function() v:Clone().Parent=c end) end end; a:Destroy() end
                     task.wait(0.1)
                 end
             end
         end
         task.wait(0.3)
-
-        -- 8. Face
-        if desc.Face and tonumber(desc.Face) and tonumber(desc.Face)>0 then
-            local head = char:FindFirstChild("Head")
-            if head then
-                local oldFace = head:FindFirstChildOfClass("Decal")
-                if oldFace then oldFace:Destroy() end
-                pcall(function()
-                    local face = Instance.new("Decal")
-                    face.Name = "face"; face.Face = Enum.NormalId.Front
-                    face.Texture = "rbxassetid://"..tostring(desc.Face)
-                    face.Parent = head
-                end)
-            end
+        if d.Face and tonumber(d.Face) and tonumber(d.Face)>0 then
+            local hd=c:FindFirstChild("Head")
+            if hd then local o=hd:FindFirstChildOfClass("Decal"); if o then o:Destroy() end; pcall(function() local f=Instance.new("Decal"); f.Name="face"; f.Face=Enum.NormalId.Front; f.Texture="rbxassetid://"..tostring(d.Face); f.Parent=hd end) end
         end
         task.wait(0.3)
-
-        Rayfield:Notify({ title="Copy Avatar", content="✓ Copy: "..username.." (Full)" })
+        Rayfield:Notify({title="Copy Avatar",content="✓ Copy: "..u.." (Full)"})
     end)
 end
-
--- ============ UI BARU: AVATAR TAB FULL + COOLDOWN ============
--- Cari tab Avatar yang udah ada (kalau ada), atau bikin baru
-local AvatarTabPatch = Window:CreateTab({ name="Avatar Full", icon=0 })
-AvatarTabPatch:CreateSection("Copy Avatar (Full - Baju+Celana+Aksesoris+Efek)")
-AvatarTabPatch:CreateInput({ name="Target Username", currentValue="", placeholder="Ketik username (tanpa @)", flag="avfull_user", callback=function(v) AvatarCopier.TargetUsername=v end })
-AvatarTabPatch:CreateButton({ name="🎭 Copy Avatar (Full)", callback=function()
-    copyAvatarFull(AvatarCopier.TargetUsername)
-end })
-AvatarTabPatch:CreateButton({ name="🔄 Reset to Original", callback=function()
-    if not AvatarCopier.OriginalDescription then
-        Rayfield:Notify({ title="Reset Avatar", content="Belum ada original!" })
-        return
-    end
-    local char = LocalPlayer.Character; if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid"); if not hum then return end
-    removeAllClothingAndAccessories(char)
-    task.wait(0.1)
-    pcall(function() hum:ApplyDescriptionClientServer(AvatarCopier.OriginalDescription) end)
-    AvatarCopier.CurrentCopiedUserId = nil
-    Rayfield:Notify({ title="Reset Avatar", content="✓ Avatar original balik!" })
-end })
-AvatarTabPatch:CreateButton({ name="💾 Save Current as Original", callback=function()
-    saveOriginalAppearance()
-    Rayfield:Notify({ title="Save Avatar", content="Original disimpan!" })
-end })
-AvatarTabPatch:CreateToggle({ name="Blocky Body (R6 Style)", currentValue=true, flag="avfull_blocky", callback=function(v) AvatarCopier.BlockyBody=v end })
-
--- ============ COOLDOWN SLIDERS DI SURVIVOR TAB ============
--- Karena tab Survivor udah ada di Part 4, kita tambahin lewat reference
--- Kita bikin tab baru "Perk Cooldown" biar aman
-local PerkCdTab = Window:CreateTab({ name="Perk Cooldown", icon=0 })
-PerkCdTab:CreateSection("🎭 Cooldown Fake Perks (max 70 detik)")
-PerkCdTab:CreateSlider({ name="Flowstate Cooldown", range={1,70}, increment=1, suffix="s", currentValue=30, flag="fp_flow_cd2", callback=function(v) FakePerks.Flowstate.Cooldown=v end })
-PerkCdTab:CreateSlider({ name="Snake Step Cooldown", range={1,70}, increment=1, suffix="s", currentValue=30, flag="fp_snake_cd2", callback=function(v) FakePerks.SnakeStep.Cooldown=v end })
-PerkCdTab:CreateSlider({ name="Quick Recovery Cooldown", range={1,70}, increment=1, suffix="s", currentValue=30, flag="fp_qr_cd2", callback=function(v) _G.QRCooldown=v; FakePerks.QuickRecovery.Cooldown=v end })
-PerkCdTab:CreateSection("Info")
-PerkCdTab:CreateParagraph({ title="Cara Kerja", content="Cooldown = waktu tunggu sebelum Fake Perk bisa aktif lagi. Max 70 detik." })
-
--- ============ TOMBOL FLOATING LOCK (LK) ============
-local LKPos = UDim2.new(0.05, 0, 0.55, 0)
-pcall(function()
-    if isfile and isfile("TiarV18_Config.json") then
-        local data = HttpService:JSONDecode(readfile("TiarV18_Config.json"))
-        if data.LKPos then LKPos = UDim2.new(data.LKPos[1], data.LKPos[2], data.LKPos[3], data.LKPos[4]) end
-    end
-end)
-
-local function saveLKPos()
-    pcall(function()
-        if writefile then
-            local data = {}
-            if isfile("TiarV18_Config.json") then
-                data = HttpService:JSONDecode(readfile("TiarV18_Config.json"))
-            end
-            data.LKPos = {LKPos.X.Scale, LKPos.X.Offset, LKPos.Y.Scale, LKPos.Y.Offset}
-            writefile("TiarV18_Config.json", HttpService:JSONEncode(data))
-        end
-    end)
-end
-
-local LKButton = Instance.new("TextButton")
-LKButton.Name = "LKButton"
-LKButton.Text = "LK"
-LKButton.Size = UDim2.fromOffset(55, 55)
-LKButton.Position = LKPos
-LKButton.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-LKButton.BackgroundTransparency = 0.1
-LKButton.TextColor3 = Color3.fromRGB(255, 200, 0)
-LKButton.Font = Enum.Font.GothamBlack
-LKButton.TextSize = 16
-LKButton.AutoButtonColor = false
-LKButton.Parent = FloatingGui
-Instance.new("UICorner", LKButton).CornerRadius = UDim.new(1, 0)
-local LKStroke = Instance.new("UIStroke")
-LKStroke.Color = Color3.fromRGB(255, 200, 0)
-LKStroke.Thickness = 2
-LKStroke.Transparency = 0.2
-LKStroke.Parent = LKButton
-local LKGlow = Instance.new("UIStroke")
-LKGlow.Color = Color3.fromRGB(255, 200, 0)
-LKGlow.Thickness = 6
-LKGlow.Transparency = 0.7
-LKGlow.Parent = LKButton
-
--- Bikin draggable
-local lkDragging = false; local lkDragStart, lkStartPos
-LKButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        lkDragging = true; lkDragStart = input.Position; lkStartPos = LKButton.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if lkDragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - lkDragStart
-        LKButton.Position = UDim2.new(lkStartPos.X.Scale, lkStartPos.X.Offset+delta.X, lkStartPos.Y.Scale, lkStartPos.Y.Offset+delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        if lkDragging then
-            lkDragging = false
-            LKPos = LKButton.Position
-            saveLKPos()
-        end
-    end
-end)
-
-LKButton.MouseButton1Click:Connect(function()
-    Aimlock.Locked = not Aimlock.Locked
-    if Aimlock.Locked then
-        Aimlock.Enabled = true
-        Aimlock.Holding = true
-        LKStroke.Color = Color3.fromRGB(0, 255, 100)
-        LKButton.TextColor3 = Color3.fromRGB(0, 255, 100)
-    else
-        LKStroke.Color = Color3.fromRGB(255, 200, 0)
-        LKButton.TextColor3 = Color3.fromRGB(255, 200, 0)
-    end
-end)
-LKButton.MouseEnter:Connect(function() LKButton.BackgroundColor3 = Color3.fromRGB(28, 28, 35) end)
-LKButton.MouseLeave:Connect(function() LKButton.BackgroundColor3 = Color3.fromRGB(18, 18, 22) end)
-
--- ============ NOTIFIKASI PATCH ============
+local AT=Window:CreateTab({name="Avatar Full",icon=0})
+AT:CreateInput({name="Username",currentValue="",placeholder="Ketik username",flag="avf_u",callback=function(v) AvatarCopier.TargetUsername=v end})
+AT:CreateButton({name="🎭 Copy Avatar (Full)",callback=function() copyAvatarFull(AvatarCopier.TargetUsername) end})
+AT:CreateButton({name="🔄 Reset to Original",callback=function()
+    if not AvatarCopier.OriginalDescription then Rayfield:Notify({title="Reset",content="Belum ada original!"}); return end
+    local c=LocalPlayer.Character; local h=c and c:FindFirstChildOfClass("Humanoid"); if not h then return end
+    rmClothes(c); task.wait(0.1); pcall(function() h:ApplyDescriptionClientServer(AvatarCopier.OriginalDescription) end)
+    AvatarCopier.CurrentCopiedUserId=nil; Rayfield:Notify({title="Reset",content="✓ Original balik!"})
+end})
+AT:CreateButton({name="💾 Save as Original",callback=function() saveOrig(); Rayfield:Notify({title="Save",content="Original disimpan!"}) end})
+AT:CreateToggle({name="Blocky Body",currentValue=true,flag="avf_b",callback=function(v) AvatarCopier.BlockyBody=v end})
+local PT=Window:CreateTab({name="Perk Cooldown",icon=0})
+PT:CreateSlider({name="Flowstate Cooldown",range={1,70},increment=1,suffix="s",currentValue=30,flag="fp_fc",callback=function(v) FakePerks.Flowstate.Cooldown=v end})
+PT:CreateSlider({name="Snake Step Cooldown",range={1,70},increment=1,suffix="s",currentValue=30,flag="fp_sc",callback=function(v) FakePerks.SnakeStep.Cooldown=v end})
+PT:CreateSlider({name="Quick Recovery Cooldown",range={1,70},increment=1,suffix="s",currentValue=30,flag="fp_qc",callback=function(v) _G.QRCooldown=v; FakePerks.QuickRecovery.Cooldown=v end})
+local LKP=UDim2.new(0.05,0,0.55,0)
+pcall(function() if isfile and isfile("TiarV18_Config.json") then local dd=HttpService:JSONDecode(readfile("TiarV18_Config.json")); if dd.LKPos then LKP=UDim2.new(dd.LKPos[1],dd.LKPos[2],dd.LKPos[3],dd.LKPos[4]) end end end)
+local LK=Instance.new("TextButton")
+LK.Name="LKButton"; LK.Text="LK"; LK.Size=UDim2.fromOffset(55,55); LK.Position=LKP
+LK.BackgroundColor3=Color3.fromRGB(18,18,22); LK.BackgroundTransparency=0.1; LK.TextColor3=Color3.fromRGB(255,200,0)
+LK.Font=Enum.Font.GothamBlack; LK.TextSize=16; LK.AutoButtonColor=false; LK.Parent=FloatingGui
+Instance.new("UICorner",LK).CornerRadius=UDim.new(1,0)
+local LKS=Instance.new("UIStroke"); LKS.Color=Color3.fromRGB(255,200,0); LKS.Thickness=2; LKS.Transparency=0.2; LKS.Parent=LK
+local LKG=Instance.new("UIStroke"); LKG.Color=Color3.fromRGB(255,200,0); LKG.Thickness=6; LKG.Transparency=0.7; LKG.Parent=LK
+local lkD=false; local lkDS,lkSP
+LK.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then lkD=true; lkDS=i.Position; lkSP=LK.Position end end)
+UserInputService.InputChanged:Connect(function(i) if lkD and (i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseMovement) then local dl=i.Position-lkDS; LK.Position=UDim2.new(lkSP.X.Scale,lkSP.X.Offset+dl.X,lkSP.Y.Scale,lkSP.Y.Offset+dl.Y) end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then if lkD then lkD=false; LKP=LK.Position; pcall(function() if writefile then local dd={}; if isfile("TiarV18_Config.json") then dd=HttpService:JSONDecode(readfile("TiarV18_Config.json")) end; dd.LKPos={LKP.X.Scale,LKP.X.Offset,LKP.Y.Scale,LKP.Y.Offset}; writefile("TiarV18_Config.json",HttpService:JSONEncode(dd)) end end) end end end)
+LK.MouseButton1Click:Connect(function() Aimlock.Locked=not Aimlock.Locked; if Aimlock.Locked then Aimlock.Enabled=true; Aimlock.Holding=true; LKS.Color=Color3.fromRGB(0,255,100); LK.TextColor3=Color3.fromRGB(0,255,100) else LKS.Color=Color3.fromRGB(255,200,0); LK.TextColor3=Color3.fromRGB(255,200,0) end end)
+LK.MouseEnter:Connect(function() LK.BackgroundColor3=Color3.fromRGB(28,28,35) end)
+LK.MouseLeave:Connect(function() LK.BackgroundColor3=Color3.fromRGB(18,18,22) end)
 task.wait(1)
-Rayfield:Notify({
-    title = "⚡ TiarHub v18 Patch ⚡",
-    content = "Cooldown 70s + Copy Avatar Full + Tombol LOCK udah ditambahin!",
-    duration = 8
-})
-
-task.wait(2)
-Rayfield:Notify({
-    title = "🎯 Fitur Baru",
-    content = "Cek tab 'Avatar Full' + 'Perk Cooldown' + tombol LK kuning di screen",
-    duration = 8
-})
-
-print("============================================")
-print("  ⚡ TIARHUB v18 PATCH - LOADED ⚡")
-print("  ==========================================")
-print("  [✓] Cooldown Fake Perks (max 70s)")
-print("  [✓] Copy Avatar FULL (Fallens)")
-print("  [✓] Tab 'Avatar Full'")
-print("  [✓] Tab 'Perk Cooldown'")
-print("  [✓] Tombol Floating LK (Lock)")
-print("  ==========================================")
+Rayfield:Notify({title="⚡ Patch v18 ⚡",content="Cooldown + Copy Avatar + LK aktif!",duration=8})
+print("[TiarHub v18 Patch] OK")

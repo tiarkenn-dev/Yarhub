@@ -1,11 +1,13 @@
 -- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT
---   VERSION: 2.0 (Mobile Fixed)
+--   TIARHUB x VIOLENCE DISTRICT — V3 (Better Debug)
+--   Bagian 1 : Setup, Library, Splash, Window, Tabs
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Starting...")
+print("═══ [TIARHUB] SCRIPT START ═══")
 
--- ─── SERVICES ─────────────────────────────────────────────
+-- ═══════════════════════════════════════════════════════════
+--   STEP 1: SERVICES
+-- ═══════════════════════════════════════════════════════════
 local Players            = game:GetService("Players")
 local RunService         = game:GetService("RunService")
 local UserInputService   = game:GetService("UserInputService")
@@ -19,33 +21,41 @@ local LocalPlayer        = Players.LocalPlayer
 local PlayerGui          = LocalPlayer:WaitForChild("PlayerGui")
 local Camera             = workspace.CurrentCamera
 
-print("[TIARHUB] Services loaded")
+print("[TIARHUB] ✅ Step 1: Services OK")
 
--- ─── LIBRARY OBSIDIAN ─────────────────────────────────────
+-- ═══════════════════════════════════════════════════════════
+--   STEP 2: LIBRARY OBSIDIAN
+-- ═══════════════════════════════════════════════════════════
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 
-local ok1, Library = pcall(function()
+print("[TIARHUB] Downloading Library...")
+local okLib, Library = pcall(function()
     return loadstring(game:HttpGet(repo .. "Library.lua"))()
 end)
-if not ok1 then
-    warn("[TIARHUB] Library gagal load:", Library)
+
+if not okLib or not Library then
+    warn("[TIARHUB] ❌ Library FAILED:", Library)
     return
 end
 
-local ok2, ThemeManager = pcall(function()
+print("[TIARHUB] ✅ Step 2: Library OK")
+
+local okTM, ThemeManager = pcall(function()
     return loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 end)
 
-local ok3, SaveManager = pcall(function()
+local okSM, SaveManager = pcall(function()
     return loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 end)
 
-print("[TIARHUB] Library loaded")
+print("[TIARHUB] ThemeManager:", okTM, "| SaveManager:", okSM)
 
 Library.ShowToggleFrameInKeybinds = true
 Library.ShowCustomCursor = true
 
--- ─── WARNA TEMA ───────────────────────────────────────────
+-- ═══════════════════════════════════════════════════════════
+--   STEP 3: WARNA TEMA
+-- ═══════════════════════════════════════════════════════════
 local Theme = {
     NEON_BLUE  = Color3.fromRGB(30, 150, 255),
     WHITE_BLUE = Color3.fromRGB(220, 235, 255),
@@ -53,21 +63,27 @@ local Theme = {
     BLACK_BLUE = Color3.fromRGB(10, 20, 40),
 }
 
-Library.Scheme.AccentColor     = Theme.NEON_BLUE
-Library.Scheme.BackgroundColor = Theme.BLACK_BLUE
-Library.Scheme.MainColor       = Color3.fromRGB(20, 35, 65)
-Library.Scheme.OutlineColor    = Color3.fromRGB(0, 80, 180)
-Library.Scheme.FontColor       = Theme.WHITE_BLUE
+pcall(function()
+    Library.Scheme.AccentColor     = Theme.NEON_BLUE
+    Library.Scheme.BackgroundColor = Theme.BLACK_BLUE
+    Library.Scheme.MainColor       = Color3.fromRGB(20, 35, 65)
+    Library.Scheme.OutlineColor    = Color3.fromRGB(0, 80, 180)
+    Library.Scheme.FontColor       = Theme.WHITE_BLUE
+end)
+
+print("[TIARHUB] ✅ Step 3: Theme OK")
 
 -- ═══════════════════════════════════════════════════════════
---   SPLASH SCREEN (FIXED - PAKAI PlayerGui)
+--   STEP 4: SPLASH SCREEN
 -- ═══════════════════════════════════════════════════════════
+print("[TIARHUB] Showing splash...")
+
 local function ShowSplash()
     local splash = Instance.new("ScreenGui")
     splash.Name = "TiarHubSplash"
     splash.IgnoreGuiInset = true
     splash.DisplayOrder = 999
-    splash.Parent = PlayerGui  -- ✅ FIX: PlayerGui bukan CoreGui
+    splash.Parent = PlayerGui
 
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1, 0, 1, 0)
@@ -88,7 +104,7 @@ local function ShowSplash()
     title.Parent = bg
 
     local sub = Instance.new("TextLabel")
-    sub.Text = "VIOLENCE DISTRICT v2.0"
+    sub.Text = "VIOLENCE DISTRICT v3.0"
     sub.Font = Enum.Font.GothamBold
     sub.TextSize = 14
     sub.TextColor3 = Theme.WHITE_BLUE
@@ -109,7 +125,6 @@ local function ShowSplash()
 
     task.wait(1.5)
 
-    -- Fade out
     for i = 0, 1, 0.1 do
         bg.BackgroundTransparency = i
         title.TextTransparency = i
@@ -122,52 +137,43 @@ local function ShowSplash()
     splash:Destroy()
 end
 
-local okSplash, errSplash = pcall(ShowSplash)
-if not okSplash then
-    warn("[TIARHUB] Splash error:", errSplash)
+local okSplash = pcall(ShowSplash)
+print("[TIARHUB] ✅ Step 4: Splash done (" .. tostring(okSplash) .. ")")
+
+-- ═══════════════════════════════════════════════════════════
+--   STEP 5: WINDOW
+-- ═══════════════════════════════════════════════════════════
+print("[TIARHUB] Creating Window...")
+
+local okWin, Window = pcall(function()
+    return Library:CreateWindow({
+        Title = "TIARHUB",
+        Footer = "v3.0 | Violence District",
+        Icon = 0,
+        NotifySide = "Right",
+        ShowCustomCursor = true,
+        Size = UDim2.fromOffset(520, 400),
+    })
+end)
+
+if not okWin or not Window then
+    warn("[TIARHUB] ❌ Window FAILED:", Window)
+    return
 end
 
-print("[TIARHUB] Splash done")
+print("[TIARHUB] ✅ Step 5: Window OK")
 
--- ═══════════════════════════════════════════════════════════
---   WINDOW
--- ═══════════════════════════════════════════════════════════
-local Window = Library:CreateWindow({
-    Title = "TIARHUB",
-    Footer = "v2.0 | Violence District",
-    Icon = 0,
-    NotifySide = "Right",
-    ShowCustomCursor = true,
-    Size = UDim2.fromOffset(520, 380),
-})
-
-task.wait(0.1)
+task.wait(0.2)
 
 if Window.UI then
-    -- Posisi di tengah atas (aman buat mobile)
-    Window.UI.Position = UDim2.new(0.5, 0, 0.05, 0)
-    Window.UI.AnchorPoint = Vector2.new(0.5, 0)
+    pcall(function()
+        Window.UI.Position = UDim2.new(0.5, 0, 0.05, 0)
+        Window.UI.AnchorPoint = Vector2.new(0.5, 0)
+    end)
 end
 
-print("[TIARHUB] Window created")
-
 -- ═══════════════════════════════════════════════════════════
---   TAB UTAMA
--- ═══════════════════════════════════════════════════════════
-local Tabs = {
-    Info     = Window:AddTab("Info",     "info"),
-    Combat   = Window:AddTab("Combat",   "sword"),
-    Visuals  = Window:AddTab("Visuals",  "eye"),
-    Movement = Window:AddTab("Movement", "activity"),
-    Auto     = Window:AddTab("Auto",     "zap"),
-    Player   = Window:AddTab("Player",   "user"),
-    Settings = Window:AddTab("Settings", "settings"),
-}
-
-print("[TIARHUB] Tabs created: 7 tabs")
-
--- ═══════════════════════════════════════════════════════════
---   CONFIG (pakai LOCAL, bukan _G)
+--   STEP 6: CONFIG (LOCAL, gak pakai _G)
 -- ═══════════════════════════════════════════════════════════
 local Config = {
     ESP = {
@@ -225,10 +231,10 @@ local Config = {
     Stalk = { Enabled = false, Range = 150 },
 }
 
-print("[TIARHUB] Config ready")
+print("[TIARHUB] ✅ Step 6: Config OK")
 
 -- ═══════════════════════════════════════════════════════════
---   KILLER ANIM ID (23 ID)
+--   STEP 7: KILLER ANIMS (23 ID)
 -- ═══════════════════════════════════════════════════════════
 local KillerAnims = {
     ["rbxassetid://105374834496520"] = true,
@@ -256,23 +262,20 @@ local KillerAnims = {
     ["rbxassetid://138720291317243"] = true,
 }
 
--- Anim ID Parry (buat deteksi diri sendiri)
-local ParryAnimId = "rbxassetid://127096285501517"
-
-print("[TIARHUB] Killer anims ready:", 23 .. " ids")
+print("[TIARHUB] ✅ Step 7: KillerAnims OK (23 ids)")
 
 -- ═══════════════════════════════════════════════════════════
---   REMOTE EVENTS (dengan timeout biar gak stuck)
+--   STEP 8: REMOTES
 -- ═══════════════════════════════════════════════════════════
 local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 if not Remotes then
     Remotes = ReplicatedStorage:WaitForChild("Remotes", 15)
 end
 
-print("[TIARHUB] Remotes:", Remotes ~= nil)
+print("[TIARHUB] ✅ Step 8: Remotes =", Remotes ~= nil)
 
 -- ═══════════════════════════════════════════════════════════
---   HELPER
+--   STEP 9: HELPER FUNCTIONS
 -- ═══════════════════════════════════════════════════════════
 local function getRoot()
     local char = LocalPlayer.Character
@@ -285,23 +288,57 @@ local function getHum()
 end
 
 local function notify(title, desc, dur)
-    Library:Notify({
-        Title = title,
-        Description = desc or "",
-        Time = dur or 3,
-        Icon = 0,
-    })
+    pcall(function()
+        Library:Notify({
+            Title = title,
+            Description = desc or "",
+            Time = dur or 3,
+            Icon = 0,
+        })
+    end)
 end
 
-print("[TIARHUB] Helpers ready")
+print("[TIARHUB] ✅ Step 9: Helpers OK")
 
 -- ═══════════════════════════════════════════════════════════
---   STATS PANEL (FIXED - PlayerGui)
+--   STEP 10: TABS
+-- ═══════════════════════════════════════════════════════════
+print("[TIARHUB] Creating Tabs...")
+
+local Tabs = {
+    Info     = Window:AddTab("Info",     "info"),
+    Combat   = Window:AddTab("Combat",   "sword"),
+    Visuals  = Window:AddTab("Visuals",  "eye"),
+    Movement = Window:AddTab("Movement", "activity"),
+    Auto     = Window:AddTab("Auto",     "zap"),
+    Player   = Window:AddTab("Player",   "user"),
+    Settings = Window:AddTab("Settings", "settings"),
+}
+
+print("[TIARHUB] ✅ Step 10: 7 Tabs created")
+
+-- ═══════════════════════════════════════════════════════════
+--   STEP 11: TEST GROUPBOX (buat mastiin tab gak kosong)
+-- ═══════════════════════════════════════════════════════════
+print("[TIARHUB] Creating test groupbox...")
+
+local TestBox = Tabs.Info:AddLeftGroupbox("Script Info", "info")
+
+TestBox:AddLabel("TIARHUB x Violence District")
+TestBox:AddLabel("Version: 3.0")
+TestBox:AddLabel("Status: Loading...")
+TestBox:AddDivider()
+TestBox:AddLabel("Kalau lu liat ini, tab work ✅")
+
+print("[TIARHUB] ✅ Step 11: Test groupbox OK")
+
+-- ═══════════════════════════════════════════════════════════
+--   STEP 12: STATS PANEL
 -- ═══════════════════════════════════════════════════════════
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "TiarHubStats"
 statsGui.ResetOnSpawn = false
-statsGui.Parent = PlayerGui  -- ✅ FIX
+statsGui.Parent = PlayerGui
 
 local statsFrame = Instance.new("Frame")
 statsFrame.Size = UDim2.new(0, 150, 0, 90)
@@ -361,10 +398,10 @@ task.spawn(function()
     end)
 end)
 
-print("[TIARHUB] Stats panel ready")
+print("[TIARHUB] ✅ Step 12: Stats panel OK")
 
 -- ═══════════════════════════════════════════════════════════
---   KEYBIND TOGGLE (RightShift)
+--   STEP 13: KEYBIND TOGGLE
 -- ═══════════════════════════════════════════════════════════
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -373,54 +410,258 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
---   NOTIF
--- ═══════════════════════════════════════════════════════════
-notify("TIARHUB v2.0", "Bagian 1 selesai ✓", 3)
-
-print("╔══════════════════════════════════════════╗")
-print("║   TIARHUB v2.0 - BAGIAN 1 LOADED       ║")
-print("║   ✅ Services  ✅ Library  ✅ GUI       ║")
-print("║   ✅ Config    ✅ Anims   ✅ Stats      ║")
-print("╚══════════════════════════════════════════╝")
+print("[TIARHUB] ✅ Step 13: Keybind OK")
 
 -- ═══════════════════════════════════════════════════════════
---   END OF BAGIAN 1 (FIXED)
--- ═══════════════════════════════════════════════════════════-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 2
---   Combat : Auto Parry 360° + Aimlock + Crosshair
+--   DONE
+-- ═══════════════════════════════════════════════════════════
+notify("TIARHUB v3.0", "Bagian 1 selesai ✓", 3)
+
+print("╔══════════════════════════════════════════════╗")
+print("║   TIARHUB v3.0 — BAGIAN 1 LOADED             ║")
+print("║   ✅ Step 1-13 selesai                       ║")
+print("║   Kalau tab kosong → error di Bagian 2-7     ║")
+print("╚══════════════════════════════════════════════╝")
+
+print("═══ [TIARHUB] BAGIAN 1 END ═══")-- ═══════════════════════════════════════════════════════════
+--   TIARHUB x VIOLENCE DISTRICT — ALL-IN-ONE
+--   NO _G — Semua Local
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Bagian 2 - Combat loading...")
+print("[TIARHUB] Starting...")
+
+-- ═══ SERVICES ═══
+local Players            = game:GetService("Players")
+local RunService         = game:GetService("RunService")
+local UserInputService   = game:GetService("UserInputService")
+local VirtualInputManager= game:GetService("VirtualInputManager")
+local ReplicatedStorage  = game:GetService("ReplicatedStorage")
+local Lighting           = game:GetService("Lighting")
+local Stats              = game:GetService("Stats")
+local LocalPlayer        = Players.LocalPlayer
+local PlayerGui          = LocalPlayer:WaitForChild("PlayerGui")
+local Camera             = workspace.CurrentCamera
+
+print("[TIARHUB] Services OK")
+
+-- ═══ LIBRARY ═══
+local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+
+print("[TIARHUB] Library OK")
+
+Library.Scheme.AccentColor     = Color3.fromRGB(30, 150, 255)
+Library.Scheme.BackgroundColor = Color3.fromRGB(10, 20, 40)
+Library.Scheme.MainColor       = Color3.fromRGB(20, 35, 65)
+Library.Scheme.OutlineColor    = Color3.fromRGB(0, 80, 180)
+Library.Scheme.FontColor       = Color3.fromRGB(220, 235, 255)
+Library.ShowToggleFrameInKeybinds = true
+Library.ShowCustomCursor = true
+
+-- ═══ WINDOW ═══
+local Window = Library:CreateWindow({
+    Title = "TIARHUB",
+    Footer = "Violence District",
+    Icon = 0,
+    NotifySide = "Right",
+    ShowCustomCursor = true,
+    Size = UDim2.fromOffset(520, 400),
+})
+
+task.wait(0.1)
+if Window.UI then
+    Window.UI.Position = UDim2.new(0.5, 0, 0.05, 0)
+    Window.UI.AnchorPoint = Vector2.new(0.5, 0)
+end
+
+print("[TIARHUB] Window OK")
+
+-- ═══ CONFIG ═══
+local Config = {
+    ESP = {
+        Killer=false, Survivor=false, Generator=false, Pallet=false, Window=false, SCP=false,
+        Distance=300,
+        KillerColor=Color3.fromRGB(255,60,60),
+        SurvivorColor=Color3.fromRGB(60,255,120),
+        GenColor=Color3.fromRGB(255,170,0),
+        PalletColor=Color3.fromRGB(74,255,181),
+        WindowColor=Color3.fromRGB(74,255,181),
+        SCPColor=Color3.fromRGB(255,0,0),
+        NameSize=14,
+        ESPMode="Highlight",
+    },
+    ESPStatus = { Enabled=false, ShowName=true, ShowDistance=true, ShowHealth=false, Radius=200 },
+    ESPCircle = { Enabled=false, Size=6, Thickness=0.1, Color=Color3.fromRGB(0,255,255), Transparency=0.5 },
+    AutoParry = { Enabled=false, Distance=15, Mode="Instant" },
+    AutoSkillCheck = { Enabled=false },
+    AutoWiggle = { Enabled=false, Spam=5 },
+    AutoFlee = { Enabled=false, Distance=50, Cooldown=0.1 },
+    Aimlock = { Enabled=false, Target="Survivor", AimPart="HumanoidRootPart", FOV=250, Predict=0.12, LockMode="Camera" },
+    WalkSpeed = { Enabled=false, Value=17.6 },
+    JumpPower = { Enabled=false, Value=50 },
+    NoClip = { Enabled=false },
+    Moonwalk = { Enabled=false, Spam=30, Intensity=35, Slow=13 },
+    FastVault = { Enabled=false, Speed=1.2 },
+    Crosshair = { Enabled=false, Style="Plus", Size=8, Thickness=2, Color=Color3.fromRGB(255,255,255), OffsetX=0, OffsetY=0 },
+    VisualContrast = { Enabled=false, Contrast=1.0, Saturation=1.0, Brightness=0.0, Tint=Color3.fromRGB(255,255,255) },
+    Fullbright = { Enabled=false },
+    FOV = { Enabled=false, Value=70 },
+    Zoom = { Enabled=false, Max=1000 },
+    Stalk = { Enabled=false, Range=150 },
+    Killer = { KillAll=false, AutoAttack=false, AutoCarry=false, AttackDelay=0.45, KillRange=500, BlockVaults=false, AntiBlind=false, BreakSpeed=0 },
+    Masked = { Power="Cobra" },
+    Avatar = { Username="", Original=nil, UserId=nil, Blocky=true },
+    Jerk = { Enabled=false },
+    GodMode = { Enabled=false },
+    InfiniteLunge = { Enabled=false },
+    NoStun = { Enabled=false },
+    InstantHeal = { Enabled=false },
+    FlowState = { Enabled=false },
+}
+
+print("[TIARHUB] Config OK")
+
+-- ═══ KILLER ANIMS (23 ID) ═══
+local KillerAnims = {
+    ["rbxassetid://105374834496520"]=true, ["rbxassetid://113255068724446"]=true,
+    ["rbxassetid://118907603246885"]=true, ["rbxassetid://129784271201071"]=true,
+    ["rbxassetid://117042998468241"]=true, ["rbxassetid://122812055447896"]=true,
+    ["rbxassetid://78935059863801"]=true,  ["rbxassetid://74968262036854"]=true,
+    ["rbxassetid://78432063483146"]=true,  ["rbxassetid://132817836308238"]=true,
+    ["rbxassetid://133963973694098"]=true, ["rbxassetid://111920872708571"]=true,
+    ["rbxassetid://80411309607666"]=true,  ["rbxassetid://98163597193511"]=true,
+    ["rbxassetid://82666958311998"]=true,  ["rbxassetid://110355011987939"]=true,
+    ["rbxassetid://139369275981139"]=true, ["rbxassetid://135002183282873"]=true,
+    ["rbxassetid://121216847022485"]=true, ["rbxassetid://130593238885843"]=true,
+    ["rbxassetid://117070354890871"]=true, ["rbxassetid://106871536134254"]=true,
+    ["rbxassetid://138720291317243"]=true,
+}
+
+-- Anim ID Parry (dari script lu)
+local ParryAnimId = "rbxassetid://127096285501517"
+
+print("[TIARHUB] KillerAnims OK (23 ids)")
+
+-- ═══ REMOTES ═══
+local Remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage:WaitForChild("Remotes", 15)
+print("[TIARHUB] Remotes:", Remotes ~= nil)
+
+-- ═══ HELPER ═══
+local function getRoot() local c=LocalPlayer.Character; return c and c:FindFirstChild("HumanoidRootPart") end
+local function getHum() local c=LocalPlayer.Character; return c and c:FindFirstChildOfClass("Humanoid") end
+local function notify(t,d,du) pcall(function() Library:Notify({Title=t,Description=d or "",Time=du or 3,Icon=0}) end) end
+
+print("[TIARHUB] Helpers OK")
+
+-- ═══ SPLASH ═══
+local function ShowSplash()
+    local splash = Instance.new("ScreenGui")
+    splash.IgnoreGuiInset = true
+    splash.DisplayOrder = 999
+    splash.Parent = PlayerGui
+    local bg = Instance.new("Frame", splash)
+    bg.Size = UDim2.new(1,0,1,0)
+    bg.BackgroundColor3 = Color3.fromRGB(10,20,40)
+    bg.BorderSizePixel = 0
+    local t1 = Instance.new("TextLabel", bg)
+    t1.Text = "TIARHUB"
+    t1.Font = Enum.Font.GothamBlack
+    t1.TextSize = 60
+    t1.TextColor3 = Color3.fromRGB(0,255,255)
+    t1.BackgroundTransparency = 1
+    t1.Size = UDim2.new(1,0,0,80)
+    t1.Position = UDim2.new(0,0,0.42,0)
+    t1.TextStrokeTransparency = 0.2
+    t1.TextStrokeColor3 = Color3.fromRGB(30,150,255)
+    local sub = Instance.new("TextLabel", bg)
+    sub.Text = "VIOLENCE DISTRICT"
+    sub.Font = Enum.Font.GothamBold
+    sub.TextSize = 14
+    sub.TextColor3 = Color3.fromRGB(220,235,255)
+    sub.BackgroundTransparency = 1
+    sub.Size = UDim2.new(1,0,0,20)
+    sub.Position = UDim2.new(0,0,0.52,0)
+    task.wait(1.2)
+    splash:Destroy()
+end
+
+pcall(ShowSplash)
+print("[TIARHUB] Splash done")
+
+-- ═══ TABS ═══
+local Tabs = {
+    Info     = Window:AddTab("Info",     "info"),
+    Combat   = Window:AddTab("Combat",   "sword"),
+    Visuals  = Window:AddTab("Visuals",  "eye"),
+    Movement = Window:AddTab("Movement", "activity"),
+    Auto     = Window:AddTab("Auto",     "zap"),
+    Player   = Window:AddTab("Player",   "user"),
+    Settings = Window:AddTab("Settings", "settings"),
+}
+
+print("[TIARHUB] 7 Tabs OK")
+print("═══ BAGIAN A DONE — LANJUT BAGIAN B ═══")-- ═══════════════════════════════════════════════════════════
+--   BAGIAN B — INFO + COMBAT
+-- ═══════════════════════════════════════════════════════════
+
+print("[TIARHUB] Bagian B loading...")
 
 -- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
+--   TAB 1: INFO
+-- ═══════════════════════════════════════════════════════════
+local InfoBox    = Tabs.Info:AddLeftGroupbox("Script Info", "info")
+local CreditsBox = Tabs.Info:AddRightGroupbox("Credits", "user")
+
+InfoBox:AddLabel("TIARHUB x Violence District")
+InfoBox:AddLabel("Version : All-in-One")
+InfoBox:AddLabel("Status  : ✅ Loaded")
+InfoBox:AddDivider()
+InfoBox:AddButton({
+    Text = "📋 Copy Discord",
+    Func = function()
+        setclipboard("https://discord.gg/tiarhub")
+        notify("Copied!", "Discord disalin", 2)
+    end,
+})
+
+CreditsBox:AddLabel("Developer : Tiar")
+CreditsBox:AddDivider()
+CreditsBox:AddLabel("Library   : Obsidian UI")
+CreditsBox:AddLabel("Base      : Fallens Freemium")
+CreditsBox:AddDivider()
+CreditsBox:AddButton({
+    Text = "💖 Support Dev",
+    Func = function()
+        setclipboard("https://sociabuzz.com/amill_al/tribe")
+        notify("Thanks!", "Link disalin", 2)
+    end,
+})
+
+print("[TIARHUB] Info tab OK")
+
+-- ═══════════════════════════════════════════════════════════
+--   TAB 2: COMBAT
 -- ═══════════════════════════════════════════════════════════
 local ParryBox     = Tabs.Combat:AddLeftGroupbox("Auto Parry 360°", "sword")
-local AimlockBox   = Tabs.Combat:AddLeftGroupbox("Aimlock",        "crosshair")
-local CrosshairBox = Tabs.Combat:AddRightGroupbox("Crosshair",     "crosshair")
+local AimBox       = Tabs.Combat:AddLeftGroupbox("Aimlock", "crosshair")
+local CrosshairBox = Tabs.Combat:AddRightGroupbox("Crosshair", "crosshair")
 
-print("[TIARHUB] Combat groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   AUTO PARRY 360°
--- ═══════════════════════════════════════════════════════════
-local PARRY_DEBOUNCE = 0.2
+-- ─── AUTO PARRY 360° ───
 local lastParry      = 0
 local ParryActive    = false
 local ParryCircle    = nil
 local hookedKillers  = {}
 
--- PC: klik kanan
 local function pressRightClick()
     pcall(function()
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true,  game, 0)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
         task.wait(0.02)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
     end)
 end
 
--- Mobile: cari tombol parry (Survivor-mob.Controls.Gui-mob)
 local function getParryButton()
     local cur = PlayerGui
     for seg in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
@@ -452,59 +693,42 @@ end
 
 local function doParry()
     local now = tick()
-    if now - lastParry < PARRY_DEBOUNCE then return end
+    if now - lastParry < 0.2 then return end
     lastParry = now
-
     ParryActive = true
     pressParryButton()
-
     task.delay(0.3, function() ParryActive = false end)
 end
 
--- ✅ CEK JARAK DOANG — GAK CEK ARAH (360°)
-local function isInParryRange(killerChar)
-    local myRoot = getRoot()
-    if not myRoot or not killerChar then return false end
-
-    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
-    if not enemyRoot then return false end
-
-    local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-    return dist <= Config.AutoParry.Distance
-end
-
--- Hook killer (pantau animasi mereka)
 local function hookKiller(char)
     if not char or hookedKillers[char] then return end
     hookedKillers[char] = true
 
     local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    local animator = hum:FindFirstChildOfClass("Animator")
+    local animator = hum and hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
     animator.AnimationPlayed:Connect(function(track)
-        if not Config.AutoParry.Enabled then return end
-        if ParryActive then return end
-
+        if not Config.AutoParry.Enabled or ParryActive then return end
         local anim = track.Animation
         if not anim or not anim.AnimationId then return end
-
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-
         local fullId = "rbxassetid://" .. id
 
-        -- Cek 23 killer anim
         if KillerAnims[fullId] then
-            if not isInParryRange(char) then return end
-            doParry()
+            local myRoot = getRoot()
+            local enemyRoot = char:FindFirstChild("HumanoidRootPart")
+            if myRoot and enemyRoot then
+                local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                if dist <= Config.AutoParry.Distance then
+                    doParry()  -- ✅ 360° tanpa cek arah
+                end
+            end
         end
     end)
 end
 
--- Scan killer tiap 0.8 detik
 task.spawn(function()
     while task.wait(0.8) do
         if Config.AutoParry.Enabled then
@@ -517,58 +741,38 @@ task.spawn(function()
     end
 end)
 
--- Circle visualizer parry range
 local function updateParryCircle()
     local root = getRoot()
-
     if not Config.AutoParry.Enabled or not root then
         if ParryCircle then ParryCircle:Destroy(); ParryCircle = nil end
         return
     end
-
     if not ParryCircle then
         ParryCircle = Instance.new("Part")
-        ParryCircle.Name = "TiarParryCircle"
         ParryCircle.Shape = Enum.PartType.Cylinder
         ParryCircle.Anchored = true
         ParryCircle.CanCollide = false
         ParryCircle.Material = Enum.Material.Neon
+        ParryCircle.Name = "TiarParryCircle"
         ParryCircle.Parent = workspace
     end
-
     local size = Config.AutoParry.Distance * 2
-    local yOffset = root.Size.Y / 2 + 1.5
-
+    local yOff = root.Size.Y / 2 + 1.5
     ParryCircle.Size = Vector3.new(0.1, size, size)
-    ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
+    ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOff, 0))
         * CFrame.Angles(0, 0, math.rad(90))
-    ParryCircle.Color = Theme.NEON_BLUE
+    ParryCircle.Color = Color3.fromRGB(30, 150, 255)
     ParryCircle.Transparency = 0.85
 end
 
-print("[TIARHUB] Auto Parry ready")
-
--- ═══════════════════════════════════════════════════════════
---   AIMLOCK
--- ═══════════════════════════════════════════════════════════
+-- ─── AIMLOCK ───
 local AimHolding = false
 local RayParams = RaycastParams.new()
-
--- FIX: RaycastFilterType support semua versi
-pcall(function()
-    RayParams.FilterType = Enum.RaycastFilterType.Exclude
-end)
-if not RayParams.FilterType then
-    pcall(function()
-        RayParams.FilterType = Enum.RaycastFilterType.Blacklist
-    end)
-end
+pcall(function() RayParams.FilterType = Enum.RaycastFilterType.Exclude end)
 
 local function isVisible(part)
     RayParams.FilterDescendantsInstances = { LocalPlayer.Character }
-    local origin = Camera.CFrame.Position
-    local dir = part.Position - origin
-    local result = workspace:Raycast(origin, dir, RayParams)
+    local result = workspace:Raycast(Camera.CFrame.Position, part.Position - Camera.CFrame.Position, RayParams)
     if not result then return true end
     return result.Instance:IsDescendantOf(part.Parent)
 end
@@ -576,22 +780,19 @@ end
 local function getClosestTarget()
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
     local closest, shortest = nil, Config.Aimlock.FOV
-
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and p.Team then
-            local valid = false
-            if Config.Aimlock.Target == "Killer"   and p.Team.Name == "Killer"    then valid = true end
-            if Config.Aimlock.Target == "Survivor" and p.Team.Name == "Survivors" then valid = true end
-
+            local valid = (Config.Aimlock.Target == "Killer" and p.Team.Name == "Killer")
+                       or (Config.Aimlock.Target == "Survivor" and p.Team.Name == "Survivors")
             if valid then
                 local hrp = p.Character:FindFirstChild(Config.Aimlock.AimPart)
                 local hum = p.Character:FindFirstChildOfClass("Humanoid")
                 if hrp and hum and hum.Health > 0 then
-                    local pos, visible = Camera:WorldToViewportPoint(hrp.Position)
-                    if visible then
-                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist < shortest and isVisible(hrp) then
-                            shortest = dist
+                    local pos, vis = Camera:WorldToViewportPoint(hrp.Position)
+                    if vis then
+                        local d = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if d < shortest and isVisible(hrp) then
+                            shortest = d
                             closest = hrp
                         end
                     end
@@ -602,99 +803,81 @@ local function getClosestTarget()
     return closest
 end
 
--- PC: deteksi mouse kanan ditahan
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+UserInputService.InputBegan:Connect(function(i, g)
+    if not g and i.UserInputType == Enum.UserInputType.MouseButton2 then
         AimHolding = true
     end
 end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton2 then
         AimHolding = false
     end
 end)
 
--- Loop aimlock
 RunService.RenderStepped:Connect(function()
-    if not Config.Aimlock.Enabled then return end
-    if not AimHolding then return end
-
+    if not Config.Aimlock.Enabled or not AimHolding then return end
     local target = getClosestTarget()
     if not target then return end
-
     local pos = target.Position
     if Config.Aimlock.Predict > 0 then
         pos = pos + target.AssemblyLinearVelocity * Config.Aimlock.Predict
     end
-
-    local cf = CFrame.new(Camera.CFrame.Position, pos)
-    Camera.CFrame = Camera.CFrame:Lerp(cf, 0.35)
+    if Config.Aimlock.LockMode == "Camera" then
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), 0.35)
+    end
 end)
 
-print("[TIARHUB] Aimlock ready")
-
--- ═══════════════════════════════════════════════════════════
---   CROSSHAIR (Drawing API)
--- ═══════════════════════════════════════════════════════════
+-- ─── CROSSHAIR ───
 local CrosshairDrawings = {}
-local LastCrosshairStyle = nil
-local crosshairCreated = false
+local CHCreated = false
+local CHLastStyle = nil
 
 local function clearCrosshair()
     for _, v in pairs(CrosshairDrawings) do
         if v and v.Remove then v:Remove() end
     end
     CrosshairDrawings = {}
-    crosshairCreated = false
+    CHCreated = false
 end
 
-local function drawCrosshair()
+RunService.RenderStepped:Connect(function()
     local C = Config.Crosshair
-
     if not C.Enabled then
-        for _, v in pairs(CrosshairDrawings) do
-            if v then v.Visible = false end
-        end
+        for _, v in pairs(CrosshairDrawings) do if v then v.Visible = false end end
         return
     end
-
-    if LastCrosshairStyle ~= C.Style then
+    if CHLastStyle ~= C.Style then
         clearCrosshair()
-        LastCrosshairStyle = C.Style
+        CHLastStyle = C.Style
     end
+    local center = Vector2.new(Camera.ViewportSize.X/2 + C.OffsetX, Camera.ViewportSize.Y/2 + C.OffsetY)
 
-    local center = Vector2.new(
-        Camera.ViewportSize.X / 2 + C.OffsetX,
-        Camera.ViewportSize.Y / 2 + C.OffsetY
-    )
-
-    if not crosshairCreated then
-        crosshairCreated = true
+    if not CHCreated then
+        CHCreated = true
         if C.Style == "Plus" then
             for i = 1, 4 do
-                local line = Drawing.new("Line")
-                line.Visible = true
-                table.insert(CrosshairDrawings, line)
+                local l = Drawing.new("Line")
+                l.Visible = true
+                table.insert(CrosshairDrawings, l)
             end
         elseif C.Style == "Dot" then
-            local dot = Drawing.new("Circle")
-            dot.Filled = true
-            dot.Visible = true
-            table.insert(CrosshairDrawings, dot)
+            local d = Drawing.new("Circle")
+            d.Filled = true
+            d.Visible = true
+            table.insert(CrosshairDrawings, d)
         elseif C.Style == "Circle" then
-            local circle = Drawing.new("Circle")
-            circle.Filled = false
-            circle.Visible = true
-            table.insert(CrosshairDrawings, circle)
+            local c = Drawing.new("Circle")
+            c.Filled = false
+            c.Visible = true
+            table.insert(CrosshairDrawings, c)
         end
     end
 
     if C.Style == "Plus" then
-        for _, line in pairs(CrosshairDrawings) do
-            line.Color = C.Color
-            line.Thickness = C.Thickness
-            line.Visible = true
+        for _, l in pairs(CrosshairDrawings) do
+            l.Color = C.Color
+            l.Thickness = C.Thickness
+            l.Visible = true
         end
         CrosshairDrawings[1].From = center + Vector2.new(-C.Size, 0)
         CrosshairDrawings[1].To   = center + Vector2.new(-2, 0)
@@ -705,167 +888,97 @@ local function drawCrosshair()
         CrosshairDrawings[4].From = center + Vector2.new(0, C.Size)
         CrosshairDrawings[4].To   = center + Vector2.new(0, 2)
     elseif C.Style == "Dot" then
-        local dot = CrosshairDrawings[1]
-        dot.Position = center
-        dot.Radius = C.Size / 2
-        dot.Color = C.Color
-        dot.Visible = true
+        CrosshairDrawings[1].Position = center
+        CrosshairDrawings[1].Radius = C.Size / 2
+        CrosshairDrawings[1].Color = C.Color
+        CrosshairDrawings[1].Visible = true
     elseif C.Style == "Circle" then
-        local circle = CrosshairDrawings[1]
-        circle.Position = center
-        circle.Radius = C.Size
-        circle.Color = C.Color
-        circle.Thickness = C.Thickness
-        circle.Visible = true
+        CrosshairDrawings[1].Position = center
+        CrosshairDrawings[1].Radius = C.Size
+        CrosshairDrawings[1].Color = C.Color
+        CrosshairDrawings[1].Thickness = C.Thickness
+        CrosshairDrawings[1].Visible = true
     end
-end
-
-RunService.RenderStepped:Connect(function()
-    updateParryCircle()
-    pcall(drawCrosshair)
 end)
 
-print("[TIARHUB] Crosshair ready")
-
--- ═══════════════════════════════════════════════════════════
---   UI — AUTO PARRY
--- ═══════════════════════════════════════════════════════════
+-- ─── UI CONTROLS ───
 ParryBox:AddToggle("AutoParry", {
     Text = "Auto Parry (360°)",
     Default = false,
-    Tooltip = "Parry otomatis, gak peduli arah killer",
     Callback = function(v)
         Config.AutoParry.Enabled = v
-        if v then notify("Auto Parry", "ON - 360° mode", 2) end
+        if v then notify("Parry", "ON - 360°", 2) end
     end,
 })
-
 ParryBox:AddSlider("ParryDistance", {
     Text = "Parry Distance",
-    Default = 15,
-    Min = 5,
-    Max = 30,
-    Rounding = 0,
+    Default = 15, Min = 5, Max = 30, Rounding = 0,
     Suffix = " studs",
     Callback = function(v) Config.AutoParry.Distance = v end,
 })
-
 ParryBox:AddLabel("ℹ️ Trigger: 23 Killer Anim ID")
-ParryBox:AddLabel("ℹ️ Work di depan/belakang/samping")
 
--- ═══════════════════════════════════════════════════════════
---   UI — AIMLOCK
--- ═══════════════════════════════════════════════════════════
-AimlockBox:AddToggle("AimlockEnabled", {
+AimBox:AddToggle("AimlockEnabled", {
     Text = "Aimlock",
     Default = false,
-    Tooltip = "Tahan klik kanan buat lock",
     Callback = function(v) Config.Aimlock.Enabled = v end,
 })
-
-AimlockBox:AddDropdown("AimTarget", {
-    Text = "Target",
-    Values = { "Killer", "Survivor" },
-    Default = "Survivor",
-    Multi = false,
+AimBox:AddDropdown("AimTarget", {
+    Text = "Target", Values = {"Killer","Survivor"}, Default = "Survivor",
     Callback = function(v) Config.Aimlock.Target = v end,
 })
-
-AimlockBox:AddDropdown("AimPart", {
-    Text = "Aim Part",
-    Values = { "Head", "HumanoidRootPart", "UpperTorso", "Torso" },
-    Default = "HumanoidRootPart",
-    Multi = false,
+AimBox:AddDropdown("AimPart", {
+    Text = "Aim Part", Values = {"Head","HumanoidRootPart","Torso"}, Default = "HumanoidRootPart",
     Callback = function(v) Config.Aimlock.AimPart = v end,
 })
-
-AimlockBox:AddSlider("AimFOV", {
-    Text = "FOV",
-    Default = 250,
-    Min = 30,
-    Max = 800,
-    Rounding = 0,
+AimBox:AddSlider("AimFOV", {
+    Text = "FOV", Default = 250, Min = 30, Max = 800, Rounding = 0,
     Callback = function(v) Config.Aimlock.FOV = v end,
 })
-
-AimlockBox:AddSlider("AimPredict", {
-    Text = "Prediction",
-    Default = 0.12,
-    Min = 0,
-    Max = 1,
-    Rounding = 2,
+AimBox:AddSlider("AimPredict", {
+    Text = "Prediction", Default = 0.12, Min = 0, Max = 1, Rounding = 2,
     Callback = function(v) Config.Aimlock.Predict = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — CROSSHAIR
--- ═══════════════════════════════════════════════════════════
-local CHToggle = CrosshairBox:AddToggle("CrosshairEnabled", {
+CrosshairBox:AddToggle("Crosshair", {
     Text = "Enable Crosshair",
     Default = false,
     Callback = function(v) Config.Crosshair.Enabled = v end,
 })
-
-CHToggle:AddColorPicker("CrosshairColor", {
-    Default = Color3.fromRGB(255,255,255),
-    Title = "Crosshair Color",
-    Callback = function(c) Config.Crosshair.Color = c end,
-})
-
-CrosshairBox:AddDropdown("CrosshairStyle", {
-    Text = "Style",
-    Values = { "Plus", "Dot", "Circle" },
-    Default = "Plus",
-    Multi = false,
+CrosshairBox:AddDropdown("CHStyle", {
+    Text = "Style", Values = {"Plus","Dot","Circle"}, Default = "Plus",
     Callback = function(v) Config.Crosshair.Style = v end,
 })
-
-CrosshairBox:AddSlider("CrosshairSize", {
-    Text = "Size",
-    Default = 8,
-    Min = 2,
-    Max = 30,
-    Rounding = 0,
+CrosshairBox:AddSlider("CHSize", {
+    Text = "Size", Default = 8, Min = 2, Max = 30, Rounding = 0,
     Callback = function(v) Config.Crosshair.Size = v end,
 })
-
-CrosshairBox:AddSlider("CrosshairThick", {
-    Text = "Thickness",
-    Default = 2,
-    Min = 1,
-    Max = 10,
-    Rounding = 0,
+CrosshairBox:AddSlider("CHThick", {
+    Text = "Thickness", Default = 2, Min = 1, Max = 10, Rounding = 0,
     Callback = function(v) Config.Crosshair.Thickness = v end,
 })
-
-CrosshairBox:AddSlider("CrosshairX", {
-    Text = "Position X",
-    Default = 0,
-    Min = -100,
-    Max = 100,
-    Rounding = 0,
+CrosshairBox:AddSlider("CHX", {
+    Text = "Position X", Default = 0, Min = -100, Max = 100, Rounding = 0,
     Callback = function(v) Config.Crosshair.OffsetX = v end,
 })
-
-CrosshairBox:AddSlider("CrosshairY", {
-    Text = "Position Y",
-    Default = 0,
-    Min = -100,
-    Max = 100,
-    Rounding = 0,
+CrosshairBox:AddSlider("CHY", {
+    Text = "Position Y", Default = 0, Min = -100, Max = 100, Rounding = 0,
     Callback = function(v) Config.Crosshair.OffsetY = v end,
 })
 
-print("[TIARHUB] Bagian 2 - Combat DONE ✅")-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 3
---   Visuals : ESP + ESP Circle + Visual Contrast
+-- Loop parry circle
+RunService.RenderStepped:Connect(function()
+    updateParryCircle()
+end)
+
+print("[TIARHUB] Combat tab OK")
+print("═══ BAGIAN B DONE — LANJUT BAGIAN C ═══")-- ═══════════════════════════════════════════════════════════
+--   BAGIAN C — VISUALS
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Bagian 3 - Visuals loading...")
+print("[TIARHUB] Bagian C loading...")
 
--- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
--- ═══════════════════════════════════════════════════════════
+-- ═══ GROUPBOXES ═══
 local ESPBox       = Tabs.Visuals:AddLeftGroupbox("ESP - Players", "eye")
 local ESPObjBox    = Tabs.Visuals:AddLeftGroupbox("ESP - Objects", "box")
 local ESPStatusBox = Tabs.Visuals:AddRightGroupbox("ESP Status", "info")
@@ -873,24 +986,17 @@ local CircleBox    = Tabs.Visuals:AddRightGroupbox("ESP Circle (Self)", "circle"
 local VisualBox    = Tabs.Visuals:AddLeftGroupbox("Visual Contrast", "sun")
 local CameraBox    = Tabs.Visuals:AddRightGroupbox("Camera & Zoom", "camera")
 
-print("[TIARHUB] Visuals groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   CACHE
--- ═══════════════════════════════════════════════════════════
+-- ═══ CACHE ═══
 local ESPObjects       = {}
 local StatusESP        = {}
 local GenBB            = {}
 local SelfCircle       = nil
-
 local CachedSCP        = {}
 local CachedGenerators = {}
 local CachedWindows    = {}
 local CachedPallets    = {}
 
--- ═══════════════════════════════════════════════════════════
---   HELPER
--- ═══════════════════════════════════════════════════════════
+-- ═══ ESP CORE ═══
 local function removeESP(obj)
     if ESPObjects[obj] then
         ESPObjects[obj]:Destroy()
@@ -900,13 +1006,11 @@ end
 
 local function createESP(obj, color)
     if not obj or not obj.Parent then return end
-
     if ESPObjects[obj] then
         ESPObjects[obj].FillColor    = color
         ESPObjects[obj].OutlineColor = color
         return
     end
-
     local h = Instance.new("Highlight")
     h.FillColor           = color
     h.OutlineColor        = color
@@ -914,7 +1018,6 @@ local function createESP(obj, color)
     h.OutlineTransparency = 0.3
     h.DepthMode           = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent              = obj
-
     ESPObjects[obj] = h
 
     obj.AncestryChanged:Connect(function(_, parent)
@@ -922,7 +1025,7 @@ local function createESP(obj, color)
     end)
 end
 
-local function createBillboard(adornee, size, offset)
+local function createBB(adornee, size, offset, nameSize)
     local bb = Instance.new("BillboardGui")
     bb.Name = "TiarBB"
     bb.Size = size or UDim2.new(0, 150, 0, 60)
@@ -936,7 +1039,7 @@ local function createBillboard(adornee, size, offset)
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
+    label.TextSize = nameSize or Config.ESP.NameSize
     label.TextStrokeTransparency = 0
     label.TextColor3 = Color3.fromRGB(255,255,255)
     label.Text = ""
@@ -945,9 +1048,7 @@ local function createBillboard(adornee, size, offset)
     return bb, label
 end
 
--- ═══════════════════════════════════════════════════════════
---   CACHE OBJECT
--- ═══════════════════════════════════════════════════════════
+-- ═══ CACHE OBJECT ═══
 local function cacheObject(obj)
     local name = string.lower(obj.Name)
     if name:find("scp")             then CachedSCP[obj] = true end
@@ -957,28 +1058,22 @@ local function cacheObject(obj)
        or obj.Name == "Palletwrong" then CachedPallets[obj] = true end
 end
 
-local function removeCache(obj)
-    CachedSCP[obj] = nil
-    CachedGenerators[obj] = nil
-    CachedWindows[obj] = nil
-    CachedPallets[obj] = nil
-end
-
 for _, obj in ipairs(workspace:GetDescendants()) do
     cacheObject(obj)
 end
 
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(function(obj)
-    removeCache(obj)
+    CachedSCP[obj] = nil
+    CachedGenerators[obj] = nil
+    CachedWindows[obj] = nil
+    CachedPallets[obj] = nil
     removeESP(obj)
 end)
 
 print("[TIARHUB] ESP cache ready")
 
--- ═══════════════════════════════════════════════════════════
---   ESP STATUS
--- ═══════════════════════════════════════════════════════════
+-- ═══ ESP STATUS ═══
 local function removeStatusESP(char)
     if StatusESP[char] then
         StatusESP[char]:Destroy()
@@ -1001,7 +1096,6 @@ local function updateStatusESP(player, char, myRoot)
         removeStatusESP(char)
         return
     end
-
     local head = char:FindFirstChild("Head")
     local hum  = char:FindFirstChildOfClass("Humanoid")
     if not head or not hum then return end
@@ -1014,7 +1108,6 @@ local function updateStatusESP(player, char, myRoot)
 
     local isDown = isDownedChar(char)
     local text = ""
-
     if isDown then text = text .. "🔻 DOWN\n" end
     if Config.ESPStatus.ShowName     then text = text .. player.Name .. "\n" end
     if Config.ESPStatus.ShowDistance then text = text .. string.format("Dist: %.0f\n", dist) end
@@ -1031,7 +1124,7 @@ local function updateStatusESP(player, char, myRoot)
 
     local bb = StatusESP[char]
     if not bb then
-        bb, _ = createBillboard(head, UDim2.new(0, 130, 0, 60), Vector3.new(0, 2.5, 0))
+        bb, _ = createBB(head, UDim2.new(0, 130, 0, 60), Vector3.new(0, 2.5, 0), Config.ESP.NameSize)
         StatusESP[char] = bb
     end
 
@@ -1039,12 +1132,11 @@ local function updateStatusESP(player, char, myRoot)
     if label then
         label.Text = text
         label.TextColor3 = teamColor
+        label.TextSize = Config.ESP.NameSize
     end
 end
 
--- ═══════════════════════════════════════════════════════════
---   ESP GENERATOR
--- ═══════════════════════════════════════════════════════════
+-- ═══ ESP GENERATOR ═══
 local function getGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -1059,51 +1151,39 @@ end
 
 local function updateGenerator(gen)
     if not gen or not gen.Parent then return end
-
     if not Config.ESP.Generator then
         if GenBB[gen] then GenBB[gen]:Destroy(); GenBB[gen] = nil end
         removeESP(gen)
         return
     end
-
-    local percent = getGameValue(gen, "RepairProgress")
-                    or getGameValue(gen, "Progress")
-                    or 0
-
+    local percent = getGameValue(gen, "RepairProgress") or getGameValue(gen, "Progress") or 0
     if percent >= 100 then
         if GenBB[gen] then GenBB[gen]:Destroy(); GenBB[gen] = nil end
         return
     end
-
     local cp = math.clamp(percent, 0, 100)
     local color = Config.ESP.GenColor:Lerp(Color3.fromRGB(0,255,120), cp/100)
     local text = string.format("[%.0f%%]", percent)
 
     if not GenBB[gen] then
-        local bb, _ = createBillboard(gen, UDim2.new(0, 120, 0, 30), Vector3.new(0, 3, 0))
+        local bb, _ = createBB(gen, UDim2.new(0, 120, 0, 30), Vector3.new(0, 3, 0), 12)
         GenBB[gen] = bb
     end
-
     local label = GenBB[gen]:FindFirstChild("TiarLabel")
     if label then
         label.Text = text
         label.TextColor3 = color
     end
-
     createESP(gen, color)
 end
 
--- ═══════════════════════════════════════════════════════════
---   ESP CIRCLE (Self)
--- ═══════════════════════════════════════════════════════════
+-- ═══ ESP CIRCLE SELF ═══
 local function updateSelfCircle()
     local root = getRoot()
-
     if not Config.ESPCircle.Enabled or not root then
         if SelfCircle then SelfCircle:Destroy(); SelfCircle = nil end
         return
     end
-
     if not SelfCircle then
         SelfCircle = Instance.new("Part")
         SelfCircle.Name = "TiarSelfCircle"
@@ -1113,10 +1193,8 @@ local function updateSelfCircle()
         SelfCircle.Material = Enum.Material.Neon
         SelfCircle.Parent = workspace
     end
-
     local C = Config.ESPCircle
     local yOffset = root.Size.Y / 2 + 0.5
-
     SelfCircle.Size = Vector3.new(C.Thickness, C.Size, C.Size)
     SelfCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
         * CFrame.Angles(0, 0, math.rad(90))
@@ -1124,9 +1202,7 @@ local function updateSelfCircle()
     SelfCircle.Transparency = C.Transparency
 end
 
--- ═══════════════════════════════════════════════════════════
---   VISUAL CONTRAST (ColorCorrection)
--- ═══════════════════════════════════════════════════════════
+-- ═══ VISUAL CONTRAST ═══
 local ColorCorrection = Instance.new("ColorCorrectionEffect")
 ColorCorrection.Name = "TiarContrast"
 ColorCorrection.Enabled = false
@@ -1146,16 +1222,14 @@ local function applyContrast()
 end
 
 local ContrastPresets = {
-    ["Default"]      = { Enabled = false, Contrast = 1.0, Saturation = 1.0, Brightness = 0.0,  Tint = Color3.fromRGB(255,255,255) },
-    ["Competitive"]  = { Enabled = true,  Contrast = 1.4, Saturation = 1.3, Brightness = 0.05, Tint = Color3.fromRGB(255,255,255) },
-    ["Horror"]       = { Enabled = true,  Contrast = 1.6, Saturation = 0.8, Brightness = -0.05,Tint = Color3.fromRGB(180,100,100) },
-    ["Night Vision"] = { Enabled = true,  Contrast = 1.5, Saturation = 1.2, Brightness = 0.3,  Tint = Color3.fromRGB(80,255,120) },
-    ["FPS Boost"]    = { Enabled = true,  Contrast = 1.1, Saturation = 0.7, Brightness = 0.0,  Tint = Color3.fromRGB(255,255,255) },
+    ["Default"]      = { c=1.0, s=1.0, b=0.0,  t=Color3.fromRGB(255,255,255) },
+    ["Competitive"]  = { c=1.4, s=1.3, b=0.05, t=Color3.fromRGB(255,255,255) },
+    ["Horror"]       = { c=1.6, s=0.8, b=-0.05,t=Color3.fromRGB(180,100,100) },
+    ["Night Vision"] = { c=1.5, s=1.2, b=0.3,  t=Color3.fromRGB(80,255,120) },
+    ["FPS Boost"]    = { c=1.1, s=0.7, b=0.0,  t=Color3.fromRGB(255,255,255) },
 }
 
--- ═══════════════════════════════════════════════════════════
---   FULLBRIGHT
--- ═══════════════════════════════════════════════════════════
+-- ═══ FULLBRIGHT ═══
 local FBOriginal = {
     Brightness = Lighting.Brightness,
     ClockTime  = Lighting.ClockTime,
@@ -1177,14 +1251,10 @@ local function applyFullbright()
     end
 end
 
--- ═══════════════════════════════════════════════════════════
---   MAIN VISUAL LOOP
--- ═══════════════════════════════════════════════════════════
+-- ═══ MAIN VISUAL LOOP ═══
 local lastVisualUpdate = 0
-
 RunService.RenderStepped:Connect(function()
     local now = tick()
-
     if now - lastVisualUpdate < 0.05 then
         updateSelfCircle()
         return
@@ -1200,7 +1270,6 @@ RunService.RenderStepped:Connect(function()
                 local char = p.Character
                 local hum = char:FindFirstChildOfClass("Humanoid")
                 local hrp = char:FindFirstChild("HumanoidRootPart")
-
                 if hum and hrp and hum.Health > 0 then
                     local dist = (hrp.Position - root.Position).Magnitude
                     if dist <= Config.ESP.Distance then
@@ -1251,7 +1320,7 @@ RunService.RenderStepped:Connect(function()
         for obj in pairs(CachedSCP) do removeESP(obj) end
     end
 
-    -- ESP Window
+    -- ESP Window + Pallet
     if root then
         for obj in pairs(CachedWindows) do
             if obj and obj.Parent then
@@ -1264,8 +1333,6 @@ RunService.RenderStepped:Connect(function()
                 end
             end
         end
-
-        -- ESP Pallet
         for obj in pairs(CachedPallets) do
             if obj and obj.Parent then
                 local pos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
@@ -1284,191 +1351,140 @@ end)
 
 print("[TIARHUB] Visual loop ready")
 
--- ═══════════════════════════════════════════════════════════
---   UI — ESP PLAYERS
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — ESP PLAYERS ═══
 local SurvivorToggle = ESPBox:AddToggle("SurvivorESP", {
-    Text = "ESP Survivor",
-    Default = false,
+    Text = "ESP Survivor", Default = false,
     Callback = function(v) Config.ESP.Survivor = v end,
 })
 SurvivorToggle:AddColorPicker("SurvivorESPColor", {
-    Default = Config.ESP.SurvivorColor,
-    Title = "Survivor Color",
+    Default = Config.ESP.SurvivorColor, Title = "Survivor Color",
     Callback = function(c) Config.ESP.SurvivorColor = c end,
 })
 
 local KillerToggle = ESPBox:AddToggle("KillerESP", {
-    Text = "ESP Killer",
-    Default = false,
+    Text = "ESP Killer", Default = false,
     Callback = function(v) Config.ESP.Killer = v end,
 })
 KillerToggle:AddColorPicker("KillerESPColor", {
-    Default = Config.ESP.KillerColor,
-    Title = "Killer Color",
+    Default = Config.ESP.KillerColor, Title = "Killer Color",
     Callback = function(c) Config.ESP.KillerColor = c end,
 })
 
 ESPBox:AddSlider("ESPDistance", {
-    Text = "ESP Radius",
-    Default = 300,
-    Min = 20,
-    Max = 2000,
-    Rounding = 0,
+    Text = "ESP Radius", Default = 300, Min = 20, Max = 2000, Rounding = 0,
     Suffix = " studs",
     Callback = function(v) Config.ESP.Distance = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — ESP OBJECTS
--- ═══════════════════════════════════════════════════════════
+ESPBox:AddSlider("ESPNameSize", {
+    Text = "ESP Name Size", Default = 14, Min = 8, Max = 40, Rounding = 0,
+    Callback = function(v) Config.ESP.NameSize = v end,
+})
+
+-- ═══ UI — ESP OBJECTS ═══
 local GenToggle = ESPObjBox:AddToggle("ESPGenerator", {
-    Text = "ESP Generator (progress)",
-    Default = false,
+    Text = "ESP Generator (progress)", Default = false,
     Callback = function(v) Config.ESP.Generator = v end,
 })
 GenToggle:AddColorPicker("GenESPColor", {
-    Default = Config.ESP.GenColor,
-    Title = "Generator Color",
+    Default = Config.ESP.GenColor, Title = "Generator Color",
     Callback = function(c) Config.ESP.GenColor = c end,
 })
 
 local SCPToggle = ESPObjBox:AddToggle("ESPSCP", {
-    Text = "ESP SCP",
-    Default = false,
+    Text = "ESP SCP", Default = false,
     Callback = function(v) Config.ESP.SCP = v end,
 })
 SCPToggle:AddColorPicker("SCPColor", {
-    Default = Config.ESP.SCPColor,
-    Title = "SCP Color",
+    Default = Config.ESP.SCPColor, Title = "SCP Color",
     Callback = function(c) Config.ESP.SCPColor = c end,
 })
 
 local PalletToggle = ESPObjBox:AddToggle("ESPPallet", {
-    Text = "ESP Pallet",
-    Default = false,
+    Text = "ESP Pallet", Default = false,
     Callback = function(v) Config.ESP.Pallet = v end,
 })
 PalletToggle:AddColorPicker("PalletColor", {
-    Default = Config.ESP.PalletColor,
-    Title = "Pallet Color",
+    Default = Config.ESP.PalletColor, Title = "Pallet Color",
     Callback = function(c) Config.ESP.PalletColor = c end,
 })
 
 local WindowToggle = ESPObjBox:AddToggle("ESPWindow", {
-    Text = "ESP Window",
-    Default = false,
+    Text = "ESP Window", Default = false,
     Callback = function(v) Config.ESP.Window = v end,
 })
 WindowToggle:AddColorPicker("WindowColor", {
-    Default = Config.ESP.WindowColor,
-    Title = "Window Color",
+    Default = Config.ESP.WindowColor, Title = "Window Color",
     Callback = function(c) Config.ESP.WindowColor = c end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — ESP STATUS
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — ESP STATUS ═══
 ESPStatusBox:AddToggle("ESPStatusEnabled", {
-    Text = "Enable Status ESP",
-    Default = false,
+    Text = "Enable Status ESP", Default = false,
     Callback = function(v) Config.ESPStatus.Enabled = v end,
 })
-
 ESPStatusBox:AddToggle("ShowName", {
-    Text = "Show Name",
-    Default = true,
+    Text = "Show Name", Default = true,
     Callback = function(v) Config.ESPStatus.ShowName = v end,
 })
-
 ESPStatusBox:AddToggle("ShowDist", {
-    Text = "Show Distance",
-    Default = true,
+    Text = "Show Distance", Default = true,
     Callback = function(v) Config.ESPStatus.ShowDistance = v end,
 })
-
 ESPStatusBox:AddToggle("ShowHP", {
-    Text = "Show Health",
-    Default = false,
+    Text = "Show Health", Default = false,
     Callback = function(v) Config.ESPStatus.ShowHealth = v end,
 })
-
 ESPStatusBox:AddSlider("StatusRadius", {
-    Text = "Status Radius",
-    Default = 200,
-    Min = 20,
-    Max = 1000,
-    Rounding = 0,
+    Text = "Status Radius", Default = 200, Min = 20, Max = 1000, Rounding = 0,
     Callback = function(v) Config.ESPStatus.Radius = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — ESP CIRCLE
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — ESP CIRCLE ═══
 local CircleToggle = CircleBox:AddToggle("ESPCircleEnabled", {
-    Text = "Enable ESP Circle",
-    Default = false,
+    Text = "Enable ESP Circle", Default = false,
     Tooltip = "Lingkaran neon di bawah player",
     Callback = function(v) Config.ESPCircle.Enabled = v end,
 })
 CircleToggle:AddColorPicker("ESPCircleColor", {
-    Default = Config.ESPCircle.Color,
-    Title = "Circle Color",
+    Default = Config.ESPCircle.Color, Title = "Circle Color",
     Callback = function(c) Config.ESPCircle.Color = c end,
 })
-
 CircleBox:AddSlider("CircleSize", {
-    Text = "Circle Size",
-    Default = 6,
-    Min = 2,
-    Max = 50,
-    Rounding = 0,
+    Text = "Circle Size", Default = 6, Min = 2, Max = 50, Rounding = 0,
     Suffix = " studs",
     Callback = function(v) Config.ESPCircle.Size = v end,
 })
-
 CircleBox:AddSlider("CircleThick", {
-    Text = "Circle Thickness",
-    Default = 0.1,
-    Min = 0.05,
-    Max = 1,
-    Rounding = 2,
+    Text = "Circle Thickness", Default = 0.1, Min = 0.05, Max = 1, Rounding = 2,
     Callback = function(v) Config.ESPCircle.Thickness = v end,
 })
-
 CircleBox:AddSlider("CircleTrans", {
-    Text = "Circle Transparency",
-    Default = 0.5,
-    Min = 0,
-    Max = 1,
-    Rounding = 2,
+    Text = "Circle Transparency", Default = 0.5, Min = 0, Max = 1, Rounding = 2,
     Callback = function(v) Config.ESPCircle.Transparency = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — VISUAL CONTRAST
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — VISUAL CONTRAST ═══
 VisualBox:AddDropdown("ContrastPreset", {
     Text = "Preset",
     Values = { "Default", "Competitive", "Horror", "Night Vision", "FPS Boost" },
     Default = "Default",
     Multi = false,
     Callback = function(v)
-        local preset = ContrastPresets[v]
-        if not preset then return end
-        Config.VisualContrast.Enabled    = preset.Enabled
-        Config.VisualContrast.Contrast   = preset.Contrast
-        Config.VisualContrast.Saturation = preset.Saturation
-        Config.VisualContrast.Brightness = preset.Brightness
-        Config.VisualContrast.Tint       = preset.Tint
+        local p = ContrastPresets[v]
+        if not p then return end
+        Config.VisualContrast.Enabled    = true
+        Config.VisualContrast.Contrast   = p.c
+        Config.VisualContrast.Saturation = p.s
+        Config.VisualContrast.Brightness = p.b
+        Config.VisualContrast.Tint       = p.t
         applyContrast()
         notify("Contrast", "Preset: " .. v, 2)
     end,
 })
 
 VisualBox:AddToggle("ContrastEnabled", {
-    Text = "Enable Contrast",
-    Default = false,
+    Text = "Enable Contrast", Default = false,
     Callback = function(v)
         Config.VisualContrast.Enabled = v
         applyContrast()
@@ -1476,67 +1492,30 @@ VisualBox:AddToggle("ContrastEnabled", {
 })
 
 VisualBox:AddSlider("ContrastValue", {
-    Text = "Contrast",
-    Default = 1.0,
-    Min = 0.5,
-    Max = 2.5,
-    Rounding = 2,
-    Callback = function(v)
-        Config.VisualContrast.Contrast = v
-        applyContrast()
-    end,
+    Text = "Contrast", Default = 1.0, Min = 0.5, Max = 2.5, Rounding = 2,
+    Callback = function(v) Config.VisualContrast.Contrast = v; applyContrast() end,
 })
-
 VisualBox:AddSlider("SaturationValue", {
-    Text = "Saturation",
-    Default = 1.0,
-    Min = 0,
-    Max = 2.5,
-    Rounding = 2,
-    Callback = function(v)
-        Config.VisualContrast.Saturation = v
-        applyContrast()
-    end,
+    Text = "Saturation", Default = 1.0, Min = 0, Max = 2.5, Rounding = 2,
+    Callback = function(v) Config.VisualContrast.Saturation = v; applyContrast() end,
 })
-
 VisualBox:AddSlider("BrightnessValue", {
-    Text = "Brightness",
-    Default = 0.0,
-    Min = -0.5,
-    Max = 0.5,
-    Rounding = 2,
-    Callback = function(v)
-        Config.VisualContrast.Brightness = v
-        applyContrast()
-    end,
+    Text = "Brightness", Default = 0.0, Min = -0.5, Max = 0.5, Rounding = 2,
+    Callback = function(v) Config.VisualContrast.Brightness = v; applyContrast() end,
 })
-
 VisualBox:AddColorPicker("TintColor", {
-    Default = Color3.fromRGB(255,255,255),
-    Title = "Tint Color",
-    Callback = function(c)
-        Config.VisualContrast.Tint = c
-        applyContrast()
-    end,
+    Default = Color3.fromRGB(255,255,255), Title = "Tint Color",
+    Callback = function(c) Config.VisualContrast.Tint = c; applyContrast() end,
 })
-
 VisualBox:AddDivider()
-
 VisualBox:AddToggle("FullbrightToggle", {
-    Text = "Fullbright",
-    Default = false,
-    Callback = function(v)
-        Config.Fullbright.Enabled = v
-        applyFullbright()
-    end,
+    Text = "Fullbright", Default = false,
+    Callback = function(v) Config.Fullbright.Enabled = v; applyFullbright() end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — CAMERA
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — CAMERA ═══
 CameraBox:AddToggle("UnlimitedZoom", {
-    Text = "Unlimited Zoom",
-    Default = false,
+    Text = "Unlimited Zoom", Default = false,
     Callback = function(v)
         Config.Zoom.Enabled = v
         if v then
@@ -1548,74 +1527,50 @@ CameraBox:AddToggle("UnlimitedZoom", {
         end
     end,
 })
-
 CameraBox:AddSlider("ZoomMax", {
-    Text = "Max Zoom Distance",
-    Default = 1000,
-    Min = 100,
-    Max = 5000,
-    Rounding = 0,
+    Text = "Max Zoom Distance", Default = 1000, Min = 100, Max = 5000, Rounding = 0,
     Callback = function(v)
         Config.Zoom.Max = v
-        if Config.Zoom.Enabled then
-            LocalPlayer.CameraMaxZoomDistance = v
-        end
+        if Config.Zoom.Enabled then LocalPlayer.CameraMaxZoomDistance = v end
     end,
 })
-
 CameraBox:AddToggle("CustomFOV", {
-    Text = "Custom FOV",
-    Default = false,
+    Text = "Custom FOV", Default = false,
     Callback = function(v)
         Config.FOV.Enabled = v
         Camera.FieldOfView = v and Config.FOV.Value or 70
     end,
 })
-
 CameraBox:AddSlider("FOVValue", {
-    Text = "FOV Value",
-    Default = 70,
-    Min = 30,
-    Max = 120,
-    Rounding = 0,
+    Text = "FOV Value", Default = 70, Min = 30, Max = 120, Rounding = 0,
     Callback = function(v)
         Config.FOV.Value = v
-        if Config.FOV.Enabled then
-            Camera.FieldOfView = v
-        end
+        if Config.FOV.Enabled then Camera.FieldOfView = v end
     end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   RESPAWN HANDLER
--- ═══════════════════════════════════════════════════════════
+-- ═══ RESPAWN ═══
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     if Config.Fullbright.Enabled then applyFullbright() end
     if SelfCircle then SelfCircle:Destroy(); SelfCircle = nil end
 end)
 
-print("[TIARHUB] Bagian 3 - Visuals DONE ✅")-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 4
---   Movement : Speed, Jump, NoClip, Moonwalk, Vault, TP
+print("[TIARHUB] Bagian C DONE — Visuals OK ✅")
+print("═══ BAGIAN C DONE — LANJUT BAGIAN D ═══")-- ═══════════════════════════════════════════════════════════
+--   BAGIAN D — MOVEMENT
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Bagian 4 - Movement loading...")
+print("[TIARHUB] Bagian D loading...")
 
--- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
--- ═══════════════════════════════════════════════════════════
+-- ═══ GROUPBOXES ═══
 local SpeedBox    = Tabs.Movement:AddLeftGroupbox("Speed", "zap")
 local JumpBox     = Tabs.Movement:AddLeftGroupbox("Jump & NoClip", "arrow-up")
 local VaultBox    = Tabs.Movement:AddRightGroupbox("Vault & Anim", "activity")
-local MoonwalkBox = Tabs.Movement:AddRightGroupbox("Moonwalk", "moon")
+local MWBox       = Tabs.Movement:AddRightGroupbox("Moonwalk", "moon")
 local TeleportBox = Tabs.Movement:AddLeftGroupbox("Teleport", "map-pin")
 
-print("[TIARHUB] Movement groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   PAUSE ANIMS (biar gak keliatan curang)
--- ═══════════════════════════════════════════════════════════
+-- ═══ PAUSE ANIMS ═══
 local PauseAnims = {
     ["rbxassetid://127096285501517"] = true,  -- Parry
     ["rbxassetid://112166042383605"] = true,  -- Break Pallet
@@ -1627,7 +1582,6 @@ local PauseAnims = {
 local function shouldPauseMods()
     local char = LocalPlayer.Character
     if not char then return true end
-
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return true end
 
@@ -1645,87 +1599,69 @@ local function shouldPauseMods()
             local anim = track.Animation
             if anim and anim.AnimationId then
                 if PauseAnims[anim.AnimationId] then return true end
-
                 local id = anim.AnimationId:match("%d+")
                 if id then
-                    local fullId = "rbxassetid://" .. id
-                    if KillerAnims[fullId] then return true end
+                    if KillerAnims["rbxassetid://" .. id] then return true end
                 end
             end
         end
     end
-
     return false
 end
 
--- ═══════════════════════════════════════════════════════════
---   WALKSPEED
--- ═══════════════════════════════════════════════════════════
+-- ═══ WALKSPEED ═══
 local WalkConn = nil
-local OriginalWalkSpeed = 16
+local OrigWS = 16
 
 local function applyWalkSpeed()
     if WalkConn then WalkConn:Disconnect(); WalkConn = nil end
     if not Config.WalkSpeed.Enabled then return end
-
     WalkConn = RunService.Heartbeat:Connect(function()
         if not Config.WalkSpeed.Enabled then return end
         if shouldPauseMods() then return end
-
         local hum = getHum()
         if not hum then return end
-
         if hum.WalkSpeed ~= Config.WalkSpeed.Value then
             hum.WalkSpeed = Config.WalkSpeed.Value
         end
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
---   JUMP POWER
--- ═══════════════════════════════════════════════════════════
+-- ═══ JUMP POWER ═══
 local JumpConn = nil
-local OriginalJumpPower = 50
+local OrigJP = 50
 
 local function applyJumpPower()
     if JumpConn then JumpConn:Disconnect(); JumpConn = nil end
     if not Config.JumpPower.Enabled then return end
-
     JumpConn = RunService.Heartbeat:Connect(function()
         if not Config.JumpPower.Enabled then return end
         if shouldPauseMods() then return end
-
         local hum = getHum()
         if not hum then return end
-
         if hum.UseJumpPower then
             if hum.JumpPower ~= Config.JumpPower.Value then
                 hum.JumpPower = Config.JumpPower.Value
             end
         else
-            local height = Config.JumpPower.Value / 7.5
-            if hum.JumpHeight ~= height then
-                hum.JumpHeight = height
-            end
+            local h = Config.JumpPower.Value / 7.5
+            if hum.JumpHeight ~= h then hum.JumpHeight = h end
         end
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
---   NOCLIP
--- ═══════════════════════════════════════════════════════════
+-- ═══ NOCLIP ═══
 local NoClipConn = nil
 
 local function enableNoClip()
     if NoClipConn then NoClipConn:Disconnect(); NoClipConn = nil end
-
     NoClipConn = RunService.Stepped:Connect(function()
         if not Config.NoClip.Enabled then return end
-        local char = LocalPlayer.Character
-        if not char then return end
-        for _, part in ipairs(char:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
+        local c = LocalPlayer.Character
+        if not c then return end
+        for _, p in ipairs(c:GetDescendants()) do
+            if p:IsA("BasePart") and p.CanCollide then
+                p.CanCollide = false
             end
         end
     end)
@@ -1733,72 +1669,57 @@ end
 
 local function disableNoClip()
     if NoClipConn then NoClipConn:Disconnect(); NoClipConn = nil end
-    local char = LocalPlayer.Character
-    if char then
-        for _, part in ipairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
+    local c = LocalPlayer.Character
+    if c then
+        for _, p in ipairs(c:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = true end
         end
     end
 end
 
--- ═══════════════════════════════════════════════════════════
---   MOONWALK
--- ═══════════════════════════════════════════════════════════
-local MoonwalkConn = nil
-local MoonwalkButton = nil
+-- ═══ MOONWALK ═══
+local MWConn = nil
+local MWButton = nil
 
 local function startMoonwalk()
-    if MoonwalkConn then return end
-
-    MoonwalkConn = RunService.RenderStepped:Connect(function()
+    if MWConn then return end
+    MWConn = RunService.RenderStepped:Connect(function()
         if not Config.Moonwalk.Enabled then return end
         if shouldPauseMods() then return end
 
-        local char = LocalPlayer.Character
-        if not char then return end
-
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local c = LocalPlayer.Character
+        if not c then return end
+        local h = c:FindFirstChildOfClass("Humanoid")
+        local hrp = c:FindFirstChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
-        if not hum or not hrp or not cam then return end
+        if not h or not hrp or not cam then return end
 
-        if hum.WalkSpeed ~= Config.Moonwalk.Slow then
-            hum.WalkSpeed = Config.Moonwalk.Slow
+        if h.WalkSpeed ~= Config.Moonwalk.Slow then
+            h.WalkSpeed = Config.Moonwalk.Slow
         end
 
         local look = cam.CFrame.LookVector
-        local flatLook = Vector3.new(look.X, 0, look.Z)
-        if flatLook.Magnitude > 0 then
-            flatLook = flatLook.Unit
-            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+        local flat = Vector3.new(look.X, 0, look.Z)
+        if flat.Magnitude > 0 then
+            flat = flat.Unit
+            local base = CFrame.new(hrp.Position, hrp.Position + flat)
             local angle = math.sin(tick() * Config.Moonwalk.Spam) * Config.Moonwalk.Intensity
-            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
-            hum:Move(Vector3.new(0, 0, 1), true)
+            hrp.CFrame = base * CFrame.Angles(0, math.rad(angle), 0)
+            h:Move(Vector3.new(0, 0, 1), true)
         end
     end)
 end
 
 local function stopMoonwalk()
-    if MoonwalkConn then
-        MoonwalkConn:Disconnect()
-        MoonwalkConn = nil
-    end
-    local hum = getHum()
-    if hum then
-        if Config.WalkSpeed.Enabled then
-            hum.WalkSpeed = Config.WalkSpeed.Value
-        else
-            hum.WalkSpeed = OriginalWalkSpeed
-        end
+    if MWConn then MWConn:Disconnect(); MWConn = nil end
+    local h = getHum()
+    if h then
+        h.WalkSpeed = Config.WalkSpeed.Enabled and Config.WalkSpeed.Value or OrigWS
     end
 end
 
--- On-screen Moonwalk button
-local function createMoonwalkButton()
-    if MoonwalkButton then MoonwalkButton:Destroy() end
-
+local function createMWButton()
+    if MWButton then MWButton:Destroy() end
     local gui = Instance.new("ScreenGui")
     gui.Name = "TiarMoonwalkBtn"
     gui.ResetOnSpawn = false
@@ -1835,23 +1756,17 @@ local function createMoonwalkButton()
         end
     end)
 
-    MoonwalkButton = gui
+    MWButton = gui
 end
 
-local function removeMoonwalkButton()
-    if MoonwalkButton then
-        MoonwalkButton:Destroy()
-        MoonwalkButton = nil
-    end
+local function removeMWButton()
+    if MWButton then MWButton:Destroy(); MWButton = nil end
 end
 
--- ═══════════════════════════════════════════════════════════
---   FAST VAULT
--- ═══════════════════════════════════════════════════════════
+-- ═══ FAST VAULT ═══
 local VaultReplace = {
     ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
 }
-
 local VaultTracks = {}
 
 local function normalizeId(id)
@@ -1862,93 +1777,67 @@ end
 local function hookVault(char)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
     animator.AnimationPlayed:Connect(function(track)
         if not Config.FastVault.Enabled then return end
-
         local anim = track.Animation
         if not anim or not anim.AnimationId then return end
-
         local id = normalizeId(anim.AnimationId)
         if not id then return end
-
         local replaceId = VaultReplace[id]
         if not replaceId then return end
         if VaultTracks[track] then return end
-
         VaultTracks[track] = true
         track:Stop()
 
         local newAnim = Instance.new("Animation")
         newAnim.AnimationId = replaceId
-
         local newTrack = animator:LoadAnimation(newAnim)
         newTrack.Priority = Enum.AnimationPriority.Action
         newTrack:Play()
         newTrack:AdjustSpeed(Config.FastVault.Speed)
-
         newTrack.Stopped:Connect(function()
             VaultTracks[track] = nil
         end)
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
---   INSTANT ESCAPE / TP
--- ═══════════════════════════════════════════════════════════
-local function teleportToFinishLine()
+-- ═══ TELEPORT ═══
+local function tpFinish()
     local root = getRoot()
-    if not root then
-        notify("Escape", "Player gak ada", 2)
-        return
-    end
-
-    local found = nil
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        local n = string.lower(obj.Name)
-        if obj:IsA("BasePart") and (n == "fininshline" or n:find("exit") or n:find("finish")) then
-            found = obj
-            break
+    if not root then notify("TP","Player gak ada",2); return end
+    for _, o in ipairs(workspace:GetDescendants()) do
+        local n = string.lower(o.Name)
+        if o:IsA("BasePart") and (n == "fininshline" or n:find("exit") or n:find("finish")) then
+            root.CFrame = o.CFrame + Vector3.new(0, 5, 0)
+            notify("TP", "Finish!", 2)
+            return
         end
     end
-
-    if not found then
-        notify("Escape", "Finish line gak ketemu", 2)
-        return
-    end
-
-    root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
-    notify("Escape", "TP!", 2)
+    notify("TP", "Finish line gak ketemu", 2)
 end
 
-local function teleportToNearestGenerator()
-    local root = getRoot()
-    if not root then return end
-
-    local nearest, dist = nil, math.huge
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj.Name == "Generator" then
-            local pivot = obj:GetPivot().Position
-            local d = (pivot - root.Position).Magnitude
-            if d < dist then dist = d; nearest = obj end
+local function tpGen()
+    local root = getRoot(); if not root then return end
+    local best, dist = nil, math.huge
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("Model") and o.Name == "Generator" then
+            local d = (o:GetPivot().Position - root.Position).Magnitude
+            if d < dist then dist = d; best = o end
         end
     end
-
-    if nearest then
-        root.CFrame = CFrame.new(nearest:GetPivot().Position + Vector3.new(0,5,0))
+    if best then
+        root.CFrame = CFrame.new(best:GetPivot().Position + Vector3.new(0,5,0))
         notify("TP", "Generator terdekat", 2)
     else
         notify("TP", "Gak ada generator", 2)
     end
 end
 
-local function teleportToKiller()
-    local root = getRoot()
-    if not root then return end
-
+local function tpKiller()
+    local root = getRoot(); if not root then return end
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Team and p.Team.Name == "Killer" and p.Character then
             local hrp = p.Character:FindFirstChild("HumanoidRootPart")
@@ -1962,180 +1851,108 @@ local function teleportToKiller()
     notify("TP", "Killer gak ketemu", 2)
 end
 
-print("[TIARHUB] Movement logic ready")
-
--- ═══════════════════════════════════════════════════════════
---   UI — SPEED
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — SPEED ═══
 SpeedBox:AddToggle("WalkSpeedToggle", {
-    Text = "Walk Speed",
-    Default = false,
+    Text = "Walk Speed", Default = false,
     Callback = function(v)
         Config.WalkSpeed.Enabled = v
         if v then
             applyWalkSpeed()
         else
             if WalkConn then WalkConn:Disconnect(); WalkConn = nil end
-            local hum = getHum()
-            if hum then hum.WalkSpeed = OriginalWalkSpeed end
+            local h = getHum(); if h then h.WalkSpeed = OrigWS end
         end
     end,
 })
-
 SpeedBox:AddSlider("WalkSpeedSlider", {
-    Text = "Walk Speed Value",
-    Default = 17.6,
-    Min = 16,
-    Max = 100,
-    Rounding = 1,
+    Text = "Walk Speed Value", Default = 17.6, Min = 16, Max = 100, Rounding = 1,
     Callback = function(v) Config.WalkSpeed.Value = v end,
 })
-
 SpeedBox:AddSlider("SpamSpeedValue", {
-    Text = "Spam Speed",
-    Default = 30,
-    Min = 1,
-    Max = 100,
-    Rounding = 0,
+    Text = "Spam Speed", Default = 30, Min = 1, Max = 100, Rounding = 0,
     Callback = function(v) Config.Moonwalk.Spam = v end,
 })
-
 SpeedBox:AddSlider("IntensityValue", {
-    Text = "Intensity",
-    Default = 35,
-    Min = 1,
-    Max = 90,
-    Rounding = 0,
+    Text = "Intensity", Default = 35, Min = 1, Max = 90, Rounding = 0,
     Callback = function(v) Config.Moonwalk.Intensity = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — JUMP & NOCLIP
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — JUMP & NOCLIP ═══
 JumpBox:AddToggle("JumpPowerToggle", {
-    Text = "Custom Jump Power",
-    Default = false,
+    Text = "Custom Jump Power", Default = false,
     Callback = function(v)
         Config.JumpPower.Enabled = v
         if v then
             applyJumpPower()
         else
             if JumpConn then JumpConn:Disconnect(); JumpConn = nil end
-            local hum = getHum()
-            if hum then
-                if hum.UseJumpPower then
-                    hum.JumpPower = OriginalJumpPower
-                else
-                    hum.JumpHeight = OriginalJumpPower / 7.5
-                end
+            local h = getHum()
+            if h then
+                if h.UseJumpPower then h.JumpPower = OrigJP
+                else h.JumpHeight = OrigJP / 7.5 end
             end
         end
     end,
 })
-
 JumpBox:AddSlider("JumpPowerValue", {
-    Text = "Jump Power",
-    Default = 50,
-    Min = 0,
-    Max = 300,
-    Rounding = 0,
+    Text = "Jump Power", Default = 50, Min = 0, Max = 300, Rounding = 0,
     Callback = function(v) Config.JumpPower.Value = v end,
 })
-
 JumpBox:AddDivider()
-
 JumpBox:AddToggle("NoClipToggle", {
-    Text = "No Clip",
-    Default = false,
+    Text = "No Clip", Default = false,
     Callback = function(v)
         Config.NoClip.Enabled = v
         if v then enableNoClip() else disableNoClip() end
     end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — VAULT
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — VAULT ═══
 VaultBox:AddToggle("FastVaultToggle", {
-    Text = "Fast Vault",
-    Default = false,
+    Text = "Fast Vault", Default = false,
     Callback = function(v) Config.FastVault.Enabled = v end,
 })
-
 VaultBox:AddSlider("VaultSpeedFactor", {
-    Text = "Vault Speed Factor",
-    Default = 1.2,
-    Min = 1,
-    Max = 5,
-    Rounding = 1,
+    Text = "Vault Speed Factor", Default = 1.2, Min = 1, Max = 5, Rounding = 1,
     Callback = function(v) Config.FastVault.Speed = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — MOONWALK
--- ═══════════════════════════════════════════════════════════
-local MWToggle = MoonwalkBox:AddToggle("MoonwalkEnabled", {
-    Text = "Moonwalk (Keybind)",
-    Default = false,
+-- ═══ UI — MOONWALK ═══
+local MWToggle = MWBox:AddToggle("MoonwalkEnabled", {
+    Text = "Moonwalk (Keybind)", Default = false,
     Callback = function(v)
         Config.Moonwalk.Enabled = v
         if v then startMoonwalk() else stopMoonwalk() end
     end,
 })
-
 MWToggle:AddKeybind({
-    Text = "Keybind",
-    Default = Enum.KeyCode.V,
+    Text = "Keybind", Default = Enum.KeyCode.V,
     Callback = function() end,
 })
-
-MoonwalkBox:AddToggle("MoonwalkButtonToggle", {
-    Text = "On-Screen Button",
-    Default = false,
+MWBox:AddToggle("MoonwalkButtonToggle", {
+    Text = "On-Screen Button", Default = false,
     Callback = function(v)
-        if v then createMoonwalkButton() else removeMoonwalkButton() end
+        if v then createMWButton() else removeMWButton() end
     end,
 })
-
-MoonwalkBox:AddSlider("MoonwalkSlow", {
-    Text = "Moonwalk Speed",
-    Default = 13,
-    Min = 1,
-    Max = 50,
-    Rounding = 0,
+MWBox:AddSlider("MoonwalkSlow", {
+    Text = "Moonwalk Speed", Default = 13, Min = 1, Max = 50, Rounding = 0,
     Callback = function(v) Config.Moonwalk.Slow = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — TELEPORT
--- ═══════════════════════════════════════════════════════════
-TeleportBox:AddButton({
-    Text = "⚡ Instant Escape",
-    Func = teleportToFinishLine,
-})
+-- ═══ UI — TELEPORT ═══
+TeleportBox:AddButton({ Text = "⚡ Instant Escape", Func = tpFinish })
+TeleportBox:AddButton({ Text = "📡 TP ke Generator", Func = tpGen })
+TeleportBox:AddButton({ Text = "🔪 TP ke Killer", Func = tpKiller })
 
-TeleportBox:AddButton({
-    Text = "📡 TP ke Generator",
-    Func = teleportToNearestGenerator,
-})
-
-TeleportBox:AddButton({
-    Text = "🔪 TP ke Killer",
-    Func = teleportToKiller,
-})
-
--- ═══════════════════════════════════════════════════════════
---   RESPAWN HANDLER
--- ═══════════════════════════════════════════════════════════
+-- ═══ RESPAWN ═══
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(1)
-
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        OriginalWalkSpeed = hum.WalkSpeed
-        OriginalJumpPower = hum.UseJumpPower and hum.JumpPower or 50
+    local h = char:FindFirstChildOfClass("Humanoid")
+    if h then
+        OrigWS = h.WalkSpeed
+        OrigJP = h.UseJumpPower and h.JumpPower or 50
     end
-
     if Config.WalkSpeed.Enabled then applyWalkSpeed() end
     if Config.JumpPower.Enabled then applyJumpPower() end
     if Config.NoClip.Enabled then enableNoClip() end
@@ -2143,36 +1960,31 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     if Config.FastVault.Enabled then hookVault(char) end
 end)
 
--- Apply sekarang
 if LocalPlayer.Character then
-    local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        OriginalWalkSpeed = hum.WalkSpeed
-        OriginalJumpPower = hum.UseJumpPower and hum.JumpPower or 50
+    local h = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if h then
+        OrigWS = h.WalkSpeed
+        OrigJP = h.UseJumpPower and h.JumpPower or 50
     end
     hookVault(LocalPlayer.Character)
 end
 
-print("[TIARHUB] Bagian 4 - Movement DONE ✅")-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 5
---   Auto : Skill Check, Wiggle, Flee, Stalk
+print("[TIARHUB] Bagian D — Movement DONE ✅")
+print("═══ BAGIAN D DONE — LANJUT BAGIAN E ═══")-- ═══════════════════════════════════════════════════════════
+--   BAGIAN E — AUTO + PLAYER
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Bagian 5 - Auto loading...")
+print("[TIARHUB] Bagian E loading...")
 
 -- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
+--   TAB 5: AUTO
 -- ═══════════════════════════════════════════════════════════
 local SkillBox  = Tabs.Auto:AddLeftGroupbox("Auto Skill Check", "check")
 local WiggleBox = Tabs.Auto:AddLeftGroupbox("Auto Wiggle", "activity")
 local FleeBox   = Tabs.Auto:AddRightGroupbox("Auto Flee Killer", "run")
 local StalkBox  = Tabs.Auto:AddRightGroupbox("Auto Stalk (Killer)", "eye")
 
-print("[TIARHUB] Auto groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   AUTO SKILL CHECK
--- ═══════════════════════════════════════════════════════════
+-- ═══ AUTO SKILL CHECK ═══
 local SkillConn    = nil
 local SkillBusy    = false
 local SkillLastHit = 0
@@ -2185,12 +1997,9 @@ local function pressSpace()
     end)
 end
 
-local TouchID    = 8822
-local ActionPath = "Survivor-mob.Controls.action.check"
-
 local function getActionTarget()
     local cur = PlayerGui
-    for seg in string.gmatch(ActionPath, "[^%.]+") do
+    for seg in string.gmatch("Survivor-mob.Controls.action.check", "[^%.]+") do
         cur = cur and cur:FindFirstChild(seg)
     end
     return cur
@@ -2204,28 +2013,23 @@ local function triggerMobileButton()
         local inset = game:GetService("GuiService"):GetGuiInset()
         local x = pos.X + size.X/2 + inset.X
         local y = pos.Y + size.Y/2 + inset.Y
-
         pcall(function()
-            VirtualInputManager:SendTouchEvent(TouchID, 0, x, y)
+            VirtualInputManager:SendTouchEvent(8822, 0, x, y)
             task.wait(0.01)
-            VirtualInputManager:SendTouchEvent(TouchID, 2, x, y)
+            VirtualInputManager:SendTouchEvent(8822, 2, x, y)
         end)
     end
 end
 
 local function startSkillCheck()
     if SkillConn then SkillConn:Disconnect() end
-
     SkillConn = RunService.RenderStepped:Connect(function()
         if not Config.AutoSkillCheck.Enabled then return end
         if SkillBusy then return end
-
-        local now = tick()
-        if now - SkillLastHit < 0.15 then return end
+        if tick() - SkillLastHit < 0.15 then return end
 
         local prompt = PlayerGui:FindFirstChild("SkillCheckPromptGui")
         if not prompt then return end
-
         local check = prompt:FindFirstChild("Check")
         if not check or not check.Visible then return end
 
@@ -2235,17 +2039,13 @@ local function startSkillCheck()
 
         local lr = line.Rotation % 360
         local gr = goal.Rotation % 360
+        local sr = (gr + 102) % 360
+        local er = (gr + 116) % 360
 
-        local startRange = (gr + 102) % 360
-        local endRange   = (gr + 116) % 360
-
-        local success = (startRange > endRange and (lr >= startRange or lr <= endRange))
-                        or (lr >= startRange and lr <= endRange)
-
-        if success then
+        local ok = (sr > er and (lr >= sr or lr <= er)) or (lr >= sr and lr <= er)
+        if ok then
             SkillBusy = true
-            SkillLastHit = now
-
+            SkillLastHit = tick()
             task.spawn(function()
                 if UserInputService.TouchEnabled then
                     triggerMobileButton()
@@ -2259,19 +2059,15 @@ local function startSkillCheck()
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
---   AUTO WIGGLE
--- ═══════════════════════════════════════════════════════════
+-- ═══ AUTO WIGGLE ═══
+local WiggleConn = nil
+
 local function isCarried()
-    local char = LocalPlayer.Character
-    if not char then return false end
-
-    local carried  = char:FindFirstChild("IsCarried")
-    local carrying = char:FindFirstChild("IsCarrying")
-
-    if carried  and carried.Value  then return true end
-    if carrying and carrying.Value then return true end
-    return false
+    local c = LocalPlayer.Character
+    if not c then return false end
+    local a = c:FindFirstChild("IsCarried")
+    local b = c:FindFirstChild("IsCarrying")
+    return (a and a.Value) or (b and b.Value)
 end
 
 local function getWiggleRemote()
@@ -2281,43 +2077,32 @@ local function getWiggleRemote()
     return carry:FindFirstChild("SelfUnHookEvent")
 end
 
-local WiggleConn = nil
-
 local function startAutoWiggle()
     if WiggleConn then WiggleConn:Disconnect() end
-
     WiggleConn = RunService.Heartbeat:Connect(function()
         if not Config.AutoWiggle.Enabled then return end
         if not isCarried() then return end
-
-        local event = getWiggleRemote()
-        if not event then return end
-
+        local ev = getWiggleRemote()
+        if not ev then return end
         for i = 1, Config.AutoWiggle.Spam do
-            pcall(function() event:FireServer() end)
+            pcall(function() ev:FireServer() end)
         end
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
---   AUTO FLEE KILLER
--- ═══════════════════════════════════════════════════════════
+-- ═══ AUTO FLEE KILLER ═══
 local FleeLastTick = 0
 
 local function getNearestKiller()
     local root = getRoot()
     if not root then return nil end
-
     local closest, shortest = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Team and p.Team.Name == "Killer" and p.Character then
             local hrp = p.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
                 local d = (hrp.Position - root.Position).Magnitude
-                if d < shortest then
-                    shortest = d
-                    closest = hrp
-                end
+                if d < shortest then shortest = d; closest = hrp end
             end
         end
     end
@@ -2326,15 +2111,11 @@ end
 
 local function getFarthestGeneratorPoint(killerRoot)
     if not killerRoot then return nil end
-
     local best, dist = nil, 0
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") and string.match(obj.Name, "^GeneratorPoint%d+$") then
             local d = (obj.Position - killerRoot.Position).Magnitude
-            if d > dist then
-                dist = d
-                best = obj
-            end
+            if d > dist then dist = d; best = obj end
         end
     end
     return best
@@ -2343,14 +2124,11 @@ end
 task.spawn(function()
     while task.wait(0.2) do
         if not Config.AutoFlee.Enabled then continue end
-
         local root = getRoot()
         if not root then continue end
-
         local killerRoot, distance = getNearestKiller()
         if killerRoot and distance and distance <= Config.AutoFlee.Distance
            and tick() - FleeLastTick > Config.AutoFlee.Cooldown then
-
             local point = getFarthestGeneratorPoint(killerRoot)
             if point then
                 FleeLastTick = tick()
@@ -2360,15 +2138,12 @@ task.spawn(function()
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
---   AUTO STALK
--- ═══════════════════════════════════════════════════════════
+-- ═══ AUTO STALK ═══
 local StalkConn = nil
 
 local function getClosestSurvivorForStalk()
     local root = getRoot()
     if not root then return nil end
-
     local closest, shortest = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
@@ -2397,128 +2172,74 @@ end
 
 local function startAutoStalk()
     if StalkConn then StalkConn:Disconnect() end
-
     StalkConn = RunService.Heartbeat:Connect(function()
         if not Config.Stalk.Enabled then return end
-
         local target = getClosestSurvivorForStalk()
         if not target then return end
-
-        local event = getStalkRemote()
-        if event then
-            pcall(function() event:FireServer(target) end)
-        end
+        local ev = getStalkRemote()
+        if ev then pcall(function() ev:FireServer(target) end) end
     end)
 end
 
 local function stopAutoStalk()
-    if StalkConn then
-        StalkConn:Disconnect()
-        StalkConn = nil
-    end
+    if StalkConn then StalkConn:Disconnect(); StalkConn = nil end
 end
 
-print("[TIARHUB] Auto logic ready")
-
--- ═══════════════════════════════════════════════════════════
---   UI — AUTO SKILL CHECK
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — AUTO ═══
 SkillBox:AddToggle("AutoSkillCheck", {
-    Text = "Auto Skill Check",
-    Default = false,
-    Tooltip = "Otomatis hit skill check generator",
+    Text = "Auto Skill Check", Default = false,
+    Tooltip = "PC: Space | Mobile: tap",
     Callback = function(v)
         Config.AutoSkillCheck.Enabled = v
         if v then startSkillCheck() end
     end,
 })
 
-SkillBox:AddLabel("ℹ️ PC: Space | Mobile: tap")
-
--- ═══════════════════════════════════════════════════════════
---   UI — AUTO WIGGLE
--- ═══════════════════════════════════════════════════════════
 WiggleBox:AddToggle("AutoWiggle", {
-    Text = "Auto Wiggle",
-    Default = false,
-    Tooltip = "Spam self-unhook kalau digendong",
+    Text = "Auto Wiggle", Default = false,
     Callback = function(v)
         Config.AutoWiggle.Enabled = v
         if v then startAutoWiggle() end
     end,
 })
-
 WiggleBox:AddSlider("WiggleSpam", {
-    Text = "Spam Intensity",
-    Default = 5,
-    Min = 1,
-    Max = 30,
-    Rounding = 0,
+    Text = "Spam Intensity", Default = 5, Min = 1, Max = 30, Rounding = 0,
     Callback = function(v) Config.AutoWiggle.Spam = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — AUTO FLEE
--- ═══════════════════════════════════════════════════════════
 FleeBox:AddToggle("AutoFlee", {
-    Text = "Auto Flee Killer",
-    Default = false,
-    Tooltip = "TP ke gen terjauh kalau killer deket",
+    Text = "Auto Flee Killer", Default = false,
     Callback = function(v) Config.AutoFlee.Enabled = v end,
 })
-
 FleeBox:AddSlider("FleeDistance", {
-    Text = "Detect Distance",
-    Default = 50,
-    Min = 10,
-    Max = 200,
-    Rounding = 0,
+    Text = "Detect Distance", Default = 50, Min = 10, Max = 200, Rounding = 0,
     Suffix = " studs",
     Callback = function(v) Config.AutoFlee.Distance = v end,
 })
-
 FleeBox:AddSlider("FleeCooldown", {
-    Text = "Cooldown",
-    Default = 0.1,
-    Min = 0.05,
-    Max = 2,
-    Rounding = 2,
+    Text = "Cooldown", Default = 0.1, Min = 0.05, Max = 2, Rounding = 2,
     Suffix = " s",
     Callback = function(v) Config.AutoFlee.Cooldown = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — AUTO STALK
--- ═══════════════════════════════════════════════════════════
 StalkBox:AddToggle("AutoStalk", {
-    Text = "Auto Stalk",
-    Default = false,
-    Tooltip = "Auto stalk survivor (buat killer Myers)",
+    Text = "Auto Stalk", Default = false,
+    Tooltip = "Buat killer Myers-like",
     Callback = function(v)
         Config.Stalk.Enabled = v
         if v then startAutoStalk() else stopAutoStalk() end
     end,
 })
-
 StalkBox:AddSlider("StalkRange", {
-    Text = "Stalk Range",
-    Default = 150,
-    Min = 20,
-    Max = 500,
-    Rounding = 0,
+    Text = "Stalk Range", Default = 150, Min = 20, Max = 500, Rounding = 0,
     Suffix = " studs",
     Callback = function(v) Config.Stalk.Range = v end,
 })
 
-print("[TIARHUB] Bagian 5 - Auto DONE ✅")-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 6
---   Player : Masked, Killer Abilities, Emote, Avatar, Fun
--- ═══════════════════════════════════════════════════════════
-
-print("[TIARHUB] Bagian 6 - Player loading...")
+print("[TIARHUB] Auto tab OK")
 
 -- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
+--   TAB 6: PLAYER
 -- ═══════════════════════════════════════════════════════════
 local MaskedBox = Tabs.Player:AddLeftGroupbox("Masked Power", "sparkles")
 local KillerBox = Tabs.Player:AddLeftGroupbox("Killer Abilities", "skull")
@@ -2526,13 +2247,8 @@ local EmoteBox  = Tabs.Player:AddRightGroupbox("Emote", "music")
 local AvatarBox = Tabs.Player:AddRightGroupbox("Avatar Stealer", "user")
 local FunBox    = Tabs.Player:AddRightGroupbox("Fun / Troll", "smile")
 
-print("[TIARHUB] Player groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   MASKED POWER
--- ═══════════════════════════════════════════════════════════
+-- ═══ MASKED POWER ═══
 local MaskedPowers = { "Cobra", "Richter", "Brandon", "Rabbit", "Alex" }
-local MaskedState  = { Current = "Cobra" }
 
 local function getMaskedRemote(name)
     if not Remotes then return nil end
@@ -2544,36 +2260,26 @@ local function getMaskedRemote(name)
 end
 
 local function activatePower()
-    local event = getMaskedRemote("Activatepower")
-    if event then
-        pcall(function() event:FireServer(MaskedState.Current) end)
-        notify("Masked", "Activated: " .. MaskedState.Current, 2)
+    local ev = getMaskedRemote("Activatepower")
+    if ev then
+        pcall(function() ev:FireServer(Config.Masked.Power) end)
+        notify("Masked", "Activated: " .. Config.Masked.Power, 2)
     else
         notify("Masked", "Remote gak ketemu", 2)
     end
 end
 
 local function deactivatePower()
-    local event = getMaskedRemote("Deactivatepower")
-    if event then
-        pcall(function() event:FireServer() end)
+    local ev = getMaskedRemote("Deactivatepower")
+    if ev then
+        pcall(function() ev:FireServer() end)
         notify("Masked", "Deactivated", 2)
     else
         notify("Masked", "Remote gak ketemu", 2)
     end
 end
 
--- ═══════════════════════════════════════════════════════════
---   KILLER ABILITIES
--- ═══════════════════════════════════════════════════════════
-local KillerState = {
-    KillAll     = false,
-    AutoAttack  = false,
-    AutoCarry   = false,
-    AttackDelay = 0.45,
-    KillRange   = 500,
-}
-
+-- ═══ KILLER ABILITIES ═══
 local KillerBusy   = false
 local KillerTarget = nil
 local LastAttack   = 0
@@ -2602,7 +2308,6 @@ end
 local function getNearestAliveSurvivor()
     local root = getRoot()
     if not root then return nil end
-
     local closest, shortest = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
@@ -2610,7 +2315,7 @@ local function getNearestAliveSurvivor()
             local hrp = p.Character:FindFirstChild("HumanoidRootPart")
             if hum and hrp and hum.Health > 30 then
                 local d = (hrp.Position - root.Position).Magnitude
-                if d < shortest and d <= KillerState.KillRange then
+                if d < shortest and d <= Config.Killer.KillRange then
                     shortest = d
                     closest = p.Character
                 end
@@ -2623,7 +2328,6 @@ end
 local function getDownedSurvivor()
     local root = getRoot()
     if not root then return nil end
-
     local best, dist = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
@@ -2631,10 +2335,7 @@ local function getDownedSurvivor()
             local hrp = p.Character:FindFirstChild("HumanoidRootPart")
             if hum and hrp and hum.Health > 0 and hum.Health <= hum.MaxHealth * 0.25 then
                 local d = (hrp.Position - root.Position).Magnitude
-                if d < dist then
-                    dist = d
-                    best = p.Character
-                end
+                if d < dist then dist = d; best = p.Character end
             end
         end
     end
@@ -2644,15 +2345,11 @@ end
 local function getHookPoint()
     local root = getRoot()
     if not root then return nil end
-
     local best, shortest = nil, math.huge
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name == "HookPoint" then
             local d = (obj.Position - root.Position).Magnitude
-            if d < shortest and d < 400 then
-                shortest = d
-                best = obj
-            end
+            if d < shortest and d < 400 then shortest = d; best = obj end
         end
     end
     return best
@@ -2660,33 +2357,24 @@ end
 
 task.spawn(function()
     while task.wait(0.05) do
-
-        -- AUTO ATTACK
-        if KillerState.AutoAttack then
-            local now = tick()
-            if now - LastAttack >= KillerState.AttackDelay then
-                LastAttack = now
-                local attack = getAttackEvent()
-                if attack then
-                    pcall(function() attack:FireServer(false) end)
-                end
+        if Config.Killer.AutoAttack then
+            if tick() - LastAttack >= Config.Killer.AttackDelay then
+                LastAttack = tick()
+                local ev = getAttackEvent()
+                if ev then pcall(function() ev:FireServer(false) end) end
             end
         end
 
-        -- AUTO CARRY
-        if KillerState.AutoCarry and not KillerBusy then
+        if Config.Killer.AutoCarry and not KillerBusy then
             KillerBusy = true
-
             task.spawn(function()
                 local target = getDownedSurvivor()
                 local root = getRoot()
-
                 if target and root then
                     local tRoot = target:FindFirstChild("HumanoidRootPart")
                     if tRoot then
                         root.CFrame = tRoot.CFrame * CFrame.new(0, 3, -2)
                         task.wait(0.4)
-
                         local carry = getCarryEvent()
                         if carry then
                             for i = 1, 4 do
@@ -2695,29 +2383,25 @@ task.spawn(function()
                             end
                         end
                         task.wait(0.6)
-
                         local hook = getHookPoint()
                         if hook then
                             root.CFrame = hook.CFrame * CFrame.new(0, 4, -3)
                             task.wait(0.7)
-
-                            local hookEvent = getHookEvent()
-                            if hookEvent then
+                            local he = getHookEvent()
+                            if he then
                                 for i = 1, 6 do
-                                    pcall(function() hookEvent:FireServer(hook) end)
+                                    pcall(function() he:FireServer(hook) end)
                                     task.wait(0.15)
                                 end
                             end
                         end
                     end
                 end
-
                 task.delay(2, function() KillerBusy = false end)
             end)
         end
 
-        -- AUTO KILL ALL
-        if KillerState.KillAll then
+        if Config.Killer.KillAll then
             local root = getRoot()
             if root then
                 if not KillerTarget
@@ -2725,30 +2409,24 @@ task.spawn(function()
                 or KillerTarget.Humanoid.Health <= 35 then
                     KillerTarget = getNearestAliveSurvivor()
                 end
-
                 if KillerTarget then
                     local tHRP = KillerTarget:FindFirstChild("HumanoidRootPart")
                     if tHRP then
-                        local velocity = tHRP.AssemblyLinearVelocity
-                        local predict = velocity * 0.15
-                        local targetPos = tHRP.Position + predict
+                        local v = tHRP.AssemblyLinearVelocity
+                        local pred = v * 0.15
+                        local tPos = tHRP.Position + pred
                         local behind = tHRP.CFrame.LookVector * -3
-                        root.CFrame = CFrame.new(targetPos + behind, targetPos)
+                        root.CFrame = CFrame.new(tPos + behind, tPos)
                     end
-
-                    local attack = getAttackEvent()
-                    if attack then
-                        pcall(function() attack:FireServer(false) end)
-                    end
+                    local atk = getAttackEvent()
+                    if atk then pcall(function() atk:FireServer(false) end) end
                 end
             end
         end
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
---   EMOTE
--- ═══════════════════════════════════════════════════════════
+-- ═══ EMOTE ═══
 local EmoteList = {
     "Mannrobics", "Arm Swing", "Schadenfreude", "Kyoufuu",
     "Backflip", "Griddy", "Friday Night", "Floating Rest",
@@ -2765,10 +2443,8 @@ local function getEmoteRemote()
 end
 
 local function playEmote(name)
-    local event = getEmoteRemote()
-    if event then
-        pcall(function() event:FireServer(name) end)
-    end
+    local ev = getEmoteRemote()
+    if ev then pcall(function() ev:FireServer(name) end) end
 end
 
 local function createEmoteButton()
@@ -2818,7 +2494,7 @@ local function createEmoteButton()
         end)
     end)
 
-    EmoteBtnGui   = gui
+    EmoteBtnGui = gui
     EmoteLabelRef = label
 end
 
@@ -2830,22 +2506,13 @@ local function removeEmoteButton()
     end
 end
 
--- ═══════════════════════════════════════════════════════════
---   AVATAR STEALER
--- ═══════════════════════════════════════════════════════════
-local AvatarState = {
-    TargetUsername      = "",
-    OriginalDescription = nil,
-    StealedUserId       = nil,
-    BlockyBody          = true,
-}
-
+-- ═══ AVATAR STEALER ═══
 local function saveOriginalAppearance()
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then
-        AvatarState.OriginalDescription = hum:GetAppliedDescription()
+        Config.Avatar.Original = hum:GetAppliedDescription()
         notify("Avatar", "Original saved", 2)
     end
 end
@@ -2853,25 +2520,20 @@ end
 local function applyBlockyBody(character)
     local hum = character:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local desc = Instance.new("HumanoidDescription")
-    desc.BodyTypeScale   = 1
-    desc.DepthScale      = 1
-    desc.HeadScale       = 1
-    desc.HeightScale     = 1
+    desc.BodyTypeScale = 1
+    desc.DepthScale = 1
+    desc.HeadScale = 1
+    desc.HeightScale = 1
     desc.ProportionScale = 0
-    desc.WidthScale      = 1
-
+    desc.WidthScale = 1
     hum:ApplyDescriptionClientServer(desc)
 end
 
 local function removeAllClothing(character)
     for _, v in ipairs(character:GetDescendants()) do
-        if v:IsA("Accessory")
-        or v:IsA("Clothing")
-        or v:IsA("Shirt")
-        or v:IsA("Pants")
-        or v:IsA("ShirtGraphic") then
+        if v:IsA("Accessory") or v:IsA("Clothing")
+        or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
             v:Destroy()
         end
     end
@@ -2879,87 +2541,69 @@ end
 
 local function copyAvatar(username)
     if not username or username == "" then
-        notify("Avatar", "Username kosong", 2)
-        return
+        notify("Avatar", "Username kosong", 2); return
     end
-
     saveOriginalAppearance()
-
     local ok, userId = pcall(function()
         return Players:GetUserIdFromNameAsync(username)
     end)
-    if not ok then
-        notify("Avatar", "User gak ketemu", 2)
-        return
-    end
-
-    AvatarState.StealedUserId = userId
+    if not ok then notify("Avatar", "User gak ketemu", 2); return end
+    Config.Avatar.UserId = userId
 
     local char = LocalPlayer.Character
     if not char then return end
-
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
 
     task.spawn(function()
         local desc = Players:GetHumanoidDescriptionFromUserId(userId)
-
-        if AvatarState.BlockyBody then
+        if Config.Avatar.Blocky then
             applyBlockyBody(char)
             task.wait(0.3)
         end
-
         removeAllClothing(char)
         task.wait(0.2)
-
         hum:ApplyDescriptionClientServer(desc)
         notify("Avatar", "Copied: " .. username, 2)
     end)
 end
 
 local function resetAvatar()
-    if not AvatarState.OriginalDescription then
-        notify("Avatar", "Belum ada original", 2)
-        return
+    if not Config.Avatar.Original then
+        notify("Avatar", "Belum ada original", 2); return
     end
-
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then
         removeAllClothing(char)
-        hum:ApplyDescriptionClientServer(AvatarState.OriginalDescription)
-        AvatarState.StealedUserId = nil
+        hum:ApplyDescriptionClientServer(Config.Avatar.Original)
+        Config.Avatar.UserId = nil
         notify("Avatar", "Reset ke original", 2)
     end
 end
 
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(1.5)
-    if AvatarState.StealedUserId then
+    if Config.Avatar.UserId then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
-            local desc = Players:GetHumanoidDescriptionFromUserId(AvatarState.StealedUserId)
-            if AvatarState.BlockyBody then applyBlockyBody(char) end
+            local desc = Players:GetHumanoidDescriptionFromUserId(Config.Avatar.UserId)
+            if Config.Avatar.Blocky then applyBlockyBody(char) end
             removeAllClothing(char)
             hum:ApplyDescriptionClientServer(desc)
         end
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
---   JERK TOOL
--- ═══════════════════════════════════════════════════════════
-local JerkState       = { Enabled = false }
+-- ═══ JERK TOOL ═══
 local CurrentJerkTool = nil
 
 local function createJerkTool()
     if CurrentJerkTool then CurrentJerkTool:Destroy() end
-
     local char = LocalPlayer.Character
     if not char then return end
-
-    local hum      = char:FindFirstChildOfClass("Humanoid")
+    local hum = char:FindFirstChildOfClass("Humanoid")
     local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
     if not hum or not backpack then return end
 
@@ -2968,40 +2612,36 @@ local function createJerkTool()
     tool.ToolTip = "in the stripped club"
     tool.RequiresHandle = false
     tool.Parent = backpack
-
     CurrentJerkTool = tool
 
     local jorkin = false
     local track  = nil
 
-    local function stopTomfoolery()
+    local function stop()
         jorkin = false
         if track then track:Stop(); track = nil end
     end
 
     tool.Equipped:Connect(function() jorkin = true end)
-    tool.Unequipped:Connect(stopTomfoolery)
-    hum.Died:Connect(stopTomfoolery)
+    tool.Unequipped:Connect(stop)
+    hum.Died:Connect(stop)
 
     task.spawn(function()
         while task.wait() do
-            if not JerkState.Enabled or not jorkin then
+            if not Config.Jerk.Enabled or not jorkin then
                 if track then track:Stop() end
                 continue
             end
-
             local isR15 = hum.RigType == Enum.HumanoidRigType.R15
             if not track then
                 local anim = Instance.new("Animation")
                 anim.AnimationId = isR15 and "rbxassetid://698251653" or "rbxassetid://72042024"
                 track = hum:LoadAnimation(anim)
             end
-
             track:Play()
             track:AdjustSpeed(isR15 and 0.7 or 0.65)
             track.TimePosition = 0.6
             task.wait(0.1)
-
             while track and track.TimePosition < (isR15 and 0.7 or 0.65) do
                 task.wait(0.1)
             end
@@ -3012,138 +2652,73 @@ end
 
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
-    if JerkState.Enabled then createJerkTool() end
+    if Config.Jerk.Enabled then createJerkTool() end
 end)
 
-print("[TIARHUB] Player logic ready")
-
--- ═══════════════════════════════════════════════════════════
---   UI — MASKED
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — MASKED ═══
 MaskedBox:AddDropdown("MaskedSelect", {
-    Text = "Select Power",
-    Values = MaskedPowers,
-    Default = "Cobra",
-    Multi = false,
-    Callback = function(v) MaskedState.Current = v end,
+    Text = "Select Power", Values = MaskedPowers, Default = "Cobra", Multi = false,
+    Callback = function(v) Config.Masked.Power = v end,
 })
+MaskedBox:AddButton({ Text = "⚡ Activate Power", Func = activatePower })
+MaskedBox:AddButton({ Text = "🛑 Deactivate Power", Func = deactivatePower })
 
-MaskedBox:AddButton({
-    Text = "⚡ Activate Power",
-    Func = activatePower,
-})
-
-MaskedBox:AddButton({
-    Text = "🛑 Deactivate Power",
-    Func = deactivatePower,
-})
-
--- ═══════════════════════════════════════════════════════════
---   UI — KILLER ABILITIES
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — KILLER ABILITIES ═══
 KillerBox:AddToggle("AutoKillAll", {
-    Text = "Auto Kill All",
-    Default = false,
-    Tooltip = "TP ke survivor + spam attack",
-    Callback = function(v) KillerState.KillAll = v end,
+    Text = "Auto Kill All", Default = false,
+    Callback = function(v) Config.Killer.KillAll = v end,
 })
-
 KillerBox:AddToggle("AutoSpamAttack", {
-    Text = "Auto Spam Attack",
-    Default = false,
-    Callback = function(v) KillerState.AutoAttack = v end,
+    Text = "Auto Spam Attack", Default = false,
+    Callback = function(v) Config.Killer.AutoAttack = v end,
 })
-
 KillerBox:AddSlider("AttackDelay", {
-    Text = "Attack Delay",
-    Default = 0.45,
-    Min = 0.1,
-    Max = 2,
-    Rounding = 2,
+    Text = "Attack Delay", Default = 0.45, Min = 0.1, Max = 2, Rounding = 2,
     Suffix = " s",
-    Callback = function(v) KillerState.AttackDelay = v end,
+    Callback = function(v) Config.Killer.AttackDelay = v end,
 })
-
 KillerBox:AddDivider()
-
 KillerBox:AddToggle("AutoCarry", {
-    Text = "Auto Carry + Hook",
-    Default = false,
-    Tooltip = "Auto gendong survivor downed + hook",
-    Callback = function(v) KillerState.AutoCarry = v end,
+    Text = "Auto Carry + Hook", Default = false,
+    Callback = function(v) Config.Killer.AutoCarry = v end,
 })
-
 KillerBox:AddSlider("KillRange", {
-    Text = "Kill Range",
-    Default = 500,
-    Min = 50,
-    Max = 2000,
-    Rounding = 0,
+    Text = "Kill Range", Default = 500, Min = 50, Max = 2000, Rounding = 0,
     Suffix = " studs",
-    Callback = function(v) KillerState.KillRange = v end,
+    Callback = function(v) Config.Killer.KillRange = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — EMOTE
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — EMOTE ═══
 EmoteBox:AddDropdown("EmoteSelect", {
-    Text = "Select Emote",
-    Values = EmoteList,
-    Default = "Mannrobics",
-    Multi = false,
+    Text = "Select Emote", Values = EmoteList, Default = "Mannrobics", Multi = false,
     Callback = function(v)
         EmoteSelected = v
         if EmoteLabelRef then EmoteLabelRef.Text = v end
     end,
 })
-
-EmoteBox:AddButton({
-    Text = "▶️ Play Emote",
-    Func = function() playEmote(EmoteSelected) end,
-})
-
+EmoteBox:AddButton({ Text = "▶️ Play Emote", Func = function() playEmote(EmoteSelected) end })
 EmoteBox:AddToggle("ShowEmoteBtn", {
-    Text = "Show On-Screen Button",
-    Default = false,
+    Text = "Show On-Screen Button", Default = false,
     Callback = function(v)
         if v then createEmoteButton() else removeEmoteButton() end
     end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   UI — AVATAR
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — AVATAR ═══
 AvatarBox:AddInput("AvatarUsername", {
-    Text = "Target Username",
-    Default = "",
-    Placeholder = "Ketik username...",
+    Text = "Target Username", Default = "", Placeholder = "Ketik username...",
     Finished = true,
-    Callback = function(v) AvatarState.TargetUsername = v end,
+    Callback = function(v) Config.Avatar.Username = v end,
 })
+AvatarBox:AddButton({ Text = "📥 Copy Avatar", Func = function() copyAvatar(Config.Avatar.Username) end })
+AvatarBox:AddButton({ Text = "🔄 Reset to Original", Func = resetAvatar })
+AvatarBox:AddButton({ Text = "💾 Save as Original", Func = saveOriginalAppearance })
 
-AvatarBox:AddButton({
-    Text = "📥 Copy Avatar",
-    Func = function() copyAvatar(AvatarState.TargetUsername) end,
-})
-
-AvatarBox:AddButton({
-    Text = "🔄 Reset to Original",
-    Func = resetAvatar,
-})
-
-AvatarBox:AddButton({
-    Text = "💾 Save Current as Original",
-    Func = saveOriginalAppearance,
-})
-
--- ═══════════════════════════════════════════════════════════
---   UI — FUN
--- ═══════════════════════════════════════════════════════════
+-- ═══ UI — FUN ═══
 FunBox:AddToggle("JerkTool", {
-    Text = "Jerk Tool",
-    Default = false,
+    Text = "Jerk Tool", Default = false,
     Callback = function(v)
-        JerkState.Enabled = v
+        Config.Jerk.Enabled = v
         if v then
             createJerkTool()
         else
@@ -3155,104 +2730,74 @@ FunBox:AddToggle("JerkTool", {
     end,
 })
 
-print("[TIARHUB] Bagian 6 - Player DONE ✅")-- ═══════════════════════════════════════════════════════════
---   TIARHUB x VIOLENCE DISTRICT - Bagian 7 (FINAL)
---   Settings + ThemeManager + SaveManager + Finalization
+print("[TIARHUB] Player tab OK")
+print("[TIARHUB] Bagian E DONE ✅")
+print("═══ BAGIAN E DONE — LANJUT BAGIAN F (FINAL) ═══")-- ═══════════════════════════════════════════════════════════
+--   BAGIAN F — SETTINGS + FINALIZATION (FINAL)
 -- ═══════════════════════════════════════════════════════════
 
-print("[TIARHUB] Bagian 7 - Settings loading...")
+print("[TIARHUB] Bagian F loading...")
 
 -- ═══════════════════════════════════════════════════════════
---   GROUPBOXES
+--   TAB 7: SETTINGS
 -- ═══════════════════════════════════════════════════════════
 local SettingBox = Tabs.Settings:AddLeftGroupbox("Menu Settings", "wrench")
 local ConfigBox  = Tabs.Settings:AddRightGroupbox("Config & Theme", "settings")
 local AboutBox   = Tabs.Settings:AddLeftGroupbox("About", "info")
 
-print("[TIARHUB] Settings groupboxes created")
-
--- ═══════════════════════════════════════════════════════════
---   CUSTOM CURSOR
--- ═══════════════════════════════════════════════════════════
+-- ═══ CUSTOM CURSOR ═══
 SettingBox:AddToggle("ShowCustomCursor", {
-    Text = "Custom Cursor",
-    Default = true,
-    Callback = function(v)
-        Library.ShowCustomCursor = v
-    end,
+    Text = "Custom Cursor", Default = true,
+    Callback = function(v) Library.ShowCustomCursor = v end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   NOTIFICATION SIDE
--- ═══════════════════════════════════════════════════════════
+-- ═══ NOTIFICATION SIDE ═══
 SettingBox:AddDropdown("NotificationSide", {
     Text = "Notification Side",
     Values = { "Left", "Right" },
-    Default = "Right",
-    Multi = false,
-    Callback = function(v)
-        Library:SetNotifySide(v)
-    end,
+    Default = "Right", Multi = false,
+    Callback = function(v) Library:SetNotifySide(v) end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   DPI SCALE
--- ═══════════════════════════════════════════════════════════
+-- ═══ DPI SCALE ═══
 SettingBox:AddDropdown("DPIDropdown", {
     Text = "DPI Scale",
     Values = { "50%", "75%", "85%", "100%", "125%", "150%" },
-    Default = "100%",
-    Multi = false,
+    Default = "100%", Multi = false,
     Callback = function(v)
-        local num = tonumber(v:gsub("%%", ""))
-        if num then Library:SetDPIScale(num) end
+        local n = tonumber(v:gsub("%%", ""))
+        if n then Library:SetDPIScale(n) end
     end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   CORNER RADIUS
--- ═══════════════════════════════════════════════════════════
+-- ═══ CORNER RADIUS ═══
 SettingBox:AddSlider("UICornerSlider", {
-    Text = "Corner Radius",
-    Default = 20,
-    Min = 0,
-    Max = 30,
-    Rounding = 0,
+    Text = "Corner Radius", Default = 20, Min = 0, Max = 30, Rounding = 0,
     Callback = function(v)
-        if Window.SetCornerRadius then
-            Window:SetCornerRadius(v)
-        end
+        if Window.SetCornerRadius then Window:SetCornerRadius(v) end
     end,
 })
 
--- ═══════════════════════════════════════════════════════════
---   WATERMARK
--- ═══════════════════════════════════════════════════════════
+-- ═══ WATERMARK ═══
 local Watermark = Library:AddDraggableLabel("TIARHUB")
 
 SettingBox:AddToggle("WatermarkToggle", {
-    Text = "Show Watermark",
-    Default = true,
-    Callback = function(v)
-        Watermark.Visible = v
-    end,
+    Text = "Show Watermark", Default = true,
+    Callback = function(v) Watermark.Visible = v end,
 })
 
 -- Update watermark (FPS / PING)
 local FPS, Frames, LastTick = 0, 0, tick()
-
 RunService.RenderStepped:Connect(function()
     Frames += 1
     if tick() - LastTick >= 1 then
         FPS = Frames
         Frames = 0
         LastTick = tick()
-
         local ok, ping = pcall(function()
             return math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
         if not ok then ping = 0 end
-
         Watermark:SetText(string.format(
             "TIARHUB | FPS: %d | PING: %d ms",
             FPS, ping
@@ -3260,15 +2805,11 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
---   THEME MANAGER
--- ═══════════════════════════════════════════════════════════
+-- ═══ THEME MANAGER ═══
 if ThemeManager then
     pcall(function()
         ThemeManager:SetLibrary(Library)
         ThemeManager:SetFolder("TiarHub")
-
-        -- Save custom theme biru
         if ThemeManager.SaveCustomTheme then
             ThemeManager:SaveCustomTheme({
                 Name            = "TiarHub Blue",
@@ -3279,15 +2820,12 @@ if ThemeManager then
                 FontColor       = Color3.fromRGB(220, 235, 255),
             })
         end
-
         ThemeManager:ApplyToTab(Tabs.Settings)
     end)
     print("[TIARHUB] ThemeManager configured")
 end
 
--- ═══════════════════════════════════════════════════════════
---   SAVE MANAGER
--- ═══════════════════════════════════════════════════════════
+-- ═══ SAVE MANAGER ═══
 if SaveManager then
     pcall(function()
         SaveManager:SetLibrary(Library)
@@ -3299,12 +2837,10 @@ if SaveManager then
     print("[TIARHUB] SaveManager configured")
 end
 
--- ═══════════════════════════════════════════════════════════
---   ABOUT
--- ═══════════════════════════════════════════════════════════
+-- ═══ ABOUT ═══
 AboutBox:AddLabel("TIARHUB x Violence District")
-AboutBox:AddLabel("Version : 2.0 (Mobile Fixed)")
-AboutBox:AddLabel("Build   : 7-part modular")
+AboutBox:AddLabel("Version : All-in-One")
+AboutBox:AddLabel("Build   : 7 Tabs Modular")
 AboutBox:AddDivider()
 
 AboutBox:AddButton({
@@ -3316,12 +2852,13 @@ AboutBox:AddButton({
 
 AboutBox:AddDivider()
 AboutBox:AddLabel("⌨️ RightShift = Toggle Menu")
+AboutBox:AddLabel("⌨️ RightControl = Toggle (alt)")
 AboutBox:AddLabel("⌨️ Q = Auto Parry")
 AboutBox:AddLabel("⌨️ V = Moonwalk")
-AboutBox:AddLabel("🖱️ Right Click (hold) = Aimlock")
+AboutBox:AddLabel("🖱️ Right Click = Aimlock")
 
 -- ═══════════════════════════════════════════════════════════
---   EXTRA KEYBIND (RightControl sebagai alternatif)
+--   EXTRA KEYBIND
 -- ═══════════════════════════════════════════════════════════
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -3331,13 +2868,77 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 end)
 
 -- ═══════════════════════════════════════════════════════════
---   CLEANUP HANDLER
+--   STATS PANEL
+-- ═══════════════════════════════════════════════════════════
+local statsGui = Instance.new("ScreenGui")
+statsGui.Name = "TiarHubStats"
+statsGui.ResetOnSpawn = false
+statsGui.Parent = PlayerGui
+
+local statsFrame = Instance.new("Frame")
+statsFrame.Size = UDim2.new(0, 150, 0, 90)
+statsFrame.Position = UDim2.new(1, -165, 0, 20)
+statsFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
+statsFrame.BackgroundTransparency = 0.2
+statsFrame.BorderSizePixel = 0
+statsFrame.Parent = statsGui
+
+local sCorner = Instance.new("UICorner")
+sCorner.CornerRadius = UDim.new(0, 8)
+sCorner.Parent = statsFrame
+
+local sStroke = Instance.new("UIStroke")
+sStroke.Color = Color3.fromRGB(30, 150, 255)
+sStroke.Thickness = 1.5
+sStroke.Transparency = 0.3
+sStroke.Parent = statsFrame
+
+local sTitle = Instance.new("TextLabel")
+sTitle.Text = "STATS"
+sTitle.Font = Enum.Font.GothamBlack
+sTitle.TextSize = 12
+sTitle.TextColor3 = Color3.fromRGB(0, 255, 255)
+sTitle.BackgroundTransparency = 1
+sTitle.Size = UDim2.new(1, 0, 0, 18)
+sTitle.Position = UDim2.new(0, 0, 0, 4)
+sTitle.Parent = statsFrame
+
+local sText = Instance.new("TextLabel")
+sText.Font = Enum.Font.GothamBold
+sText.TextSize = 12
+sText.TextColor3 = Color3.fromRGB(220, 235, 255)
+sText.BackgroundTransparency = 1
+sText.Size = UDim2.new(1, -12, 1, -25)
+sText.Position = UDim2.new(0, 8, 0, 24)
+sText.TextXAlignment = Enum.TextXAlignment.Left
+sText.TextYAlignment = Enum.TextYAlignment.Top
+sText.Text = "FPS: --\nPING: --\nPLAYERS: --"
+sText.Parent = statsFrame
+
+task.spawn(function()
+    local frames, lastTick, fps = 0, tick(), 0
+    RunService.RenderStepped:Connect(function()
+        frames += 1
+        if tick() - lastTick >= 1 then
+            fps = frames
+            frames = 0
+            lastTick = tick()
+            local okPing, ping = pcall(function()
+                return math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            end)
+            if not okPing then ping = 0 end
+            local count = #Players:GetPlayers()
+            sText.Text = string.format("FPS: %d\nPING: %d ms\nPLAYERS: %d", fps, ping, count)
+        end
+    end)
+end)
+
+-- ═══════════════════════════════════════════════════════════
+--   CLEANUP
 -- ═══════════════════════════════════════════════════════════
 game:BindToClose(function()
-    -- Destroy circle parts
     if SelfCircle then SelfCircle:Destroy() end
     if ParryCircle then ParryCircle:Destroy() end
-    -- Destroy color correction
     if ColorCorrection then ColorCorrection:Destroy() end
 end)
 
@@ -3345,30 +2946,27 @@ end)
 --   FINAL NOTIFICATION
 -- ═══════════════════════════════════════════════════════════
 task.spawn(function()
-    task.wait(0.5)
+    task.wait(0.3)
     Watermark:SetText("TIARHUB | Loading...")
     Watermark.Visible = true
-
-    notify("TIARHUB v2.0", "Loaded ✓ | 7 parts", 4)
+    notify("TIARHUB", "All features loaded ✓", 4)
     task.wait(1.5)
-    notify("Tip", "RightShift = Toggle menu", 4)
+    notify("Tip", "RightShift = Toggle Menu", 4)
 end)
 
 -- ═══════════════════════════════════════════════════════════
 --   FINAL PRINT
 -- ═══════════════════════════════════════════════════════════
 print("╔══════════════════════════════════════════════╗")
-print("║   TIARHUB x VIOLENCE DISTRICT v2.0          ║")
-print("║   ✅ Bagian 1  - Setup & GUI                 ║")
-print("║   ✅ Bagian 2  - Combat                      ║")
-print("║   ✅ Bagian 3  - Visuals                     ║")
-print("║   ✅ Bagian 4  - Movement                    ║")
-print("║   ✅ Bagian 5  - Auto                        ║")
-print("║   ✅ Bagian 6  - Player                      ║")
-print("║   ✅ Bagian 7  - Settings (FINAL)            ║")
+print("║   TIARHUB x VIOLENCE DISTRICT               ║")
+print("║   ✅ Bagian A  — Setup & Window              ║")
+print("║   ✅ Bagian B  — Combat                      ║")
+print("║   ✅ Bagian C  — Visuals                     ║")
+print("║   ✅ Bagian D  — Movement                    ║")
+print("║   ✅ Bagian E  — Auto & Player               ║")
+print("║   ✅ Bagian F  — Settings (FINAL)            ║")
 print("║                                              ║")
 print("║   🎮 RightShift = Toggle Menu                ║")
 print("╚══════════════════════════════════════════════╝")
 
-print("[TIARHUB] Bagian 7 - Settings DONE ✅")
-print("[TIARHUB] ALL PARTS LOADED - SCRIPT READY!")
+print("[TIARHUB] ALL PARTS LOADED — READY!")

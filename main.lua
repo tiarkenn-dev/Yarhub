@@ -1,12 +1,7 @@
--- ============================================
 -- TIARHUB v20 - BAGIAN 1/5
 -- Setup + Services + Config
--- ============================================
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
-if not Rayfield then
-    Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
-end
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -391,6 +386,7 @@ local function GetNearestKiller()
 end
 
 -- END BAGIAN 1-- TIARHUB v20 - BAGIAN 2/5
+-- ESP System + Parry Smooth + FPS Overlay
 
 local ESPObjects = {}
 local ESPNames = {}
@@ -967,6 +963,7 @@ task.spawn(function()
 end)
 
 -- END BAGIAN 2-- TIARHUB v20 - BAGIAN 3/5
+-- Survivor System
 
 local lastParry = 0
 
@@ -1744,6 +1741,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- END BAGIAN 3-- TIARHUB v20 - BAGIAN 4/5
+-- Killer System + Movement + Visual + Camera + Teleport
 
 local function applyGodMode()
     if not PlayerMods.GodMode then return end
@@ -2976,8 +2974,8 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 end)
 
 -- END BAGIAN 4-- TIARHUB v20 - BAGIAN 5/5
+-- UI Menu + Startup
 
--- ============ ESP TAB ============
 local ESPTab = Window:CreateTab({ name = "ESP", icon = 0 })
 ESPTab:CreateSection("Player ESP")
 ESPTab:CreateToggle({ name = "ESP Survivor", currentValue = false, flag = "esp_survivor", callback = function(v) ESP.Survivor = v end })
@@ -3010,7 +3008,6 @@ ESPTab:CreateToggle({ name = "Killer Warning", currentValue = false, flag = "kwa
 ESPTab:CreateColorPicker({ name = "Warning Color", color = KillerWarning.Color, flag = "kwarn_color", callback = function(c) KillerWarning.Color = c end })
 ESPTab:CreateSlider({ name = "Warning Distance", range = {20, 200}, increment = 5, suffix = "stud", currentValue = 60, flag = "kwarn_dist", callback = function(v) KillerWarning.Distance = v end })
 
--- ============ SURVIVOR TAB ============
 local SurvivorTab = Window:CreateTab({ name = "Survivor", icon = 0 })
 SurvivorTab:CreateSection("Auto Parry")
 SurvivorTab:CreateToggle({ name = "Auto Parry", currentValue = false, flag = "parry_on", callback = function(v) Auto.Parry = v end })
@@ -3021,28 +3018,23 @@ SurvivorTab:CreateToggle({ name = "Parry Pulse Effect", currentValue = true, fla
 SurvivorTab:CreateColorPicker({ name = "Parry Range Color", color = ParryRangeVisual.Color, flag = "parry_color", callback = function(c) ParryRangeVisual.Color = c end })
 SurvivorTab:CreateSlider({ name = "Parry Circle Size", range = {5, 50}, increment = 1, suffix = "stud", currentValue = 12, flag = "parry_size", callback = function(v) Auto.ParryDistance = v end })
 SurvivorTab:CreateSlider({ name = "Parry Range Transparency", range = {0, 1}, increment = 0.05, currentValue = 0.7, flag = "parry_trans", callback = function(v) ParryRangeVisual.Transparency = v end })
-
 SurvivorTab:CreateSection("Auto Skill Check")
 SurvivorTab:CreateToggle({ name = "Auto Skill Check", currentValue = false, flag = "skillcheck", callback = function(v) Auto.SkillCheck = v; if v then startSkillCheck() end end })
 SurvivorTab:CreateDropdown({ name = "Skill Check Mode", options = {"Instant", "Perfect"}, currentOption = "Perfect", flag = "skill_mode", callback = function(opt) SkillCheckMode = opt; Rayfield:Notify({ title = "Skill Check", content = "Mode: " .. opt }) end })
-
 SurvivorTab:CreateSection("Auto Wiggle / Flee")
 SurvivorTab:CreateToggle({ name = "Auto Wiggle", currentValue = false, flag = "wiggle", callback = function(v) Auto.Wiggle = v end })
 SurvivorTab:CreateSlider({ name = "Wiggle Spam", range = {1, 10}, increment = 1, suffix = "x", currentValue = 5, flag = "wiggle_spam", callback = function(v) Auto.WiggleSpam = v end })
 SurvivorTab:CreateToggle({ name = "Auto Flee Killer", currentValue = false, flag = "flee", callback = function(v) AutoFlee.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Flee Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 50, flag = "flee_dist", callback = function(v) AutoFlee.DetectDistance = v end })
-
 SurvivorTab:CreateSection("Fast Vault")
 SurvivorTab:CreateToggle({ name = "Fast Vault", currentValue = false, flag = "vault", callback = function(v) FastVault.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Animation Speed", range = {1, 5}, increment = 0.1, suffix = "x", currentValue = 1.2, flag = "vault_speed", callback = function(v) FastVault.Speed = v end })
-
 SurvivorTab:CreateSection("Auto Dodge Abyss (Anti Dark Severance)")
 SurvivorTab:CreateToggle({ name = "Enable Auto Dodge Abyss", currentValue = false, flag = "auto_dodge_abyss", callback = function(v) AutoDodgeAbyss.Enabled = v end })
 SurvivorTab:CreateDropdown({ name = "Detect Mode", options = {"Anim", "Distance", "Both"}, currentOption = "Both", flag = "ad_abyss_mode", callback = function(opt) AutoDodgeAbyss.DetectMode = opt end })
 SurvivorTab:CreateSlider({ name = "Detect Radius", range = {5, 100}, increment = 1, suffix = "stud", currentValue = 30, flag = "ad_abyss_range", callback = function(v) AutoDodgeAbyss.Radius = v end })
 SurvivorTab:CreateSlider({ name = "Cooldown", range = {0.5, 10}, increment = 0.5, suffix = "s", currentValue = 2, flag = "ad_abyss_cd", callback = function(v) AutoDodgeAbyss.Cooldown = v end })
 SurvivorTab:CreateSlider({ name = "Crouch Duration", range = {0.1, 2}, increment = 0.1, suffix = "s", currentValue = 0.3, flag = "ad_abyss_dur", callback = function(v) AutoDodgeAbyss.CrouchDuration = v end })
-
 SurvivorTab:CreateSection("Fake Perks")
 SurvivorTab:CreateToggle({ name = "Fake Flowstate (Speed Boost on Vault)", currentValue = false, flag = "fp_flow", callback = function(v) FakePerks.Flowstate.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Flowstate Speed Boost (%)", range = {10, 50}, increment = 5, suffix = "%", currentValue = 20, flag = "fp_flow_speed", callback = function(v) FakePerks.Flowstate.SpeedBoost = v end })
@@ -3053,7 +3045,6 @@ SurvivorTab:CreateSlider({ name = "Snake Step Speed", range = {16, 100}, increme
 SurvivorTab:CreateSlider({ name = "Snake Step Cooldown", range = {0, 70}, increment = 1, suffix = "s", currentValue = 10, flag = "fp_snake_cd", callback = function(v) FakePerks.SnakeStep.Cooldown = v end })
 SurvivorTab:CreateToggle({ name = "Fake Quick Recovery", currentValue = false, flag = "fp_recovery", callback = function(v) FakePerks.QuickRecovery.Enabled = v end })
 SurvivorTab:CreateSlider({ name = "Quick Recovery Cooldown", range = {0, 70}, increment = 1, suffix = "s", currentValue = 10, flag = "fp_recovery_cd", callback = function(v) FakePerks.QuickRecovery.Cooldown = v end })
-
 SurvivorTab:CreateSection("Aimbot Pistol (Survivor)")
 SurvivorTab:CreateToggle({ name = "Aimbot Pistol (Hold RMB)", currentValue = false, flag = "aim_pistol", callback = function(v) GunAim.Enabled = v end })
 SurvivorTab:CreateToggle({ name = "Show FOV Circle", currentValue = false, flag = "aim_fovcircle", callback = function(v) FOVCircleVisible = v; if v and not FOVCircle then createFOVCircle() end end })
@@ -3068,7 +3059,6 @@ SurvivorTab:CreateSlider({ name = "Aimbot Smoothness", range = {0.1, 1}, increme
 SurvivorTab:CreateSlider({ name = "Aimbot Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "aim_predict", callback = function(v) GunAim.PredictStrength = v end })
 SurvivorTab:CreateToggle({ name = "Visibility Check", currentValue = false, flag = "aim_vis", callback = function(v) GunAim.VisibilityCheck = v end })
 
--- ============ SILENT AIM TAB ============
 local AimTab = Window:CreateTab({ name = "Silent Aim", icon = 0 })
 AimTab:CreateSection("Silent Aim Veil Spear")
 AimTab:CreateToggle({ name = "Enable Silent Aim Spear", currentValue = false, flag = "silent_spear", callback = function(v) SilentAimSpear.Enabled = v end })
@@ -3077,13 +3067,11 @@ AimTab:CreateDropdown({ name = "Silent Aim Target", options = {"Killer", "Surviv
 AimTab:CreateDropdown({ name = "Silent Aim Part", options = {"Head", "HumanoidRootPart", "Torso"}, currentOption = "HumanoidRootPart", flag = "silent_part", callback = function(opt) SilentAimSpear.AimPart = opt end })
 AimTab:CreateSlider({ name = "Silent Aim FOV", range = {50, 1000}, increment = 10, currentValue = 250, flag = "silent_fov_val", callback = function(v) SilentAimSpear.FOV = v end })
 AimTab:CreateSlider({ name = "Silent Aim Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "silent_pred", callback = function(v) SilentAimSpear.Prediction = v end })
-
 AimTab:CreateSection("Hit Marker")
 AimTab:CreateToggle({ name = "Enable Hit Marker", currentValue = false, flag = "hm_on", callback = function(v) HitMarker.Enabled = v; if v and #HitMarkerLines == 0 then createHitMarkerLines() end end })
 AimTab:CreateColorPicker({ name = "Hit Marker Color", color = HitMarker.Color, flag = "hm_color", callback = function(c) HitMarker.Color = c end })
 AimTab:CreateSlider({ name = "Hit Marker Size", range = {5, 50}, increment = 1, suffix = "px", currentValue = 20, flag = "hm_size", callback = function(v) HitMarker.Size = v end })
 AimTab:CreateSlider({ name = "Hit Marker Thickness", range = {1, 5}, increment = 1, suffix = "px", currentValue = 2, flag = "hm_thick", callback = function(v) HitMarker.Thickness = v end })
-
 AimTab:CreateSection("Aimlock Button (On-Screen)")
 AimTab:CreateToggle({ name = "Show Aimlock Button", currentValue = false, flag = "alb_show", callback = function(v) AimlockButton.Enabled = v; if v then createAimlockButton() else removeAimlockButton() end end })
 AimTab:CreateToggle({ name = "Show Aimlock Circle", currentValue = true, flag = "alb_circle", callback = function(v) AimlockButton.ShowCircle = v end })
@@ -3094,7 +3082,6 @@ AimTab:CreateSlider({ name = "Aimlock Strength", range = {0.1, 1}, increment = 0
 AimTab:CreateSlider({ name = "Aimlock Prediction", range = {0, 1}, increment = 0.01, currentValue = 0.12, flag = "alb_predict", callback = function(v) AimlockButton.Predict = v end })
 AimTab:CreateColorPicker({ name = "Aimlock Circle Color", color = AimlockButton.CircleColor, flag = "alb_color", callback = function(c) AimlockButton.CircleColor = c end })
 
--- ============ KILLER TAB ============
 local KillerTab = Window:CreateTab({ name = "Killer", icon = 0 })
 KillerTab:CreateSection("Attack")
 KillerTab:CreateToggle({ name = "Auto Attack", currentValue = false, flag = "k_attack", callback = function(v) Killer.AutoAttack = v end })
@@ -3102,41 +3089,33 @@ KillerTab:CreateSlider({ name = "Attack Delay", range = {0.1, 2}, increment = 0.
 KillerTab:CreateToggle({ name = "Auto Kill All", currentValue = false, flag = "k_killall", callback = function(v) Killer.KillAll = v end })
 KillerTab:CreateToggle({ name = "Prediction Attack", currentValue = false, flag = "k_predict", callback = function(v) Killer.PredictionAttack = v end })
 KillerTab:CreateSlider({ name = "Prediction Strength", range = {0, 1}, increment = 0.05, currentValue = 0.15, flag = "k_predict_str", callback = function(v) Killer.PredictStrength = v end })
-
-KillerTab:CreateSection("Aimbot Killer (Lock saat Hit)")
+KillerTab:CreateSection("Aimbot Killer")
 KillerTab:CreateToggle({ name = "Killer Aim Lock", currentValue = false, flag = "kaim_on", callback = function(v) KillerAim.Enabled = v end })
 KillerTab:CreateSlider({ name = "Killer Aim FOV", range = {50, 500}, increment = 10, currentValue = 200, flag = "kaim_fov", callback = function(v) KillerAim.FOV = v end })
 KillerTab:CreateSlider({ name = "Killer Aim Smoothness", range = {0.1, 1}, increment = 0.05, currentValue = 0.5, flag = "kaim_smooth", callback = function(v) KillerAim.Strength = v end })
-
 KillerTab:CreateSection("Carry & Hook")
 KillerTab:CreateToggle({ name = "Auto Carry Downed", currentValue = false, flag = "k_carry", callback = function(v) Killer.AutoCarry = v end })
 KillerTab:CreateToggle({ name = "Auto Hook After Carry", currentValue = false, flag = "k_hook", callback = function(v) Killer.AutoHook = v end })
 KillerTab:CreateToggle({ name = "Auto Hook All Downed", currentValue = false, flag = "k_hookall", callback = function(v) Killer.AutoHookAllDowned = v end })
 KillerTab:CreateSlider({ name = "Hook All Range", range = {100, 2000}, increment = 50, suffix = "stud", currentValue = 500, flag = "k_hookall_range", callback = function(v) Killer.AutoHookAllRange = v end })
-
 KillerTab:CreateSection("Auto Sprint")
 KillerTab:CreateToggle({ name = "Auto Sprint", currentValue = false, flag = "k_sprint", callback = function(v) Killer.AutoSprint = v end })
 KillerTab:CreateSlider({ name = "Sprint Speed", range = {16, 100}, increment = 1, currentValue = 30, flag = "k_sprint_val", callback = function(v) Killer.AutoSprintValue = v end })
-
 KillerTab:CreateSection("Auto Face Target")
 KillerTab:CreateToggle({ name = "Auto Face Survivor", currentValue = false, flag = "k_face", callback = function(v) Killer.AutoFaceTarget = v end })
 KillerTab:CreateSlider({ name = "Face Range", range = {5, 100}, increment = 5, suffix = "stud", currentValue = 20, flag = "k_face_range", callback = function(v) Killer.AutoFaceRange = v end })
-
 KillerTab:CreateSection("Chase Detector")
 KillerTab:CreateToggle({ name = "Chase Alert", currentValue = false, flag = "k_chase", callback = function(v) ChaseDetector.Enabled = v end })
 KillerTab:CreateSlider({ name = "Chase Range", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 30, flag = "k_chase_range", callback = function(v) ChaseDetector.Range = v end })
 KillerTab:CreateSlider({ name = "Chase Cooldown", range = {0.5, 10}, increment = 0.5, suffix = "s", currentValue = 2, flag = "k_chase_cd", callback = function(v) ChaseDetector.Cooldown = v end })
-
 KillerTab:CreateSection("Stalk")
 KillerTab:CreateToggle({ name = "Auto Stalk", currentValue = false, flag = "k_stalk", callback = function(v) Killer.AutoStalk = v; if v then startAutoStalk() else stopAutoStalk() end end })
 KillerTab:CreateSlider({ name = "Stalk Range", range = {50, 500}, increment = 10, suffix = "stud", currentValue = 150, flag = "k_stalk_range", callback = function(v) Killer.StalkRange = v end })
-
 KillerTab:CreateSection("Masked Power")
 KillerTab:CreateDropdown({ name = "Select Power", options = MaskedPowers, currentOption = "Cobra", flag = "k_masked", callback = function(opt) Masked.CurrentPower = opt end })
 KillerTab:CreateButton({ name = "Activate Power", callback = activateMasked })
 KillerTab:CreateButton({ name = "Deactivate Power", callback = deactivateMasked })
 
--- ============ TELEPORT TAB ============
 local TeleportTab = Window:CreateTab({ name = "Teleport", icon = 0 })
 TeleportTab:CreateSection("Teleport Cepat")
 TeleportTab:CreateButton({ name = "Teleport ke Generator", callback = function()
@@ -3168,7 +3147,6 @@ TeleportTab:CreateToggle({ name = "Auto Escape (Kabur dari Killer)", currentValu
 TeleportTab:CreateSlider({ name = "Detect Distance", range = {10, 200}, increment = 5, suffix = "stud", currentValue = 40, flag = "escape_dist", callback = function(v) AutoEscape.DetectDistance = v end })
 TeleportTab:CreateSlider({ name = "Cooldown", range = {0.2, 3}, increment = 0.1, suffix = "s", currentValue = 0.8, flag = "escape_cd", callback = function(v) AutoEscape.Cooldown = v end })
 
--- ============ AVATAR TAB ============
 local AvatarTab = Window:CreateTab({ name = "Avatar", icon = 0 })
 AvatarTab:CreateSection("Copy Avatar")
 AvatarTab:CreateInput({ name = "Target Username", currentValue = "", placeholder = "Ketik username (tanpa @)", flag = "av_username", callback = function(v) AvatarCopier.TargetUsername = v end })
@@ -3181,7 +3159,6 @@ end })
 AvatarTab:CreateSection("Setting")
 AvatarTab:CreateToggle({ name = "Blocky Body (R6 Style)", currentValue = true, flag = "av_blocky", callback = function(v) AvatarCopier.BlockyBody = v end })
 
--- ============ MISC TAB ============
 local MiscTab = Window:CreateTab({ name = "Misc", icon = 0 })
 MiscTab:CreateSection("Walk Speed")
 MiscTab:CreateToggle({ name = "Enable Walk Speed", currentValue = false, flag = "m_ws", callback = function(v) Movement.WalkSpeedEnabled = v; if v then applyWalkSpeed() else local hum = getHum(); if hum then hum.WalkSpeed = Movement.OriginalWalkSpeed end end end })
@@ -3190,7 +3167,6 @@ MiscTab:CreateSection("No Clip")
 MiscTab:CreateToggle({ name = "No Clip", currentValue = false, flag = "m_noclip", callback = function(v) toggleNoClip(v) end })
 MiscTab:CreateSection("Anti KnockDown / GodMode")
 MiscTab:CreateToggle({ name = "Anti KnockDown (GodMode)", currentValue = false, flag = "m_god", callback = function(v) PlayerMods.GodMode = v end })
-
 MiscTab:CreateSection("Moonwalk")
 MiscTab:CreateToggle({ name = "Moonwalk", currentValue = false, flag = "m_moonwalk", callback = function(v) Moonwalk.Enabled = v; if v then startMoonwalk(); applyMoonwalkFOV() else stopMoonwalk() end end })
 MiscTab:CreateDropdown({ name = "Moonwalk Mode", options = {"Default", "Camera"}, currentOption = "Default", flag = "m_moon_mode", callback = function(opt)
@@ -3204,12 +3180,10 @@ end })
 MiscTab:CreateToggle({ name = "Moonwalk Button", currentValue = false, flag = "m_moonwalk_btn", callback = function(v) Moonwalk.ShowButton = v; if v then createMoonwalkButton() else removeMoonwalkButton() end end })
 MiscTab:CreateSlider({ name = "Spam Speed", range = {1, 50}, increment = 1, currentValue = 30, flag = "m_moon_spam", callback = function(v) Moonwalk.SpamSpeed = v end })
 MiscTab:CreateSlider({ name = "Intensity", range = {1, 50}, increment = 1, currentValue = 35, flag = "m_moon_int", callback = function(v) Moonwalk.Intensity = v end })
-
 MiscTab:CreateSection("Emote")
 MiscTab:CreateDropdown({ name = "Select Emote", options = EmoteList, currentOption = "Mannrobics", flag = "m_emote", callback = function(opt) Emote.Selected = opt end })
 MiscTab:CreateButton({ name = "Play Emote", callback = function() playEmote(Emote.Selected) end })
 
--- ============ VISUAL TAB ============
 local VisualTab = Window:CreateTab({ name = "Visual", icon = 0 })
 VisualTab:CreateSection("Lighting")
 VisualTab:CreateToggle({ name = "Fullbright", currentValue = false, flag = "v_fb", callback = function(v) Visual.Fullbright = v; applyVisual(true) end })
@@ -3230,11 +3204,9 @@ VisualTab:CreateToggle({ name = "No Bloom", currentValue = false, flag = "v_nobl
 VisualTab:CreateToggle({ name = "No Blur / DOF", currentValue = false, flag = "v_noblur", callback = function(v) Visual.NoBlur = v; toggleScreenEffects() end })
 VisualTab:CreateToggle({ name = "No Camera Shake", currentValue = false, flag = "v_noshake", callback = function(v) Visual.NoCameraShake = v; applyCameraShake() end })
 VisualTab:CreateToggle({ name = "No Blood", currentValue = false, flag = "v_noblood", callback = function(v) Visual.NoBlood = v; removeBlood() end })
-
 VisualTab:CreateSection("Graphics Optimization")
 VisualTab:CreateToggle({ name = "Low Graphics", currentValue = false, flag = "v_lowgfx", callback = function(v) Visual.LowGraphics = v; applyOptimization(true) end })
 VisualTab:CreateToggle({ name = "Clean Sky", currentValue = false, flag = "v_cleansky", callback = function(v) Visual.CleanSky = v; applyOptimization(true) end })
-
 VisualTab:CreateSection("Color Correction")
 VisualTab:CreateToggle({ name = "Enable Color Correction", currentValue = false, flag = "v_cc", callback = function(v) Visual.ColorCorrection = v; applyColorCorrection() end })
 VisualTab:CreateSlider({ name = "Saturation", range = {-1, 1}, increment = 0.05, currentValue = 0, flag = "v_sat", callback = function(v) Visual.Saturation = v; applyColorCorrection() end })
@@ -3244,17 +3216,14 @@ VisualTab:CreateButton({ name = "Reset Color", callback = function()
     resetColorCorrection()
     Rayfield:Notify({ title = "Color Reset", content = "Saturation, Brightness, Contrast di-reset ke 0." })
 end })
-
 VisualTab:CreateSection("Camera")
 VisualTab:CreateToggle({ name = "Unlimited Zoom Out", currentValue = false, flag = "v_zoom", callback = function(v) CameraZoom.UnlimitedZoom = v; applyUnlimitedZoom() end })
 VisualTab:CreateSlider({ name = "Max Zoom Distance", range = {100, 5000}, increment = 50, currentValue = 1000, flag = "v_zoom_max", callback = function(v) CameraZoom.MaxDistance = v; if CameraZoom.UnlimitedZoom then applyUnlimitedZoom() end end })
 VisualTab:CreateToggle({ name = "Custom FOV", currentValue = false, flag = "v_fov", callback = function(v) CameraZoom.FOVEnabled = v; applyCameraFOV() end })
 VisualTab:CreateSlider({ name = "Camera FOV", range = {40, 120}, increment = 1, currentValue = 70, flag = "v_fov_val", callback = function(v) CameraZoom.FOV = v; if CameraZoom.FOVEnabled then applyCameraFOV() end end })
-
 VisualTab:CreateSection("Effect")
 VisualTab:CreateToggle({ name = "Hide Red Spark", currentValue = false, flag = "v_hide_spark", callback = function(v) HideSpark.Enabled = v; if v then startHideSpark() else stopHideSpark() end end })
 
--- ============ ANTI-LAG TAB ============
 local AntiLagTab = Window:CreateTab({ name = "Anti-Lag", icon = 0 })
 AntiLagTab:CreateSection("Anti-Lag Pack")
 AntiLagTab:CreateToggle({ name = "Enable Anti-Lag", currentValue = false, flag = "al_on", callback = function(v) AntiLag.Enabled = v end })
@@ -3265,7 +3234,6 @@ AntiLagTab:CreateToggle({ name = "Physics Throttle", currentValue = false, flag 
 AntiLagTab:CreateToggle({ name = "No Global Shadows", currentValue = false, flag = "al_shadows", callback = function(v) AntiLag.NoGlobalShadows = v end })
 AntiLagTab:CreateToggle({ name = "Network Replication Lag", currentValue = false, flag = "al_net", callback = function(v) AntiLag.NetworkLag = v end })
 
--- ============ CROSSHAIR TAB ============
 local CrosshairTab = Window:CreateTab({ name = "Crosshair", icon = 0 })
 CrosshairTab:CreateToggle({ name = "Enable Crosshair", currentValue = false, flag = "ch_on", callback = function(v) Crosshair.Enabled = v end })
 CrosshairTab:CreateDropdown({ name = "Style", options = {"Plus", "Dot", "Circle"}, currentOption = "Plus", flag = "ch_style", callback = function(opt) Crosshair.Style = opt end })
@@ -3275,11 +3243,9 @@ CrosshairTab:CreateSlider({ name = "Thickness", range = {1, 5}, increment = 1, s
 CrosshairTab:CreateSlider({ name = "Position X", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_x", callback = function(v) Crosshair.OffsetX = v end })
 CrosshairTab:CreateSlider({ name = "Position Y", range = {-100, 100}, increment = 1, suffix = "px", currentValue = 0, flag = "ch_y", callback = function(v) Crosshair.OffsetY = v end })
 
--- ============ UI SETTINGS TAB ============
 local UISettingsTab = Window:CreateTab({ name = "UI Settings", icon = 0 })
 UISettingsTab:CreateSection("FPS / Ping Overlay")
 UISettingsTab:CreateToggle({ name = "Show FPS/Ping Overlay", currentValue = true, flag = "fps_overlay", callback = function(v) FPSOverlay.Enabled = v end })
-
 UISettingsTab:CreateSection("Sound Feedback")
 UISettingsTab:CreateToggle({ name = "Enable Click Sound", currentValue = true, flag = "sf_on", callback = function(v) SoundFeedback.Enabled = v end })
 UISettingsTab:CreateDropdown({ name = "Sound Type", options = {"Click", "Switch", "Beep", "Bell", "Whoosh"}, currentOption = "Click", flag = "sf_type", callback = function(opt)
@@ -3295,7 +3261,6 @@ UISettingsTab:CreateButton({ name = "Test Sound", callback = function()
     playClickSound()
     Rayfield:Notify({ title = "Sound", content = "Sound: " .. SoundFeedback.CurrentSound })
 end })
-
 UISettingsTab:CreateSection("Sasuke Background")
 UISettingsTab:CreateButton({ name = "Toggle Sasuke BG", callback = function()
     BGImage.Visible = not BGImage.Visible
@@ -3309,7 +3274,6 @@ UISettingsTab:CreateButton({ name = "Cara Ganti Gambar", callback = function()
     })
 end })
 
--- ============ SOUND WRAPPER ============
 local function wrapCallbacks()
     local origToggle = Window.CreateToggle
     local origButton = Window.CreateButton
@@ -3368,7 +3332,6 @@ end
 
 pcall(wrapCallbacks)
 
--- ============ STARTUP ============
 task.wait(0.5)
 pcall(function() applyParryPreset(Auto.ParryMode) end)
 pcall(function() if Auto.SkillCheck then startSkillCheck() end end)
@@ -3376,7 +3339,6 @@ pcall(function() applyVisual(true) end)
 pcall(function() applyOptimization(true) end)
 pcall(function() createFPSOverlay() end)
 
--- ============ NOTIFIKASI ============
 task.wait(1)
 Rayfield:Notify({
     title = "TiarHub v20",
@@ -3405,7 +3367,6 @@ Rayfield:Notify({
     duration = 10
 })
 
--- ============ PRINT STATUS ============
 print("============================================")
 print("  TIARHUB v20 - ALL LOADED")
 print("  ==========================================")
@@ -3428,7 +3389,7 @@ print("  [OK] Crosshair Style (Plus/Dot/Circle)")
 print("  [OK] Copy Avatar")
 print("  [OK] Teleport + Instant Escape")
 print("  [OK] Visual + Low Graphics + Clean Sky")
-print("  [OK] Anti-Lag + Hide Spark")
+print("  [OK] Anti-Lag + Hide Red Spark")
 print("  [OK] FPS/Ping Overlay")
 print("  [OK] Sasuke Background (Placeholder)")
 print("  [OK] Rainbow UI + Nama Tebal")

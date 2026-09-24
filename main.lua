@@ -51,6 +51,14 @@ _G.RoooorS = _G.RoooorS or {
     Aimlock = false, AimlockRadius = 500, AimlockLocked = false,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     Korblox = false, Headless = false,
+    Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
+    Killer_KillAll = false,
+    Killer_Hitbox = false, Killer_HitboxSize = 15,
+    Killer_AutoStalk = false, Killer_StalkRange = 150,
+    MaskedPower = "Cobra",
+    FastVault = false, FastVaultSpeed = 1.5,
+    Moonwalk = false, MoonwalkSpam = 30, MoonwalkIntensity = 35, MoonwalkSlow = 13,
+    MoonwalkLocked = false,
 }
 
 local S = _G.RoooorS
@@ -183,30 +191,18 @@ local SkyList = {
 }
 
 local SkyIds = {
-    Sunset = "rbxassetid://159454299",
-    Night = "rbxassetid://159454299",
-    Space = "rbxassetid://159454299",
-    Alien = "rbxassetid://159454299",
-    Purple = "rbxassetid://159454299",
-    Pink = "rbxassetid://159454299",
-    Cyan = "rbxassetid://159454299",
-    Red = "rbxassetid://159454299",
-    Blue = "rbxassetid://159454299",
-    Green = "rbxassetid://159454299",
-    Galaxy = "rbxassetid://159454299",
-    Nebula = "rbxassetid://159454299",
-    Aurora = "rbxassetid://159454299",
-    Cosmic = "rbxassetid://159454299",
-    Void = "rbxassetid://159454299",
-    Heaven = "rbxassetid://159454299",
-    Hell = "rbxassetid://159454299",
-    Ocean = "rbxassetid://159454299",
-    Desert = "rbxassetid://159454299",
-    Forest = "rbxassetid://159454299",
-    Snow = "rbxassetid://159454299",
-    Storm = "rbxassetid://159454299",
-    Rainbow = "rbxassetid://159454299",
-    Golden = "rbxassetid://159454299",
+    Sunset = "rbxassetid://159454299", Night = "rbxassetid://159454299",
+    Space = "rbxassetid://159454299", Alien = "rbxassetid://159454299",
+    Purple = "rbxassetid://159454299", Pink = "rbxassetid://159454299",
+    Cyan = "rbxassetid://159454299", Red = "rbxassetid://159454299",
+    Blue = "rbxassetid://159454299", Green = "rbxassetid://159454299",
+    Galaxy = "rbxassetid://159454299", Nebula = "rbxassetid://159454299",
+    Aurora = "rbxassetid://159454299", Cosmic = "rbxassetid://159454299",
+    Void = "rbxassetid://159454299", Heaven = "rbxassetid://159454299",
+    Hell = "rbxassetid://159454299", Ocean = "rbxassetid://159454299",
+    Desert = "rbxassetid://159454299", Forest = "rbxassetid://159454299",
+    Snow = "rbxassetid://159454299", Storm = "rbxassetid://159454299",
+    Rainbow = "rbxassetid://159454299", Golden = "rbxassetid://159454299",
 }
 
 local KillerAnims = {}
@@ -447,12 +443,6 @@ closeB.AutoButtonColor = false
 closeB.Parent = head
 rnd(closeB, 8)
 strk(closeB, C.RED, 1, 0.5)
-closeB.MouseEnter:Connect(function()
-    TweenService:Create(closeB, TweenInfo.new(0.1), {BackgroundColor3 = C.RED, TextColor3 = Color3.new(1,1,1)}):Play()
-end)
-closeB.MouseLeave:Connect(function()
-    TweenService:Create(closeB, TweenInfo.new(0.1), {BackgroundColor3 = C.PANEL2, TextColor3 = C.RED}):Play()
-end)
 closeB.MouseButton1Click:Connect(function()
     main.Visible = false
     fBtn.Visible = true
@@ -795,6 +785,57 @@ function btn(name, cb)
     end)
 end
 
+function drp(name, options, def, cb)
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(1, -4, 0, 32)
+    f.BackgroundColor3 = C.BG
+    f.BackgroundTransparency = 0.4
+    f.BorderSizePixel = 0
+    f.Parent = cs
+    rnd(f, 10)
+    strk(f, C.ACC, 1, 0.7)
+
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(0.5, 0, 1, 0)
+    l.Position = UDim2.new(0, 12, 0, 0)
+    l.BackgroundTransparency = 1
+    l.Text = name
+    l.TextColor3 = C.TXT
+    l.TextSize = 11
+    l.Font = Enum.Font.GothamMedium
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Parent = f
+
+    local idx = 1
+    for i, o in ipairs(options) do if o == def then idx = i end end
+    local cur = options[idx]
+
+    local v = Instance.new("TextLabel")
+    v.Size = UDim2.new(0.5, -30, 1, 0)
+    v.Position = UDim2.new(0.5, 0, 0, 0)
+    v.BackgroundTransparency = 1
+    v.Text = tostring(cur) .. " ▶"
+    v.TextColor3 = C.ACC2
+    v.TextSize = 10
+    v.Font = Enum.Font.GothamBold
+    v.TextXAlignment = Enum.TextXAlignment.Right
+    v.Parent = f
+
+    local cB = Instance.new("TextButton")
+    cB.Size = UDim2.new(1, 0, 1, 0)
+    cB.BackgroundTransparency = 1
+    cB.Text = ""
+    cB.Parent = f
+
+    cB.MouseButton1Click:Connect(function()
+        idx = idx + 1
+        if idx > #options then idx = 1 end
+        cur = options[idx]
+        v.Text = tostring(cur) .. " ▶"
+        if cb then pcall(cb, cur) end
+    end)
+end
+
 -- TAB SYSTEM
 local activeTab = nil
 function makeTab(name, icon, order, cb)
@@ -1122,164 +1163,6 @@ function updateObjESP(obj, root, enabled, color)
 end
 
 print("✅ [7/12] ESP loaded")-- =========================================================
--- BAGIAN 9/12 : VISUAL FUNCTIONS
--- =========================================================
-
-function applyFullbright(s)
-    if s then
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.Ambient = Color3.new(1, 1, 1)
-        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-        Lighting.GlobalShadows = false
-    else
-        Lighting.Brightness = 1
-        Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-        Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-        Lighting.GlobalShadows = true
-    end
-end
-
-function applyNoFog(s)
-    if s then
-        Lighting.FogEnd = 9e9
-        Lighting.FogStart = 9e9
-    else
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
-    end
-end
-
-local origSky = nil
-for _, v in pairs(Lighting:GetChildren()) do
-    if v:IsA("Sky") then origSky = v:Clone() break end
-end
-
-function applySky(skyName)
-    for _, v in pairs(Lighting:GetChildren()) do
-        if v:IsA("Sky") then v:Destroy() end
-    end
-    if skyName and skyName ~= "Default" then
-        local skyId = SkyIds[skyName] or "rbxassetid://159454299"
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = skyId
-        sky.SkyboxDn = skyId
-        sky.SkyboxFt = skyId
-        sky.SkyboxLf = skyId
-        sky.SkyboxRt = skyId
-        sky.SkyboxUp = skyId
-        sky.Parent = Lighting
-    elseif origSky then
-        origSky:Clone().Parent = Lighting
-    end
-end
-
-function applyFOV()
-    local cam = workspace.CurrentCamera
-    if cam then
-        if S.FOVEnabled then
-            cam.FieldOfView = S.FOV
-        else
-            cam.FieldOfView = 70
-        end
-    end
-end
-
-function applyUltraHD()
-    if S.UltraHD then
-        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
-        Lighting.GlobalShadows = true
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        if not _G.RoooorHD then
-            _G.RoooorHD = Instance.new("ColorCorrectionEffect")
-            _G.RoooorHD.Parent = Lighting
-        end
-        _G.RoooorHD.Contrast = 0.2
-        _G.RoooorHD.Saturation = 0.15
-    else
-        if _G.RoooorHD then _G.RoooorHD:Destroy(); _G.RoooorHD = nil end
-    end
-end
-
-function applyContrast()
-    if S.Contrast then
-        if not _G.ContrastFx then
-            _G.ContrastFx = Instance.new("ColorCorrectionEffect")
-            _G.ContrastFx.Parent = Lighting
-        end
-        _G.ContrastFx.Contrast = S.ContrastVal
-        _G.ContrastFx.Saturation = S.SaturationVal
-    else
-        if _G.ContrastFx then _G.ContrastFx:Destroy(); _G.ContrastFx = nil end
-    end
-end
-
-function applyKorblox(s)
-    local char = LP.Character
-    if not char then return end
-    local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
-    local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
-    for _, leg in pairs({lLeg, rLeg}) do
-        if leg then
-            if s then
-                leg.BrickColor = BrickColor.new("Really black")
-                leg.Material = Enum.Material.Slate
-                if not leg:FindFirstChild("RoooorKorblox") then
-                    local mesh = Instance.new("SpecialMesh")
-                    mesh.Name = "RoooorKorblox"
-                    mesh.MeshType = Enum.MeshType.FileMesh
-                    mesh.MeshId = "rbxassetid://1395869870"
-                    mesh.Parent = leg
-                end
-            else
-                if leg:FindFirstChild("RoooorKorblox") then
-                    leg.RoooorKorblox:Destroy()
-                end
-                leg.Material = Enum.Material.Plastic
-            end
-        end
-    end
-end
-
-function applyHeadless(s)
-    local char = LP.Character
-    if not char then return end
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-    if s then
-        head.Transparency = 1
-        for _, v in pairs(head:GetChildren()) do
-            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
-                v.Transparency = 1
-            end
-        end
-    else
-        head.Transparency = 0
-        for _, v in pairs(head:GetChildren()) do
-            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
-                v.Transparency = 0
-            end
-        end
-    end
-end
-
-task.spawn(function()
-    while gui.Parent do
-        task.wait(0.1)
-        if S.WalkSpeed and LP.Character then
-            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                local target = S.WalkSpeedVal + (S.WalkSpeedBoost or 0)
-                if hum.WalkSpeed ~= target then
-                    hum.WalkSpeed = target
-                end
-            end
-        end
-    end
-end)
-
-print("✅ [9/12] Visual loaded")-- =========================================================
 -- BAGIAN 8/12 : PARRY + SKILL + AIMLOCK
 -- =========================================================
 
@@ -1565,6 +1448,599 @@ task.spawn(function()
 end)
 
 print("✅ [8/12] Parry + Skill + Aimlock loaded")-- =========================================================
+-- BAGIAN 9/12 : VISUAL + KILLER FUNCTIONS
+-- =========================================================
+
+function applyFullbright(s)
+    if s then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.Ambient = Color3.new(1, 1, 1)
+        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+        Lighting.GlobalShadows = false
+    else
+        Lighting.Brightness = 1
+        Lighting.Ambient = Color3.fromRGB(70, 70, 70)
+        Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+        Lighting.GlobalShadows = true
+    end
+end
+
+function applyNoFog(s)
+    if s then
+        Lighting.FogEnd = 9e9
+        Lighting.FogStart = 9e9
+    else
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0
+    end
+end
+
+local origSky = nil
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Sky") then origSky = v:Clone() break end
+end
+
+function applySky(skyName)
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("Sky") then v:Destroy() end
+    end
+    if skyName and skyName ~= "Default" then
+        local skyId = SkyIds[skyName] or "rbxassetid://159454299"
+        local sky = Instance.new("Sky")
+        sky.SkyboxBk = skyId
+        sky.SkyboxDn = skyId
+        sky.SkyboxFt = skyId
+        sky.SkyboxLf = skyId
+        sky.SkyboxRt = skyId
+        sky.SkyboxUp = skyId
+        sky.Parent = Lighting
+    elseif origSky then
+        origSky:Clone().Parent = Lighting
+    end
+end
+
+function applyFOV()
+    local cam = workspace.CurrentCamera
+    if cam then
+        if S.FOVEnabled then
+            cam.FieldOfView = S.FOV
+        else
+            cam.FieldOfView = 70
+        end
+    end
+end
+
+function applyUltraHD()
+    if S.UltraHD then
+        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
+        Lighting.GlobalShadows = true
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        if not _G.RoooorHD then
+            _G.RoooorHD = Instance.new("ColorCorrectionEffect")
+            _G.RoooorHD.Parent = Lighting
+        end
+        _G.RoooorHD.Contrast = 0.2
+        _G.RoooorHD.Saturation = 0.15
+    else
+        if _G.RoooorHD then _G.RoooorHD:Destroy(); _G.RoooorHD = nil end
+    end
+end
+
+function applyContrast()
+    if S.Contrast then
+        if not _G.ContrastFx then
+            _G.ContrastFx = Instance.new("ColorCorrectionEffect")
+            _G.ContrastFx.Parent = Lighting
+        end
+        _G.ContrastFx.Contrast = S.ContrastVal
+        _G.ContrastFx.Saturation = S.SaturationVal
+    else
+        if _G.ContrastFx then _G.ContrastFx:Destroy(); _G.ContrastFx = nil end
+    end
+end
+
+-- KORBLOX (1 KAKI SAJA - KANAN)
+function applyKorblox(s)
+    local char = LP.Character
+    if not char then return end
+    
+    local rightLeg = char:FindFirstChild("Right Leg") 
+        or char:FindFirstChild("RightUpperLeg") 
+        or char:FindFirstChild("RightLowerLeg")
+    
+    if not rightLeg then
+        warn("[RoooorHub] Kaki kanan gak ketemu")
+        return
+    end
+    
+    if s then
+        if not _G.KorbloxOrig then
+            _G.KorbloxOrig = {
+                Color = rightLeg.Color,
+                BrickColor = rightLeg.BrickColor,
+                Material = rightLeg.Material,
+                Size = rightLeg.Size,
+            }
+        end
+        
+        rightLeg.Color = Color3.fromRGB(27, 42, 53)
+        rightLeg.Material = Enum.Material.Slate
+        
+        if rightLeg:FindFirstChild("RoooorKorblox") then
+            rightLeg.RoooorKorblox:Destroy()
+        end
+        
+        local mesh = Instance.new("SpecialMesh")
+        mesh.Name = "RoooorKorblox"
+        mesh.MeshType = Enum.MeshType.FileMesh
+        mesh.MeshId = "rbxassetid://1395869870"
+        mesh.TextureId = ""
+        mesh.Scale = Vector3.new(1, 1, 1)
+        mesh.Parent = rightLeg
+    else
+        if rightLeg:FindFirstChild("RoooorKorblox") then
+            rightLeg.RoooorKorblox:Destroy()
+        end
+        
+        if _G.KorbloxOrig then
+            rightLeg.Color = _G.KorbloxOrig.Color
+            rightLeg.BrickColor = _G.KorbloxOrig.BrickColor
+            rightLeg.Material = _G.KorbloxOrig.Material
+            rightLeg.Size = _G.KorbloxOrig.Size
+            _G.KorbloxOrig = nil
+        else
+            rightLeg.Material = Enum.Material.Plastic
+        end
+    end
+end
+
+function applyHeadless(s)
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    if s then
+        head.Transparency = 1
+        for _, v in pairs(head:GetChildren()) do
+            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                v.Transparency = 1
+            end
+        end
+    else
+        head.Transparency = 0
+        for _, v in pairs(head:GetChildren()) do
+            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                v.Transparency = 0
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if S.WalkSpeed and LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local target = S.WalkSpeedVal + (S.WalkSpeedBoost or 0)
+                if hum.WalkSpeed ~= target then
+                    hum.WalkSpeed = target
+                end
+            end
+        end
+    end
+end)
+
+-- INSTANT ESCAPE
+function teleportToFinishLine()
+    local root = getRoot()
+    if not root then return end
+    
+    local found = nil
+    local searchNames = {"fininshline", "finishline", "finish", "gate", "exit", "escape"}
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local lname = string.lower(obj.Name)
+            for _, search in ipairs(searchNames) do
+                if string.find(lname, search) then
+                    found = obj
+                    break
+                end
+            end
+            if found then break end
+        end
+    end
+    
+    if not found then
+        warn("[RoooorHub] Finish line gak ketemu")
+        return
+    end
+    
+    root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
+end
+
+-- FAST VAULT
+local FastVaultMap = {
+    ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
+}
+local VaultTracks = {}
+
+local function hookVault(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+    
+    animator.AnimationPlayed:Connect(function(track)
+        if not S.FastVault then return end
+        local anim = track.Animation
+        if not anim or not anim.AnimationId then return end
+        local id = tostring(anim.AnimationId):match("%d+")
+        if not id then return end
+        local fullId = "rbxassetid://" .. id
+        local replaceId = FastVaultMap[fullId]
+        if not replaceId then return end
+        if VaultTracks[track] then return end
+        VaultTracks[track] = true
+        track:Stop()
+        local newAnim = Instance.new("Animation")
+        newAnim.AnimationId = replaceId
+        local newTrack = animator:LoadAnimation(newAnim)
+        newTrack.Priority = Enum.AnimationPriority.Action
+        newTrack:Play()
+        newTrack:AdjustSpeed(S.FastVaultSpeed or 1.5)
+        newTrack.Stopped:Connect(function()
+            VaultTracks[track] = nil
+        end)
+    end)
+end
+
+LP.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    hookVault(char)
+end)
+if LP.Character then hookVault(LP.Character) end
+
+-- MOONWALK
+_G.MoonwalkConn = nil
+
+local function isDowned()
+    local char = LP.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return false end
+    return hum.Health <= 0 or hum.Health < 2
+end
+
+function startMoonwalk()
+    if _G.MoonwalkConn then return end
+    _G.MoonwalkConn = RunService.RenderStepped:Connect(function()
+        if not S.Moonwalk then return end
+        if isDowned() then return end
+        local char = LP.Character
+        if not char then return end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+        if not humanoid or not hrp or not cam then return end
+        if humanoid.WalkSpeed ~= S.MoonwalkSlow then
+            humanoid.WalkSpeed = S.MoonwalkSlow
+        end
+        local look = cam.CFrame.LookVector
+        local flatLook = Vector3.new(look.X, 0, look.Z)
+        if flatLook.Magnitude > 0 then
+            flatLook = flatLook.Unit
+            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+            local angle = math.sin(tick() * S.MoonwalkSpam) * S.MoonwalkIntensity
+            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+            humanoid:Move(Vector3.new(0, 0, 1), true)
+        end
+    end)
+end
+
+function stopMoonwalk()
+    if _G.MoonwalkConn then
+        _G.MoonwalkConn:Disconnect()
+        _G.MoonwalkConn = nil
+    end
+    local char = LP.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if S.WalkSpeed then
+                hum.WalkSpeed = S.WalkSpeedVal + (S.WalkSpeedBoost or 0)
+            else
+                hum.WalkSpeed = 16
+            end
+        end
+    end
+end
+
+-- KILLER FUNCTIONS
+local lastAtk = 0
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if S.Killer_AutoAtk then
+            local now = tick()
+            if now - lastAtk >= (S.Killer_AtkDelay or 0.35) then
+                lastAtk = now
+                pcall(function()
+                    local r = ReplicatedStorage:FindFirstChild("Remotes")
+                    if r then
+                        local a = r:FindFirstChild("Attacks")
+                        if a then
+                            local atk = a:FindFirstChild("BasicAttack")
+                            if atk then atk:FireServer(false) end
+                        end
+                    end
+                end)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.2)
+        if S.Killer_KillAll then
+            local myRoot = getRoot()
+            if myRoot then
+                local closest, shortest = nil, 500
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if hrp and hum and hum.Health > 0 then
+                            local dist = (hrp.Position - myRoot.Position).Magnitude
+                            if dist < shortest then shortest = dist; closest = hrp end
+                        end
+                    end
+                end
+                if closest then
+                    local targetPos = closest.Position + (closest.AssemblyLinearVelocity * 0.15)
+                    local behind = closest.CFrame.LookVector * -3
+                    myRoot.CFrame = CFrame.new(targetPos + behind, targetPos)
+                    pcall(function()
+                        local r = ReplicatedStorage:FindFirstChild("Remotes")
+                        if r then
+                            local a = r:FindFirstChild("Attacks")
+                            if a then
+                                local atk = a:FindFirstChild("BasicAttack")
+                                if atk then atk:FireServer(false) end
+                            end
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+local hitboxCache = {}
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.3)
+        if S.Killer_Hitbox then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health > 0 then
+                        local parts = {
+                            p.Character:FindFirstChild("Head"),
+                            p.Character:FindFirstChild("UpperTorso") or p.Character:FindFirstChild("Torso"),
+                            p.Character:FindFirstChild("HumanoidRootPart"),
+                        }
+                        for _, part in pairs(parts) do
+                            if part and part:IsA("BasePart") then
+                                if not hitboxCache[part] then
+                                    hitboxCache[part] = { Size = part.Size, Transparency = part.Transparency }
+                                end
+                                local size = S.Killer_HitboxSize or 15
+                                part.Size = Vector3.new(size, size, size)
+                                part.Transparency = 0.7
+                                part.CanCollide = false
+                                part.BrickColor = BrickColor.new("Really red")
+                                part.Material = Enum.Material.Neon
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            for part, orig in pairs(hitboxCache) do
+                if part and part.Parent then
+                    part.Size = orig.Size
+                    part.Transparency = orig.Transparency
+                    part.CanCollide = true
+                    part.Material = Enum.Material.Plastic
+                end
+                hitboxCache[part] = nil
+            end
+        end
+    end
+end)
+
+local function activateMaskedPower(power)
+    pcall(function()
+        local r = ReplicatedStorage:FindFirstChild("Remotes")
+        if r then
+            local k = r:FindFirstChild("Killers")
+            if k then
+                local m = k:FindFirstChild("Masked")
+                if m then
+                    local ev = m:FindFirstChild("Activatepower")
+                    if ev then ev:FireServer(power) end
+                end
+            end
+        end
+    end)
+end
+
+local function deactivateMaskedPower()
+    pcall(function()
+        local r = ReplicatedStorage:FindFirstChild("Remotes")
+        if r then
+            local k = r:FindFirstChild("Killers")
+            if k then
+                local m = k:FindFirstChild("Masked")
+                if m then
+                    local ev = m:FindFirstChild("Deactivatepower")
+                    if ev then ev:FireServer() end
+                end
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if S.Killer_AutoStalk then
+            local myRoot = getRoot()
+            if myRoot then
+                local closest, shortest = nil, S.Killer_StalkRange or 150
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if hrp and hum and hum.Health > 30 then
+                            local dist = (hrp.Position - myRoot.Position).Magnitude
+                            if dist < shortest then shortest = dist; closest = p end
+                        end
+                    end
+                end
+                if closest then
+                    pcall(function()
+                        local r = ReplicatedStorage:FindFirstChild("Remotes")
+                        if r then
+                            local k = r:FindFirstChild("Killers")
+                            if k then
+                                local s = k:FindFirstChild("Stalker")
+                                if s then
+                                    local ev = s:FindFirstChild("StartStalking")
+                                    if ev then ev:FireServer(closest) end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- MOONWALK BUTTON
+_G.MoonwalkButton = nil
+
+function createMoonwalkButton()
+    if _G.MoonwalkButton then _G.MoonwalkButton:Destroy() end
+    local btnGui = Instance.new("ScreenGui")
+    btnGui.Name = "RoooorMoonwalkBtn"
+    btnGui.ResetOnSpawn = false
+    btnGui.IgnoreGuiInset = true
+    btnGui.Parent = PG
+    local btn = Instance.new("TextButton")
+    btn.Name = "MoonwalkBtn"
+    btn.Size = UDim2.new(0, 52, 0, 52)
+    btn.Position = UDim2.new(0.65, 0, 0.75, 0)
+    btn.BackgroundColor3 = C.PANEL
+    btn.Text = "🌙"
+    btn.TextColor3 = C.ACC2
+    btn.TextSize = 26
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.AutoButtonColor = false
+    btn.Parent = btnGui
+    rnd(btn, 26)
+    local bStrk = strk(btn, C.ACC, 2)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 100, 0, 14)
+    lbl.Position = UDim2.new(0.5, -50, 1, 2)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "MOONWALK"
+    lbl.TextColor3 = C.ACC2
+    lbl.TextSize = 10
+    lbl.Font = Enum.Font.GothamBlack
+    lbl.TextStrokeTransparency = 0.3
+    lbl.Parent = btn
+    local lockLbl = Instance.new("TextLabel")
+    lockLbl.Name = "LockLabel"
+    lockLbl.Size = UDim2.new(0, 100, 0, 12)
+    lockLbl.Position = UDim2.new(0.5, -50, 1, 17)
+    lockLbl.BackgroundTransparency = 1
+    lockLbl.Text = "🔓"
+    lockLbl.TextColor3 = C.DIM
+    lockLbl.TextSize = 9
+    lockLbl.Font = Enum.Font.GothamBold
+    lockLbl.Parent = btn
+    local dragging = false
+    local ds, dp
+    local wasDragged = false
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if S.MoonwalkLocked then return end
+            dragging = true
+            wasDragged = false
+            ds = input.Position
+            dp = btn.Position
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local d = input.Position - ds
+            if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
+            btn.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    btn.MouseButton1Click:Connect(function()
+        if wasDragged then wasDragged = false; return end
+        S.Moonwalk = not S.Moonwalk
+        if S.Moonwalk then
+            btn.BackgroundColor3 = C.ACC
+            bStrk.Color = C.ACC2
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            startMoonwalk()
+        else
+            btn.BackgroundColor3 = C.PANEL
+            bStrk.Color = C.ACC
+            btn.TextColor3 = C.ACC2
+            stopMoonwalk()
+        end
+    end)
+    _G.MoonwalkButton = btnGui
+end
+
+function removeMoonwalkButton()
+    if _G.MoonwalkButton then _G.MoonwalkButton:Destroy(); _G.MoonwalkButton = nil end
+end
+
+function updateMoonwalkLock()
+    if not _G.MoonwalkButton then return end
+    local btn = _G.MoonwalkButton:FindFirstChild("MoonwalkBtn", true)
+    if btn then
+        local lockLbl = btn:FindFirstChild("LockLabel")
+        if lockLbl then
+            if S.MoonwalkLocked then
+                lockLbl.Text = "🔒"
+                lockLbl.TextColor3 = C.GOLD
+            else
+                lockLbl.Text = "🔓"
+                lockLbl.TextColor3 = C.DIM
+            end
+        end
+    end
+end
+
+print("✅ [9/12] Visual + Killer loaded")-- =========================================================
 -- BAGIAN 10/12 : ISI TAB FIRE + FIRE FEET
 -- =========================================================
 
@@ -1617,6 +2093,8 @@ makeTab("Fire", "🔥", 1, function()
                     c.BackgroundTransparency = 0.4
                     local l = c:FindFirstChildOfClass("TextLabel")
                     if l then l.TextColor3 = C.TXT end
+                    local s = c:FindFirstChildOfClass("UIStroke")
+                    if s then s.Color = C.ACC end
                 end
             end
             btn.BackgroundColor3 = C.ACC
@@ -1675,6 +2153,8 @@ makeTab("Fire Feet", "👟", 2, function()
                     c.BackgroundTransparency = 0.4
                     local l = c:FindFirstChildOfClass("TextLabel")
                     if l then l.TextColor3 = C.TXT end
+                    local s = c:FindFirstChildOfClass("UIStroke")
+                    if s then s.Color = C.ACC end
                 end
             end
             btn.BackgroundColor3 = C.ACC
@@ -1686,7 +2166,7 @@ makeTab("Fire Feet", "👟", 2, function()
 end)
 
 print("✅ [10/12] Tab Fire + Fire Feet loaded")-- =========================================================
--- BAGIAN 11/12 : ISI TAB ESP + SURVIVOR + VISUAL + MOVEMENT
+-- BAGIAN 11/12 : ISI TAB LAINNYA
 -- =========================================================
 
 -- TAB ESP
@@ -1753,8 +2233,35 @@ makeTab("Survivor", "🏃", 4, function()
     end)
 end)
 
+-- TAB KILLER
+makeTab("Killer", "🔪", 5, function()
+    sec("Auto Attack", "⚔️")
+    tog("Auto Spam Attack", false, function(s) S.Killer_AutoAtk = s end)
+    sl("Attack Delay", 0.1, 2, 0.35, function(v) S.Killer_AtkDelay = v end)
+
+    sec("Auto Kill All", "💀")
+    tog("Auto Kill All", false, function(s) S.Killer_KillAll = s end)
+    lbl("TP + Attack survivor terdekat", C.ACC2)
+    lbl("⚠️ Beresiko ban di public", C.RED)
+
+    sec("Hitbox Expander", "📦")
+    tog("Enable Hitbox", false, function(s) S.Killer_Hitbox = s end)
+    sl("Hitbox Size", 3, 30, 15, function(v) S.Killer_HitboxSize = v end)
+
+    sec("Masked Power", "🎭")
+    drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
+        S.MaskedPower = v
+    end)
+    btn("⚡ Activate Power", function() activateMaskedPower(S.MaskedPower or "Cobra") end)
+    btn("❌ Deactivate Power", function() deactivateMaskedPower() end)
+
+    sec("Auto Stalk", "👁️")
+    tog("Auto Stalk", false, function(s) S.Killer_AutoStalk = s end)
+    sl("Stalk Range", 50, 500, 150, function(v) S.Killer_StalkRange = v end)
+end)
+
 -- TAB VISUAL
-makeTab("Visual", "🎨", 5, function()
+makeTab("Visual", "🎨", 6, function()
     sec("Top 5 Wajib", "⭐")
     tog("Fullbright", false, function(s) S.Fullbright = s; applyFullbright(s) end)
     tog("No Fog", false, function(s) S.NoFog = s; applyNoFog(s) end)
@@ -1809,6 +2316,8 @@ makeTab("Visual", "🎨", 5, function()
                     c.BackgroundTransparency = 0.4
                     local l = c:FindFirstChildOfClass("TextLabel")
                     if l then l.TextColor3 = C.TXT end
+                    local s = c:FindFirstChildOfClass("UIStroke")
+                    if s then s.Color = C.ACC end
                 end
             end
             btn.BackgroundColor3 = C.ACC
@@ -1819,26 +2328,72 @@ makeTab("Visual", "🎨", 5, function()
     end
 
     sec("Appearance", "💫")
-    tog("Korblox Legs", false, function(s) S.Korblox = s; applyKorblox(s) end)
+    tog("Korblox Legs (1 Kaki)", false, function(s) S.Korblox = s; applyKorblox(s) end)
     tog("Headless", false, function(s) S.Headless = s; applyHeadless(s) end)
 end)
 
 -- TAB MOVEMENT
-makeTab("Movement", "🏃", 6, function()
+makeTab("Movement", "🏃", 7, function()
     sec("Walk Speed", "⚡")
     tog("Enable Walk Speed", false, function(s) S.WalkSpeed = s end)
     sl("Speed Value", 16, 100, 16, function(v) S.WalkSpeedVal = v end)
     sl("Speed Boost", 0, 100, 0, function(v) S.WalkSpeedBoost = v end)
+
+    sec("Instant Escape", "🚪")
+    btn("🚀 Instant Escape (TP Finish)", function()
+        teleportToFinishLine()
+    end)
+    lbl("Teleport ke finish line/gate", C.ACC2)
+
+    sec("Fast Vault", "🏃")
+    tog("Enable Fast Vault", false, function(s) S.FastVault = s end)
+    sl("Animation Speed", 1, 5, 1.5, function(v) S.FastVaultSpeed = v end)
+
+    sec("Moonwalk", "🌙")
+    tog("Enable Moonwalk", false, function(s)
+        S.Moonwalk = s
+        if s then startMoonwalk() else stopMoonwalk() end
+    end)
+    sl("Spam Speed", 1, 100, 30, function(v) S.MoonwalkSpam = v end)
+    sl("Intensity", 1, 90, 35, function(v) S.MoonwalkIntensity = v end)
+    sl("Slow Speed", 5, 30, 13, function(v) S.MoonwalkSlow = v end)
+    lbl("Konsisten Lobby & Ingame", C.GRN)
+
+    sec("Moonwalk Floating Button", "🌙")
+    tog("Show Moonwalk Button", false, function(s)
+        if s then
+            createMoonwalkButton()
+            task.wait(0.1)
+            updateMoonwalkLock()
+        else
+            removeMoonwalkButton()
+        end
+    end)
+    tog("🔒 Lock Moonwalk Button", false, function(s)
+        S.MoonwalkLocked = s
+        updateMoonwalkLock()
+    end)
+    btn("🔄 Reset Posisi Moonwalk", function()
+        if _G.MoonwalkButton then
+            local b = _G.MoonwalkButton:FindFirstChild("MoonwalkBtn", true)
+            if b then b.Position = UDim2.new(0.65, 0, 0.75, 0) end
+        end
+    end)
 end)
 
 -- TAB SETTINGS
-makeTab("Settings", "⚙️", 7, function()
+makeTab("Settings", "⚙️", 8, function()
     sec("Keybind", "⌨️")
     lbl("RightShift = Toggle Menu", C.ACC2)
+    lbl("Klik ⚡ = Buka Menu", C.ACC2)
+    lbl("Drag Header = Pindah Window", C.DIM)
+    lbl("Drag 🎯/🌙 = Pindah Tombol", C.DIM)
+
     sec("Info", "ℹ️")
     lbl("RoooorHub Premium Ultimate", C.ACC4)
     lbl("60 Fire + 20 Fire Feet + 25 Sky", C.ACC2)
     lbl("ESP + Parry + Skill + Aimlock", C.ACC2)
+    lbl("Killer + Visual + Movement", C.ACC2)
     lbl("Made with 💜", C.ACC3)
 end)
 
@@ -1858,11 +2413,7 @@ rnd(fpsPanel, 14)
 strk(fpsPanel, C.ACC, 1, 0.5)
 
 local fpsGrad = Instance.new("UIGradient")
-fpsGrad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, C.ACC),
-    ColorSequenceKeypoint.new(0.5, C.ACC2),
-    ColorSequenceKeypoint.new(1, C.ACC3),
-}
+fpsGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
 fpsGrad.Rotation = 0
 fpsGrad.Parent = fpsPanel
 
@@ -1950,6 +2501,7 @@ task.spawn(function()
     end
 end)
 
+-- RESPAWN HANDLER
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     HookedKillers = {}
@@ -1959,8 +2511,11 @@ LP.CharacterAdded:Connect(function(char)
     if S.Parry then scanKillers() end
     if S.Korblox then task.wait(0.3); applyKorblox(true) end
     if S.Headless then task.wait(0.3); applyHeadless(true) end
+    if S.FastVault then task.wait(0.5); hookVault(char) end
+    if S.Moonwalk then task.wait(0.5); startMoonwalk() end
 end)
 
+-- KEYBIND RightShift
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -1974,6 +2529,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- BUKA TAB PERTAMA
 task.wait(0.3)
 for _, c in pairs(sb:GetChildren()) do
     if c:IsA("TextButton") then
@@ -1982,6 +2538,7 @@ for _, c in pairs(sb:GetChildren()) do
     end
 end
 
+-- WINDOW NEON ANIMATION
 task.spawn(function()
     while main.Parent do
         task.wait(0.05)
@@ -1991,17 +2548,20 @@ task.spawn(function()
     end
 end)
 
+-- FINAL PRINT
 print("=====================================================")
 print("✅ [12/12] PREMIUM ULTIMATE - LOADED!")
 print("🎉 ROOORHUB PREMIUM ULTIMATE - SUCCESS!")
 print("=====================================================")
-print("🔥 Tab Fire        : 60 Efek (List Button)")
-print("👟 Tab Fire Feet   : 20 Efek")
-print("👁️ Tab ESP         : Player + Gen + Pallet + Window + SCP")
-print("🏃 Tab Survivor    : Parry 360° + Circle + Skill + Aimlock")
-print("🎨 Tab Visual      : Fullbright + No Fog + Contrast + FOV + 25 Sky")
-print("🏃 Tab Movement    : Walk Speed + Boost")
-print("⚙️ Tab Settings    : Info")
+print("🔥 Fire         : 60 Efek")
+print("👟 Fire Feet    : 20 Efek")
+print("👁️ ESP          : Player + Gen + Pallet + Window + SCP")
+print("🏃 Survivor     : Parry + Skill + Aimlock")
+print("🔪 Killer       : Auto Attack + Kill All + Hitbox")
+print("🎨 Visual       : Fullbright + No Fog + FOV + 25 Sky")
+print("💫 Appearance   : Korblox (1 kaki) + Headless")
+print("🚀 Movement     : Walk Speed + Instant Escape + Fast Vault")
+print("🌙 Moonwalk     : Konsisten Lobby & Ingame")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
 print("=====================================================")

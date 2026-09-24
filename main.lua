@@ -29,7 +29,7 @@ local C = {
     GRN = Color3.fromRGB(0, 255, 150),
 }
 
--- STATE (PAKAI _G - ANTI RESET)
+-- STATE GLOBAL (ANTI RESET)
 _G.RoooorS = _G.RoooorS or {
     FireOn = false,
     FireType = "Classic",
@@ -66,25 +66,22 @@ _G.RoooorS = _G.RoooorS or {
 
 local S = _G.RoooorS
 
--- TOGGLE STATE (ANTI VISUAL RESET)
+-- STATE SYNC
 _G.ToggleStates = _G.ToggleStates or {}
 _G.ToggleObjects = _G.ToggleObjects or {}
+_G.SliderStates = _G.SliderStates or {}
+_G.DropdownStates = _G.DropdownStates or {}
 
 -- 60 FIRE EFFECT
 local FireList = {
-    -- 1-10 Klasik
     "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
     "GoldenKing", "SakuraFire", "EmeraldFire", "BloodFire", "ShadowFire",
-    -- 11-20 Elemen
     "HolyFire", "OceanFire", "Firework", "Lava", "GhostFire",
     "CosmicFire", "DragonFire", "MysteryFire", "RainbowFire", "LightningFire",
-    -- 21-30 Super Duper
     "GalaxyFire", "NebulaFire", "AuroraFire", "PhoenixFire", "DemonFire",
     "AngelFire", "CrystalFire", "NeonFire", "PlasmaFire", "QuantumFire",
-    -- 31-40 Legendary
     "LegendaryFire", "MythicFire", "DivineFire", "CursedFire", "AncientFire",
     "EternalFire", "InfernoFire", "BifrostFire", "ChaosFire", "OmegaFire",
-    -- 41-60 Ultra Recommended
     "SolarFire", "LunarFire", "EclipseFire", "SolarFlare", "VoidStorm",
     "StarFire", "SupernovaFire", "BlackHoleFire", "MeteorFire", "CometFire",
     "FrostFire", "BlizzardFire", "ThunderFire", "StormFire", "TornadoFire",
@@ -92,7 +89,6 @@ local FireList = {
 }
 
 local FireConfig = {
-    -- 1-10
     Classic = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 200, 0) },
     HellFire = { c1 = Color3.fromRGB(150, 0, 0), c2 = Color3.fromRGB(255, 50, 0), smoke = true, smokeColor = Color3.fromRGB(20, 20, 20) },
     IceFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(200, 240, 255), spark = true, light = Color3.fromRGB(100, 200, 255) },
@@ -103,7 +99,6 @@ local FireConfig = {
     EmeraldFire = { c1 = Color3.fromRGB(0, 200, 100), c2 = Color3.fromRGB(100, 255, 150), light = Color3.fromRGB(0, 255, 150) },
     BloodFire = { c1 = Color3.fromRGB(200, 0, 0), c2 = Color3.fromRGB(100, 0, 0), smoke = true, smokeColor = Color3.fromRGB(80, 0, 0) },
     ShadowFire = { c1 = Color3.fromRGB(20, 20, 30), c2 = Color3.fromRGB(80, 0, 100), smoke = true, smokeColor = Color3.fromRGB(40, 0, 60) },
-    -- 11-20
     HolyFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 200), spark = true, light = Color3.fromRGB(255, 255, 255) },
     OceanFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(100, 200, 255), light = Color3.fromRGB(0, 150, 255) },
     Firework = { c1 = Color3.fromRGB(255, 0, 100), c2 = Color3.fromRGB(255, 200, 0), spark = true, rainbow = true },
@@ -114,7 +109,6 @@ local FireConfig = {
     MysteryFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
     RainbowFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true, spark = true },
     LightningFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(255, 255, 255), spark = true, light = Color3.fromRGB(200, 220, 255) },
-    -- 21-30
     GalaxyFire = { c1 = Color3.fromRGB(80, 0, 200), c2 = Color3.fromRGB(255, 200, 255), spark = true, rainbow = true, light = Color3.fromRGB(150, 100, 255) },
     NebulaFire = { c1 = Color3.fromRGB(200, 50, 255), c2 = Color3.fromRGB(50, 200, 255), spark = true, rainbow = true },
     AuroraFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(100, 255, 100), spark = true, rainbow = true },
@@ -125,7 +119,6 @@ local FireConfig = {
     NeonFire = { c1 = Color3.fromRGB(0, 255, 100), c2 = Color3.fromRGB(255, 0, 200), spark = true, rainbow = true, light = Color3.fromRGB(0, 255, 150) },
     PlasmaFire = { c1 = Color3.fromRGB(150, 0, 255), c2 = Color3.fromRGB(0, 200, 255), spark = true, light = Color3.fromRGB(150, 100, 255) },
     QuantumFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(255, 0, 100), rainbow = true, spark = true },
-    -- 31-40
     LegendaryFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 100, 0), spark = true, light = Color3.fromRGB(255, 200, 0) },
     MythicFire = { c1 = Color3.fromRGB(200, 0, 255), c2 = Color3.fromRGB(255, 200, 0), spark = true, rainbow = true },
     DivineFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 200, 100), spark = true, light = Color3.fromRGB(255, 240, 200) },
@@ -136,7 +129,6 @@ local FireConfig = {
     BifrostFire = { c1 = Color3.fromRGB(255, 100, 200), c2 = Color3.fromRGB(100, 255, 200), rainbow = true, spark = true, light = Color3.fromRGB(200, 200, 255) },
     ChaosFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 255), rainbow = true, spark = true },
     OmegaFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 0, 255), rainbow = true, spark = true, light = Color3.fromRGB(255, 150, 200) },
-    -- 41-60 RECOMMENDED
     SolarFire = { c1 = Color3.fromRGB(255, 150, 0), c2 = Color3.fromRGB(255, 255, 100), spark = true, light = Color3.fromRGB(255, 200, 0) },
     LunarFire = { c1 = Color3.fromRGB(200, 220, 255), c2 = Color3.fromRGB(100, 150, 255), spark = true, light = Color3.fromRGB(150, 200, 255) },
     EclipseFire = { c1 = Color3.fromRGB(50, 0, 100), c2 = Color3.fromRGB(255, 150, 0), spark = true, light = Color3.fromRGB(150, 100, 200) },
@@ -159,7 +151,10 @@ local FireConfig = {
     ReaperFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(255, 0, 0), smoke = true, smokeColor = Color3.fromRGB(80, 0, 0), light = Color3.fromRGB(150, 0, 0) },
 }
 
--- 23 KILLER ANIMS
+-- Print buat cek fire loaded
+print("🔥 Fire Config:", #FireList, "efek loaded")
+print("🔥 Contoh:", FireConfig.Classic and "Classic OK" or "Classic KOSONG")
+
 local KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -199,7 +194,7 @@ function rainbowSeq()
     }
 end
 
-print("✅ [1/6] Core + 60 Fire Config loaded")-- =========================================================
+print("✅ [1/6] Core loaded")-- =========================================================
 -- BAGIAN 2/6 : GUI + COMPONENTS + STATE SYNC
 -- =========================================================
 
@@ -257,7 +252,7 @@ task.spawn(function()
     end
 end)
 
--- DRAG
+-- DRAG FLOAT
 local dragF = false
 local dragFStart, dragFPos
 floatBtn.InputBegan:Connect(function(input)
@@ -406,6 +401,7 @@ ct.Parent = main
 rnd(ct, 10)
 strk(ct, C.ACC2, 1, 0.7)
 
+-- 🔥 CONTENT SCROLL (ZINDEX TINGGI BIAR DROPDOWN MUNCUL DI ATAS)
 local cs = Instance.new("ScrollingFrame")
 cs.Size = UDim2.new(1, -14, 1, -14)
 cs.Position = UDim2.new(0, 7, 0, 7)
@@ -524,7 +520,7 @@ function lbl(text, color)
     l.Parent = cs
 end
 
--- TOGGLE DENGAN STATE SYNC (ANTI OFF SENDIRI)
+-- 🔥 TOGGLE DENGAN STATE SYNC
 function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
@@ -556,7 +552,6 @@ function tog(name, def, cb)
     k.Parent = t
     rnd(k, 6)
 
-    -- 🔥 AMBIL STATE DARI GLOBAL
     local savedState = _G.ToggleStates[name]
     local state
     if savedState ~= nil then
@@ -566,7 +561,6 @@ function tog(name, def, cb)
         _G.ToggleStates[name] = state
     end
 
-    -- Set visual SESUAI state
     t.BackgroundColor3 = state and C.ACC or C.PANEL
     local tS = strk(t, state and C.ACC2 or C.DIM, 1, 0.5)
     k.Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
@@ -607,7 +601,7 @@ function syncToggles()
     end
 end
 
--- DROPDOWN
+-- 🔥 DROPDOWN FIX (PASTI MUNCUL)
 function drp(name, options, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
@@ -617,6 +611,7 @@ function drp(name, options, def, cb)
     f.Parent = cs
     rnd(f, 8)
     strk(f, C.ACC, 1, 0.8)
+
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0.5, 0, 1, 0)
     l.Position = UDim2.new(0, 10, 0, 0)
@@ -627,7 +622,11 @@ function drp(name, options, def, cb)
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
-    local cur = def or options[1]
+
+    local savedValue = _G.DropdownStates[name]
+    local cur = savedValue or def or options[1]
+    _G.DropdownStates[name] = cur
+
     local v = Instance.new("TextLabel")
     v.Size = UDim2.new(0.5, -20, 1, 0)
     v.Position = UDim2.new(0.5, 0, 0, 0)
@@ -638,23 +637,25 @@ function drp(name, options, def, cb)
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = f
+
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
     cB.BackgroundTransparency = 1
     cB.Text = ""
     cB.Parent = f
 
+    -- LIST
     local listOpen = false
     local listFrame = Instance.new("Frame")
     listFrame.Size = UDim2.new(1, 0, 0, 0)
-    listFrame.Position = UDim2.new(0, 0, 1, 2)
+    listFrame.Position = UDim2.new(0, 0, 1, 4)
     listFrame.BackgroundColor3 = C.PANEL
     listFrame.BorderSizePixel = 0
     listFrame.Visible = false
-    listFrame.ZIndex = 50
-    listFrame.Parent = f
+    listFrame.ZIndex = 100
+    listFrame.Parent = gui  -- 🔥 PARENT KE GUI (biar muncul di atas semua)
     rnd(listFrame, 8)
-    strk(listFrame, C.ACC2, 1)
+    strk(listFrame, C.ACC2, 1.5)
 
     local listScroll = Instance.new("ScrollingFrame")
     listScroll.Size = UDim2.new(1, -4, 1, -4)
@@ -687,6 +688,7 @@ function drp(name, options, def, cb)
         rnd(optBtn, 4)
         optBtn.MouseButton1Click:Connect(function()
             cur = opt
+            _G.DropdownStates[name] = cur
             v.Text = tostring(cur)
             listFrame.Visible = false
             listOpen = false
@@ -697,15 +699,20 @@ function drp(name, options, def, cb)
     cB.MouseButton1Click:Connect(function()
         listOpen = not listOpen
         if listOpen then
+            -- 🔥 POSISI LIST (di bawah dropdown)
+            local absPos = f.AbsolutePosition
+            local absSize = f.AbsoluteSize
+            local h = math.min(#options * 24 + 8, 250)
+            listFrame.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+            listFrame.Size = UDim2.new(0, absSize.X, 0, h)
             listFrame.Visible = true
-            local h = math.min(#options * 24 + 8, 200)
-            listFrame.Size = UDim2.new(1, 0, 0, h)
         else
             listFrame.Visible = false
         end
     end)
 end
 
+-- 🔥 SLIDER DENGAN STATE SYNC
 function sl(name, min, max, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 38)
@@ -725,11 +732,15 @@ function sl(name, min, max, def, cb)
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
+    local savedValue = _G.SliderStates[name]
+    local curVal = savedValue or def
+    _G.SliderStates[name] = curVal
+
     local v = Instance.new("TextLabel")
     v.Size = UDim2.new(0, 35, 0, 16)
     v.Position = UDim2.new(1, -42, 0, 3)
     v.BackgroundTransparency = 1
-    v.Text = tostring(def)
+    v.Text = tostring(curVal)
     v.TextColor3 = C.ACC2
     v.TextSize = 9
     v.Font = Enum.Font.GothamBold
@@ -743,14 +754,14 @@ function sl(name, min, max, def, cb)
     bg.Parent = f
     rnd(bg, 2)
     local fill = Instance.new("Frame")
-    fill.Size = UDim2.new((def - min) / (max - min), 0, 1, 0)
+    fill.Size = UDim2.new((curVal - min) / (max - min), 0, 1, 0)
     fill.BackgroundColor3 = C.ACC
     fill.BorderSizePixel = 0
     fill.Parent = bg
     rnd(fill, 2)
     local kn = Instance.new("Frame")
     kn.Size = UDim2.new(0, 10, 0, 10)
-    kn.Position = UDim2.new((def - min) / (max - min), -5, 0.5, -5)
+    kn.Position = UDim2.new((curVal - min) / (max - min), -5, 0.5, -5)
     kn.BackgroundColor3 = C.TXT
     kn.BorderSizePixel = 0
     kn.ZIndex = 2
@@ -760,6 +771,7 @@ function sl(name, min, max, def, cb)
     local function upd(input)
         local pos = math.clamp((input.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
         local val = math.floor((min + (max - min) * pos) * 100 + 0.5) / 100
+        _G.SliderStates[name] = val
         fill.Size = UDim2.new(pos, 0, 1, 0)
         kn.Position = UDim2.new(pos, -5, 0.5, -5)
         v.Text = tostring(val)
@@ -870,12 +882,12 @@ end)
 -- AUTO SYNC
 task.spawn(function()
     while gui.Parent do
-        task.wait(0.3)
+        task.wait(0.5)
         if syncToggles then pcall(syncToggles) end
     end
 end)
 
-print("✅ [2/6] GUI + Components + State Sync loaded")-- =========================================================
+print("✅ [2/6] GUI + Components + Dropdown FIX loaded")-- =========================================================
 -- BAGIAN 3/6 : FIRE KEPALA + ESP LENGKAP
 -- =========================================================
 
@@ -901,7 +913,7 @@ function applyFire()
     if not head then return end
     local cfg = FireConfig[S.FireType] or FireConfig.Classic
 
-    -- Fire utama di KEPALA
+    -- 🔥 FIRE DI KEPALA
     local fire = Instance.new("Fire")
     fire.Name = "RoooorFire"
     fire.Size = S.FireSize
@@ -939,6 +951,8 @@ function applyFire()
         light.Brightness = 2
         light.Parent = head
     end
+
+    print("[RoooorHub] Fire applied:", S.FireType)
 end
 
 -- Rainbow fire animation
@@ -964,7 +978,7 @@ task.spawn(function()
     end
 end)
 
--- ============== ESP SYSTEM (FALLENS) ==============
+-- ============== ESP SYSTEM ==============
 local ESPObjects = {}
 local StatusESP = {}
 
@@ -1001,7 +1015,7 @@ end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
--- Create Highlight ESP
+-- Create Highlight
 function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
@@ -1032,7 +1046,7 @@ function removeESP(obj)
     end
 end
 
--- ESP Nama Player + Status
+-- ESP Nama + Status
 function createStatusESP(player, char, root)
     if not S.ESP_Name then
         if StatusESP[char] then
@@ -1116,7 +1130,6 @@ function removeStatusESP(char)
     end
 end
 
--- Get Value helper (buat progress generator)
 function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -1146,7 +1159,6 @@ function updateGenerator(gen)
         return
     end
 
-    local cp = math.clamp(percent, 0, 100)
     local color = S.ESP_GenColor
     local text = string.format("[%.0f%%]", percent)
 
@@ -1214,12 +1226,12 @@ function updateSCP(obj, root)
 end
 
 print("✅ [3/6] Fire Kepala + ESP Lengkap loaded")-- =========================================================
--- BAGIAN 4/6 : AUTO PARRY SUPER WORK + CIRCLE + SKILLCHECK
+-- BAGIAN 4/6 : AUTO PARRY 360° + CIRCLE + SKILLCHECK
 -- =========================================================
 
--- ============== AUTO PARRY SUPER WORK ==============
+-- ============== AUTO PARRY 360° (SEMUA ARAH) ==============
 local lastParry = 0
-local PARRY_DEBOUNCE = 0.08
+local PARRY_DEBOUNCE = 0.05
 _G.ParryActive = false
 _G.HookedKillers = _G.HookedKillers or {}
 
@@ -1260,7 +1272,7 @@ function pressParryButton()
         VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
     end)
-    -- Prioritas 3: Fire remote
+    -- Prioritas 3: Remote fallback
     pcall(function()
         local remotes = ReplicatedStorage:FindFirstChild("Remotes")
         if remotes then
@@ -1284,20 +1296,20 @@ function doParry()
     lastParry = now
     _G.ParryActive = true
     pressParryButton()
-    task.delay(0.1, function() _G.ParryActive = false end)
+    task.delay(0.05, function() _G.ParryActive = false end)
 end
 
--- Range Check
+-- Range check (TANPA FACING - 360°)
 function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
     local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-    return dist <= S.ParryDist and dist > 1
+    return dist <= S.ParryDist and dist > 0.5
 end
 
--- Hook Killer (2 method: Event + Prediction Loop)
+-- Hook Killer (2 method: Event + Prediction Loop 360°)
 function hookKiller(char)
     if _G.HookedKillers[char] then return end
     _G.HookedKillers[char] = true
@@ -1315,20 +1327,24 @@ function hookKiller(char)
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-        local fullId = "rbxassetid://" .. id
-        if KillerAnims[fullId] then
-            if not isInParryRange(char) then return end
-            doParry()
+        if KillerAnims["rbxassetid://"..id] then
+            if isInParryRange(char) then
+                doParry()
+            end
         end
     end)
 
-    -- METHOD 2: Prediction Loop (lebih cepet)
+    -- 🔥 METHOD 2: Prediction Loop (360° - SEMUA ARAH)
     task.spawn(function()
         while _G.HookedKillers[char] and char.Parent do
-            task.wait(0.02)
+            task.wait(0.03)  -- Cek tiap 30ms (ringan)
             if not S.Parry then break end
             if _G.ParryActive then continue end
 
+            -- Cek jarak DULU (hemat performa)
+            if not isInParryRange(char) then continue end
+
+            -- Cek animasi (semua arah, gak peduli facing)
             local playing = animator:GetPlayingAnimationTracks()
             for _, track in ipairs(playing) do
                 local anim = track.Animation
@@ -1337,10 +1353,8 @@ function hookKiller(char)
                     if id then
                         local fullId = "rbxassetid://" .. id
                         if KillerAnims[fullId] then
-                            if isInParryRange(char) then
-                                doParry()
-                                break
-                            end
+                            doParry()
+                            break
                         end
                     end
                 end
@@ -1357,10 +1371,10 @@ function scanKillers()
     end
 end
 
--- Auto scan tiap 0.3 detik
+-- Auto scan tiap 0.2 detik
 task.spawn(function()
     while gui.Parent do
-        task.wait(0.3)
+        task.wait(0.2)
         if S.Parry then scanKillers() end
     end
 end)
@@ -1394,7 +1408,7 @@ function updateParryCircle()
     _G.ParryCirclePart.Transparency = 0.5
 end
 
--- ============== AUTO SKILL CHECK (FALLENS) ==============
+-- ============== AUTO SKILL CHECK ==============
 _G.SkillConn = nil
 local skillBusy = false
 local TouchID = 8822
@@ -1467,7 +1481,7 @@ function startSkillCheck()
     end)
 end
 
-print("✅ [4/6] Parry Super Work + Circle + SkillCheck loaded")-- =========================================================
+print("✅ [4/6] Parry 360° + Circle + SkillCheck loaded")-- =========================================================
 -- BAGIAN 5/6 : ULTRA HD + CONTRAST
 -- =========================================================
 
@@ -1597,8 +1611,8 @@ makeTab("Fire", "🔥", 2, function()
         S.FireSize = v
         applyFire()
     end)
-    lbl("Pilih dari 60 efek di atas ↑", C.ACC2)
-    lbl("Klik dropdown, pilih dari list", C.DIM)
+    lbl("Klik dropdown untuk pilih efek", C.ACC2)
+    lbl("60 efek fire di kepala", C.DIM)
 end)
 
 -- TAB 3 : ESP
@@ -1641,13 +1655,14 @@ end)
 
 -- TAB 4 : SURVIVOR
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry", "🛡️")
+    sec("Auto Parry 360°", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         S.Parry = s
         if s then scanKillers() end
     end)
     sl("Parry Distance", 3, 15, 8, function(v) S.ParryDist = v end)
-    lbl("Rekomendasi jarak: 8", C.ACC2)
+    lbl("360° - Semua arah", C.ACC2)
+    lbl("Rekomendasi jarak: 8", C.DIM)
 
     sec("Parry Circle", "🔵")
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
@@ -1715,8 +1730,9 @@ makeTab("Settings", "⚙️", 6, function()
     end)
 
     sec("Info", "ℹ️")
-    lbl("Version: 6.0 Ultimate", C.ACC3)
-    lbl("60 Fire + ESP + Parry + Skill", C.DIM)
+    lbl("Version: 7.0 Ultimate", C.ACC3)
+    lbl("60 Fire + ESP + Parry 360°", C.DIM)
+    lbl("Skill + Ultra HD + Contrast", C.DIM)
 end)
 
 -- =========================================================
@@ -1767,8 +1783,8 @@ task.spawn(function()
         local root = getRoot()
 
         if root then
-            -- ESP UPDATE (tiap 0.1s)
-            if now - lastESP >= 0.1 then
+            -- ESP UPDATE (tiap 0.2s - hemat performa)
+            if now - lastESP >= 0.2 then
                 lastESP = now
 
                 -- Player ESP
@@ -1777,16 +1793,19 @@ task.spawn(function()
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
                         if hum and hum.Health > 0 then
                             createStatusESP(p, p.Character, root)
-                            local dist = (p.Character.HumanoidRootPart.Position - root.Position).Magnitude
-                            if dist <= S.ESP_Radius and S.ESP_Name then
-                                local color = S.ESP_DefaultColor
-                                if p.Team then
-                                    if p.Team.Name == "Killer" then color = S.ESP_KillerColor
-                                    elseif p.Team.Name == "Survivors" then color = S.ESP_SurvivorColor end
+                            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                local dist = (hrp.Position - root.Position).Magnitude
+                                if dist <= S.ESP_Radius and S.ESP_Name then
+                                    local color = S.ESP_DefaultColor
+                                    if p.Team then
+                                        if p.Team.Name == "Killer" then color = S.ESP_KillerColor
+                                        elseif p.Team.Name == "Survivors" then color = S.ESP_SurvivorColor end
+                                    end
+                                    createESP(p.Character, color)
+                                else
+                                    removeESP(p.Character)
                                 end
-                                createESP(p.Character, color)
-                            else
-                                removeESP(p.Character)
                             end
                         else
                             removeStatusESP(p.Character)
@@ -1831,7 +1850,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- RESPAWN HANDLER (RE-APPLY SEMUA)
+-- RESPAWN HANDLER
 -- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
@@ -1895,11 +1914,11 @@ print("=====================================================")
 print("🔥 60 Fire Effect di Kepala (Dropdown)")
 print("👁️ ESP Lengkap (Player/Gen/Pallet/Window/SCP)")
 print("🎨 ESP Custom Warna + Nama Size Slider")
-print("🛡️ Auto Parry SUPER WORK (Prediction + 3 Fallback)")
+print("🛡️ Auto Parry 360° (Semua Arah)")
 print("🔵 Parry Circle Bulat Garis")
 print("🎯 Auto Skill Check (Fallens)")
 print("🎨 Ultra HD + Contrast")
-print("🔄 STATE SYNC (Fitur GAK OFF SENDIRI)")
+print("🔄 State Sync (Toggle/Slider/Dropdown GAK RESET)")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
 print("=====================================================")

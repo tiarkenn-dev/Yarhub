@@ -3961,76 +3961,282 @@ print("✅ Moonwalk Fix: LOBBY = INGAME")
 print("✅ Korblox Auto-Reapply: AKTIF")
 print("✅ Headless Auto-Reapply: AKTIF")
 print("=====================================================")-- =========================================================
--- FORCE FIX: PASTIKAN TAB BARU MUNCUL
+-- FIX TAB TAMBAHAN (Survivor+ / Visual+ / Anti / Top 10)
+-- Paste di PALING BAWAH script
 -- =========================================================
 
-task.wait(0.5)
+task.wait(1)
 
--- Cek apakah sidebar ScrollingFrame
-local sbFix = nil
-for _, obj in pairs(main:GetDescendants()) do
-    if obj:IsA("ScrollingFrame") and obj.Parent and obj.Parent.Size.X.Offset == 120 then
-        sbFix = obj
+-- =========================================================
+-- 1. FIX SIDEBAR JADI SCROLLING (kalau bukan)
+-- =========================================================
+local mainFrame = nil
+local currentSidebar = nil
+
+-- Cari window utama
+for _, obj in pairs(PG:GetDescendants()) do
+    if obj:IsA("Frame") and obj.Size.X.Offset == 480 and obj.Size.Y.Offset == 450 then
+        mainFrame = obj
         break
     end
 end
 
-if sbFix then
-    print("✅ Sidebar ScrollingFrame detected")
-    sbFix.CanvasSize = UDim2.new(0, 0, 0, 0)
-    sbFix.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    sbFix.ScrollingDirection = Enum.ScrollingDirection.Y
-    sbFix.ScrollBarThickness = 4
-    sbFix.ScrollBarImageColor3 = C.ACC
-    
-    -- Count tab
-    local tabCount = 0
-    for _, c in pairs(sbFix:GetChildren()) do
-        if c:IsA("TextButton") then tabCount = tabCount + 1 end
-    end
-    print("📊 Total tab:", tabCount, "(harus 12)")
-    
-    -- Kalau cuma 8, bikin tab baru manual
-    if tabCount < 12 then
-        print("⚠️ Tab kurang dari 12! Buat tab baru manual...")
-    end
-else
-    warn("❌ Sidebar bukan ScrollingFrame! Fix manual...")
-    -- Cari sidebar lama (Frame biasa)
-    local oldSb = nil
-    for _, obj in pairs(main:GetDescendants()) do
-        if obj:IsA("Frame") and obj.Size.X.Offset == 120 and obj:FindFirstChildOfClass("UIListLayout") then
-            oldSb = obj
-            break
-        end
-    end
-    if oldSb then
-        -- Ganti dengan ScrollingFrame
-        local newSb = Instance.new("ScrollingFrame")
-        newSb.Size = UDim2.new(1, -4, 1, -4)
-        newSb.Position = UDim2.new(0, 2, 0, 2)
-        newSb.BackgroundTransparency = 1
-        newSb.BorderSizePixel = 0
-        newSb.ScrollBarThickness = 4
-        newSb.ScrollBarImageColor3 = C.ACC
-        newSb.CanvasSize = UDim2.new(0, 0, 0, 0)
-        newSb.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        newSb.ScrollingDirection = Enum.ScrollingDirection.Y
-        newSb.Parent = oldSb
-        
-        -- Pindahin semua tab ke ScrollingFrame baru
-        for _, c in pairs(oldSb:GetChildren()) do
-            if c:IsA("TextButton") then
-                c.Parent = newSb
-            end
-        end
-        
-        local newL = Instance.new("UIListLayout")
-        newL.Padding = UDim.new(0, 5)
-        newL.Parent = newSb
-        
-        print("✅ Sidebar di-fix jadi ScrollingFrame")
+if not mainFrame then
+    warn("❌ Window utama gak ketemu, coba cek GUI")
+    return
+end
+
+print("✅ Window utama ketemu")
+
+-- Cari sidebar (Frame 120px)
+for _, obj in pairs(mainFrame:GetChildren()) do
+    if obj:IsA("Frame") and obj.Size.X.Offset == 120 then
+        currentSidebar = obj
+        break
     end
 end
 
-print("✅ [FORCE FIX] Sidebar fix selesai")
+if not currentSidebar then
+    warn("❌ Sidebar gak ketemu")
+    return
+end
+
+print("✅ Sidebar ketemu:", currentSidebar.ClassName)
+
+-- Kalau sidebar bukan ScrollingFrame, ganti
+if not currentSidebar:IsA("ScrollingFrame") then
+    print("⚠️ Sidebar bukan ScrollingFrame, fixing...")
+    
+    -- Buat ScrollingFrame baru di dalam sidebar
+    local newSb = Instance.new("ScrollingFrame")
+    newSb.Name = "RoooorScrollTabs"
+    newSb.Size = UDim2.new(1, -4, 1, -4)
+    newSb.Position = UDim2.new(0, 2, 0, 2)
+    newSb.BackgroundTransparency = 1
+    newSb.BorderSizePixel = 0
+    newSb.ScrollBarThickness = 4
+    newSb.ScrollBarImageColor3 = Color3.fromRGB(180, 80, 255)
+    newSb.CanvasSize = UDim2.new(0, 0, 0, 0)
+    newSb.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    newSb.ScrollingDirection = Enum.ScrollingDirection.Y
+    newSb.Parent = currentSidebar
+    
+    -- Pindah semua TextButton ke ScrollingFrame
+    local movedCount = 0
+    for _, c in pairs(currentSidebar:GetChildren()) do
+        if c:IsA("TextButton") then
+            c.Parent = newSb
+            movedCount = movedCount + 1
+        elseif c:IsA("UIListLayout") then
+            c.Parent = newSb
+        elseif c:IsA("UIPadding") then
+            c.Parent = newSb
+        end
+    end
+    
+    print("✅ Moved", movedCount, "tabs ke ScrollingFrame baru")
+    
+    -- Ganti reference sb
+    sb = newSb
+else
+    -- Udah ScrollingFrame, pastiin auto-size
+    currentSidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
+    currentSidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    currentSidebar.ScrollBarThickness = 4
+    currentSidebar.ScrollingDirection = Enum.ScrollingDirection.Y
+    sb = currentSidebar
+    print("✅ Sidebar udah ScrollingFrame")
+end
+
+-- =========================================================
+-- 2. CEK JUMLAH TAB — KALAU KURANG, BIKIN TAB BARU MANUAL
+-- =========================================================
+
+task.wait(0.5)
+
+local tabCount = 0
+for _, c in pairs(sb:GetChildren()) do
+    if c:IsA("TextButton") then tabCount = tabCount + 1 end
+end
+
+print("📊 Total tab saat ini:", tabCount)
+
+-- Kalau kurang dari 12, bikin tab baru
+if tabCount < 12 then
+    print("⚠️ Tab kurang, bikin tab baru manual...")
+
+    -- Function manual bikin tab (mirip makeTab)
+    local function manualTab(name, icon, order, cb)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(1, -8, 0, 34)
+        b.BackgroundColor3 = Color3.fromRGB(8, 6, 16)
+        b.BackgroundTransparency = 1
+        b.Text = ""
+        b.BorderSizePixel = 0
+        b.LayoutOrder = order
+        b.AutoButtonColor = false
+        b.Parent = sb
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(0, 8)
+        c.Parent = b
+
+        local ind = Instance.new("Frame")
+        ind.Size = UDim2.new(0, 3, 0, 0)
+        ind.Position = UDim2.new(0, 0, 0.5, 0)
+        ind.AnchorPoint = Vector2.new(0, 0.5)
+        ind.BackgroundColor3 = Color3.fromRGB(180, 80, 255)
+        ind.BorderSizePixel = 0
+        ind.Parent = b
+        local c2 = Instance.new("UICorner")
+        c2.CornerRadius = UDim.new(0, 2)
+        c2.Parent = ind
+
+        local ico = Instance.new("TextLabel")
+        ico.Size = UDim2.new(0, 24, 1, 0)
+        ico.Position = UDim2.new(0, 8, 0, 0)
+        ico.BackgroundTransparency = 1
+        ico.Text = icon
+        ico.TextColor3 = Color3.fromRGB(120, 120, 160)
+        ico.TextSize = 16
+        ico.Font = Enum.Font.GothamBold
+        ico.Parent = b
+
+        local lblT = Instance.new("TextLabel")
+        lblT.Size = UDim2.new(1, -32, 1, 0)
+        lblT.Position = UDim2.new(0, 34, 0, 0)
+        lblT.BackgroundTransparency = 1
+        lblT.Text = string.upper(name)
+        lblT.TextColor3 = Color3.fromRGB(120, 120, 160)
+        lblT.TextSize = 10
+        lblT.Font = Enum.Font.GothamBlack
+        lblT.TextXAlignment = Enum.TextXAlignment.Left
+        lblT.Parent = b
+
+        b.MouseButton1Click:Connect(function()
+            -- Reset tab lain
+            for _, c in pairs(sb:GetChildren()) do
+                if c:IsA("TextButton") then
+                    c.BackgroundTransparency = 1
+                    local oi = c:FindFirstChildOfClass("Frame")
+                    if oi then oi.Size = UDim2.new(0, 3, 0, 0) end
+                    for _, cl in pairs(c:GetChildren()) do
+                        if cl:IsA("TextLabel") then
+                            cl.TextColor3 = Color3.fromRGB(120, 120, 160)
+                        end
+                    end
+                end
+            end
+            -- Aktifin tab ini
+            b.BackgroundTransparency = 0.7
+            ind.Size = UDim2.new(0, 3, 0, 24)
+            ico.TextColor3 = Color3.fromRGB(245, 245, 255)
+            lblT.TextColor3 = Color3.fromRGB(245, 245, 255)
+            -- Clear content
+            for _, c in pairs(cs:GetChildren()) do
+                if not c:IsA("UIListLayout") then c:Destroy() end
+            end
+            if cb then pcall(cb) end
+        end)
+    end
+
+    -- Bikin tab Survivor+ (kalau belum ada)
+    manualTab("Survivor+", "🏃", 9, function()
+        sec("Auto Pallet Stun", "🪵")
+        tog("Enable Auto Pallet", false, function(s) X.AutoPallet = s end)
+        sl("Pallet Range", 3, 20, 8, function(v) X.AutoPalletRange = v end)
+        sec("Auto Vault Window", "🪟")
+        tog("Enable Auto Vault", false, function(s) X.AutoVault = s end)
+        sl("Vault Range", 5, 25, 10, function(v) X.AutoVaultRange = v end)
+        sec("Auto Heal", "💊")
+        tog("Enable Auto Heal", false, function(s) X.AutoHeal = s end)
+        sl("Heal Threshold", 10, 100, 40, function(v) X.AutoHealThreshold = v end)
+        sec("Auto Revive", "💀")
+        tog("Enable Auto Revive", false, function(s) X.AutoRevive = s end)
+        sec("Auto Repair Generator", "⚙️")
+        tog("Enable Auto Repair", false, function(s) X.AutoRepair = s end)
+        sec("Skill Perfect", "🎯")
+        tog("Enable Perfect Skill", false, function(s) X.SkillPerfect = s end)
+        sec("Safe Zone", "🟢")
+        tog("Enable Safe Zone", false, function(s) X.SafeZone = s end)
+        sec("Escape Alert", "⚠️")
+        tog("Enable Escape Alert", false, function(s) X.EscapeAlert = s end)
+        sl("Alert Range", 20, 200, 60, function(v) X.EscapeAlertRange = v end)
+    end)
+
+    manualTab("Visual+", "🎨", 10, function()
+        sec("Kill Effect", "💥")
+        tog("Enable Kill Effect", false, function(s) X.KillEffect = s end)
+        sec("Trail", "✨")
+        tog("Enable Trail", false, function(s) X.Trail = s; if _G.Roooor_applyTrail then _G.Roooor_applyTrail(s) end end)
+        cpk("Trail Color", X.TrailColor, function(c) X.TrailColor = c; if _G.Roooor_applyTrail then _G.Roooor_applyTrail(X.Trail) end end)
+        sec("Aura Effect", "🌟")
+        tog("Enable Aura", false, function(s) X.Aura = s; if _G.Roooor_applyAura then _G.Roooor_applyAura(s) end end)
+        cpk("Aura Color", X.AuraColor, function(c) X.AuraColor = c; if _G.Roooor_applyAura then _G.Roooor_applyAura(X.Aura) end end)
+        sec("RGB UI", "🌈")
+        tog("Enable RGB UI", false, function(s) X.RGBUI = s end)
+        sec("Crosshair", "➕")
+        tog("Enable Crosshair", false, function(s) X.Crosshair = s; if _G.Roooor_applyCrosshair then _G.Roooor_applyCrosshair(s) end end)
+        cpk("Crosshair Color", X.CrosshairColor, function(c) X.CrosshairColor = c; if _G.Roooor_applyCrosshair then _G.Roooor_applyCrosshair(X.Crosshair) end end)
+        sl("Crosshair Size", 3, 30, 8, function(v) X.CrosshairSize = v; if _G.Roooor_applyCrosshair then _G.Roooor_applyCrosshair(X.Crosshair) end end)
+        sec("Camera", "📷")
+        tog("No Clip Camera", false, function(s) X.NoClipCamera = s end)
+        tog("Zoom Out", false, function(s) X.ZoomOut = s; if _G.Roooor_applyZoomOut then _G.Roooor_applyZoomOut() end end)
+        sl("Zoom Distance", 100, 5000, 500, function(v) X.ZoomOutValue = v; if _G.Roooor_applyZoomOut then _G.Roooor_applyZoomOut() end end)
+    end)
+
+    manualTab("Anti", "🛡️", 11, function()
+        sec("Anti Stun", "⚡")
+        tog("Enable Anti Stun", false, function(s) X.AntiStun = s end)
+        sec("Anti Blind", "👁️")
+        tog("Enable Anti Blind", false, function(s) X.AntiBlind = s end)
+        sec("Anti Grab", "✋")
+        tog("Enable Anti Grab", false, function(s) X.AntiGrab = s end)
+        sec("Anti Hook", "🪝")
+        tog("Enable Anti Hook", false, function(s) X.AntiHook = s end)
+        sec("Anti Ragdoll", "🤸")
+        tog("Enable Anti Ragdoll", false, function(s) X.AntiRagdoll = s end)
+        sec("Anti Parry", "⚔️")
+        tog("Enable Anti Parry", false, function(s) X.AntiParry = s end)
+        sec("Anti Kick", "🚫")
+        tog("Enable Anti Kick", false, function(s) X.AntiKick = s end)
+        sec("Anti AFK", "💤")
+        tog("Enable Anti AFK", false, function(s) X.AntiAFK = s end)
+    end)
+
+    manualTab("Top 10", "🏆", 12, function()
+        sec("Fly", "🕊️")
+        tog("Enable Fly", false, function(s)
+            X.Fly = s
+            if s and _G.Roooor_startFly then _G.Roooor_startFly()
+            elseif _G.Roooor_stopFly then _G.Roooor_stopFly() end
+        end)
+        sl("Fly Speed", 10, 200, 50, function(v) X.FlySpeed = v end)
+        lbl("WASD + Space + LShift", Color3.fromRGB(0, 230, 255))
+        sec("Teleport", "🌀")
+        tog("Enable TP to Player", false, function(s) X.TPtoPlayer = s end)
+        sec("Item ESP", "📦")
+        tog("Enable Item ESP", false, function(s) X.ItemESP = s end)
+        cpk("Item Color", X.ItemESPColor, function(c) X.ItemESPColor = c end)
+        sec("Player List", "👥")
+        tog("Show Player List", false, function(s)
+            X.PlayerList = s
+            if s and _G.Roooor_createPlayerList then _G.Roooor_createPlayerList()
+            else
+                local plg = PG:FindFirstChild("RoooorPlayerList")
+                if plg then plg:Destroy() end
+            end
+        end)
+    end)
+
+    -- Hitung ulang
+    local newCount = 0
+    for _, c in pairs(sb:GetChildren()) do
+        if c:IsA("TextButton") then newCount = newCount + 1 end
+    end
+    print("✅ Setelah fix, total tab:", newCount)
+end
+
+print("=====================================================")
+print("✅ [FIX] TAB TAMBAHAN BERHASIL DIPERBAIKI")
+print("📊 Scroll sidebar ke bawah buat liat tab baru")
+print("=====================================================")

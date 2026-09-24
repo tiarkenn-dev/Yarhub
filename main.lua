@@ -1,5 +1,6 @@
 -- =========================================================
--- ROOORHUB PREMIUM - BAGIAN 1/12 : SERVICES + CONFIG
+-- ROOORHUB PREMIUM ULTIMATE + FALLENS ESP/PARRY
+-- BAGIAN 1/12 : SERVICES + CONFIG
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -205,6 +206,9 @@ local SkyIds = {
     Rainbow = "rbxassetid://159454299", Golden = "rbxassetid://159454299",
 }
 
+-- =========================================================
+-- KILLER ANIMATIONS - DARI FALLENS (LENGKAP 23)
+-- =========================================================
 local KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -214,6 +218,15 @@ for _, id in ipairs({
     "139369275981133","135002183282873","121216847022485","130593238885843",
     "117070354890871","106871536134254","138720291317243"
 }) do KillerAnims["rbxassetid://"..id] = true end
+
+-- Additional Parry Anim IDs (dari Fallens)
+local ParrySelfAnims = {
+    ["rbxassetid://127096285501517"] = true,  -- PARRY ANIM
+    ["rbxassetid://112166042383605"] = true,  -- BREAK PALLET
+    ["rbxassetid://126965695851149"] = true,  -- WALKCROUCH
+    ["rbxassetid://135084204086504"] = true,  -- WALKCROUCHINJURED
+    ["rbxassetid://123047897844134"] = true,  -- STUN
+}
 
 function rnd(o, r)
     local c = Instance.new("UICorner")
@@ -1057,31 +1070,58 @@ task.spawn(function()
 end)
 
 print("✅ [6/12] Fire + Fire Feet loaded")-- =========================================================
--- BAGIAN 7/12 : ESP FUNCTIONS
+-- BAGIAN 7/12 : ESP SYSTEM (FALLENS VERSION - AKURAT)
 -- =========================================================
 
-local StatusESP = {}
 local ESPObjects = {}
-local Cached = { Generators = {}, Windows = {}, Pallets = {}, SCPs = {} }
+local StatusESP = {}
+local CachedSCP = {}
+local Cached = {
+    Generators = {},
+    Windows = {},
+    Pallets = {},
+    SCPs = {}
+}
 
+-- =========================================================
+-- CACHE OBJECT (GENERATOR, WINDOW, PALLET, SCP)
+-- =========================================================
 local function cacheObject(obj)
-    if obj.Name == "Generator" then Cached.Generators[obj] = true
-    elseif obj.Name == "Window" then Cached.Windows[obj] = true
-    elseif obj.Name == "Pallet" or obj.Name == "Palletwrong" then Cached.Pallets[obj] = true
-    elseif string.find(string.lower(obj.Name), "scp") then Cached.SCPs[obj] = true
+    local lname = string.lower(obj.Name)
+    if obj.Name == "Generator" then
+        Cached.Generators[obj] = true
+    elseif obj.Name == "Window" then
+        Cached.Windows[obj] = true
+    elseif obj.Name == "Pallet" or obj.Name == "Palletwrong" then
+        Cached.Pallets[obj] = true
+    elseif string.find(lname, "scp") then
+        Cached.SCPs[obj] = true
+        CachedSCP[obj] = true
     end
 end
 
-for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
+for _, obj in ipairs(workspace:GetDescendants()) do
+    cacheObject(obj)
+end
+
 workspace.DescendantAdded:Connect(cacheObject)
+
 workspace.DescendantRemoving:Connect(function(obj)
     Cached.Generators[obj] = nil
     Cached.Windows[obj] = nil
     Cached.Pallets[obj] = nil
     Cached.SCPs[obj] = nil
+    CachedSCP[obj] = nil
+    if ESPObjects[obj] then
+        ESPObjects[obj]:Destroy()
+        ESPObjects[obj] = nil
+    end
 end)
 
-function createESP(obj, color)
+-- =========================================================
+-- CREATE / REMOVE HIGHLIGHT
+-- =========================================================
+local function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
         ESPObjects[obj].FillColor = color
@@ -1096,119 +1136,450 @@ function createESP(obj, color)
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = obj
     ESPObjects[obj] = h
+
+    obj.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            if ESPObjects[obj] then
+                ESPObjects[obj]:Destroy()
+                ESPObjects[obj] = nil
+            end
+        end
+    end)
 end
 
-function removeESP(obj)
+local function removeESP(obj)
     if ESPObjects[obj] then
         ESPObjects[obj]:Destroy()
         ESPObjects[obj] = nil
     end
 end
 
-function createStatusESP(player, char, root)
+-- =========================================================
+-- GET GAME VALUE (ATTRIBUTE / CHILD)
+-- =========================================================
+local function GetGameValue(obj, name)
+    if not obj then return nil end
+    local attr = obj:GetAttribute(name)
+    if attr ~= nil then return attr end
+    local child = obj:FindFirstChild(name)
+    if child then
+        local success, val = pcall(function() return child.Value end)
+        if success then return val end
+    end
+    return nil
+end
+
+-- =========================================================
+-- GENERATOR ESP (DENGAN % PROGRESS)
+-- =========================================================
+local function ApplyGenHighlight(object, color)
+    local h = object:FindFirstChild("GenHighlight") or Instance.new("Highlight")
+    h.Name = "GenHighlight"
+    h.Adornee = object
+    h.FillColor = color
+    h.OutlineColor = color
+    h.FillTransparency = 0.7
+    h.OutlineTransparency = 0.3
+    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    h.Parent = object
+end
+
+local function CreateBillboard(text, color)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GenESP"
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.AlwaysOnTop = true
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = color
+    label.TextStrokeTransparency = 0
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.Parent = billboard
+
+    return billboard
+end
+
+local function UpdateGenerator(generator)
+    if not generator or not generator.Parent then return end
+
+    if not S.ESP_Generator then
+        local old = generator:FindFirstChild("GenESP")
+        if old then old:Destroy() end
+        local h = generator:FindFirstChild("GenHighlight")
+        if h then h:Destroy() end
+        return
+    end
+
+    local root = getRoot()
+    if not root then return end
+
+    local pos = generator:IsA("Model") and generator:GetPivot().Position or generator.Position
+    if not pos then return end
+
+    local dist = (pos - root.Position).Magnitude
+    if dist > S.ESP_Radius then
+        local old = generator:FindFirstChild("GenESP")
+        if old then old:Destroy() end
+        local h = generator:FindFirstChild("GenHighlight")
+        if h then h:Destroy() end
+        return
+    end
+
+    local percent = GetGameValue(generator, "RepairProgress") or GetGameValue(generator, "Progress") or 0
+    local billboard = generator:FindFirstChild("GenESP")
+
+    if percent >= 100 then
+        if billboard then billboard:Destroy() end
+        return
+    end
+
+    local cp = math.clamp(percent, 0, 100)
+    local color = S.ESP_GenColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
+    local text = string.format("[%.0f%%]", percent)
+
+    if not billboard then
+        billboard = CreateBillboard(text, color)
+        billboard.Adornee = generator
+        billboard.Parent = generator
+    else
+        local lbl2 = billboard:FindFirstChildOfClass("TextLabel")
+        if lbl2 then
+            lbl2.Text = text
+            lbl2.TextColor3 = color
+        end
+    end
+
+    ApplyGenHighlight(generator, color)
+end
+
+-- =========================================================
+-- MAP ESP (PALLET + WINDOW)
+-- =========================================================
+local function UpdateMapESP(obj, root)
+    if not obj or not root then return end
+    local pos
+    if obj:IsA("Model") then
+        pos = obj:GetPivot().Position
+    elseif obj:IsA("BasePart") then
+        pos = obj.Position
+    end
+    if not pos then return end
+    local distance = (pos - root.Position).Magnitude
+
+    if obj.Name == "Window" then
+        if S.ESP_Window and distance <= S.ESP_Radius then
+            createESP(obj, S.ESP_WindowColor)
+        else
+            removeESP(obj)
+        end
+    end
+
+    if obj.Name == "Pallet" or obj.Name == "Palletwrong" then
+        if S.ESP_Pallet and distance <= S.ESP_Radius then
+            createESP(obj, S.ESP_PalletColor)
+        else
+            removeESP(obj)
+        end
+    end
+end
+
+-- =========================================================
+-- STATUS ESP (NAMA + JARAK + HP)
+-- =========================================================
+local function removeStatusESP(char)
+    if StatusESP[char] then
+        StatusESP[char]:Destroy()
+        StatusESP[char] = nil
+    end
+end
+
+local function createStatusESP(player, char, root)
     if not S.ESP_Name then
-        if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
+        removeStatusESP(char)
         return
     end
     if not root then return end
+
     local head = char:FindFirstChild("Head")
-    if not head then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not head or not hum then return end
+
+    local isDown = hum.Health <= 0 or hum.Health < 2
+        or char:GetAttribute("Downed") == true
+        or char:GetAttribute("IsDown") == true
+        or char:GetAttribute("Knocked") == true
+
     local dist = (head.Position - root.Position).Magnitude
     if dist > S.ESP_Radius then
-        if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
+        removeStatusESP(char)
         return
     end
-    local color = S.ESP_DefaultColor
+
+    local text = ""
+    if isDown then text = text .. "🔻 DOWN\n" end
+    text = text .. player.Name .. "\n"
+    text = text .. string.format("Dist: %.0f\n", dist)
+    text = text .. string.format("HP: %.0f", hum.Health)
+
+    local billboard = StatusESP[char]
+    local teamColor = S.ESP_DefaultColor
     if player.Team then
-        if player.Team.Name == "Killer" then color = S.ESP_KillerColor
-        elseif player.Team.Name == "Survivors" then color = S.ESP_SurvivorColor end
+        if player.Team.Name == "Killer" then
+            teamColor = S.ESP_KillerColor
+        elseif player.Team.Name == "Survivors" then
+            teamColor = S.ESP_SurvivorColor
+        end
     end
-    local bb = StatusESP[char]
-    if not bb then
-        bb = Instance.new("BillboardGui")
-        bb.Size = UDim2.new(0, 150, 0, 30)
-        bb.AlwaysOnTop = true
-        bb.StudsOffset = Vector3.new(0, 3, 0)
+    if isDown then teamColor = Color3.fromRGB(255, 0, 0) end
+
+    if not billboard then
+        billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 150, 0, 50)
+        billboard.AlwaysOnTop = true
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+
         local label = Instance.new("TextLabel")
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = player.Name
-        label.TextColor3 = color
+        label.Text = text
+        label.TextColor3 = teamColor
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
         label.TextSize = S.ESP_Size
-        label.Parent = bb
-        bb.Adornee = head
-        bb.Parent = char
-        StatusESP[char] = bb
+        label.Parent = billboard
+
+        billboard.Adornee = head
+        billboard.Parent = char
+        StatusESP[char] = billboard
     else
-        local label = bb:FindFirstChildOfClass("TextLabel")
+        local label = billboard:FindFirstChildOfClass("TextLabel")
         if label then
-            label.Text = player.Name
-            label.TextColor3 = color
+            label.Text = text
+            label.TextColor3 = teamColor
             label.TextSize = S.ESP_Size
         end
     end
 end
 
-function updateObjESP(obj, root, enabled, color)
-    if not obj or not root then return end
-    local pos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
-    if not pos then return end
-    if enabled and (pos - root.Position).Magnitude <= S.ESP_Radius then
-        createESP(obj, color)
-    else
-        removeESP(obj)
+-- =========================================================
+-- SCP ESP
+-- =========================================================
+local function UpdateSCPEsp(root)
+    if not S.ESP_SCP then
+        for obj in pairs(Cached.SCPs) do
+            removeESP(obj)
+        end
+        return
+    end
+
+    for obj in pairs(Cached.SCPs) do
+        if obj and obj.Parent then
+            local pos
+            if obj:IsA("Model") then
+                pos = obj:GetPivot().Position
+            elseif obj:IsA("BasePart") then
+                pos = obj.Position
+            end
+            if pos then
+                local dist = (pos - root.Position).Magnitude
+                if dist <= S.ESP_Radius then
+                    createESP(obj, S.ESP_SCPColor)
+                else
+                    removeESP(obj)
+                end
+            end
+        end
     end
 end
 
-print("✅ [7/12] ESP loaded")-- =========================================================
--- BAGIAN 8/12 : PARRY + SKILL + AIMLOCK
+-- Expose ke global biar bisa dipakai di Bagian 12
+_G.Roooor_UpdateGenerator = UpdateGenerator
+_G.Roooor_UpdateMapESP = UpdateMapESP
+_G.Roooor_UpdateSCPEsp = UpdateSCPEsp
+_G.Roooor_createStatusESP = createStatusESP
+_G.Roooor_Cached = Cached
+_G.Roooor_StatusESP = StatusESP
+
+print("✅ [7/12] ESP (Fallens Version) loaded")-- =========================================================
+-- BAGIAN 8/12 : AUTO PARRY (FALLENS VERSION - ANTI MISS)
 -- =========================================================
 
+-- Parry state
 local lastParry = 0
-local HookedKillers = _G.HookedKillers or {}
+local PARRY_DEBOUNCE = 0.2
+local ParryActive = false
+local hookedKillers = _G.Roooor_HookedKillers or {}
 
-local function doParry()
-    if tick() - lastParry < 0.1 then return end
-    lastParry = tick()
+_G.Roooor_HookedKillers = hookedKillers
+
+-- =========================================================
+-- PARry BUTTON PATH
+-- =========================================================
+local AttackPaths = {
+    "Slasher-mob.Controls.attack",
+    "Masked-mob.Controls.attack",
+    "Killer-mob.Controls.attack"
+}
+
+local function GetParryButton()
+    local current = PG
+    for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+local function GetAttackButtonForParry()
+    for _, path in ipairs(AttackPaths) do
+        local current = PG
+        for segment in string.gmatch(path, "[^%.]+") do
+            current = current and current:FindFirstChild(segment)
+        end
+        if current and current:IsA("GuiObject") then
+            return current
+        end
+    end
+    return nil
+end
+
+-- =========================================================
+-- PRESS RIGHT CLICK (PC)
+-- =========================================================
+local function pressRightClick()
+    pcall(function()
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
+        task.wait()
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+    end)
+end
+
+-- =========================================================
+-- PRESS PARRY BUTTON (MOBILE / PC)
+-- =========================================================
+local function pressParryButton()
     if UIS.TouchEnabled then
-        pcall(function()
-            VirtualInputManager:SendTouchEvent(8823, 0, 200, 200)
-            VirtualInputManager:SendTouchEvent(8823, 2, 200, 200)
-        end)
+        local btn = GetParryButton()
+        if btn and btn:IsA("GuiObject") then
+            local pos = btn.AbsolutePosition
+            local size = btn.AbsoluteSize
+            local inset = GuiService:GetGuiInset()
+            local x = pos.X + size.X / 2 + inset.X
+            local y = pos.Y + size.Y / 2 + inset.Y
+            pcall(function()
+                VirtualInputManager:SendTouchEvent(8823, 0, x, y)
+                task.wait(0.01)
+                VirtualInputManager:SendTouchEvent(8823, 2, x, y)
+            end)
+        end
     else
-        pcall(function()
-            VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
-            VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
-        end)
+        pressRightClick()
     end
 end
 
+-- =========================================================
+-- DO PARRY (DENGAN DEBOUNCE)
+-- =========================================================
+local function doParry()
+    local now = tick()
+    if now - lastParry < PARRY_DEBOUNCE then return end
+    lastParry = now
+
+    ParryActive = true
+
+    if S.Moonwalk then
+        S.Moonwalk = false
+        _G.ToggleStates["Enable Moonwalk"] = false
+    end
+
+    pressParryButton()
+
+    task.delay(0.3, function()
+        ParryActive = false
+    end)
+end
+
+-- =========================================================
+-- RANGE & FACING CHECK (ANTI MISS)
+-- =========================================================
+local function isInParryRange(killerChar)
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+
+    local dist = (enemyRoot.Position - myRoot.Position).Magnitude
+    return dist <= (S.ParryDist + 5)
+end
+
+local function isFacingTarget(targetChar)
+    local myChar = LP.Character
+    if not myChar then return false end
+
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot or not enemyRoot then return false end
+
+    local enemyForward = enemyRoot.CFrame.LookVector
+    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
+    local dot = enemyForward:Dot(directionToMe)
+
+    return dot >= 0.3
+end
+
+-- =========================================================
+-- HOOK KILLER (3 METODE DETEKSI)
+-- =========================================================
 local function hookKiller(char)
-    if HookedKillers[char] then return end
-    HookedKillers[char] = true
-    _G.HookedKillers = HookedKillers
+    if hookedKillers[char] then return end
+    hookedKillers[char] = true
+
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
+
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
+    -- METODE 1: AnimationPlayed Event
+    animator.AnimationPlayed:Connect(function(track)
+        if not S.Parry then return end
+        local anim = track.Animation
+        if not anim then return end
+        local id = tostring(anim.AnimationId):match("%d+")
+        if not id then return end
+        local fullId = "rbxassetid://" .. id
+        if KillerAnims[fullId] then
+            if not isInParryRange(char) then return end
+            doParry()
+        end
+    end)
+
+    -- METODE 2 & 3: Loop cepat (anti-miss)
     task.spawn(function()
-        while HookedKillers[char] and char.Parent do
+        while char.Parent and hookedKillers[char] do
             task.wait(0.03)
             if not S.Parry then break end
             local myRoot = getRoot()
             local eRoot = char:FindFirstChild("HumanoidRootPart")
             if not myRoot or not eRoot then continue end
-            if (eRoot.Position - myRoot.Position).Magnitude > S.ParryDist then continue end
+            local dist = (eRoot.Position - myRoot.Position).Magnitude
+            if dist > (S.ParryDist + 5) then continue end
+
+            -- Cek anim track yang sedang jalan
             for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                 local anim = track.Animation
-                if anim then
-                    local id = anim.AnimationId:match("%d+")
-                    if id and KillerAnims["rbxassetid://"..id] then
-                        doParry()
-                        break
+                if anim and anim.AnimationId then
+                    local id = tostring(anim.AnimationId):match("%d+")
+                    if id then
+                        local fullId = "rbxassetid://" .. id
+                        if KillerAnims[fullId] then
+                            doParry()
+                            break
+                        end
                     end
                 end
             end
@@ -1216,6 +1587,9 @@ local function hookKiller(char)
     end)
 end
 
+-- =========================================================
+-- SCAN & HOOK SEMUA KILLER
+-- =========================================================
 function scanKillers()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
@@ -1224,6 +1598,7 @@ function scanKillers()
     end
 end
 
+-- Auto rescan tiap 0.5 detik
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
@@ -1231,30 +1606,44 @@ task.spawn(function()
     end
 end)
 
-_G.ParryCirclePart = nil
+-- =========================================================
+-- PARRY CIRCLE VISUAL
+-- =========================================================
+_G.Roooor_ParryCircle = nil
+
 function updateParryCircle()
     local root = getRoot()
     if not S.ParryCircle or not root then
-        if _G.ParryCirclePart then _G.ParryCirclePart:Destroy(); _G.ParryCirclePart = nil end
+        if _G.Roooor_ParryCircle then
+            _G.Roooor_ParryCircle:Destroy()
+            _G.Roooor_ParryCircle = nil
+        end
         return
     end
-    if not _G.ParryCirclePart then
-        _G.ParryCirclePart = Instance.new("Part")
-        _G.ParryCirclePart.Shape = Enum.PartType.Cylinder
-        _G.ParryCirclePart.Anchored = true
-        _G.ParryCirclePart.CanCollide = false
-        _G.ParryCirclePart.Material = Enum.Material.Neon
-        _G.ParryCirclePart.Parent = workspace
+
+    if not _G.Roooor_ParryCircle then
+        _G.Roooor_ParryCircle = Instance.new("Part")
+        _G.Roooor_ParryCircle.Shape = Enum.PartType.Cylinder
+        _G.Roooor_ParryCircle.Anchored = true
+        _G.Roooor_ParryCircle.CanCollide = false
+        _G.Roooor_ParryCircle.Material = Enum.Material.Neon
+        _G.Roooor_ParryCircle.Name = "RoooorParryCircle"
+        _G.Roooor_ParryCircle.Parent = workspace
     end
-    local size = S.ParryCircleSize * 2
-    _G.ParryCirclePart.Size = Vector3.new(0.1, size, size)
+
+    local size = (S.ParryDist + 5) * 2
+    _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
     local yOffset = root.Size.Y / 2 + 1.5
-    _G.ParryCirclePart.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0)) * CFrame.Angles(0, 0, math.rad(90))
-    _G.ParryCirclePart.Color = C.ACC
-    _G.ParryCirclePart.Transparency = 0.5
+    _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0)) * CFrame.Angles(0, 0, math.rad(90))
+    _G.Roooor_ParryCircle.Color = C.ACC
+    _G.Roooor_ParryCircle.Transparency = 0.5
 end
 
+-- =========================================================
+-- AUTO SKILL CHECK
+-- =========================================================
 local skillBusy = false
+
 local function doSkillCheck()
     if skillBusy then return end
     skillBusy = true
@@ -1266,8 +1655,8 @@ local function doSkillCheck()
             end
             if b and b:IsA("GuiObject") then
                 local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
-                VirtualInputManager:SendTouchEvent(8822, 0, p.X + s.X/2 + i.X, p.Y + s.Y/2 + i.Y)
-                VirtualInputManager:SendTouchEvent(8822, 2, p.X + s.X/2 + i.X, p.Y + s.Y/2 + i.Y)
+                VirtualInputManager:SendTouchEvent(8822, 0, p.X + s.X / 2 + i.X, p.Y + s.Y / 2 + i.Y)
+                VirtualInputManager:SendTouchEvent(8822, 2, p.X + s.X / 2 + i.X, p.Y + s.Y / 2 + i.Y)
             end
         else
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1303,17 +1692,20 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
+-- AIMLOCK BUTTON (dari RoooorHub asli, tetap dipertahankan)
+-- =========================================================
 _G.AimlockButton = nil
 
 local function createAimlockButton()
     if _G.AimlockButton then _G.AimlockButton:Destroy() end
-    
+
     local btnGui = Instance.new("ScreenGui")
     btnGui.Name = "RoooorAimlockBtn"
     btnGui.ResetOnSpawn = false
     btnGui.IgnoreGuiInset = true
     btnGui.Parent = PG
-    
+
     local btn = Instance.new("TextButton")
     btn.Name = "AimlockBtn"
     btn.Size = UDim2.new(0, 52, 0, 52)
@@ -1328,18 +1720,18 @@ local function createAimlockButton()
     btn.Parent = btnGui
     rnd(btn, 26)
     local bStrk = strk(btn, C.ACC, 2)
-    
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0, 100, 0, 14)
-    lbl.Position = UDim2.new(0.5, -50, 1, 2)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = "AIMLOCK"
-    lbl.TextColor3 = C.ACC2
-    lbl.TextSize = 10
-    lbl.Font = Enum.Font.GothamBlack
-    lbl.TextStrokeTransparency = 0.3
-    lbl.Parent = btn
-    
+
+    local lbl2 = Instance.new("TextLabel")
+    lbl2.Size = UDim2.new(0, 100, 0, 14)
+    lbl2.Position = UDim2.new(0.5, -50, 1, 2)
+    lbl2.BackgroundTransparency = 1
+    lbl2.Text = "AIMLOCK"
+    lbl2.TextColor3 = C.ACC2
+    lbl2.TextSize = 10
+    lbl2.Font = Enum.Font.GothamBlack
+    lbl2.TextStrokeTransparency = 0.3
+    lbl2.Parent = btn
+
     local lockLbl = Instance.new("TextLabel")
     lockLbl.Name = "LockLabel"
     lockLbl.Size = UDim2.new(0, 100, 0, 12)
@@ -1350,11 +1742,11 @@ local function createAimlockButton()
     lockLbl.TextSize = 9
     lockLbl.Font = Enum.Font.GothamBold
     lockLbl.Parent = btn
-    
+
     local dragging = false
     local ds, dp
     local wasDragged = false
-    
+
     btn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if S.AimlockLocked then return end
@@ -1364,7 +1756,7 @@ local function createAimlockButton()
             dp = btn.Position
         end
     end)
-    
+
     UIS.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local d = input.Position - ds
@@ -1372,33 +1764,40 @@ local function createAimlockButton()
             btn.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
         end
     end)
-    
+
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
-    
+
     btn.MouseButton1Click:Connect(function()
         if wasDragged then wasDragged = false; return end
         S.Aimlock = not S.Aimlock
         if S.Aimlock then
             btn.BackgroundColor3 = C.ACC
             bStrk.Color = C.ACC2
-            btn.TextColor3 = Color3.new(1,1,1)
+            btn.TextColor3 = Color3.new(1, 1, 1)
         else
             btn.BackgroundColor3 = C.PANEL
             bStrk.Color = C.ACC
             btn.TextColor3 = C.ACC2
         end
     end)
-    
+
     _G.AimlockButton = btnGui
 end
 
+_G.createAimlockButton = createAimlockButton
+
 local function removeAimlockButton()
-    if _G.AimlockButton then _G.AimlockButton:Destroy(); _G.AimlockButton = nil end
+    if _G.AimlockButton then
+        _G.AimlockButton:Destroy()
+        _G.AimlockButton = nil
+    end
 end
+
+_G.removeAimlockButton = removeAimlockButton
 
 local function updateAimlockLock()
     if not _G.AimlockButton then return end
@@ -1417,6 +1816,9 @@ local function updateAimlockLock()
     end
 end
 
+_G.updateAimlockLock = updateAimlockLock
+
+-- AIMLOCK LOOP
 task.spawn(function()
     while gui.Parent do
         task.wait(0.03)
@@ -1425,7 +1827,7 @@ task.spawn(function()
             if myRoot then
                 local closest, shortest = nil, S.AimlockRadius
                 for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                         local hrp = p.Character:FindFirstChild("Head") or p.Character:FindFirstChild("HumanoidRootPart")
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
                         if hrp and hum and hum.Health > 0 then
@@ -1447,8 +1849,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [8/12] Parry + Skill + Aimlock loaded")-- =========================================================
--- BAGIAN 9/12 : VISUAL + KILLER FUNCTIONS
+print("✅ [8/12] Auto Parry (Fallens Version) + Skill + Aimlock loaded")-- =========================================================
+-- BAGIAN 9/12 : VISUAL + KORBLOX (1 KAKI) + HEADLESS
 -- =========================================================
 
 function applyFullbright(s)
@@ -1541,37 +1943,37 @@ function applyContrast()
     end
 end
 
--- KORBLOX (1 KAKI SAJA - KANAN)
+-- =========================================================
+-- KORBLOX (1 KAKI KANAN - AUTO REAPPLY)
+-- =========================================================
+local KorbloxOrig = nil
+
 function applyKorblox(s)
     local char = LP.Character
     if not char then return end
-    
-    local rightLeg = char:FindFirstChild("Right Leg") 
-        or char:FindFirstChild("RightUpperLeg") 
+
+    local rightLeg = char:FindFirstChild("Right Leg")
+        or char:FindFirstChild("RightUpperLeg")
         or char:FindFirstChild("RightLowerLeg")
-    
-    if not rightLeg then
-        warn("[RoooorHub] Kaki kanan gak ketemu")
-        return
-    end
-    
+
+    if not rightLeg then return end
+
     if s then
-        if not _G.KorbloxOrig then
-            _G.KorbloxOrig = {
+        if not KorbloxOrig then
+            KorbloxOrig = {
                 Color = rightLeg.Color,
                 BrickColor = rightLeg.BrickColor,
                 Material = rightLeg.Material,
                 Size = rightLeg.Size,
             }
         end
-        
+
         rightLeg.Color = Color3.fromRGB(27, 42, 53)
         rightLeg.Material = Enum.Material.Slate
-        
-        if rightLeg:FindFirstChild("RoooorKorblox") then
-            rightLeg.RoooorKorblox:Destroy()
-        end
-        
+
+        local oldMesh = rightLeg:FindFirstChild("RoooorKorblox")
+        if oldMesh then oldMesh:Destroy() end
+
         local mesh = Instance.new("SpecialMesh")
         mesh.Name = "RoooorKorblox"
         mesh.MeshType = Enum.MeshType.FileMesh
@@ -1579,29 +1981,74 @@ function applyKorblox(s)
         mesh.TextureId = ""
         mesh.Scale = Vector3.new(1, 1, 1)
         mesh.Parent = rightLeg
-    else
-        if rightLeg:FindFirstChild("RoooorKorblox") then
-            rightLeg.RoooorKorblox:Destroy()
+
+        -- Force R6 look kalau R15
+        if char:FindFirstChild("Humanoid") and char.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+            pcall(function()
+                rightLeg.Size = Vector3.new(1, 2, 1)
+            end)
         end
-        
-        if _G.KorbloxOrig then
-            rightLeg.Color = _G.KorbloxOrig.Color
-            rightLeg.BrickColor = _G.KorbloxOrig.BrickColor
-            rightLeg.Material = _G.KorbloxOrig.Material
-            rightLeg.Size = _G.KorbloxOrig.Size
-            _G.KorbloxOrig = nil
+    else
+        local oldMesh = rightLeg:FindFirstChild("RoooorKorblox")
+        if oldMesh then oldMesh:Destroy() end
+
+        if KorbloxOrig then
+            rightLeg.Color = KorbloxOrig.Color
+            rightLeg.BrickColor = KorbloxOrig.BrickColor
+            rightLeg.Material = KorbloxOrig.Material
+            rightLeg.Size = KorbloxOrig.Size
+            KorbloxOrig = nil
         else
             rightLeg.Material = Enum.Material.Plastic
         end
     end
 end
 
+-- Auto-reapply Korblox tiap 0.5 detik (biar gak ilang)
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if S.Korblox and LP.Character then
+            local rightLeg = LP.Character:FindFirstChild("Right Leg")
+                or LP.Character:FindFirstChild("RightUpperLeg")
+                or LP.Character:FindFirstChild("RightLowerLeg")
+            if rightLeg then
+                if not rightLeg:FindFirstChild("RoooorKorblox") then
+                    applyKorblox(true)
+                else
+                    if rightLeg.Color ~= Color3.fromRGB(27, 42, 53) then
+                        rightLeg.Color = Color3.fromRGB(27, 42, 53)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- HEADLESS (KEPALA INVISIBLE - AUTO REAPPLY)
+-- =========================================================
+local HeadlessOrig = nil
+
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
     local head = char:FindFirstChild("Head")
     if not head then return end
+
     if s then
+        if not HeadlessOrig then
+            HeadlessOrig = {
+                Transparency = head.Transparency,
+                Decals = {}
+            }
+            for _, v in pairs(head:GetChildren()) do
+                if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                    table.insert(HeadlessOrig.Decals, {obj = v, transparency = v.Transparency})
+                end
+            end
+        end
+
         head.Transparency = 1
         for _, v in pairs(head:GetChildren()) do
             if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
@@ -1615,9 +2062,33 @@ function applyHeadless(s)
                 v.Transparency = 0
             end
         end
+        HeadlessOrig = nil
     end
 end
 
+-- Auto-reapply Headless tiap 0.5 detik
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if S.Headless and LP.Character then
+            local head = LP.Character:FindFirstChild("Head")
+            if head then
+                if head.Transparency ~= 1 then
+                    head.Transparency = 1
+                end
+                for _, v in pairs(head:GetChildren()) do
+                    if (v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh")) and v.Transparency ~= 1 then
+                        v.Transparency = 1
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- WALK SPEED LOOP
+-- =========================================================
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -1633,14 +2104,16 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- INSTANT ESCAPE
+-- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
-    
+
     local found = nil
     local searchNames = {"fininshline", "finishline", "finish", "gate", "exit", "escape"}
-    
+
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
             local lname = string.lower(obj.Name)
@@ -1653,16 +2126,18 @@ function teleportToFinishLine()
             if found then break end
         end
     end
-    
+
     if not found then
         warn("[RoooorHub] Finish line gak ketemu")
         return
     end
-    
+
     root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
 end
 
+-- =========================================================
 -- FAST VAULT
+-- =========================================================
 local FastVaultMap = {
     ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
 }
@@ -1673,7 +2148,7 @@ local function hookVault(char)
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
-    
+
     animator.AnimationPlayed:Connect(function(track)
         if not S.FastVault then return end
         local anim = track.Animation
@@ -1704,7 +2179,9 @@ LP.CharacterAdded:Connect(function(char)
 end)
 if LP.Character then hookVault(LP.Character) end
 
+-- =========================================================
 -- MOONWALK
+-- =========================================================
 _G.MoonwalkConn = nil
 
 local function isDowned()
@@ -1759,7 +2236,9 @@ function stopMoonwalk()
     end
 end
 
+-- =========================================================
 -- KILLER FUNCTIONS
+-- =========================================================
 local lastAtk = 0
 task.spawn(function()
     while gui.Parent do
@@ -1933,7 +2412,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- MOONWALK BUTTON
+-- =========================================================
 _G.MoonwalkButton = nil
 
 function createMoonwalkButton()
@@ -1957,16 +2438,16 @@ function createMoonwalkButton()
     btn.Parent = btnGui
     rnd(btn, 26)
     local bStrk = strk(btn, C.ACC, 2)
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0, 100, 0, 14)
-    lbl.Position = UDim2.new(0.5, -50, 1, 2)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = "MOONWALK"
-    lbl.TextColor3 = C.ACC2
-    lbl.TextSize = 10
-    lbl.Font = Enum.Font.GothamBlack
-    lbl.TextStrokeTransparency = 0.3
-    lbl.Parent = btn
+    local lbl2 = Instance.new("TextLabel")
+    lbl2.Size = UDim2.new(0, 100, 0, 14)
+    lbl2.Position = UDim2.new(0.5, -50, 1, 2)
+    lbl2.BackgroundTransparency = 1
+    lbl2.Text = "MOONWALK"
+    lbl2.TextColor3 = C.ACC2
+    lbl2.TextSize = 10
+    lbl2.Font = Enum.Font.GothamBlack
+    lbl2.TextStrokeTransparency = 0.3
+    lbl2.Parent = btn
     local lockLbl = Instance.new("TextLabel")
     lockLbl.Name = "LockLabel"
     lockLbl.Size = UDim2.new(0, 100, 0, 12)
@@ -2019,9 +2500,13 @@ function createMoonwalkButton()
     _G.MoonwalkButton = btnGui
 end
 
+_G.createMoonwalkButton = createMoonwalkButton
+
 function removeMoonwalkButton()
     if _G.MoonwalkButton then _G.MoonwalkButton:Destroy(); _G.MoonwalkButton = nil end
 end
+
+_G.removeMoonwalkButton = removeMoonwalkButton
 
 function updateMoonwalkLock()
     if not _G.MoonwalkButton then return end
@@ -2040,11 +2525,12 @@ function updateMoonwalkLock()
     end
 end
 
-print("✅ [9/12] Visual + Killer loaded")-- =========================================================
+_G.updateMoonwalkLock = updateMoonwalkLock
+
+print("✅ [9/12] Visual + Korblox + Headless + Killer loaded")-- =========================================================
 -- BAGIAN 10/12 : ISI TAB FIRE + FIRE FEET
 -- =========================================================
 
--- TAB FIRE
 makeTab("Fire", "🔥", 1, function()
     sec("Fire Control", "⚙️")
     tog("Enable Fire", false, function(s) S.FireOn = s; applyFire() end)
@@ -2054,17 +2540,17 @@ makeTab("Fire", "🔥", 1, function()
     lbl("Klik efek untuk ganti", C.ACC2)
 
     for i, fireName in ipairs(FireList) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -4, 0, 28)
-        btn.BackgroundColor3 = C.BG
-        btn.BackgroundTransparency = 0.4
-        btn.BorderSizePixel = 0
-        btn.Text = ""
-        btn.AutoButtonColor = false
-        btn.LayoutOrder = i + 100
-        btn.Parent = cs
-        rnd(btn, 8)
-        local btnStroke = strk(btn, C.ACC, 1, 0.6)
+        local btn2 = Instance.new("TextButton")
+        btn2.Size = UDim2.new(1, -4, 0, 28)
+        btn2.BackgroundColor3 = C.BG
+        btn2.BackgroundTransparency = 0.4
+        btn2.BorderSizePixel = 0
+        btn2.Text = ""
+        btn2.AutoButtonColor = false
+        btn2.LayoutOrder = i + 100
+        btn2.Parent = cs
+        rnd(btn2, 8)
+        local btnStroke = strk(btn2, C.ACC, 1, 0.6)
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -2075,16 +2561,16 @@ makeTab("Fire", "🔥", 1, function()
         btnLbl.TextSize = 11
         btnLbl.Font = Enum.Font.GothamMedium
         btnLbl.TextXAlignment = Enum.TextXAlignment.Left
-        btnLbl.Parent = btn
+        btnLbl.Parent = btn2
 
         if S.FireType == fireName then
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end
 
-        btn.MouseButton1Click:Connect(function()
+        btn2.MouseButton1Click:Connect(function()
             S.FireType = fireName
             applyFire()
             for _, c in pairs(cs:GetChildren()) do
@@ -2097,15 +2583,14 @@ makeTab("Fire", "🔥", 1, function()
                     if s then s.Color = C.ACC end
                 end
             end
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end)
     end
 end)
 
--- TAB FIRE FEET
 makeTab("Fire Feet", "👟", 2, function()
     sec("Fire Feet Control", "👟")
     tog("Enable Fire Feet", false, function(s) S.FireFeetOn = s; applyFireFeet() end)
@@ -2114,17 +2599,17 @@ makeTab("Fire Feet", "👟", 2, function()
     lbl("Klik efek untuk ganti", C.ACC2)
 
     for i, fireName in ipairs(FireFeetList) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -4, 0, 28)
-        btn.BackgroundColor3 = C.BG
-        btn.BackgroundTransparency = 0.4
-        btn.BorderSizePixel = 0
-        btn.Text = ""
-        btn.AutoButtonColor = false
-        btn.LayoutOrder = i + 200
-        btn.Parent = cs
-        rnd(btn, 8)
-        local btnStroke = strk(btn, C.ACC, 1, 0.6)
+        local btn2 = Instance.new("TextButton")
+        btn2.Size = UDim2.new(1, -4, 0, 28)
+        btn2.BackgroundColor3 = C.BG
+        btn2.BackgroundTransparency = 0.4
+        btn2.BorderSizePixel = 0
+        btn2.Text = ""
+        btn2.AutoButtonColor = false
+        btn2.LayoutOrder = i + 200
+        btn2.Parent = cs
+        rnd(btn2, 8)
+        local btnStroke = strk(btn2, C.ACC, 1, 0.6)
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -2135,16 +2620,16 @@ makeTab("Fire Feet", "👟", 2, function()
         btnLbl.TextSize = 11
         btnLbl.Font = Enum.Font.GothamMedium
         btnLbl.TextXAlignment = Enum.TextXAlignment.Left
-        btnLbl.Parent = btn
+        btnLbl.Parent = btn2
 
         if S.FireFeetType == fireName then
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end
 
-        btn.MouseButton1Click:Connect(function()
+        btn2.MouseButton1Click:Connect(function()
             S.FireFeetType = fireName
             applyFireFeet()
             for _, c in pairs(cs:GetChildren()) do
@@ -2157,8 +2642,8 @@ makeTab("Fire Feet", "👟", 2, function()
                     if s then s.Color = C.ACC end
                 end
             end
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end)
@@ -2175,8 +2660,8 @@ makeTab("ESP", "👁️", 3, function()
     tog("Enable ESP Name", false, function(s)
         S.ESP_Name = s
         if not s then
-            for _, bb in pairs(StatusESP) do if bb then bb:Destroy() end end
-            StatusESP = {}
+            for _, bb in pairs(_G.Roooor_StatusESP or {}) do if bb then bb:Destroy() end end
+            _G.Roooor_StatusESP = {}
         end
     end)
     sl("Nama Size", 8, 40, 12, function(v) S.ESP_Size = v end)
@@ -2277,17 +2762,17 @@ makeTab("Visual", "🎨", 6, function()
     sec("Sky Changer (25 Sky)", "🌤️")
     lbl("Klik untuk ganti sky", C.ACC2)
     for i, skyName in ipairs(SkyList) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -4, 0, 26)
-        btn.BackgroundColor3 = C.BG
-        btn.BackgroundTransparency = 0.4
-        btn.BorderSizePixel = 0
-        btn.Text = ""
-        btn.AutoButtonColor = false
-        btn.LayoutOrder = i + 300
-        btn.Parent = cs
-        rnd(btn, 6)
-        local btnStroke = strk(btn, C.ACC, 1, 0.6)
+        local btn2 = Instance.new("TextButton")
+        btn2.Size = UDim2.new(1, -4, 0, 26)
+        btn2.BackgroundColor3 = C.BG
+        btn2.BackgroundTransparency = 0.4
+        btn2.BorderSizePixel = 0
+        btn2.Text = ""
+        btn2.AutoButtonColor = false
+        btn2.LayoutOrder = i + 300
+        btn2.Parent = cs
+        rnd(btn2, 6)
+        local btnStroke = strk(btn2, C.ACC, 1, 0.6)
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -2298,16 +2783,16 @@ makeTab("Visual", "🎨", 6, function()
         btnLbl.TextSize = 10
         btnLbl.Font = Enum.Font.GothamMedium
         btnLbl.TextXAlignment = Enum.TextXAlignment.Left
-        btnLbl.Parent = btn
+        btnLbl.Parent = btn2
 
         if S.SkyId == skyName then
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end
 
-        btn.MouseButton1Click:Connect(function()
+        btn2.MouseButton1Click:Connect(function()
             S.SkyId = skyName
             applySky(skyName)
             for _, c in pairs(cs:GetChildren()) do
@@ -2320,8 +2805,8 @@ makeTab("Visual", "🎨", 6, function()
                     if s then s.Color = C.ACC end
                 end
             end
-            btn.BackgroundColor3 = C.ACC
-            btn.BackgroundTransparency = 0
+            btn2.BackgroundColor3 = C.ACC
+            btn2.BackgroundTransparency = 0
             btnLbl.TextColor3 = Color3.new(1, 1, 1)
             btnStroke.Color = C.ACC2
         end)
@@ -2392,8 +2877,8 @@ makeTab("Settings", "⚙️", 8, function()
     sec("Info", "ℹ️")
     lbl("RoooorHub Premium Ultimate", C.ACC4)
     lbl("60 Fire + 20 Fire Feet + 25 Sky", C.ACC2)
-    lbl("ESP + Parry + Skill + Aimlock", C.ACC2)
-    lbl("Killer + Visual + Movement", C.ACC2)
+    lbl("ESP Fallens + Parry Anti-Miss", C.ACC2)
+    lbl("Korblox 1 Kaki + Headless", C.ACC2)
     lbl("Made with 💜", C.ACC3)
 end)
 
@@ -2455,57 +2940,99 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
--- MAIN LOOP
+-- =========================================================
+-- MAIN LOOP - ESP FALLENS
+-- =========================================================
 task.spawn(function()
     while gui.Parent do
         local root = getRoot()
         if root then
+            -- STATUS ESP (nama + jarak + hp)
             if S.ESP_Name then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character then
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
                         if hum and hum.Health > 0 then
-                            createStatusESP(p, p.Character, root)
+                            _G.Roooor_createStatusESP(p, p.Character, root)
                         else
-                            if StatusESP[p.Character] then
-                                StatusESP[p.Character]:Destroy()
-                                StatusESP[p.Character] = nil
+                            if _G.Roooor_StatusESP[p.Character] then
+                                _G.Roooor_StatusESP[p.Character]:Destroy()
+                                _G.Roooor_StatusESP[p.Character] = nil
                             end
                         end
                     end
                 end
             end
+
+            -- GENERATOR ESP (dengan % progress)
             if S.ESP_Generator then
-                for gen in pairs(Cached.Generators) do
-                    if gen and gen.Parent then updateObjESP(gen, root, true, S.ESP_GenColor) end
+                for gen in pairs(_G.Roooor_Cached.Generators) do
+                    if gen and gen.Parent then _G.Roooor_UpdateGenerator(gen) end
                 end
             end
+
+            -- PALLET ESP
             if S.ESP_Pallet then
-                for obj in pairs(Cached.Pallets) do
-                    if obj and obj.Parent then updateObjESP(obj, root, true, S.ESP_PalletColor) end
+                for obj in pairs(_G.Roooor_Cached.Pallets) do
+                    if obj and obj.Parent then _G.Roooor_UpdateMapESP(obj, root) end
                 end
             end
+
+            -- WINDOW ESP
             if S.ESP_Window then
-                for obj in pairs(Cached.Windows) do
-                    if obj and obj.Parent then updateObjESP(obj, root, true, S.ESP_WindowColor) end
+                for obj in pairs(_G.Roooor_Cached.Windows) do
+                    if obj and obj.Parent then _G.Roooor_UpdateMapESP(obj, root) end
                 end
             end
+
+            -- SCP ESP
             if S.ESP_SCP then
-                for obj in pairs(Cached.SCPs) do
-                    if obj and obj.Parent then updateObjESP(obj, root, true, S.ESP_SCPColor) end
+                _G.Roooor_UpdateSCPEsp(root)
+            end
+
+            -- PLAYER HIGHLIGHT (Killer / Survivor / Default)
+            if S.ESP_Name then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character then
+                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if hum and hum.Health > 0 then
+                            local char = p.Character
+                            local hrp = char:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                local dist = (hrp.Position - root.Position).Magnitude
+                                if dist <= S.ESP_Radius then
+                                    if p.Team and p.Team.Name == "Killer" then
+                                        createESP(char, S.ESP_KillerColor)
+                                    elseif p.Team and p.Team.Name == "Survivors" then
+                                        createESP(char, S.ESP_SurvivorColor)
+                                    else
+                                        createESP(char, S.ESP_DefaultColor)
+                                    end
+                                else
+                                    removeESP(char)
+                                end
+                            end
+                        else
+                            removeESP(p.Character)
+                        end
+                    end
                 end
             end
+
             updateParryCircle()
         end
         task.wait(0.2)
     end
 end)
 
+-- =========================================================
 -- RESPAWN HANDLER
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
-    HookedKillers = {}
-    _G.HookedKillers = {}
+    hookedKillers = {}
+    _G.Roooor_HookedKillers = {}
+
     if S.FireOn then applyFire() end
     if S.FireFeetOn then applyFireFeet() end
     if S.Parry then scanKillers() end
@@ -2515,7 +3042,9 @@ LP.CharacterAdded:Connect(function(char)
     if S.Moonwalk then task.wait(0.5); startMoonwalk() end
 end)
 
+-- =========================================================
 -- KEYBIND RightShift
+-- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -2548,19 +3077,23 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- FINAL PRINT
+-- =========================================================
 print("=====================================================")
-print("✅ [12/12] PREMIUM ULTIMATE - LOADED!")
+print("✅ [12/12] PREMIUM ULTIMATE + FALLENS - LOADED!")
 print("🎉 ROOORHUB PREMIUM ULTIMATE - SUCCESS!")
 print("=====================================================")
 print("🔥 Fire         : 60 Efek")
 print("👟 Fire Feet    : 20 Efek")
-print("👁️ ESP          : Player + Gen + Pallet + Window + SCP")
-print("🏃 Survivor     : Parry + Skill + Aimlock")
+print("🌤️ Sky          : 25 Sky")
+print("👁️ ESP          : Player + Gen (%) + Pallet + Window + SCP")
+print("🛡️ Auto Parry   : Anti-Miss (3 metode deteksi)")
+print("🎯 Skill Check  : Auto Press")
 print("🔪 Killer       : Auto Attack + Kill All + Hitbox")
-print("🎨 Visual       : Fullbright + No Fog + FOV + 25 Sky")
+print("🎨 Visual       : Fullbright + No Fog + FOV + Ultra HD")
 print("💫 Appearance   : Korblox (1 kaki) + Headless")
-print("🚀 Movement     : Walk Speed + Instant Escape + Fast Vault")
+print("🚀 Movement     : WalkSpeed + Instant Escape + Fast Vault")
 print("🌙 Moonwalk     : Konsisten Lobby & Ingame")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")

@@ -1442,4 +1442,95 @@ print("🔍 Contrast (3 Slider)")
 print("🔄 STATE SYNC AKTIF - Fitur GAK MATI SENDIRI")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
-print("=====================================================")
+print("=====================================================")-- =========================================================
+-- PATCH: ANTI FITUR OFF SENDIRI
+-- Paste di PALING BAWAH script
+-- =========================================================
+
+-- 1. AUTO-SAVE STATE ke _G (biar gak ke-reset)
+local function saveState()
+    _G.RoooorS_Saved = {
+        FireOn = S.FireOn,
+        FireType = S.FireType,
+        FireSize = S.FireSize,
+        ESP_Name = S.ESP_Name,
+        ESP_Size = S.ESP_Size,
+        ESP_Radius = S.ESP_Radius,
+        Parry = S.Parry,
+        ParryDist = S.ParryDist,
+        ParryCircle = S.ParryCircle,
+        ParryCircleSize = S.ParryCircleSize,
+        Skill = S.Skill,
+        UltraHD = S.UltraHD,
+        Contrast = S.Contrast,
+        ContrastVal = S.ContrastVal,
+        BrightnessVal = S.BrightnessVal,
+        SaturationVal = S.SaturationVal,
+    }
+end
+
+-- 2. AUTO-RESTORE STATE tiap 1 detik
+local function restoreState()
+    if _G.RoooorS_Saved then
+        for k, v in pairs(_G.RoooorS_Saved) do
+            if S[k] ~= v then
+                S[k] = v
+                print("[RoooorHub] Restored:", k, "=", v)
+            end
+        end
+    end
+end
+
+-- 3. AUTO RE-APPLY efek yang ilang
+local function reapplyEffects()
+    if S.FireOn then
+        local head = LP.Character and LP.Character:FindFirstChild("Head")
+        if head and not head:FindFirstChild("RoooorFire") then
+            applyFire()
+            print("[RoooorHub] Re-apply Fire")
+        end
+    end
+    if S.ParryCircle then
+        if not _G.ParryCirclePart then
+            updateParryCircle()
+            print("[RoooorHub] Re-apply Parry Circle")
+        end
+    end
+    if S.UltraHD then
+        if not _G.RoooorHD then
+            applyUltraHD()
+            print("[RoooorHub] Re-apply Ultra HD")
+        end
+    end
+    if S.Contrast then
+        if not _G.ContrastFx then
+            applyContrast()
+            print("[RoooorHub] Re-apply Contrast")
+        end
+    end
+end
+
+-- 4. LOOP UTAMA - jalan tiap 1 detik
+task.spawn(function()
+    while gui.Parent do
+        task.wait(1)
+        saveState()
+        restoreState()
+        reapplyEffects()
+        if syncToggles then syncToggles() end
+    end
+end)
+
+-- 5. AUTO RESTART kalau script crash
+task.spawn(function()
+    while true do
+        task.wait(2)
+        pcall(function()
+            if not gui.Parent then
+                print("[RoooorHub] Script crashed, reloading...")
+            end
+        end)
+    end
+end)
+
+print("✅ [PATCH] Anti-Off System Active")

@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB ULTIMATE - BAGIAN 1/6 : CORE + CONFIG
+-- ROOORHUB - BAGIAN 1/5 : CORE + CONFIG
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -29,33 +29,34 @@ local C = {
     GRN = Color3.fromRGB(0, 255, 150),
 }
 
-local S = {
-    -- Fire
+-- STATE (PAKAI _G BIAR GAK KE-RESET)
+_G.RoooorS = _G.RoooorS or {
     FireOn = false,
     FireType = "Classic",
     FireSize = 5,
-    -- ESP
     ESP_Name = false,
     ESP_Size = 12,
     ESP_Radius = 500,
-    -- Parry
     Parry = false,
     ParryDist = 15,
     ParryCircle = false,
     ParryCircleSize = 15,
-    -- Skill
     Skill = false,
-    -- Visual
     UltraHD = false,
     Contrast = false,
     ContrastVal = 0.3,
     BrightnessVal = 0.1,
     SaturationVal = 0.2,
-    -- Common
     FPS = true,
 }
 
--- FIRE VARIANTS (20)
+local S = _G.RoooorS
+
+-- TOGGLE STATE TRACKER
+_G.ToggleStates = _G.ToggleStates or {}
+_G.ToggleObjects = _G.ToggleObjects or {}
+
+-- 20 FIRE VARIANTS
 local FireList = {
     "Classic", "Rainbow", "Lightning", "Hell", "Ice",
     "Toxic", "Void", "GoldenKing", "Sakura", "Emerald",
@@ -86,7 +87,7 @@ local FireConfig = {
     Mystery = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
 }
 
--- 23 KILLER ANIMS (FALLENS)
+-- 23 KILLER ANIMS
 local KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -126,8 +127,8 @@ function rainbowSeq()
     }
 end
 
-print("✅ [1/6] Core loaded")-- =========================================================
--- ROOORHUB - BAGIAN 2/6 : GUI + TAB + COMPONENTS
+print("✅ [1/5] Core loaded")-- =========================================================
+-- ROOORHUB - BAGIAN 2/5 : GUI + COMPONENTS + STATE SYNC
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -184,7 +185,7 @@ task.spawn(function()
     end
 end)
 
--- DRAG FLOAT
+-- DRAG
 local dragF = false
 local dragFStart, dragFPos
 floatBtn.InputBegan:Connect(function(input)
@@ -409,6 +410,9 @@ function makeTab(name, icon, order, cb)
             if not c:IsA("UIListLayout") then c:Destroy() end
         end
         if cb then pcall(cb) end
+        -- Sync toggle state setiap buka tab
+        task.wait(0.1)
+        syncToggles()
     end)
 end
 
@@ -449,6 +453,7 @@ function lbl(text, color)
     l.Parent = cs
 end
 
+-- TOGGLE DENGAN STATE SYNC (INI YANG BIKIN GAK MATI SENDIRI)
 function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
@@ -483,7 +488,22 @@ function tog(name, def, cb)
     k.BorderSizePixel = 0
     k.Parent = t
     rnd(k, 6)
+
     local state = def
+    _G.ToggleStates[name] = state
+
+    -- Simpan object buat sync
+    _G.ToggleObjects[name] = {
+        setState = function(newState)
+            state = newState
+            _G.ToggleStates[name] = newState
+            k.Position = newState and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+            k.BackgroundColor3 = newState and C.ACC2 or C.DIM
+            t.BackgroundColor3 = newState and C.ACC or C.PANEL
+            tS.Color = newState and C.ACC2 or C.DIM
+        end
+    }
+
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
     cB.BackgroundTransparency = 1
@@ -491,12 +511,22 @@ function tog(name, def, cb)
     cB.Parent = t
     cB.MouseButton1Click:Connect(function()
         state = not state
+        _G.ToggleStates[name] = state
         k.Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
         k.BackgroundColor3 = state and C.ACC2 or C.DIM
         t.BackgroundColor3 = state and C.ACC or C.PANEL
         tS.Color = state and C.ACC2 or C.DIM
         if cb then pcall(cb, state) end
     end)
+end
+
+-- SYNC FUNCTION
+function syncToggles()
+    for name, obj in pairs(_G.ToggleObjects) do
+        if obj.setState and _G.ToggleStates[name] ~= nil then
+            obj.setState(_G.ToggleStates[name])
+        end
+    end
 end
 
 function drp(name, options, def, cb)
@@ -642,11 +672,19 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
-print("✅ [2/6] GUI + Components loaded")-- =========================================================
--- ROOORHUB - BAGIAN 3/6 : FIRE HEAD + ESP NAMA
+-- AUTO SYNC TIAP 0.5 DETIK (INI KUNCINYA)
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if syncToggles then pcall(syncToggles) end
+    end
+end)
+
+print("✅ [2/5] GUI + State Sync loaded")-- =========================================================
+-- ROOORHUB - BAGIAN 3/5 : FIRE + ESP + PARRY + SKILLCHECK
 -- =========================================================
 
--- ============== FIRE DI KEPALA ==============
+-- ============== FIRE DI KEPALA (20 VARIAN) ==============
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -703,7 +741,7 @@ function applyFire()
     end
 end
 
--- Rainbow animation
+-- Rainbow fire animation
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -726,14 +764,14 @@ task.spawn(function()
     end
 end)
 
--- ============== ESP NAMA (Size Slider) ==============
-local ESPBillboards = {}
+-- ============== ESP NAMA (SIZE SLIDER) ==============
+_G.ESPBillboards = _G.ESPBillboards or {}
 
 function createESPName(player, char, root)
     if not S.ESP_Name then
-        if ESPBillboards[char] then
-            ESPBillboards[char]:Destroy()
-            ESPBillboards[char] = nil
+        if _G.ESPBillboards[char] then
+            _G.ESPBillboards[char]:Destroy()
+            _G.ESPBillboards[char] = nil
         end
         return
     end
@@ -744,9 +782,9 @@ function createESPName(player, char, root)
 
     local dist = (head.Position - root.Position).Magnitude
     if dist > S.ESP_Radius then
-        if ESPBillboards[char] then
-            ESPBillboards[char]:Destroy()
-            ESPBillboards[char] = nil
+        if _G.ESPBillboards[char] then
+            _G.ESPBillboards[char]:Destroy()
+            _G.ESPBillboards[char] = nil
         end
         return
     end
@@ -760,7 +798,7 @@ function createESPName(player, char, root)
         end
     end
 
-    local billboard = ESPBillboards[char]
+    local billboard = _G.ESPBillboards[char]
     if not billboard then
         billboard = Instance.new("BillboardGui")
         billboard.Name = "RoooorESPName"
@@ -781,7 +819,7 @@ function createESPName(player, char, root)
 
         billboard.Adornee = head
         billboard.Parent = char
-        ESPBillboards[char] = billboard
+        _G.ESPBillboards[char] = billboard
     else
         local label = billboard:FindFirstChildOfClass("TextLabel")
         if label then
@@ -793,14 +831,232 @@ function createESPName(player, char, root)
 end
 
 function clearAllESP()
-    for char, bb in pairs(ESPBillboards) do
+    for char, bb in pairs(_G.ESPBillboards) do
         if bb then bb:Destroy() end
     end
-    ESPBillboards = {}
+    _G.ESPBillboards = {}
 end
 
-print("✅ [3/6] Fire Head + ESP Nama loaded")-- =========================================================
--- ROOORHUB - BAGIAN 5/6 : GRAFIK ULTRA HD + CONTRAST
+-- ============== AUTO PARRY (FALLENS - WORK) ==============
+local lastParry = 0
+local PARRY_DEBOUNCE = 0.15
+_G.ParryActive = false
+_G.HookedKillers = _G.HookedKillers or {}
+
+function pressRightClick()
+    pcall(function()
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
+        task.wait()
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+    end)
+end
+
+function GetParryButton()
+    local current = PG
+    for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+function pressParryButton()
+    local didIt = false
+    -- Try 1: Mobile
+    if UIS.TouchEnabled then
+        local btn = GetParryButton()
+        if btn and btn:IsA("GuiObject") then
+            local pos = btn.AbsolutePosition
+            local size = btn.AbsoluteSize
+            local inset = GuiService:GetGuiInset()
+            local x = pos.X + size.X/2 + inset.X
+            local y = pos.Y + size.Y/2 + inset.Y
+            pcall(function()
+                VirtualInputManager:SendTouchEvent(8823, 0, x, y)
+                task.wait(0.01)
+                VirtualInputManager:SendTouchEvent(8823, 2, x, y)
+            end)
+            didIt = true
+        end
+    end
+    -- Try 2: Right Click (PC)
+    if not didIt then
+        pressRightClick()
+    end
+end
+
+function doParry()
+    local now = tick()
+    if now - lastParry < PARRY_DEBOUNCE then return end
+    lastParry = now
+    _G.ParryActive = true
+    pressParryButton()
+    task.delay(0.3, function() _G.ParryActive = false end)
+end
+
+function isInParryRange(killerChar)
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= S.ParryDist
+end
+
+function hookKiller(char)
+    if _G.HookedKillers[char] then return end
+    _G.HookedKillers[char] = true
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+    animator.AnimationPlayed:Connect(function(track)
+        if not S.Parry then return end
+        local anim = track.Animation
+        if not anim then return end
+        local id = anim.AnimationId:match("%d+")
+        if not id then return end
+        local fullId = "rbxassetid://" .. id
+        if KillerAnims[fullId] then
+            if not isInParryRange(char) then return end
+            doParry()
+        end
+    end)
+end
+
+function scanKillers()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+            hookKiller(p.Character)
+        end
+    end
+end
+
+-- Auto scan killer tiap 1 detik
+task.spawn(function()
+    while gui.Parent do
+        task.wait(1)
+        if S.Parry then scanKillers() end
+    end
+end)
+
+-- ============== PARRY CIRCLE (BULAT GARIS) ==============
+_G.ParryCirclePart = nil
+
+function updateParryCircle()
+    local root = getRoot()
+    if not S.ParryCircle or not root then
+        if _G.ParryCirclePart then
+            _G.ParryCirclePart:Destroy()
+            _G.ParryCirclePart = nil
+        end
+        return
+    end
+
+    if not _G.ParryCirclePart then
+        _G.ParryCirclePart = Instance.new("Part")
+        _G.ParryCirclePart.Shape = Enum.PartType.Cylinder
+        _G.ParryCirclePart.Anchored = true
+        _G.ParryCirclePart.CanCollide = false
+        _G.ParryCirclePart.Material = Enum.Material.Neon
+        _G.ParryCirclePart.Name = "RoooorParryCircle"
+        _G.ParryCirclePart.Parent = workspace
+    end
+
+    local size = S.ParryCircleSize * 2
+    _G.ParryCirclePart.Size = Vector3.new(0.1, size, size)
+
+    local yOffset = root.Size.Y / 2 + 1.5
+    _G.ParryCirclePart.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
+        * CFrame.Angles(0, 0, math.rad(90))
+
+    _G.ParryCirclePart.Color = Color3.fromRGB(255, 80, 80)
+    _G.ParryCirclePart.Transparency = 0.5
+end
+
+-- ============== AUTO SKILL CHECK (FALLENS - WORK) ==============
+_G.SkillConn = nil
+local skillBusy = false
+local TouchID = 8822
+local ActionPath = "Survivor-mob.Controls.action.check"
+
+function pressSpace()
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+        task.wait()
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+    end)
+end
+
+function GetActionTarget()
+    local current = PG
+    for segment in string.gmatch(ActionPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+function TriggerMobileButton()
+    local b = GetActionTarget()
+    if b and b:IsA("GuiObject") then
+        local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+        local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
+        pcall(function()
+            VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+        end)
+    end
+end
+
+function startSkillCheck()
+    if _G.SkillConn then _G.SkillConn:Disconnect() end
+    _G.SkillConn = RunService.RenderStepped:Connect(function()
+        if not S.Skill or skillBusy then return end
+
+        -- Cari prompt dengan multiple nama
+        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
+            or PG:FindFirstChild("SkillCheckGui")
+            or PG:FindFirstChild("GeneratorGui")
+
+        if not prompt then return end
+
+        local check = prompt:FindFirstChild("Check")
+            or prompt:FindFirstChild("skillCheck")
+            or prompt:FindFirstChild("SkillCheck")
+
+        if not check or not check.Visible then return end
+
+        local line = check:FindFirstChild("Line") or check:FindFirstChild("line")
+        local goal = check:FindFirstChild("Goal") or check:FindFirstChild("goal")
+
+        if not line or not goal then return end
+
+        local lr = line.Rotation % 360
+        local gr = goal.Rotation % 360
+
+        local startRange = (gr + 102) % 360
+        local endRange = (gr + 116) % 360
+
+        local success =
+            (startRange > endRange and (lr >= startRange or lr <= endRange))
+            or (lr >= startRange and lr <= endRange)
+
+        if success then
+            skillBusy = true
+            task.spawn(function()
+                if UIS.TouchEnabled then
+                    TriggerMobileButton()
+                else
+                    pressSpace()
+                end
+                task.wait(0.05)
+                skillBusy = false
+            end)
+        end
+    end)
+end
+
+print("✅ [3/5] Fire + ESP + Parry + Skill loaded")-- =========================================================
+-- ROOORHUB - BAGIAN 4/5 : ULTRA HD + CONTRAST
 -- =========================================================
 
 -- ============== GRAFIK ULTRA HD (RINGAN) ==============
@@ -821,12 +1077,10 @@ end)
 
 function applyUltraHD()
     if S.UltraHD then
-        -- Quality Level Max
         pcall(function()
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
         end)
 
-        -- Shadow + Lighting
         Lighting.GlobalShadows = true
         Lighting.Brightness = 2
         Lighting.ClockTime = 14
@@ -835,7 +1089,6 @@ function applyUltraHD()
         Lighting.Ambient = Color3.fromRGB(100, 100, 100)
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
-        -- HD Color Correction
         if not _G.RoooorHD then
             _G.RoooorHD = Instance.new("ColorCorrectionEffect")
             _G.RoooorHD.Name = "RoooorHD"
@@ -845,7 +1098,6 @@ function applyUltraHD()
         _G.RoooorHD.Brightness = 0.05
         _G.RoooorHD.Saturation = 0.15
 
-        -- Bloom (kecil, ringan)
         if not _G.RoooorBloom then
             _G.RoooorBloom = Instance.new("BloomEffect")
             _G.RoooorBloom.Name = "RoooorBloom"
@@ -855,7 +1107,6 @@ function applyUltraHD()
             _G.RoooorBloom.Parent = Lighting
         end
 
-        -- Sun Rays (tipis)
         if not _G.RoooorSunRays then
             _G.RoooorSunRays = Instance.new("SunRaysEffect")
             _G.RoooorSunRays.Name = "RoooorSunRays"
@@ -864,7 +1115,6 @@ function applyUltraHD()
             _G.RoooorSunRays.Parent = Lighting
         end
     else
-        -- RESET
         pcall(function()
             if origSettings.QualityLevel then
                 settings().Rendering.QualityLevel = origSettings.QualityLevel
@@ -886,28 +1136,28 @@ function applyUltraHD()
 end
 
 -- ============== CONTRAST ==============
-local contrastFx = nil
+_G.ContrastFx = nil
 
 function applyContrast()
     if S.Contrast then
-        if not contrastFx then
-            contrastFx = Instance.new("ColorCorrectionEffect")
-            contrastFx.Name = "RoooorContrast"
-            contrastFx.Parent = Lighting
+        if not _G.ContrastFx then
+            _G.ContrastFx = Instance.new("ColorCorrectionEffect")
+            _G.ContrastFx.Name = "RoooorContrast"
+            _G.ContrastFx.Parent = Lighting
         end
-        contrastFx.Contrast = S.ContrastVal
-        contrastFx.Brightness = S.BrightnessVal
-        contrastFx.Saturation = S.SaturationVal
+        _G.ContrastFx.Contrast = S.ContrastVal
+        _G.ContrastFx.Brightness = S.BrightnessVal
+        _G.ContrastFx.Saturation = S.SaturationVal
     else
-        if contrastFx then
-            contrastFx:Destroy()
-            contrastFx = nil
+        if _G.ContrastFx then
+            _G.ContrastFx:Destroy()
+            _G.ContrastFx = nil
         end
     end
 end
 
-print("✅ [5/6] Ultra HD + Contrast loaded")-- =========================================================
--- ROOORHUB - BAGIAN 6/6 : ISI TAB + MAIN LOOP + FINAL
+print("✅ [4/5] Ultra HD + Contrast loaded")-- =========================================================
+-- ROOORHUB - BAGIAN 5/5 : ISI TAB + MAIN LOOP + FINAL
 -- =========================================================
 
 -- ============== TAB 1 : INFO ==============
@@ -1027,13 +1277,18 @@ makeTab("Settings", "⚙️", 6, function()
 
     sec("Script", "🚪")
     btn("🔄 Reset Semua Fitur", function()
-        for k, v in pairs(S) do
-            if type(v) == "boolean" then S[k] = false end
-        end
+        S.FireOn = false
+        S.ESP_Name = false
+        S.Parry = false
+        S.ParryCircle = false
+        S.Skill = false
+        S.UltraHD = false
+        S.Contrast = false
         clearFire()
         clearAllESP()
         applyUltraHD()
         applyContrast()
+        syncToggles()
     end)
     btn("🚪 Unload Script", function()
         clearFire()
@@ -1041,13 +1296,12 @@ makeTab("Settings", "⚙️", 6, function()
         if _G.RoooorHD then _G.RoooorHD:Destroy() end
         if _G.RoooorBloom then _G.RoooorBloom:Destroy() end
         if _G.RoooorSunRays then _G.RoooorSunRays:Destroy() end
-        if ParryCirclePart then ParryCirclePart:Destroy() end
+        if _G.ParryCirclePart then _G.ParryCirclePart:Destroy() end
         gui:Destroy()
     end)
 
     sec("Info", "ℹ️")
-    lbl("Version: 4.0 Final", C.ACC3)
-    lbl("20 Fire + Ultra HD + Contrast", C.DIM)
+    lbl("Version: 5.0 Final", C.ACC3)
 end)
 
 -- =========================================================
@@ -1107,9 +1361,9 @@ task.spawn(function()
                         if hum and hum.Health > 0 then
                             createESPName(p, p.Character, root)
                         else
-                            if ESPBillboards[p.Character] then
-                                ESPBillboards[p.Character]:Destroy()
-                                ESPBillboards[p.Character] = nil
+                            if _G.ESPBillboards[p.Character] then
+                                _G.ESPBillboards[p.Character]:Destroy()
+                                _G.ESPBillboards[p.Character] = nil
                             end
                         end
                     end
@@ -1131,14 +1385,17 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- RESPAWN HANDLER
+-- RESPAWN HANDLER (RE-APPLY SEMUA FITUR YANG ON)
 -- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
-    ParryActive = false
-    hookedKillers = {}
+    _G.ParryActive = false
+    _G.HookedKillers = {}
     if S.FireOn then applyFire() end
     if S.Parry then scanKillers() end
+    if S.Skill then startSkillCheck() end
+    if S.UltraHD then applyUltraHD() end
+    if S.Contrast then applyContrast() end
 end)
 
 -- =========================================================
@@ -1172,16 +1429,17 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("✅ [6/6] FINAL loaded")
+print("✅ [5/5] FINAL loaded")
 print("🎉 ROOORHUB ULTIMATE - LOADED SUCCESSFULLY!")
 print("=====================================================")
 print("🔥 Fire di Kepala (20 Varian)")
-print("👁️ ESP Nama (Besar-Kecil)")
-print("🛡️ Auto Parry (Fallens)")
-print("🔵 Parry Circle Bulat Garis")
-print("🎯 Auto Skill Check (Fallens)")
+print("👁️ ESP Nama (Size Slider)")
+print("🛡️ Auto Parry (Fallens - WORK)")
+print("🔵 Parry Circle (Bulat Garis)")
+print("🎯 Auto Skill Check (Fallens - WORK)")
 print("🎨 Grafik Ultra HD (Ringan)")
-print("🔍 Contrast (Slider)")
+print("🔍 Contrast (3 Slider)")
+print("🔄 STATE SYNC AKTIF - Fitur GAK MATI SENDIRI")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
 print("=====================================================")

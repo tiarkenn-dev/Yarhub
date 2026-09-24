@@ -34,7 +34,6 @@ _G.RoooorS = _G.RoooorS or {
     FireOn = false,
     FireType = "Classic",
     FireSize = 5,
-    
     ESP_Name = false,
     ESP_Size = 12,
     ESP_Radius = 500,
@@ -44,7 +43,6 @@ _G.RoooorS = _G.RoooorS or {
     ESP_DefaultColor = Color3.fromRGB(255, 255, 255),
     ESP_KillerColor = Color3.fromRGB(255, 60, 60),
     ESP_SurvivorColor = Color3.fromRGB(60, 255, 120),
-    
     ESP_Generator = false,
     ESP_GenColor = Color3.fromRGB(255, 170, 0),
     ESP_Pallet = false,
@@ -53,41 +51,48 @@ _G.RoooorS = _G.RoooorS or {
     ESP_WindowColor = Color3.fromRGB(74, 255, 181),
     ESP_SCP = false,
     ESP_SCPColor = Color3.fromRGB(255, 0, 0),
-    
     Parry = false,
     ParryDist = 8,
     ParryCircle = false,
     ParryCircleSize = 15,
     Skill = false,
-    
     UltraHD = false,
     Contrast = false,
     ContrastVal = 0.3,
     BrightnessVal = 0.1,
     SaturationVal = 0.2,
-    
     FPS = true,
 }
 
 local S = _G.RoooorS
 
--- TOGGLE STATE
+-- TOGGLE STATE (ANTI VISUAL RESET)
 _G.ToggleStates = _G.ToggleStates or {}
 _G.ToggleObjects = _G.ToggleObjects or {}
 
--- 40 FIRE EFFECT
+-- 60 FIRE EFFECT
 local FireList = {
+    -- 1-10 Klasik
     "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
     "GoldenKing", "SakuraFire", "EmeraldFire", "BloodFire", "ShadowFire",
+    -- 11-20 Elemen
     "HolyFire", "OceanFire", "Firework", "Lava", "GhostFire",
     "CosmicFire", "DragonFire", "MysteryFire", "RainbowFire", "LightningFire",
+    -- 21-30 Super Duper
     "GalaxyFire", "NebulaFire", "AuroraFire", "PhoenixFire", "DemonFire",
     "AngelFire", "CrystalFire", "NeonFire", "PlasmaFire", "QuantumFire",
+    -- 31-40 Legendary
     "LegendaryFire", "MythicFire", "DivineFire", "CursedFire", "AncientFire",
-    "EternalFire", "InfernoFire", "BifrostFire", "ChaosFire", "OmegaFire"
+    "EternalFire", "InfernoFire", "BifrostFire", "ChaosFire", "OmegaFire",
+    -- 41-60 Ultra Recommended
+    "SolarFire", "LunarFire", "EclipseFire", "SolarFlare", "VoidStorm",
+    "StarFire", "SupernovaFire", "BlackHoleFire", "MeteorFire", "CometFire",
+    "FrostFire", "BlizzardFire", "ThunderFire", "StormFire", "TornadoFire",
+    "SoulFire", "SpiritFire", "PhantomFire", "WraithFire", "ReaperFire"
 }
 
 local FireConfig = {
+    -- 1-10
     Classic = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 200, 0) },
     HellFire = { c1 = Color3.fromRGB(150, 0, 0), c2 = Color3.fromRGB(255, 50, 0), smoke = true, smokeColor = Color3.fromRGB(20, 20, 20) },
     IceFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(200, 240, 255), spark = true, light = Color3.fromRGB(100, 200, 255) },
@@ -98,6 +103,7 @@ local FireConfig = {
     EmeraldFire = { c1 = Color3.fromRGB(0, 200, 100), c2 = Color3.fromRGB(100, 255, 150), light = Color3.fromRGB(0, 255, 150) },
     BloodFire = { c1 = Color3.fromRGB(200, 0, 0), c2 = Color3.fromRGB(100, 0, 0), smoke = true, smokeColor = Color3.fromRGB(80, 0, 0) },
     ShadowFire = { c1 = Color3.fromRGB(20, 20, 30), c2 = Color3.fromRGB(80, 0, 100), smoke = true, smokeColor = Color3.fromRGB(40, 0, 60) },
+    -- 11-20
     HolyFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 200), spark = true, light = Color3.fromRGB(255, 255, 255) },
     OceanFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(100, 200, 255), light = Color3.fromRGB(0, 150, 255) },
     Firework = { c1 = Color3.fromRGB(255, 0, 100), c2 = Color3.fromRGB(255, 200, 0), spark = true, rainbow = true },
@@ -108,6 +114,7 @@ local FireConfig = {
     MysteryFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
     RainbowFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true, spark = true },
     LightningFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(255, 255, 255), spark = true, light = Color3.fromRGB(200, 220, 255) },
+    -- 21-30
     GalaxyFire = { c1 = Color3.fromRGB(80, 0, 200), c2 = Color3.fromRGB(255, 200, 255), spark = true, rainbow = true, light = Color3.fromRGB(150, 100, 255) },
     NebulaFire = { c1 = Color3.fromRGB(200, 50, 255), c2 = Color3.fromRGB(50, 200, 255), spark = true, rainbow = true },
     AuroraFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(100, 255, 100), spark = true, rainbow = true },
@@ -118,6 +125,7 @@ local FireConfig = {
     NeonFire = { c1 = Color3.fromRGB(0, 255, 100), c2 = Color3.fromRGB(255, 0, 200), spark = true, rainbow = true, light = Color3.fromRGB(0, 255, 150) },
     PlasmaFire = { c1 = Color3.fromRGB(150, 0, 255), c2 = Color3.fromRGB(0, 200, 255), spark = true, light = Color3.fromRGB(150, 100, 255) },
     QuantumFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(255, 0, 100), rainbow = true, spark = true },
+    -- 31-40
     LegendaryFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 100, 0), spark = true, light = Color3.fromRGB(255, 200, 0) },
     MythicFire = { c1 = Color3.fromRGB(200, 0, 255), c2 = Color3.fromRGB(255, 200, 0), spark = true, rainbow = true },
     DivineFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 200, 100), spark = true, light = Color3.fromRGB(255, 240, 200) },
@@ -128,6 +136,27 @@ local FireConfig = {
     BifrostFire = { c1 = Color3.fromRGB(255, 100, 200), c2 = Color3.fromRGB(100, 255, 200), rainbow = true, spark = true, light = Color3.fromRGB(200, 200, 255) },
     ChaosFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 255), rainbow = true, spark = true },
     OmegaFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 0, 255), rainbow = true, spark = true, light = Color3.fromRGB(255, 150, 200) },
+    -- 41-60 RECOMMENDED
+    SolarFire = { c1 = Color3.fromRGB(255, 150, 0), c2 = Color3.fromRGB(255, 255, 100), spark = true, light = Color3.fromRGB(255, 200, 0) },
+    LunarFire = { c1 = Color3.fromRGB(200, 220, 255), c2 = Color3.fromRGB(100, 150, 255), spark = true, light = Color3.fromRGB(150, 200, 255) },
+    EclipseFire = { c1 = Color3.fromRGB(50, 0, 100), c2 = Color3.fromRGB(255, 150, 0), spark = true, light = Color3.fromRGB(150, 100, 200) },
+    SolarFlare = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 255, 200), spark = true, light = Color3.fromRGB(255, 150, 0) },
+    VoidStorm = { c1 = Color3.fromRGB(50, 0, 80), c2 = Color3.fromRGB(200, 0, 255), spark = true, rainbow = true, light = Color3.fromRGB(150, 0, 255) },
+    StarFire = { c1 = Color3.fromRGB(255, 255, 200), c2 = Color3.fromRGB(255, 200, 100), spark = true, light = Color3.fromRGB(255, 230, 150) },
+    SupernovaFire = { c1 = Color3.fromRGB(255, 200, 0), c2 = Color3.fromRGB(255, 0, 200), spark = true, rainbow = true, light = Color3.fromRGB(255, 100, 150) },
+    BlackHoleFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(100, 0, 150), smoke = true, smokeColor = Color3.fromRGB(30, 0, 50), light = Color3.fromRGB(80, 0, 120) },
+    MeteorFire = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(200, 30, 0), smoke = true, smokeColor = Color3.fromRGB(100, 50, 0), light = Color3.fromRGB(255, 80, 0) },
+    CometFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(200, 255, 255), spark = true, light = Color3.fromRGB(150, 220, 255) },
+    FrostFire = { c1 = Color3.fromRGB(200, 240, 255), c2 = Color3.fromRGB(100, 180, 255), spark = true, light = Color3.fromRGB(180, 220, 255) },
+    BlizzardFire = { c1 = Color3.fromRGB(220, 240, 255), c2 = Color3.fromRGB(150, 200, 255), spark = true, smoke = true, smokeColor = Color3.fromRGB(220, 240, 255) },
+    ThunderFire = { c1 = Color3.fromRGB(255, 255, 100), c2 = Color3.fromRGB(100, 100, 255), spark = true, light = Color3.fromRGB(200, 200, 255) },
+    StormFire = { c1 = Color3.fromRGB(80, 80, 150), c2 = Color3.fromRGB(200, 200, 255), spark = true, smoke = true, smokeColor = Color3.fromRGB(80, 80, 120) },
+    TornadoFire = { c1 = Color3.fromRGB(150, 150, 200), c2 = Color3.fromRGB(80, 80, 120), spark = true, smoke = true, smokeColor = Color3.fromRGB(100, 100, 150) },
+    SoulFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(150, 255, 255), spark = true, light = Color3.fromRGB(100, 255, 220) },
+    SpiritFire = { c1 = Color3.fromRGB(200, 255, 255), c2 = Color3.fromRGB(150, 200, 255), spark = true, light = Color3.fromRGB(200, 240, 255) },
+    PhantomFire = { c1 = Color3.fromRGB(100, 0, 150), c2 = Color3.fromRGB(50, 0, 100), smoke = true, smokeColor = Color3.fromRGB(60, 0, 100), light = Color3.fromRGB(100, 0, 150) },
+    WraithFire = { c1 = Color3.fromRGB(30, 0, 50), c2 = Color3.fromRGB(150, 0, 200), smoke = true, smokeColor = Color3.fromRGB(50, 0, 80) },
+    ReaperFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(255, 0, 0), smoke = true, smokeColor = Color3.fromRGB(80, 0, 0), light = Color3.fromRGB(150, 0, 0) },
 }
 
 -- 23 KILLER ANIMS
@@ -170,7 +199,7 @@ function rainbowSeq()
     }
 end
 
-print("✅ [1/6] Core + 40 Fire loaded")-- =========================================================
+print("✅ [1/6] Core + 60 Fire Config loaded")-- =========================================================
 -- BAGIAN 2/6 : GUI + COMPONENTS + STATE SYNC
 -- =========================================================
 
@@ -495,6 +524,7 @@ function lbl(text, color)
     l.Parent = cs
 end
 
+-- TOGGLE DENGAN STATE SYNC (ANTI OFF SENDIRI)
 function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
@@ -517,21 +547,30 @@ function tog(name, def, cb)
     local t = Instance.new("Frame")
     t.Size = UDim2.new(0, 32, 0, 16)
     t.Position = UDim2.new(1, -42, 0.5, -8)
-    t.BackgroundColor3 = def and C.ACC or C.PANEL
     t.BorderSizePixel = 0
     t.Parent = f
     rnd(t, 8)
-    local tS = strk(t, def and C.ACC2 or C.DIM, 1, 0.5)
     local k = Instance.new("Frame")
     k.Size = UDim2.new(0, 12, 0, 12)
-    k.Position = def and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
-    k.BackgroundColor3 = def and C.ACC2 or C.DIM
     k.BorderSizePixel = 0
     k.Parent = t
     rnd(k, 6)
 
-    local state = def
-    _G.ToggleStates[name] = state
+    -- 🔥 AMBIL STATE DARI GLOBAL
+    local savedState = _G.ToggleStates[name]
+    local state
+    if savedState ~= nil then
+        state = savedState
+    else
+        state = def
+        _G.ToggleStates[name] = state
+    end
+
+    -- Set visual SESUAI state
+    t.BackgroundColor3 = state and C.ACC or C.PANEL
+    local tS = strk(t, state and C.ACC2 or C.DIM, 1, 0.5)
+    k.Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+    k.BackgroundColor3 = state and C.ACC2 or C.DIM
 
     _G.ToggleObjects[name] = {
         setState = function(newState)
@@ -605,7 +644,6 @@ function drp(name, options, def, cb)
     cB.Text = ""
     cB.Parent = f
 
-    -- BUAT LIST DROPDOWN
     local listOpen = false
     local listFrame = Instance.new("Frame")
     listFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -633,7 +671,6 @@ function drp(name, options, def, cb)
     listLayout.Padding = UDim.new(0, 2)
     listLayout.Parent = listScroll
 
-    -- ISI OPTIONS
     for i, opt in ipairs(options) do
         local optBtn = Instance.new("TextButton")
         optBtn.Size = UDim2.new(1, -4, 0, 22)
@@ -830,16 +867,16 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- AUTO SYNC (ANTI FITUR OFF SENDIRI)
+-- AUTO SYNC
 task.spawn(function()
     while gui.Parent do
-        task.wait(0.5)
+        task.wait(0.3)
         if syncToggles then pcall(syncToggles) end
     end
 end)
 
 print("✅ [2/6] GUI + Components + State Sync loaded")-- =========================================================
--- BAGIAN 3/6 : FIRE KEPALA + ESP LENGKAP (FALLENS)
+-- BAGIAN 3/6 : FIRE KEPALA + ESP LENGKAP
 -- =========================================================
 
 -- ============== FIRE DI KEPALA ==============
@@ -864,6 +901,7 @@ function applyFire()
     if not head then return end
     local cfg = FireConfig[S.FireType] or FireConfig.Classic
 
+    -- Fire utama di KEPALA
     local fire = Instance.new("Fire")
     fire.Name = "RoooorFire"
     fire.Size = S.FireSize
@@ -872,6 +910,7 @@ function applyFire()
     fire.SecondaryColor = cfg.c2
     fire.Parent = head
 
+    -- Smoke
     if cfg.smoke then
         local smoke = Instance.new("Smoke")
         smoke.Name = "RoooorSmoke"
@@ -882,13 +921,16 @@ function applyFire()
         smoke.Parent = head
     end
 
+    -- Sparkles
     if cfg.spark then
         local spark = Instance.new("Sparkles")
         spark.Name = "RoooorSparkles"
         spark.SparkleColor = cfg.c2
+        spark.SparkleSize = 1
         spark.Parent = head
     end
 
+    -- PointLight
     if cfg.light then
         local light = Instance.new("PointLight")
         light.Name = "RoooorPointLight"
@@ -899,7 +941,7 @@ function applyFire()
     end
 end
 
--- Rainbow fire
+-- Rainbow fire animation
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -926,6 +968,7 @@ end)
 local ESPObjects = {}
 local StatusESP = {}
 
+-- Object Cache
 local Cached = {
     Generators = {},
     Windows = {},
@@ -958,6 +1001,7 @@ end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
+-- Create Highlight ESP
 function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
@@ -988,6 +1032,7 @@ function removeESP(obj)
     end
 end
 
+-- ESP Nama Player + Status
 function createStatusESP(player, char, root)
     if not S.ESP_Name then
         if StatusESP[char] then
@@ -1071,6 +1116,7 @@ function removeStatusESP(char)
     end
 end
 
+-- Get Value helper (buat progress generator)
 function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -1083,6 +1129,7 @@ function GetGameValue(obj, name)
     return nil
 end
 
+-- ESP Generator
 function updateGenerator(gen)
     if not gen or not gen.Parent then return end
     if not S.ESP_Generator then
@@ -1130,6 +1177,7 @@ function updateGenerator(gen)
     createESP(gen, color)
 end
 
+-- ESP Pallet
 function updatePallet(obj, root)
     if not obj or not root then return end
     local pos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
@@ -1141,6 +1189,7 @@ function updatePallet(obj, root)
     end
 end
 
+-- ESP Window
 function updateWindow(obj, root)
     if not obj or not root then return end
     local pos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
@@ -1152,6 +1201,7 @@ function updateWindow(obj, root)
     end
 end
 
+-- ESP SCP
 function updateSCP(obj, root)
     if not obj or not root then return end
     local pos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
@@ -1163,31 +1213,33 @@ function updateSCP(obj, root)
     end
 end
 
-print("✅ [3/6] Fire + ESP loaded")-- =========================================================
--- BAGIAN 4/6 : AUTO PARRY + CIRCLE + SKILLCHECK
+print("✅ [3/6] Fire Kepala + ESP Lengkap loaded")-- =========================================================
+-- BAGIAN 4/6 : AUTO PARRY SUPER WORK + CIRCLE + SKILLCHECK
 -- =========================================================
 
+-- ============== AUTO PARRY SUPER WORK ==============
 local lastParry = 0
-local PARRY_DEBOUNCE = 0.1
+local PARRY_DEBOUNCE = 0.08
 _G.ParryActive = false
 _G.HookedKillers = _G.HookedKillers or {}
 
-function pressRightClick()
-    pcall(function()
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
-    end)
-end
-
+-- Cache parry button
+local ParryButtonCache = nil
 function GetParryButton()
+    if ParryButtonCache and ParryButtonCache.Parent then
+        return ParryButtonCache
+    end
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
         current = current and current:FindFirstChild(segment)
     end
+    ParryButtonCache = current
     return current
 end
 
+-- Press Parry (3 fallback)
 function pressParryButton()
+    -- Prioritas 1: Mobile
     if UIS.TouchEnabled then
         local btn = GetParryButton()
         if btn and btn:IsA("GuiObject") then
@@ -1203,33 +1255,59 @@ function pressParryButton()
             return
         end
     end
-    pressRightClick()
+    -- Prioritas 2: PC Right-Click
+    pcall(function()
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+    end)
+    -- Prioritas 3: Fire remote
+    pcall(function()
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        if remotes then
+            local combat = remotes:FindFirstChild("Combat")
+                or remotes:FindFirstChild("Attacks")
+                or remotes:FindFirstChild("Parry")
+            if combat then
+                local parry = combat:FindFirstChild("Parry")
+                    or combat:FindFirstChild("ParryEvent")
+                    or combat:FindFirstChild("BasicParry")
+                if parry then parry:FireServer() end
+            end
+        end
+    end)
 end
 
+-- DO PARRY
 function doParry()
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
     lastParry = now
     _G.ParryActive = true
     pressParryButton()
-    task.delay(0.15, function() _G.ParryActive = false end)
+    task.delay(0.1, function() _G.ParryActive = false end)
 end
 
+-- Range Check
 function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
-    return (enemyRoot.Position - myRoot.Position).Magnitude <= S.ParryDist
+    local dist = (enemyRoot.Position - myRoot.Position).Magnitude
+    return dist <= S.ParryDist and dist > 1
 end
 
+-- Hook Killer (2 method: Event + Prediction Loop)
 function hookKiller(char)
     if _G.HookedKillers[char] then return end
     _G.HookedKillers[char] = true
+
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
+
+    -- METHOD 1: Event AnimationPlayed
     animator.AnimationPlayed:Connect(function(track)
         if not S.Parry then return end
         if _G.ParryActive then return end
@@ -1243,6 +1321,32 @@ function hookKiller(char)
             doParry()
         end
     end)
+
+    -- METHOD 2: Prediction Loop (lebih cepet)
+    task.spawn(function()
+        while _G.HookedKillers[char] and char.Parent do
+            task.wait(0.02)
+            if not S.Parry then break end
+            if _G.ParryActive then continue end
+
+            local playing = animator:GetPlayingAnimationTracks()
+            for _, track in ipairs(playing) do
+                local anim = track.Animation
+                if anim then
+                    local id = anim.AnimationId:match("%d+")
+                    if id then
+                        local fullId = "rbxassetid://" .. id
+                        if KillerAnims[fullId] then
+                            if isInParryRange(char) then
+                                doParry()
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
 end
 
 function scanKillers()
@@ -1253,14 +1357,15 @@ function scanKillers()
     end
 end
 
+-- Auto scan tiap 0.3 detik
 task.spawn(function()
     while gui.Parent do
-        task.wait(0.5)
+        task.wait(0.3)
         if S.Parry then scanKillers() end
     end
 end)
 
--- PARRY CIRCLE
+-- ============== PARRY CIRCLE ==============
 _G.ParryCirclePart = nil
 function updateParryCircle()
     local root = getRoot()
@@ -1289,26 +1394,31 @@ function updateParryCircle()
     _G.ParryCirclePart.Transparency = 0.5
 end
 
--- AUTO SKILL CHECK
+-- ============== AUTO SKILL CHECK (FALLENS) ==============
 _G.SkillConn = nil
 local skillBusy = false
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
 
-function pressSpace()
-    pcall(function()
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-        task.wait()
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-    end)
-end
-
+-- Cache action button
+local ActionButtonCache = nil
 function GetActionTarget()
+    if ActionButtonCache and ActionButtonCache.Parent then
+        return ActionButtonCache
+    end
     local current = PG
     for segment in string.gmatch(ActionPath, "[^%.]+") do
         current = current and current:FindFirstChild(segment)
     end
+    ActionButtonCache = current
     return current
+end
+
+function pressSpace()
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+    end)
 end
 
 function TriggerMobileButton()
@@ -1318,7 +1428,6 @@ function TriggerMobileButton()
         local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
         pcall(function()
             VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
-            task.wait(0.01)
             VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
         end)
     end
@@ -1335,16 +1444,22 @@ function startSkillCheck()
         local line = check:FindFirstChild("Line")
         local goal = check:FindFirstChild("Goal")
         if not line or not goal then return end
+
         local lr = line.Rotation % 360
         local gr = goal.Rotation % 360
         local startRange = (gr + 102) % 360
         local endRange = (gr + 116) % 360
         local success = (startRange > endRange and (lr >= startRange or lr <= endRange))
             or (lr >= startRange and lr <= endRange)
+
         if success then
             skillBusy = true
             task.spawn(function()
-                if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
+                if UIS.TouchEnabled then
+                    TriggerMobileButton()
+                else
+                    pressSpace()
+                end
                 task.wait(0.05)
                 skillBusy = false
             end)
@@ -1352,10 +1467,11 @@ function startSkillCheck()
     end)
 end
 
-print("✅ [4/6] Parry + Circle + Skill loaded")-- =========================================================
+print("✅ [4/6] Parry Super Work + Circle + SkillCheck loaded")-- =========================================================
 -- BAGIAN 5/6 : ULTRA HD + CONTRAST
 -- =========================================================
 
+-- ============== ULTRA HD ==============
 local origSettings = {
     QualityLevel = nil,
     Brightness = Lighting.Brightness,
@@ -1376,6 +1492,7 @@ function applyUltraHD()
         pcall(function()
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
         end)
+
         Lighting.GlobalShadows = true
         Lighting.Brightness = 2
         Lighting.ClockTime = 14
@@ -1415,6 +1532,7 @@ function applyUltraHD()
                 settings().Rendering.QualityLevel = origSettings.QualityLevel
             end
         end)
+
         Lighting.GlobalShadows = origSettings.GlobalShadows
         Lighting.Brightness = origSettings.Brightness
         Lighting.ClockTime = origSettings.ClockTime
@@ -1422,13 +1540,16 @@ function applyUltraHD()
         Lighting.FogStart = origSettings.FogStart
         Lighting.Ambient = origSettings.Ambient
         Lighting.OutdoorAmbient = origSettings.OutdoorAmbient
+
         if _G.RoooorHD then _G.RoooorHD:Destroy(); _G.RoooorHD = nil end
         if _G.RoooorBloom then _G.RoooorBloom:Destroy(); _G.RoooorBloom = nil end
         if _G.RoooorSunRays then _G.RoooorSunRays:Destroy(); _G.RoooorSunRays = nil end
     end
 end
 
+-- ============== CONTRAST ==============
 _G.ContrastFx = nil
+
 function applyContrast()
     if S.Contrast then
         if not _G.ContrastFx then
@@ -1463,7 +1584,7 @@ end)
 
 -- TAB 2 : FIRE
 makeTab("Fire", "🔥", 2, function()
-    sec("Fire di Kepala (40 Varian)", "🔥")
+    sec("Fire di Kepala (60 Varian)", "🔥")
     tog("Enable Fire", false, function(s)
         S.FireOn = s
         applyFire()
@@ -1476,7 +1597,8 @@ makeTab("Fire", "🔥", 2, function()
         S.FireSize = v
         applyFire()
     end)
-    lbl("Pilih dari 40 efek di atas ↑", C.ACC2)
+    lbl("Pilih dari 60 efek di atas ↑", C.ACC2)
+    lbl("Klik dropdown, pilih dari list", C.DIM)
 end)
 
 -- TAB 3 : ESP
@@ -1499,19 +1621,19 @@ makeTab("ESP", "👁️", 3, function()
     cpk("Default Color", S.ESP_DefaultColor, function(c) S.ESP_DefaultColor = c end)
     cpk("Killer Color", S.ESP_KillerColor, function(c) S.ESP_KillerColor = c end)
     cpk("Survivor Color", S.ESP_SurvivorColor, function(c) S.ESP_SurvivorColor = c end)
-    
+
     sec("Generator ESP", "⚡")
     tog("ESP Generator", false, function(s) S.ESP_Generator = s end)
     cpk("Gen Color", S.ESP_GenColor, function(c) S.ESP_GenColor = c end)
-    
+
     sec("Pallet ESP", "🪵")
     tog("ESP Pallet", false, function(s) S.ESP_Pallet = s end)
     cpk("Pallet Color", S.ESP_PalletColor, function(c) S.ESP_PalletColor = c end)
-    
+
     sec("Window ESP", "🪟")
     tog("ESP Window", false, function(s) S.ESP_Window = s end)
     cpk("Window Color", S.ESP_WindowColor, function(c) S.ESP_WindowColor = c end)
-    
+
     sec("SCP ESP", "👹")
     tog("ESP SCP", false, function(s) S.ESP_SCP = s end)
     cpk("SCP Color", S.ESP_SCPColor, function(c) S.ESP_SCPColor = c end)
@@ -1525,11 +1647,12 @@ makeTab("Survivor", "🏃", 4, function()
         if s then scanKillers() end
     end)
     sl("Parry Distance", 3, 15, 8, function(v) S.ParryDist = v end)
-    
+    lbl("Rekomendasi jarak: 8", C.ACC2)
+
     sec("Parry Circle", "🔵")
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
     sl("Circle Size", 5, 50, 15, function(v) S.ParryCircleSize = v end)
-    
+
     sec("Auto Skill Check", "🎯")
     tog("Enable Skill Check", false, function(s)
         S.Skill = s
@@ -1545,7 +1668,8 @@ makeTab("Visual", "🎨", 5, function()
         applyUltraHD()
     end)
     lbl("Kualitas gambar HD", C.ACC2)
-    
+    lbl("Tetap ringan di HP kentang", C.GRN)
+
     sec("Contrast", "🔍")
     tog("Enable Contrast", false, function(s)
         S.Contrast = s
@@ -1560,6 +1684,7 @@ end)
 makeTab("Settings", "⚙️", 6, function()
     sec("Keybind", "⌨️")
     lbl("RightShift = Toggle Menu", C.ACC2)
+
     sec("Script", "🚪")
     btn("🔄 Reset Semua Fitur", function()
         S.FireOn = false
@@ -1569,24 +1694,34 @@ makeTab("Settings", "⚙️", 6, function()
         S.Skill = false
         S.UltraHD = false
         S.Contrast = false
+        S.ESP_Generator = false
+        S.ESP_Pallet = false
+        S.ESP_Window = false
+        S.ESP_SCP = false
         clearFire()
         applyUltraHD()
         applyContrast()
-        syncToggles()
+        if syncToggles then syncToggles() end
     end)
+
     btn("🚪 Unload Script", function()
         clearFire()
         if _G.RoooorHD then _G.RoooorHD:Destroy() end
         if _G.RoooorBloom then _G.RoooorBloom:Destroy() end
         if _G.RoooorSunRays then _G.RoooorSunRays:Destroy() end
         if _G.ParryCirclePart then _G.ParryCirclePart:Destroy() end
+        if _G.ContrastFx then _G.ContrastFx:Destroy() end
         gui:Destroy()
     end)
+
     sec("Info", "ℹ️")
     lbl("Version: 6.0 Ultimate", C.ACC3)
+    lbl("60 Fire + ESP + Parry + Skill", C.DIM)
 end)
 
+-- =========================================================
 -- FPS/PING
+-- =========================================================
 local fpsLbl = Instance.new("TextLabel")
 fpsLbl.Size = UDim2.new(0, 140, 0, 20)
 fpsLbl.Position = UDim2.new(0.5, -70, 0, 5)
@@ -1620,7 +1755,9 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
+-- =========================================================
 -- MAIN LOOP
+-- =========================================================
 local lastESP = 0
 local lastParry = 0
 
@@ -1628,9 +1765,13 @@ task.spawn(function()
     while gui.Parent do
         local now = tick()
         local root = getRoot()
+
         if root then
+            -- ESP UPDATE (tiap 0.1s)
             if now - lastESP >= 0.1 then
                 lastESP = now
+
+                -- Player ESP
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character then
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
@@ -1653,34 +1794,51 @@ task.spawn(function()
                         end
                     end
                 end
+
+                -- Generator ESP
                 for gen in pairs(Cached.Generators) do
                     if gen and gen.Parent then updateGenerator(gen) end
                 end
+
+                -- Pallet ESP
                 for obj in pairs(Cached.Pallets) do
                     if obj and obj.Parent then updatePallet(obj, root) end
                 end
+
+                -- Window ESP
                 for obj in pairs(Cached.Windows) do
                     if obj and obj.Parent then updateWindow(obj, root) end
                 end
+
+                -- SCP ESP
                 for obj in pairs(Cached.SCPs) do
                     if obj and obj.Parent then updateSCP(obj, root) end
                 end
             end
+
+            -- Scan Killers Parry (tiap 1s)
             if S.Parry and now - lastParry >= 1 then
                 lastParry = now
                 scanKillers()
             end
         end
+
+        -- Update Parry Circle
         updateParryCircle()
+
         task.wait(0.1)
     end
 end)
 
--- RESPAWN HANDLER
+-- =========================================================
+-- RESPAWN HANDLER (RE-APPLY SEMUA)
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     _G.ParryActive = false
     _G.HookedKillers = {}
+    ParryButtonCache = nil
+    ActionButtonCache = nil
     if S.FireOn then applyFire() end
     if S.Parry then scanKillers() end
     if S.Skill then startSkillCheck() end
@@ -1688,7 +1846,9 @@ LP.CharacterAdded:Connect(function(char)
     if S.Contrast then applyContrast() end
 end)
 
--- KEYBIND
+-- =========================================================
+-- KEYBIND RightShift
+-- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -1702,7 +1862,9 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- =========================================================
 -- BUKA TAB PERTAMA
+-- =========================================================
 task.wait(0.3)
 for _, c in pairs(sb:GetChildren()) do
     if c:IsA("TextButton") then
@@ -1711,15 +1873,29 @@ for _, c in pairs(sb:GetChildren()) do
     end
 end
 
+-- =========================================================
+-- NEON ANIMASI
+-- =========================================================
+task.spawn(function()
+    while main.Parent do
+        task.wait(0.05)
+        local hue = (tick() * 0.3) % 1
+        mainStrk.Color = Color3.fromHSV(hue, 1, 1)
+        mainStrk.Transparency = 0.4
+    end
+end)
+
+-- =========================================================
 -- FINAL PRINT
+-- =========================================================
 print("=====================================================")
 print("✅ [6/6] FINAL loaded")
 print("🎉 ROOORHUB ULTIMATE - LOADED SUCCESSFULLY!")
 print("=====================================================")
-print("🔥 40 Fire Effect di Kepala")
+print("🔥 60 Fire Effect di Kepala (Dropdown)")
 print("👁️ ESP Lengkap (Player/Gen/Pallet/Window/SCP)")
 print("🎨 ESP Custom Warna + Nama Size Slider")
-print("🛡️ Auto Parry (FIX anti-delay + anti-ngeden)")
+print("🛡️ Auto Parry SUPER WORK (Prediction + 3 Fallback)")
 print("🔵 Parry Circle Bulat Garis")
 print("🎯 Auto Skill Check (Fallens)")
 print("🎨 Ultra HD + Contrast")

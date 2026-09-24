@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB - BAGIAN 1/10 : SERVICES + CONFIG
+-- ROOORHUB - BAGIAN 1/5 : CORE + CONFIG
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -30,24 +30,34 @@ local C = {
 }
 
 local S = {
-    Aimlock = { on = false, hold = false, target = "Survivor", part = "Head", fov = 250, radius = 500, predict = 0.12, smooth = 0.5 },
+    Aimlock = { on = false, hold = false, target = "Survivor", part = "Head", fov = 250, radius = 500, predict = 0.12, smooth = 0.5, locked = false },
     AutoAtk = { on = false, delay = 0.35, last = 0 },
     KillAll = { on = false },
-    Hitbox = { on = false, size = 15, onlySurv = true },
+    Hitbox = { on = false, size = 15 },
     AntiStun = { on = false },
-    Parry = { on = false, dist = 12, last = 0, cd = 0.2 },
-    ParryCircle = { on = false, size = 12 },
+    Parry = { on = false, dist = 15 },
     Skill = { on = false },
     Wiggle = { on = false, spam = 5 },
     Flee = { on = false, dist = 50, last = 0 },
-    Moonwalk = { on = false, spam = 30, intensity = 35, slow = 13 },
+    Moonwalk = { on = false, spam = 30, intensity = 35, slow = 13, locked = false },
     GodMode = { on = false },
-    ESP = { surv = false, killer = false, gen = false, name = true, dist = true, hp = false, radius = 100, sc = Color3.fromRGB(60, 255, 120), kc = Color3.fromRGB(255, 60, 60), gc = Color3.fromRGB(255, 170, 0), nc = Color3.fromRGB(255, 255, 255), ns = 12 },
-    Visual = { fb = false, nofog = false, fire = false, fireType = "Red" },
+    GenBoost = { on = false, delay = 0.2, last = 0 },
+    ESP = {
+        surv = false, killer = false, gen = false,
+        name = true, dist = true, hp = false, radius = 100,
+        sc = Color3.fromRGB(60, 255, 120),
+        kc = Color3.fromRGB(255, 60, 60),
+        gc = Color3.fromRGB(255, 170, 0),
+    },
+    Visual = { fb = false, nofog = false, contrast = false, cv = 0.3, bv = 0.15, sv = 0.2, fire = false, fireType = "Red" },
     Move = { speedOn = false, speed = 17.6, jumpOn = false, jump = 50, noclip = false },
-    Avatar = { target = "", orig = nil, uid = nil },
     FPS = { show = true },
-    Buttons = { aimOn = false, moonOn = false, aimGui = nil, moonGui = nil },
+    Buttons = { aimGui = nil, moonGui = nil, genGui = nil },
+}
+
+local TeamColors = {
+    Killer = Color3.fromRGB(255, 60, 60),
+    Survivor = Color3.fromRGB(60, 255, 120),
 }
 
 local KillerAnims = {}
@@ -68,7 +78,7 @@ local FireV = {
     Rainbow = {c = Color3.fromRGB(255,0,0), s = Color3.fromRGB(0,255,255)},
 }
 
-local CarryEvent, HookEvent, AttackEvent
+local CarryEvent, HookEvent, AttackEvent, GenBoostEvent
 pcall(function()
     local r = ReplicatedStorage:WaitForChild("Remotes", 5)
     if r then
@@ -79,6 +89,12 @@ pcall(function()
         end
         local a = r:FindFirstChild("Attacks")
         if a then AttackEvent = a:FindFirstChild("BasicAttack") end
+        local g = r:FindFirstChild("Generator")
+        if g then
+            GenBoostEvent = g:FindFirstChild("BoostEvent") 
+                or g:FindFirstChild("BoostGenerator") 
+                or g:FindFirstChild("Boost")
+        end
     end
 end)
 
@@ -145,8 +161,8 @@ function notify(text)
     end)
 end
 
-print("✅ [1/10] Config loaded")-- =========================================================
--- ROOORHUB - BAGIAN 2/10 : GUI + TAB SYSTEM
+print("✅ [1/5] Core loaded")-- =========================================================
+-- ROOORHUB - BAGIAN 2/5 : GUI + TAB + COMPONENTS
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -389,7 +405,6 @@ csL.Parent = cs
 
 -- TAB SYSTEM
 local activeTab = nil
-
 function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, 0, 0, 28)
@@ -401,7 +416,6 @@ function makeTab(name, icon, order, cb)
     b.AutoButtonColor = false
     b.Parent = sb
     rnd(b, 7)
-
     local ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 3, 0, 0)
     ind.Position = UDim2.new(0, 0, 0.5, 0)
@@ -410,7 +424,6 @@ function makeTab(name, icon, order, cb)
     ind.BorderSizePixel = 0
     ind.Parent = b
     rnd(ind, 2)
-
     local ico = Instance.new("TextLabel")
     ico.Size = UDim2.new(0, 20, 1, 0)
     ico.Position = UDim2.new(0, 8, 0, 0)
@@ -420,7 +433,6 @@ function makeTab(name, icon, order, cb)
     ico.TextSize = 12
     ico.Font = Enum.Font.GothamBold
     ico.Parent = b
-
     local lblT = Instance.new("TextLabel")
     lblT.Size = UDim2.new(1, -32, 1, 0)
     lblT.Position = UDim2.new(0, 32, 0, 0)
@@ -431,7 +443,6 @@ function makeTab(name, icon, order, cb)
     lblT.Font = Enum.Font.GothamBlack
     lblT.TextXAlignment = Enum.TextXAlignment.Left
     lblT.Parent = b
-
     b.MouseButton1Click:Connect(function()
         if activeTab == b then return end
         if activeTab then
@@ -455,30 +466,7 @@ function makeTab(name, icon, order, cb)
     end)
 end
 
--- DRAG WINDOW
-local dragW = false
-local dragWStart, dragWPos
-head.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragW = true
-        dragWStart = input.Position
-        dragWPos = main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragW = false end
-        end)
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if dragW and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local d = input.Position - dragWStart
-        main.Position = UDim2.new(dragWPos.X.Scale, dragWPos.X.Offset + d.X, dragWPos.Y.Scale, dragWPos.Y.Offset + d.Y)
-    end
-end)
-
-print("✅ [2/10] GUI + Tab loaded")-- =========================================================
--- ROOORHUB - BAGIAN 3/10 : UI COMPONENTS
--- =========================================================
-
+-- COMPONENTS
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -491,10 +479,6 @@ function sec(title, icon)
     deco.BorderSizePixel = 0
     deco.Parent = f
     rnd(deco, 2)
-    local decoG = Instance.new("UIGradient")
-    decoG.Color = rainbow()
-    decoG.Rotation = 90
-    decoG.Parent = deco
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -16, 1, 0)
     l.Position = UDim2.new(0, 12, 0, 0)
@@ -561,13 +545,9 @@ function tog(name, def, cb)
     cB.Parent = t
     cB.MouseButton1Click:Connect(function()
         state = not state
-        TweenService:Create(k, TweenInfo.new(0.15), {
-            Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6),
-            BackgroundColor3 = state and C.ACC2 or C.DIM
-        }):Play()
-        TweenService:Create(t, TweenInfo.new(0.15), {
-            BackgroundColor3 = state and C.ACC or C.PANEL
-        }):Play()
+        k.Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+        k.BackgroundColor3 = state and C.ACC2 or C.DIM
+        t.BackgroundColor3 = state and C.ACC or C.PANEL
         tS.Color = state and C.ACC2 or C.DIM
         if cb then pcall(cb, state) end
     end)
@@ -587,12 +567,6 @@ function btn(name, cb)
     b.Parent = cs
     rnd(b, 8)
     strk(b, C.ACC2, 1, 0.7)
-    b.MouseEnter:Connect(function()
-        TweenService:Create(b, TweenInfo.new(0.1), {BackgroundTransparency = 0.5, BackgroundColor3 = C.ACC}):Play()
-    end)
-    b.MouseLeave:Connect(function()
-        TweenService:Create(b, TweenInfo.new(0.1), {BackgroundTransparency = 0.3, BackgroundColor3 = C.BG}):Play()
-    end)
     b.MouseButton1Click:Connect(function()
         if cb then pcall(cb) end
     end)
@@ -765,47 +739,68 @@ function cpk(name, def, cb)
     end)
 end
 
-function inp(placeholder, cb)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.BG
-    f.BackgroundTransparency = 0.3
-    f.BorderSizePixel = 0
-    f.Parent = cs
-    rnd(f, 8)
-    strk(f, C.ACC2, 1, 0.7)
-    local tb = Instance.new("TextBox")
-    tb.Size = UDim2.new(1, -16, 1, 0)
-    tb.Position = UDim2.new(0, 8, 0, 0)
-    tb.BackgroundTransparency = 1
-    tb.Text = ""
-    tb.PlaceholderText = placeholder or "..."
-    tb.TextColor3 = C.TXT
-    tb.PlaceholderColor3 = C.DIM
-    tb.TextSize = 10
-    tb.Font = Enum.Font.GothamMedium
-    tb.TextXAlignment = Enum.TextXAlignment.Left
-    tb.ClearTextOnFocus = false
-    tb.Parent = f
-    tb.FocusLost:Connect(function()
-        if cb then pcall(cb, tb.Text) end
-    end)
-    return tb
-end
+-- DRAG WINDOW
+local dragW = false
+local dragWStart, dragWPos
+head.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragW = true
+        dragWStart = input.Position
+        dragWPos = main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragW = false end
+        end)
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if dragW and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local d = input.Position - dragWStart
+        main.Position = UDim2.new(dragWPos.X.Scale, dragWPos.X.Offset + d.X, dragWPos.Y.Scale, dragWPos.Y.Offset + d.Y)
+    end
+end)
 
-print("✅ [3/10] UI Components loaded")-- =========================================================
--- ROOORHUB - BAGIAN 4/10 : FITUR LOGIC 1
+print("✅ [2/5] GUI + Components loaded")-- =========================================================
+-- BAGIAN 3/5 : ESP + PARRY + SKILL + GENBOOST (FALLENS)
 -- =========================================================
 
--- ESP
-local ESPObjs = {}
-local ESPBbs = {}
+-- ============== ESP SYSTEM (FALLENS) ==============
+local ESPObjects = {}
+local StatusESP = {}
 
-function mkESP(obj, color)
+-- Cache Object
+local Cached = {
+    Generators = {},
+    Windows = {},
+    Pallets = {}
+}
+
+local function cacheObject(obj)
+    if obj.Name == "Generator" then
+        Cached.Generators[obj] = true
+    elseif obj.Name == "Window" then
+        Cached.Windows[obj] = true
+    elseif obj.Name == "Pallet" or obj.Name == "Palletwrong" then
+        Cached.Pallets[obj] = true
+    end
+end
+
+local function removeCache(obj)
+    Cached.Generators[obj] = nil
+    Cached.Windows[obj] = nil
+    Cached.Pallets[obj] = nil
+end
+
+for _, obj in ipairs(workspace:GetDescendants()) do
+    cacheObject(obj)
+end
+workspace.DescendantAdded:Connect(cacheObject)
+workspace.DescendantRemoving:Connect(removeCache)
+
+function createESP(obj, color)
     if not obj then return end
-    if ESPObjs[obj] then
-        ESPObjs[obj].FillColor = color
-        ESPObjs[obj].OutlineColor = color
+    if ESPObjects[obj] then
+        ESPObjects[obj].FillColor = color
+        ESPObjects[obj].OutlineColor = color
         return
     end
     local h = Instance.new("Highlight")
@@ -815,122 +810,270 @@ function mkESP(obj, color)
     h.OutlineTransparency = 0.3
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = obj
-    ESPObjs[obj] = h
-end
-
-function rmESP(obj)
-    if ESPObjs[obj] then ESPObjs[obj]:Destroy(); ESPObjs[obj] = nil end
-end
-
-function mkESPBB(plr, char, root)
-    if not char or not root then return end
-    local head = char:FindFirstChild("Head")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not head or not hum then return end
-    local dist = (head.Position - root.Position).Magnitude
-    if dist > S.ESP.radius then
-        if ESPBbs[char] then ESPBbs[char]:Destroy(); ESPBbs[char] = nil end
-        return
-    end
-    local text = ""
-    if S.ESP.name then text = text .. plr.Name .. "\n" end
-    if S.ESP.dist then text = text .. string.format("[%.0f]", dist) .. "\n" end
-    if S.ESP.hp then text = text .. string.format("HP: %.0f", hum.Health) end
-    if text == "" then text = plr.Name end
-    local tc = S.ESP.nc
-    if plr.Team then
-        if plr.Team.Name == "Killer" then tc = S.ESP.kc
-        elseif plr.Team.Name == "Survivors" then tc = S.ESP.sc end
-    end
-    local bb = ESPBbs[char]
-    if not bb then
-        bb = Instance.new("BillboardGui")
-        bb.Size = UDim2.new(0, 130, 0, 50)
-        bb.AlwaysOnTop = true
-        bb.StudsOffset = Vector3.new(0, 3, 0)
-        bb.Adornee = head
-        bb.Parent = char
-        local lb = Instance.new("TextLabel")
-        lb.Size = UDim2.new(1, 0, 1, 0)
-        lb.BackgroundTransparency = 1
-        lb.TextColor3 = tc
-        lb.TextStrokeTransparency = 0
-        lb.TextStrokeColor3 = Color3.new(0,0,0)
-        lb.Font = Enum.Font.GothamBold
-        lb.TextSize = S.ESP.ns
-        lb.Text = text
-        lb.Parent = bb
-        ESPBbs[char] = bb
-    else
-        local lb = bb:FindFirstChildOfClass("TextLabel")
-        if lb then
-            lb.Text = text
-            lb.TextColor3 = tc
-            lb.TextSize = S.ESP.ns
+    ESPObjects[obj] = h
+    obj.AncestryChanged:Connect(function(_, parent)
+        if not parent and ESPObjects[obj] then
+            ESPObjects[obj]:Destroy()
+            ESPObjects[obj] = nil
         end
-    end
-end
-
-function rmESPBB(char)
-    if ESPBbs[char] then ESPBbs[char]:Destroy(); ESPBbs[char] = nil end
-end
-
--- AIMLOCK
-function getAimTarget()
-    local center = Vector2.new(Cam.ViewportSize.X/2, Cam.ViewportSize.Y/2)
-    local closest, shortest = nil, S.Aimlock.fov
-    local root = getRoot()
-    if not root then return nil end
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LP and plr.Character then
-            local valid = false
-            if S.Aimlock.target == "Survivor" and plr.Team and plr.Team.Name == "Survivors" then valid = true end
-            if S.Aimlock.target == "Killer" and plr.Team and plr.Team.Name == "Killer" then valid = true end
-            if valid then
-                local hrp = plr.Character:FindFirstChild(S.Aimlock.part) or plr.Character:FindFirstChild("HumanoidRootPart")
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hrp and hum and hum.Health > 0 then
-                    if (hrp.Position - root.Position).Magnitude <= S.Aimlock.radius then
-                        local pos, vis = Cam:WorldToViewportPoint(hrp.Position)
-                        if vis then
-                            local sd = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                            if sd < shortest then
-                                shortest = sd
-                                closest = hrp
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-function startAimlock()
-    if _G.AimConn then return end
-    _G.AimConn = RunService.RenderStepped:Connect(function()
-        if not S.Aimlock.on or not S.Aimlock.hold then return end
-        local t = getAimTarget()
-        if not t then return end
-        local pos = t.Position
-        if S.Aimlock.predict > 0 then
-            pos = pos + (t.AssemblyLinearVelocity * S.Aimlock.predict)
-        end
-        local cf = CFrame.new(Cam.CFrame.Position, pos)
-        Cam.CFrame = Cam.CFrame:Lerp(cf, S.Aimlock.smooth)
     end)
 end
 
-UIS.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then S.Aimlock.hold = true end
-end)
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then S.Aimlock.hold = false end
-end)
+function removeESP(obj)
+    if ESPObjects[obj] then
+        ESPObjects[obj]:Destroy()
+        ESPObjects[obj] = nil
+    end
+end
 
--- HITBOX
+function createStatusESP(player, char, root)
+    if not root then return end
+    local head = char:FindFirstChild("Head")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not head or not hum then return end
+
+    local isDown = hum.Health <= 0 or hum.Health < 2
+        or char:GetAttribute("Downed") == true
+        or char:GetAttribute("IsDown") == true
+        or char:GetAttribute("Knocked") == true
+
+    local dist = (head.Position - root.Position).Magnitude
+    if dist > S.ESP.radius then
+        if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
+        return
+    end
+
+    local text = ""
+    if isDown then text = "🔻 DOWN\n" end
+    if S.ESP.name then text = text .. player.Name .. "\n" end
+    if S.ESP.dist then text = text .. string.format("Dist: %.0f\n", dist) end
+    if S.ESP.hp then text = text .. string.format("HP: %.0f\n", hum.Health) end
+    if text == "" then return end
+
+    local billboard = StatusESP[char]
+    local teamColor = Color3.new(1, 1, 1)
+    if player.Team then
+        if player.Team.Name == "Killer" then teamColor = TeamColors.Killer
+        elseif player.Team.Name == "Survivors" then teamColor = TeamColors.Survivor end
+    end
+    if isDown then teamColor = Color3.fromRGB(255, 0, 0) end
+
+    if not billboard then
+        billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 120, 0, 50)
+        billboard.AlwaysOnTop = true
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = teamColor
+        label.TextStrokeTransparency = 0
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 12
+        label.Text = text
+        label.Parent = billboard
+        billboard.Adornee = head
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.Parent = char
+        StatusESP[char] = billboard
+    else
+        local label = billboard:FindFirstChildOfClass("TextLabel")
+        if label then
+            label.Text = text
+            label.TextColor3 = teamColor
+        end
+    end
+end
+
+function removeStatusESP(char)
+    if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
+end
+
+-- ============== AUTO PARRY (FALLENS) ==============
+local lastParry = 0
+local PARRY_DEBOUNCE = 0.2
+local ParryActive = false
+local hookedKillers = {}
+
+local function pressRightClick()
+    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
+    task.wait()
+    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+end
+
+local AttackPaths = {
+    "Slasher-mob.Controls.attack",
+    "Masked-mob.Controls.attack",
+    "Killer-mob.Controls.attack"
+}
+
+local function GetParryButton()
+    local current = PG
+    for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+local function pressParryButton()
+    if UIS.TouchEnabled then
+        local btn = GetParryButton()
+        if btn and btn:IsA("GuiObject") then
+            local pos = btn.AbsolutePosition
+            local size = btn.AbsoluteSize
+            local inset = GuiService:GetGuiInset()
+            local x = pos.X + size.X/2 + inset.X
+            local y = pos.Y + size.Y/2 + inset.Y
+            VirtualInputManager:SendTouchEvent(8823, 0, x, y)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(8823, 2, x, y)
+        end
+    else
+        pressRightClick()
+    end
+end
+
+local function doParry()
+    local now = tick()
+    if now - lastParry < PARRY_DEBOUNCE then return end
+    lastParry = now
+    ParryActive = true
+    if S.Moonwalk.on then S.Moonwalk.on = false end
+    pressParryButton()
+    task.delay(0.3, function() ParryActive = false end)
+end
+
+local function isInParryRange(killerChar)
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= S.Parry.dist
+end
+
+local function isFacingTarget(targetChar)
+    local myChar = LP.Character
+    if not myChar then return false end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot or not enemyRoot then return false end
+    local enemyForward = enemyRoot.CFrame.LookVector
+    local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
+    local dot = enemyForward:Dot(directionToMe)
+    return dot >= 0.7
+end
+
+local function hookKiller(char)
+    if hookedKillers[char] then return end
+    hookedKillers[char] = true
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+    animator.AnimationPlayed:Connect(function(track)
+        if not S.Parry.on then return end
+        local anim = track.Animation
+        if not anim then return end
+        local id = anim.AnimationId:match("%d+")
+        if not id then return end
+        local fullId = "rbxassetid://" .. id
+        if KillerAnims[fullId] then
+            if not isInParryRange(char) then return end
+            if not isFacingTarget(char) then return end
+            doParry()
+        end
+    end)
+end
+
+function scanKillers()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+            hookKiller(p.Character)
+        end
+    end
+end
+
+-- ============== AUTO SKILL CHECK (FALLENS) ==============
+local skillConn = nil
+local skillBusy = false
+local TouchID = 8822
+local ActionPath = "Survivor-mob.Controls.action.check"
+
+local function pressSpace()
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+    task.wait()
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+end
+
+local function GetActionTarget()
+    local current = PG
+    for segment in string.gmatch(ActionPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+local function TriggerMobileButton()
+    local b = GetActionTarget()
+    if b and b:IsA("GuiObject") then
+        local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+        local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
+        pcall(function()
+            VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+        end)
+    end
+end
+
+function startSkillCheck()
+    if skillConn then skillConn:Disconnect() end
+    skillConn = RunService.RenderStepped:Connect(function()
+        if not S.Skill.on or skillBusy then return end
+        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
+        if not prompt then return end
+        local check = prompt:FindFirstChild("Check")
+        if not check or not check.Visible then return end
+        local line = check:FindFirstChild("Line")
+        local goal = check:FindFirstChild("Goal")
+        if not line or not goal then return end
+
+        local lr = line.Rotation % 360
+        local gr = goal.Rotation % 360
+
+        local startRange = (gr + 102) % 360
+        local endRange = (gr + 116) % 360
+
+        local success =
+            (startRange > endRange and (lr >= startRange or lr <= endRange))
+            or (lr >= startRange and lr <= endRange)
+
+        if success then
+            skillBusy = true
+            task.spawn(function()
+                if UIS.TouchEnabled then
+                    TriggerMobileButton()
+                else
+                    pressSpace()
+                end
+                task.wait(0.05)
+                skillBusy = false
+            end)
+        end
+    end)
+end
+
+-- ============== GENERATOR BOOST ==============
+function runGenBoost()
+    if not S.GenBoost.on then return end
+    local now = tick()
+    if now - S.GenBoost.last < S.GenBoost.delay then return end
+    S.GenBoost.last = now
+    if GenBoostEvent then
+        pcall(function() GenBoostEvent:FireServer() end)
+    end
+end
+
+-- ============== HITBOX EXPANDER ==============
 local hbCache = {}
 function applyHB(char)
     if not char then return end
@@ -943,7 +1086,9 @@ function applyHB(char)
     }
     for _, p in pairs(parts) do
         if p and p:IsA("BasePart") then
-            if not hbCache[p] then hbCache[p] = { Size = p.Size, Transparency = p.Transparency } end
+            if not hbCache[p] then
+                hbCache[p] = { Size = p.Size, Transparency = p.Transparency }
+            end
             p.Size = Vector3.new(S.Hitbox.size, S.Hitbox.size, S.Hitbox.size)
             p.Transparency = 0.7
             p.CanCollide = false
@@ -963,217 +1108,24 @@ function resetHB(char)
     end
 end
 
--- ANTI STUN
+-- ============== ANTI STUN ==============
 function applyAntiStun()
     if not S.AntiStun.on then return end
     local hum = getHum()
     if not hum then return end
     local st = hum:GetState()
-    if st == Enum.HumanoidStateType.FallingDown or st == Enum.HumanoidStateType.Ragdoll or st == Enum.HumanoidStateType.Dead then
+    if st == Enum.HumanoidStateType.FallingDown
+    or st == Enum.HumanoidStateType.Ragdoll
+    or st == Enum.HumanoidStateType.Dead then
         pcall(function() hum:ChangeState(Enum.HumanoidStateType.Running) end)
     end
 end
 
-print("✅ [4/10] Fitur Logic 1 loaded")-- =========================================================
--- ROOORHUB - BAGIAN 5/10 : PARRY + SKILLCHECK + MOONWALK
+print("✅ [3/5] ESP + Parry + Skill + GenBoost loaded")-- =========================================================
+-- BAGIAN 4/5 : WIGGLE, FLEE, MOONWALK, FIRE, VISUAL, MOVEMENT
 -- =========================================================
 
--- AUTO PARRY
-_G.ParryActive = false
-_G.HookedKillers = {}
-
-local function pressRC()
-    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
-    task.wait()
-    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
-end
-
-local function getParryBtn()
-    local cur = PG
-    for seg in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
-        cur = cur and cur:FindFirstChild(seg)
-    end
-    return cur
-end
-
-local function pressParry()
-    if UIS.TouchEnabled then
-        local b = getParryBtn()
-        if b and b:IsA("GuiObject") then
-            local p, sz = b.AbsolutePosition, b.AbsoluteSize
-            local ins = GuiService:GetGuiInset()
-            local x, y = p.X + sz.X/2 + ins.X, p.Y + sz.Y/2 + ins.Y
-            VirtualInputManager:SendTouchEvent(8823, 0, x, y)
-            task.wait(0.01)
-            VirtualInputManager:SendTouchEvent(8823, 2, x, y)
-        end
-    else
-        pressRC()
-    end
-end
-
-local function doParry()
-    local now = tick()
-    if now - S.Parry.last < S.Parry.cd then return end
-    S.Parry.last = now
-    _G.ParryActive = true
-    if S.Moonwalk.on then S.Moonwalk.on = false end
-    pressParry()
-    task.delay(0.3, function() _G.ParryActive = false end)
-end
-
-local function isInRange(killer)
-    local myRoot = getRoot()
-    if not myRoot or not killer then return false end
-    local eRoot = killer:FindFirstChild("HumanoidRootPart")
-    if not eRoot then return false end
-    return (eRoot.Position - myRoot.Position).Magnitude <= S.Parry.dist
-end
-
-local function hookKiller(char)
-    if _G.HookedKillers[char] then return end
-    _G.HookedKillers[char] = true
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then return end
-    animator.AnimationPlayed:Connect(function(track)
-        if not S.Parry.on then return end
-        local anim = track.Animation
-        if not anim then return end
-        local id = anim.AnimationId:match("%d+")
-        if not id then return end
-        if KillerAnims["rbxassetid://"..id] then
-            if isInRange(char) then doParry() end
-        end
-    end)
-end
-
-function scanKillers()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-            hookKiller(p.Character)
-        end
-    end
-end
-
--- PARRY CIRCLE
-function updParryCircle()
-    local root = getRoot()
-    if not S.ParryCircle.on or not root then
-        if _G.ParryCirclePart then _G.ParryCirclePart:Destroy(); _G.ParryCirclePart = nil end
-        return
-    end
-    if not _G.ParryCirclePart then
-        local c = Instance.new("Part")
-        c.Shape = Enum.PartType.Cylinder
-        c.Anchored = true
-        c.CanCollide = false
-        c.Material = Enum.Material.Neon
-        c.Name = "RoooorParryCircle"
-        c.Parent = workspace
-        _G.ParryCirclePart = c
-    end
-    local sz = S.ParryCircle.size * 2
-    local c = _G.ParryCirclePart
-    c.Size = Vector3.new(0.2, sz, sz)
-    c.CFrame = CFrame.new(root.Position - Vector3.new(0, root.Size.Y/2 + 1.5, 0)) * CFrame.Angles(0, 0, math.rad(90))
-    c.Color = Color3.fromRGB(255, 80, 80)
-    c.Transparency = 0.7
-end
-
--- AUTO SKILL CHECK
-local skillConn = nil
-local skillBusy = false
-
-local function pressSpace()
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-    task.wait()
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-end
-
-local function getActionTarget()
-    local cur = PG
-    for seg in string.gmatch("Survivor-mob.Controls.action.check", "[^%.]+") do
-        cur = cur and cur:FindFirstChild(seg)
-    end
-    return cur
-end
-
-local function triggerMobile()
-    local b = getActionTarget()
-    if b and b:IsA("GuiObject") then
-        local p, sz = b.AbsolutePosition, b.AbsoluteSize
-        local ins = GuiService:GetGuiInset()
-        local x, y = p.X + sz.X/2 + ins.X, p.Y + sz.Y/2 + ins.Y
-        pcall(function()
-            VirtualInputManager:SendTouchEvent(8822, 0, x, y)
-            task.wait(0.01)
-            VirtualInputManager:SendTouchEvent(8822, 2, x, y)
-        end)
-    end
-end
-
-function startSkillCheck()
-    if skillConn then skillConn:Disconnect() end
-    skillConn = RunService.RenderStepped:Connect(function()
-        if not S.Skill.on or skillBusy then return end
-        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
-        if not prompt then return end
-        local check = prompt:FindFirstChild("Check")
-        if not check or not check.Visible then return end
-        local line = check:FindFirstChild("Line")
-        local goal = check:FindFirstChild("Goal")
-        if not line or not goal then return end
-        local lr = line.Rotation % 360
-        local gr = goal.Rotation % 360
-        local sr = (gr + 102) % 360
-        local er = (gr + 116) % 360
-        local ok = (sr > er and (lr >= sr or lr <= er)) or (lr >= sr and lr <= er)
-        if ok then
-            skillBusy = true
-            task.spawn(function()
-                if UIS.TouchEnabled then triggerMobile() else pressSpace() end
-                task.wait(0.05)
-                skillBusy = false
-            end)
-        end
-    end)
-end
-
--- MOONWALK
-_G.MoonConn = nil
-function startMoonwalk()
-    if _G.MoonConn then return end
-    _G.MoonConn = RunService.RenderStepped:Connect(function()
-        if not S.Moonwalk.on or _G.ParryActive or isDowned() then return end
-        local char = LP.Character
-        if not char then return end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hum or not hrp then return end
-        if hum.WalkSpeed ~= S.Moonwalk.slow then hum.WalkSpeed = S.Moonwalk.slow end
-        local look = Cam.CFrame.LookVector
-        local flat = Vector3.new(look.X, 0, look.Z)
-        if flat.Magnitude > 0 then
-            flat = flat.Unit
-            local baseCF = CFrame.new(hrp.Position, hrp.Position + flat)
-            local angle = math.sin(tick() * S.Moonwalk.spam) * S.Moonwalk.intensity
-            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
-            hum:Move(Vector3.new(0, 0, 1), true)
-        end
-    end)
-end
-
-function stopMoonwalk()
-    if _G.MoonConn then _G.MoonConn:Disconnect(); _G.MoonConn = nil end
-end
-
-print("✅ [5/10] Parry + Skill + Moonwalk loaded")-- =========================================================
--- ROOORHUB - BAGIAN 6/10 : WIGGLE, FLEE, CARRY, FIRE, VISUAL
--- =========================================================
-
--- AUTO WIGGLE
+-- ============== AUTO WIGGLE ==============
 function runWiggle()
     if not S.Wiggle.on then return end
     local char = LP.Character
@@ -1185,10 +1137,12 @@ function runWiggle()
     local carry = remotes and remotes:FindFirstChild("Carry")
     local ev = carry and carry:FindFirstChild("SelfUnHookEvent")
     if not ev then return end
-    for i = 1, S.Wiggle.spam do ev:FireServer() end
+    for i = 1, S.Wiggle.spam do
+        ev:FireServer()
+    end
 end
 
--- AUTO FLEE
+-- ============== AUTO FLEE ==============
 function runFlee()
     if not S.Flee.on then return end
     local root = getRoot()
@@ -1212,41 +1166,44 @@ function runFlee()
     end
 end
 
--- AUTO CARRY
-function runCarry()
-    if not S.KillAll.on or _G.CarryBusy then return end
-    _G.CarryBusy = true
-    task.spawn(function()
-        local root = getRoot()
-        if not root then _G.CarryBusy = false; return end
-        local best, dist = nil, math.huge
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP and p.Character then
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                if hum and hrp and hum.Health > 0 and hum.Health <= hum.MaxHealth * 0.25 then
-                    local d = (hrp.Position - root.Position).Magnitude
-                    if d < dist then dist = d; best = p.Character end
-                end
-            end
+-- ============== MOONWALK (FALLENS) ==============
+_G.MoonConn = nil
+
+function startMoonwalk()
+    if _G.MoonConn then return end
+    _G.MoonConn = RunService.RenderStepped:Connect(function()
+        if not S.Moonwalk.on or ParryActive or isDowned() then return end
+        local char = LP.Character
+        if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hum or not hrp then return end
+
+        if hum.WalkSpeed ~= S.Moonwalk.slow then
+            hum.WalkSpeed = S.Moonwalk.slow
         end
-        if best then
-            local tRoot = best:FindFirstChild("HumanoidRootPart")
-            if tRoot then
-                root.CFrame = tRoot.CFrame * CFrame.new(0, 3, -2)
-                task.wait(0.4)
-                if CarryEvent then
-                    for i = 1, 4 do pcall(function() CarryEvent:FireServer(best) end); task.wait(0.2) end
-                end
-                task.wait(0.6)
-            end
+
+        local cam = workspace.CurrentCamera
+        local look = cam.CFrame.LookVector
+        local flatLook = Vector3.new(look.X, 0, look.Z)
+        if flatLook.Magnitude > 0 then
+            flatLook = flatLook.Unit
+            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+            local angle = math.sin(tick() * S.Moonwalk.spam) * S.Moonwalk.intensity
+            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+            hum:Move(Vector3.new(0, 0, 1), true)
         end
-        task.wait(2)
-        _G.CarryBusy = false
     end)
 end
 
--- FIRE EFFECT
+function stopMoonwalk()
+    if _G.MoonConn then
+        _G.MoonConn:Disconnect()
+        _G.MoonConn = nil
+    end
+end
+
+-- ============== FIRE EFFECT ==============
 function applyFire()
     local char = LP.Character
     if not char then return end
@@ -1269,7 +1226,24 @@ function applyFire()
     fire.SecondaryColor = v.s
 end
 
--- VISUAL
+-- Rainbow fire animation
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if S.Visual.fire and S.Visual.fireType == "Rainbow" then
+            local char = LP.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            local fire = hrp and hrp:FindFirstChild("RoooorFire")
+            if fire then
+                local t = tick()
+                fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
+                fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
+            end
+        end
+    end
+end)
+
+-- ============== VISUAL (FULLBRIGHT, NOFOG, CONTRAST) ==============
 local origL = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
@@ -1279,8 +1253,10 @@ local origL = {
     FogStart = Lighting.FogStart,
     GlobalShadows = Lighting.GlobalShadows,
 }
+local contrastEffect = nil
 
 function applyVisual()
+    -- Fullbright
     if S.Visual.fb then
         Lighting.Brightness = 2
         Lighting.ClockTime = 14
@@ -1294,6 +1270,8 @@ function applyVisual()
         Lighting.OutdoorAmbient = origL.OutdoorAmbient
         Lighting.GlobalShadows = origL.GlobalShadows
     end
+
+    -- No Fog
     if S.Visual.nofog then
         Lighting.FogEnd = 9e9
         Lighting.FogStart = 9e9
@@ -1301,15 +1279,34 @@ function applyVisual()
         Lighting.FogEnd = origL.FogEnd
         Lighting.FogStart = origL.FogStart
     end
+
+    -- Contrast (ColorCorrection)
+    if S.Visual.contrast then
+        if not contrastEffect then
+            contrastEffect = Instance.new("ColorCorrectionEffect")
+            contrastEffect.Name = "RoooorContrast"
+            contrastEffect.Parent = Lighting
+        end
+        contrastEffect.Contrast = S.Visual.cv
+        contrastEffect.Brightness = S.Visual.bv
+        contrastEffect.Saturation = S.Visual.sv
+    else
+        if contrastEffect then
+            contrastEffect:Destroy()
+            contrastEffect = nil
+        end
+    end
 end
 
--- TELEPORT
+-- ============== TELEPORT ==============
 function tpPlayer(name)
     local t = Players:FindFirstChild(name)
     if t and t.Character and LP.Character then
         local tHRP = t.Character:FindFirstChild("HumanoidRootPart")
         local mHRP = LP.Character:FindFirstChild("HumanoidRootPart")
-        if tHRP and mHRP then mHRP.CFrame = tHRP.CFrame + Vector3.new(0, 3, 0) end
+        if tHRP and mHRP then
+            mHRP.CFrame = tHRP.CFrame + Vector3.new(0, 3, 0)
+        end
     end
 end
 
@@ -1323,79 +1320,18 @@ function tpObj(objName)
             if d < sd then sd = d; closest = obj end
         end
     end
-    if closest then root.CFrame = closest.CFrame + Vector3.new(0, 5, 0) end
-end
-
-print("✅ [6/10] Wiggle + Flee + Carry + Fire + Visual loaded")-- =========================================================
--- ROOORHUB - BAGIAN 7/10 : AVATAR STEALER
--- =========================================================
-
-function saveAvatar()
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then S.Avatar.orig = hum:GetAppliedDescription() end
-end
-
-function applyBlocky(char)
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    local d = Instance.new("HumanoidDescription")
-    d.BodyTypeScale = 1
-    d.DepthScale = 1
-    d.HeadScale = 1
-    d.HeightScale = 1
-    d.ProportionScale = 0
-    d.WidthScale = 1
-    hum:ApplyDescriptionClientServer(d)
-end
-
-function removeAcc(char)
-    for _, v in pairs(char:GetDescendants()) do
-        if v:IsA("Accessory") or v:IsA("Clothing") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-            v:Destroy()
-        end
+    if closest then
+        root.CFrame = closest.CFrame + Vector3.new(0, 5, 0)
     end
 end
 
-function copyAvatar(username)
-    if not username or username == "" then return end
-    saveAvatar()
-    local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(username) end)
-    if not ok then notify("Username gak ditemukan!"); return end
-    S.Avatar.uid = uid
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    task.spawn(function()
-        local d = Players:GetHumanoidDescriptionFromUserId(uid)
-        applyBlocky(char)
-        task.wait(0.3)
-        removeAcc(char)
-        task.wait(0.2)
-        hum:ApplyDescriptionClientServer(d)
-        notify("Avatar dicopy!")
-    end)
-end
-
-function resetAvatar()
-    if not S.Avatar.orig then return end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        removeAcc(char)
-        hum:ApplyDescriptionClientServer(S.Avatar.orig)
-        S.Avatar.uid = nil
-        notify("Avatar direset!")
-    end
-end
-
-print("✅ [7/10] Avatar Stealer loaded")-- =========================================================
--- ROOORHUB - BAGIAN 8/10 : FLOATING BUTTONS
+print("✅ [4/5] Wiggle + Flee + Moonwalk + Fire + Visual + Move loaded")-- =========================================================
+-- BAGIAN 5/5 : FLOATING BUTTONS + ISI TAB + MAIN LOOP
 -- =========================================================
 
+-- =========================================================
+-- FLOATING BUTTONS (AIMLOCK + MOONWALK + LOCK)
+-- =========================================================
 function mkAimBtn()
     if S.Buttons.aimGui then S.Buttons.aimGui:Destroy() end
     local g = Instance.new("ScreenGui")
@@ -1403,34 +1339,56 @@ function mkAimBtn()
     g.ResetOnSpawn = false
     g.IgnoreGuiInset = true
     g.Parent = PG
+
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, 44, 0, 44)
+    b.Size = UDim2.new(0, 46, 0, 46)
     b.Position = UDim2.new(0.35, 0, 0.75, 0)
     b.BackgroundColor3 = C.PANEL
     b.Text = "🎯"
     b.TextColor3 = C.TXT
-    b.TextSize = 20
+    b.TextSize = 22
     b.Font = Enum.Font.GothamBold
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
     b.Parent = g
-    rnd(b, 22)
+    rnd(b, 23)
     local bs = strk(b, C.ACC2, 2)
+
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 100, 0, 12)
-    lbl.Position = UDim2.new(0.5, -50, 1, 1)
+    lbl.Position = UDim2.new(0.5, -50, 1, 2)
     lbl.BackgroundTransparency = 1
     lbl.Text = "AIMLOCK"
     lbl.TextColor3 = C.ACC2
     lbl.TextSize = 9
     lbl.Font = Enum.Font.GothamBlack
     lbl.TextStrokeTransparency = 0.3
+    lbl.TextStrokeColor3 = Color3.new(0,0,0)
     lbl.Parent = b
+
+    local lk = Instance.new("TextLabel")
+    lk.Name = "LockLabel"
+    lk.Size = UDim2.new(0, 100, 0, 10)
+    lk.Position = UDim2.new(0.5, -50, 1, 15)
+    lk.BackgroundTransparency = 1
+    lk.Text = "🔓"
+    lk.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lk.TextSize = 8
+    lk.Font = Enum.Font.GothamBold
+    lk.TextStrokeTransparency = 0.4
+    lk.TextStrokeColor3 = Color3.new(0,0,0)
+    lk.Parent = b
+
     local drag = false
     local ds, dp
+    local wasDragged = false
+    local lastClick = 0
+
     b.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if S.Aimlock.locked then return end
             drag = true
+            wasDragged = false
             ds = input.Position
             dp = b.Position
         end
@@ -1438,6 +1396,7 @@ function mkAimBtn()
     UIS.InputChanged:Connect(function(input)
         if drag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local d = input.Position - ds
+            if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
             b.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
         end
     end)
@@ -1446,7 +1405,11 @@ function mkAimBtn()
             drag = false
         end
     end)
+
     b.MouseButton1Click:Connect(function()
+        if wasDragged then wasDragged = false; return end
+        if tick() - lastClick < 0.15 then return end
+        lastClick = tick()
         S.Aimlock.on = not S.Aimlock.on
         if S.Aimlock.on then
             b.BackgroundColor3 = C.ACC4
@@ -1457,13 +1420,12 @@ function mkAimBtn()
             bs.Color = C.ACC2
         end
     end)
+
     S.Buttons.aimGui = g
-    S.Buttons.aimOn = true
 end
 
 function rmAimBtn()
     if S.Buttons.aimGui then S.Buttons.aimGui:Destroy(); S.Buttons.aimGui = nil end
-    S.Buttons.aimOn = false
 end
 
 function mkMoonBtn()
@@ -1473,34 +1435,56 @@ function mkMoonBtn()
     g.ResetOnSpawn = false
     g.IgnoreGuiInset = true
     g.Parent = PG
+
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, 44, 0, 44)
+    b.Size = UDim2.new(0, 46, 0, 46)
     b.Position = UDim2.new(0.65, 0, 0.75, 0)
     b.BackgroundColor3 = C.PANEL
     b.Text = "🌙"
     b.TextColor3 = C.TXT
-    b.TextSize = 20
+    b.TextSize = 22
     b.Font = Enum.Font.GothamBold
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
     b.Parent = g
-    rnd(b, 22)
+    rnd(b, 23)
     local bs = strk(b, C.ACC2, 2)
+
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 100, 0, 12)
-    lbl.Position = UDim2.new(0.5, -50, 1, 1)
+    lbl.Position = UDim2.new(0.5, -50, 1, 2)
     lbl.BackgroundTransparency = 1
     lbl.Text = "MOONWALK"
     lbl.TextColor3 = C.ACC2
     lbl.TextSize = 9
     lbl.Font = Enum.Font.GothamBlack
     lbl.TextStrokeTransparency = 0.3
+    lbl.TextStrokeColor3 = Color3.new(0,0,0)
     lbl.Parent = b
+
+    local lk = Instance.new("TextLabel")
+    lk.Name = "LockLabel"
+    lk.Size = UDim2.new(0, 100, 0, 10)
+    lk.Position = UDim2.new(0.5, -50, 1, 15)
+    lk.BackgroundTransparency = 1
+    lk.Text = "🔓"
+    lk.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lk.TextSize = 8
+    lk.Font = Enum.Font.GothamBold
+    lk.TextStrokeTransparency = 0.4
+    lk.TextStrokeColor3 = Color3.new(0,0,0)
+    lk.Parent = b
+
     local drag = false
     local ds, dp
+    local wasDragged = false
+    local lastClick = 0
+
     b.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if S.Moonwalk.locked then return end
             drag = true
+            wasDragged = false
             ds = input.Position
             dp = b.Position
         end
@@ -1508,6 +1492,7 @@ function mkMoonBtn()
     UIS.InputChanged:Connect(function(input)
         if drag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local d = input.Position - ds
+            if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
             b.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
         end
     end)
@@ -1516,7 +1501,11 @@ function mkMoonBtn()
             drag = false
         end
     end)
+
     b.MouseButton1Click:Connect(function()
+        if wasDragged then wasDragged = false; return end
+        if tick() - lastClick < 0.15 then return end
+        lastClick = tick()
         S.Moonwalk.on = not S.Moonwalk.on
         if S.Moonwalk.on then
             b.BackgroundColor3 = C.ACC4
@@ -1530,17 +1519,94 @@ function mkMoonBtn()
             if hum then hum.WalkSpeed = 16 end
         end
     end)
+
     S.Buttons.moonGui = g
-    S.Buttons.moonOn = true
 end
 
 function rmMoonBtn()
     if S.Buttons.moonGui then S.Buttons.moonGui:Destroy(); S.Buttons.moonGui = nil end
-    S.Buttons.moonOn = false
 end
 
-print("✅ [8/10] Floating Buttons loaded")-- =========================================================
--- ROOORHUB - BAGIAN 9/10 : ISI TAB
+function mkGenBtn()
+    if S.Buttons.genGui then S.Buttons.genGui:Destroy() end
+    local g = Instance.new("ScreenGui")
+    g.Name = "Roooor_GenBtn"
+    g.ResetOnSpawn = false
+    g.IgnoreGuiInset = true
+    g.Parent = PG
+
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0, 46, 0, 46)
+    b.Position = UDim2.new(0.5, 0, 0.75, 0)
+    b.BackgroundColor3 = C.PANEL
+    b.Text = "⚡"
+    b.TextColor3 = C.TXT
+    b.TextSize = 22
+    b.Font = Enum.Font.GothamBold
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.Parent = g
+    rnd(b, 23)
+    local bs = strk(b, C.ACC2, 2)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 100, 0, 12)
+    lbl.Position = UDim2.new(0.5, -50, 1, 2)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "GEN BOOST"
+    lbl.TextColor3 = C.ACC2
+    lbl.TextSize = 9
+    lbl.Font = Enum.Font.GothamBlack
+    lbl.TextStrokeTransparency = 0.3
+    lbl.TextStrokeColor3 = Color3.new(0,0,0)
+    lbl.Parent = b
+
+    local drag = false
+    local ds, dp
+    local wasDragged = false
+
+    b.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            drag = true
+            wasDragged = false
+            ds = input.Position
+            dp = b.Position
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if drag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local d = input.Position - ds
+            if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
+            b.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            drag = false
+        end
+    end)
+
+    b.MouseButton1Click:Connect(function()
+        if wasDragged then wasDragged = false; return end
+        S.GenBoost.on = not S.GenBoost.on
+        if S.GenBoost.on then
+            b.BackgroundColor3 = C.ACC4
+            bs.Color = C.ACC
+        else
+            b.BackgroundColor3 = C.PANEL
+            bs.Color = C.ACC2
+        end
+    end)
+
+    S.Buttons.genGui = g
+end
+
+function rmGenBtn()
+    if S.Buttons.genGui then S.Buttons.genGui:Destroy(); S.Buttons.genGui = nil end
+end
+
+-- =========================================================
+-- ISI TAB
 -- =========================================================
 
 -- TAB INFO
@@ -1549,11 +1615,14 @@ makeTab("Info", "ℹ️", 1, function()
     lbl("RoooorHub Ultimate", C.ACC2)
     lbl("Status: Active", C.GRN)
     lbl("Dev: Roooor", C.TXT)
+
     sec("FPS/Ping", "🌊")
     tog("Show FPS/Ping", true, function(s) S.FPS.show = s end)
+
     sec("Floating Buttons", "🔘")
     tog("Show Aimlock Button", false, function(s) if s then mkAimBtn() else rmAimBtn() end end)
     tog("Show Moonwalk Button", false, function(s) if s then mkMoonBtn() else rmMoonBtn() end end)
+    tog("Show GenBoost Button", false, function(s) if s then mkGenBtn() else rmGenBtn() end end)
 end)
 
 -- TAB KILLER
@@ -1566,10 +1635,21 @@ makeTab("Killer", "🔪", 2, function()
     sl("Radius", 50, 1000, 500, function(v) S.Aimlock.radius = v end)
     sl("Prediction", 0, 1, 0.12, function(v) S.Aimlock.predict = v end)
     sl("Smoothness", 0.05, 1, 0.5, function(v) S.Aimlock.smooth = v end)
+
+    sec("Aimlock Button", "🎯")
+    tog("Show Aimlock Button", false, function(s) if s then mkAimBtn() else rmAimBtn() end end)
+    tog("🔒 Lock Aimlock Button", false, function(s) S.Aimlock.locked = s end)
+    btn("🔄 Reset Posisi Aimlock", function()
+        if S.Buttons.aimGui then
+            local b = S.Buttons.aimGui:FindFirstChild("AimlockButton") or S.Buttons.aimGui:FindFirstChildWhichIsA("TextButton")
+            if b then b.Position = UDim2.new(0.35, 0, 0.75, 0) end
+        end
+    end)
+
     sec("Auto Attack", "⚔️")
     tog("Auto Spam Attack", false, function(s) S.AutoAtk.on = s end)
     sl("Attack Delay", 0.1, 2, 0.35, function(v) S.AutoAtk.delay = v end)
-    tog("Auto Kill All", false, function(s) S.KillAll.on = s end)
+
     sec("Hitbox Expander", "📦")
     tog("Enable Hitbox", false, function(s)
         S.Hitbox.on = s
@@ -1580,6 +1660,7 @@ makeTab("Killer", "🔪", 2, function()
         end
     end)
     sl("Hitbox Size", 3, 30, 15, function(v) S.Hitbox.size = v end)
+
     sec("Anti Stun", "💪")
     tog("Anti Stun", false, function(s) S.AntiStun.on = s end)
 end)
@@ -1587,20 +1668,31 @@ end)
 -- TAB SURVIVOR
 makeTab("Survivor", "🏃", 3, function()
     sec("Auto Parry", "🛡️")
-    tog("Enable Auto Parry", false, function(s) S.Parry.on = s; if s then scanKillers() end end)
-    sl("Parry Distance", 5, 25, 12, function(v) S.Parry.dist = v end)
-    sl("Cooldown", 0.1, 1, 0.2, function(v) S.Parry.cd = v end)
-    sec("Parry Circle", "🔵")
-    tog("Show Parry Circle", false, function(s) S.ParryCircle.on = s end)
-    sl("Circle Size", 5, 50, 12, function(v) S.ParryCircle.size = v end)
+    tog("Enable Auto Parry", false, function(s)
+        S.Parry.on = s
+        if s then scanKillers() end
+    end)
+    sl("Parry Distance", 5, 25, 15, function(v) S.Parry.dist = v end)
+
     sec("Auto Skill Check", "🎯")
-    tog("Enable Skill Check", false, function(s) S.Skill.on = s; if s then startSkillCheck() end end)
+    tog("Enable Skill Check", false, function(s)
+        S.Skill.on = s
+        if s then startSkillCheck() end
+    end)
+
+    sec("Generator Boost", "⚡")
+    tog("Enable GenBoost", false, function(s) S.GenBoost.on = s end)
+    sl("Boost Delay", 0.05, 1, 0.2, function(v) S.GenBoost.delay = v end)
+    tog("Show GenBoost Button", false, function(s) if s then mkGenBtn() else rmGenBtn() end end)
+
     sec("Auto Wiggle", "🎯")
     tog("Auto Wiggle", false, function(s) S.Wiggle.on = s end)
     sl("Wiggle Spam", 1, 10, 5, function(v) S.Wiggle.spam = v end)
+
     sec("Auto Flee Killer", "🏃")
     tog("Auto Flee", false, function(s) S.Flee.on = s end)
     sl("Detect Distance", 10, 200, 50, function(v) S.Flee.dist = v end)
+
     sec("Moonwalk", "🌙")
     tog("Enable Moonwalk", false, function(s)
         S.Moonwalk.on = s
@@ -1609,6 +1701,17 @@ makeTab("Survivor", "🏃", 3, function()
     sl("Spam Speed", 1, 100, 30, function(v) S.Moonwalk.spam = v end)
     sl("Intensity", 1, 90, 35, function(v) S.Moonwalk.intensity = v end)
     sl("Slow Speed", 5, 30, 13, function(v) S.Moonwalk.slow = v end)
+
+    sec("Moonwalk Button", "🌙")
+    tog("Show Moonwalk Button", false, function(s) if s then mkMoonBtn() else rmMoonBtn() end end)
+    tog("🔒 Lock Moonwalk Button", false, function(s) S.Moonwalk.locked = s end)
+    btn("🔄 Reset Posisi Moonwalk", function()
+        if S.Buttons.moonGui then
+            local b = S.Buttons.moonGui:FindFirstChildWhichIsA("TextButton")
+            if b then b.Position = UDim2.new(0.65, 0, 0.75, 0) end
+        end
+    end)
+
     sec("God Mode", "🛡️")
     tog("Anti Knockdown", false, function(s) S.GodMode.on = s end)
 end)
@@ -1618,17 +1721,19 @@ makeTab("ESP", "👁️", 4, function()
     sec("Survivor ESP", "🟢")
     tog("ESP Survivor", false, function(s) S.ESP.surv = s end)
     cpk("Survivor Color", S.ESP.sc, function(c) S.ESP.sc = c end)
+
     sec("Killer ESP", "🔴")
     tog("ESP Killer", false, function(s) S.ESP.killer = s end)
     cpk("Killer Color", S.ESP.kc, function(c) S.ESP.kc = c end)
+
     sec("Generator ESP", "⚡")
     tog("ESP Generator", false, function(s) S.ESP.gen = s end)
     cpk("Generator Color", S.ESP.gc, function(c) S.ESP.gc = c end)
+
     sec("ESP Status", "📊")
     tog("Show Name", true, function(s) S.ESP.name = s end)
     tog("Show Distance", true, function(s) S.ESP.dist = s end)
     tog("Show Health", false, function(s) S.ESP.hp = s end)
-    sl("Name Size", 8, 24, 12, function(v) S.ESP.ns = v end)
     sl("ESP Radius", 50, 1000, 100, function(v) S.ESP.radius = v end)
 end)
 
@@ -1637,6 +1742,13 @@ makeTab("Visual", "🎨", 5, function()
     sec("Lighting", "☀️")
     tog("Fullbright", false, function(s) S.Visual.fb = s; applyVisual() end)
     tog("No Fog", false, function(s) S.Visual.nofog = s; applyVisual() end)
+
+    sec("Contrast & Sharpen", "🔍")
+    tog("Enable Contrast", false, function(s) S.Visual.contrast = s; applyVisual() end)
+    sl("Contrast", -1, 2, 0.3, function(v) S.Visual.cv = v; applyVisual() end)
+    sl("Brightness", -1, 1, 0.15, function(v) S.Visual.bv = v; applyVisual() end)
+    sl("Saturation", -1, 1, 0.2, function(v) S.Visual.sv = v; applyVisual() end)
+
     sec("Fire Effect (5 Varian)", "🔥")
     tog("Enable Fire", false, function(s) S.Visual.fire = s; applyFire() end)
     drp("Fire Type", {"Red", "Blue", "Green", "Purple", "Rainbow"}, "Red", function(v)
@@ -1656,6 +1768,7 @@ makeTab("Movement", "🏃", 6, function()
         end
     end)
     sl("Speed Value", 16, 100, 17.6, function(v) S.Move.speed = v end)
+
     tog("Jump Power", false, function(s)
         S.Move.jumpOn = s
         if not s then
@@ -1664,7 +1777,9 @@ makeTab("Movement", "🏃", 6, function()
         end
     end)
     sl("Jump Value", 50, 300, 50, function(v) S.Move.jump = v end)
+
     tog("No Clip", false, function(s) S.Move.noclip = s end)
+
     sec("Teleport", "📍")
     btn("🚀 TP Player Acak", function()
         local list = {}
@@ -1679,24 +1794,12 @@ makeTab("Movement", "🏃", 6, function()
     btn("⚡ TP Generator", function() tpObj("generator") end)
 end)
 
--- TAB AVATAR
-makeTab("Avatar", "🎭", 7, function()
-    sec("Steal Avatar", "🎭")
-    lbl("Masukin username target", C.ACC2)
-    local tb = inp("Ketik username...", function(v) S.Avatar.target = v end)
-    btn("🎭 Copy Avatar", function()
-        if S.Avatar.target == "" and tb then S.Avatar.target = tb.Text end
-        copyAvatar(S.Avatar.target)
-    end)
-    btn("🔄 Reset Avatar", function() resetAvatar() end)
-    btn("💾 Save Avatar Skrg", function() saveAvatar() end)
-end)
-
 -- TAB SETTINGS
-makeTab("Settings", "⚙️", 8, function()
+makeTab("Settings", "⚙️", 7, function()
     sec("Keybind", "⌨️")
     lbl("RightShift = Toggle Menu", C.ACC2)
     lbl("Klik kanan = Aimlock", C.ACC2)
+
     sec("Script", "🚪")
     btn("🔄 Reset Semua Fitur", function()
         for k, v in pairs(S) do
@@ -1707,13 +1810,14 @@ makeTab("Settings", "⚙️", 8, function()
     btn("🚪 Unload Script", function()
         gui:Destroy()
     end)
+
+    sec("Info", "ℹ️")
+    lbl("Version: 3.0 Final", C.ACC3)
 end)
 
-print("✅ [9/10] Isi Tab loaded")-- =========================================================
--- ROOORHUB - BAGIAN 10/10 : MAIN LOOP + FPS + KEYBIND
 -- =========================================================
-
 -- FPS/PING
+-- =========================================================
 local fpsLbl = Instance.new("TextLabel")
 fpsLbl.Size = UDim2.new(0, 140, 0, 20)
 fpsLbl.Position = UDim2.new(0.5, -70, 0, 5)
@@ -1747,7 +1851,9 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
+-- =========================================================
 -- MAIN LOOP
+-- =========================================================
 local lastESP = 0
 local lastParry = 0
 local lastHB = 0
@@ -1758,7 +1864,7 @@ task.spawn(function()
         local now = tick()
         local root = getRoot()
         if root then
-            -- ESP
+            -- ESP UPDATE
             if now - lastESP >= 0.1 then
                 lastESP = now
                 for _, p in pairs(Players:GetPlayers()) do
@@ -1771,38 +1877,35 @@ task.spawn(function()
                                 local dist = (hrp.Position - root.Position).Magnitude
                                 if dist <= S.ESP.radius then
                                     if S.ESP.surv and p.Team and p.Team.Name == "Survivors" then
-                                        mkESP(char, S.ESP.sc)
+                                        createESP(char, S.ESP.sc)
                                     elseif S.ESP.killer and p.Team and p.Team.Name == "Killer" then
-                                        mkESP(char, S.ESP.kc)
+                                        createESP(char, S.ESP.kc)
                                     else
-                                        rmESP(char)
+                                        removeESP(char)
                                     end
                                 else
-                                    rmESP(char)
+                                    removeESP(char)
                                 end
                             end
-                            mkESPBB(p, char, root)
+                            createStatusESP(p, char, root)
                         else
-                            rmESP(char)
-                            rmESPBB(char)
+                            removeESP(char)
+                            removeStatusESP(char)
                         end
                     end
                 end
+
+                -- Generator ESP
                 if S.ESP.gen then
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj.Name == "Generator" then
-                            local part = nil
-                            if obj:IsA("Model") then
-                                part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-                            elseif obj:IsA("BasePart") then
-                                part = obj
-                            end
-                            if part then
-                                local dist = (part.Position - root.Position).Magnitude
+                    for gen in pairs(Cached.Generators) do
+                        if gen and gen.Parent then
+                            local primary = gen.PrimaryPart or gen:FindFirstChildWhichIsA("BasePart")
+                            if primary then
+                                local dist = (primary.Position - root.Position).Magnitude
                                 if dist <= S.ESP.radius then
-                                    mkESP(obj, S.ESP.gc)
+                                    createESP(gen, S.ESP.gc)
                                 else
-                                    rmESP(obj)
+                                    removeESP(gen)
                                 end
                             end
                         end
@@ -1814,20 +1917,6 @@ task.spawn(function()
             if S.AutoAtk.on and now - S.AutoAtk.last >= S.AutoAtk.delay then
                 S.AutoAtk.last = now
                 if AttackEvent then pcall(function() AttackEvent:FireServer(false) end) end
-            end
-
-            -- Kill All
-            if S.KillAll.on then
-                local target = getNearest("Survivors", 500)
-                if target then
-                    local tHRP = target:FindFirstChild("HumanoidRootPart")
-                    if tHRP then
-                        local tp = tHRP.Position + (tHRP.AssemblyLinearVelocity * 0.15)
-                        local behind = tHRP.CFrame.LookVector * -3
-                        root.CFrame = CFrame.new(tp + behind, tp)
-                        if AttackEvent then pcall(function() AttackEvent:FireServer(false) end) end
-                    end
-                end
             end
 
             -- God Mode
@@ -1849,7 +1938,7 @@ task.spawn(function()
                 end
             end
 
-            -- Jump
+            -- Jump Power
             if S.Move.jumpOn then
                 local hum = getHum()
                 if hum and hum.JumpPower ~= S.Move.jump then
@@ -1876,11 +1965,8 @@ task.spawn(function()
                 end
             end
 
-            -- Fire
+            -- Fire Effect
             if S.Visual.fire then applyFire() end
-
-            -- Parry Circle
-            updParryCircle()
 
             -- Scan Killers Parry
             if S.Parry.on and now - lastParry >= 2 then
@@ -1889,41 +1975,35 @@ task.spawn(function()
             end
         end
 
-        -- Slow loop
+        -- Slow Loop
         if now - lastSlow >= 0.5 then
             lastSlow = now
             if S.Flee.on then runFlee() end
             if S.Wiggle.on then runWiggle() end
-            if S.KillAll.on then runCarry() end
         end
+
+        -- GenBoost Loop
+        if S.GenBoost.on then runGenBoost() end
 
         task.wait(0.1)
     end
 end)
 
--- RESPAWN
+-- =========================================================
+-- RESPAWN HANDLER
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
-    _G.ParryActive = false
-    _G.CarryBusy = false
-    _G.HookedKillers = {}
+    ParryActive = false
+    hookedKillers = {}
     if S.Visual.fire then applyFire() end
     if S.Moonwalk.on then startMoonwalk() end
     if S.Parry.on then scanKillers() end
-    if S.Avatar.uid then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            local d = Players:GetHumanoidDescriptionFromUserId(S.Avatar.uid)
-            applyBlocky(char)
-            task.wait(0.2)
-            removeAcc(char)
-            task.wait(0.1)
-            hum:ApplyDescriptionClientServer(d)
-        end
-    end
 end)
 
--- KEYBIND
+-- =========================================================
+-- KEYBIND RightShift
+-- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -1937,7 +2017,9 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- =========================================================
 -- BUKA TAB PERTAMA
+-- =========================================================
 task.wait(0.3)
 for _, c in pairs(sb:GetChildren()) do
     if c:IsA("TextButton") then
@@ -1946,7 +2028,9 @@ for _, c in pairs(sb:GetChildren()) do
     end
 end
 
+-- =========================================================
 -- NEON ANIMASI
+-- =========================================================
 task.spawn(function()
     while main.Parent do
         task.wait(0.05)
@@ -1956,11 +2040,16 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
+-- FINAL PRINT
+-- =========================================================
 print("=====================================================")
-print("✅ [10/10] Main Loop loaded")
+print("✅ [5/5] FINAL - Main Loop loaded")
 print("🎉 ROOORHUB ULTIMATE - LOADED SUCCESSFULLY!")
 print("=====================================================")
 print("⌨️  RightShift = Toggle Menu")
 print("🎯 Klik kanan = Aimlock")
 print("🌙 Moonwalk = Konsisten Lobby & Ingame")
+print("⚡ GenBoost = Tombol tersedia")
+print("🔒 Lock Button = Kunci posisi tombol")
 print("=====================================================")

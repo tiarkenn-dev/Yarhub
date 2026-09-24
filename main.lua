@@ -1,6 +1,6 @@
 -- =========================================================
--- ROOORHUB PREMIUM ULTIMATE + FALLENS ESP/PARRY
--- BAGIAN 1/12 : SERVICES + CONFIG
+-- ROOORHUB PREMIUM ULTIMATE + FALLENS + EXTRA
+-- BAGIAN 1/14 : SERVICES + CONFIG
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -50,11 +50,13 @@ _G.RoooorS = _G.RoooorS or {
     Fullbright = false, NoFog = false, FOV = 70, FOVEnabled = false,
     SkyId = "Default",
     Aimlock = false, AimlockRadius = 500, AimlockLocked = false,
+    AimlockMode = "Killer",
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     Korblox = false, Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     Killer_Hitbox = false, Killer_HitboxSize = 15,
+    Killer_Hitbox_Visible = true,
     Killer_AutoStalk = false, Killer_StalkRange = 150,
     MaskedPower = "Cobra",
     FastVault = false, FastVaultSpeed = 1.5,
@@ -67,8 +69,33 @@ local S = _G.RoooorS
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
-print("✅ [1/12] Config loaded")-- =========================================================
--- BAGIAN 2/12 : FIRE LIST + CONFIG
+-- EXTRA STATE (untuk Bagian 13)
+_G.RoooorExtra = _G.RoooorExtra or {
+    AutoPallet = false, AutoPalletRange = 8,
+    AutoVault = false, AutoVaultRange = 10,
+    AutoHeal = false, AutoHealThreshold = 40,
+    AutoRevive = false, AutoRepair = false, SkillPerfect = false,
+    SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
+    KillEffect = false,
+    Trail = false, TrailColor = Color3.fromRGB(180, 80, 255),
+    Aura = false, AuraColor = Color3.fromRGB(180, 80, 255),
+    RGBUI = false,
+    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 255, 200), CrosshairSize = 8,
+    NoClipCamera = false,
+    ZoomOut = false, ZoomOutValue = 500,
+    AntiStun = false, AntiBlind = false, AntiGrab = false,
+    AntiHook = false, AntiRagdoll = false, AntiParry = false,
+    AntiKick = false, AntiAFK = false,
+    Fly = false, FlySpeed = 50,
+    TPtoPlayer = false,
+    ItemESP = false, ItemESPColor = Color3.fromRGB(255, 255, 100),
+    PlayerList = false,
+}
+
+local X = _G.RoooorExtra
+
+print("✅ [1/14] Config loaded")-- =========================================================
+-- BAGIAN 2/14 : FIRE LIST + FIRE CONFIG
 -- =========================================================
 
 local FireList = {
@@ -149,8 +176,8 @@ local FireConfig = {
     ReaperFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(255, 0, 0), smoke = true },
 }
 
-print("✅ [2/12] Fire Config loaded")-- =========================================================
--- BAGIAN 3/12 : FIRE FEET + SKY + HELPERS
+print("✅ [2/14] Fire Config loaded")-- =========================================================
+-- BAGIAN 3/14 : FIRE FEET + SKY + HELPERS + KILLER ANIMS
 -- =========================================================
 
 local FireFeetList = {
@@ -206,9 +233,7 @@ local SkyIds = {
     Rainbow = "rbxassetid://159454299", Golden = "rbxassetid://159454299",
 }
 
--- =========================================================
--- KILLER ANIMATIONS - DARI FALLENS (LENGKAP 23)
--- =========================================================
+-- KILLER ANIMATIONS (23 ID dari Fallens)
 local KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -219,13 +244,12 @@ for _, id in ipairs({
     "117070354890871","106871536134254","138720291317243"
 }) do KillerAnims["rbxassetid://"..id] = true end
 
--- Additional Parry Anim IDs (dari Fallens)
 local ParrySelfAnims = {
-    ["rbxassetid://127096285501517"] = true,  -- PARRY ANIM
-    ["rbxassetid://112166042383605"] = true,  -- BREAK PALLET
-    ["rbxassetid://126965695851149"] = true,  -- WALKCROUCH
-    ["rbxassetid://135084204086504"] = true,  -- WALKCROUCHINJURED
-    ["rbxassetid://123047897844134"] = true,  -- STUN
+    ["rbxassetid://127096285501517"] = true,
+    ["rbxassetid://112166042383605"] = true,
+    ["rbxassetid://126965695851149"] = true,
+    ["rbxassetid://135084204086504"] = true,
+    ["rbxassetid://123047897844134"] = true,
 }
 
 function rnd(o, r)
@@ -270,8 +294,8 @@ function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-print("✅ [3/12] Fire Feet + Sky + Helpers loaded")-- =========================================================
--- BAGIAN 4/12 : GUI WINDOW + HEADER
+print("✅ [3/14] Fire Feet + Sky + Helpers + KillerAnims loaded")-- =========================================================
+-- BAGIAN 4/14 : GUI WINDOW + HEADER
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -539,8 +563,8 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 6)
 csL.Parent = cs
 
-print("✅ [4/12] GUI Window loaded")-- =========================================================
--- BAGIAN 5/12 : COMPONENTS
+print("✅ [4/14] GUI Window loaded")-- =========================================================
+-- BAGIAN 5/14 : COMPONENTS (sec, lbl, tog, sl, cpk, btn, drp, makeTab)
 -- =========================================================
 
 function sec(title, icon)
@@ -942,8 +966,8 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
-print("✅ [5/12] Components loaded")-- =========================================================
--- BAGIAN 6/12 : FIRE + FIRE FEET FUNCTIONS
+print("✅ [5/14] Components loaded")-- =========================================================
+-- BAGIAN 6/14 : FIRE + FIRE FEET FUNCTIONS
 -- =========================================================
 
 function clearFire()
@@ -1069,13 +1093,12 @@ task.spawn(function()
     end
 end)
 
-print("✅ [6/12] Fire + Fire Feet loaded")-- =========================================================
--- BAGIAN 7/12 : ESP SYSTEM (FALLENS VERSION - AKURAT)
+print("✅ [6/14] Fire + Fire Feet loaded")-- =========================================================
+-- BAGIAN 7/14 : ESP SYSTEM (FALLENS VERSION)
 -- =========================================================
 
 local ESPObjects = {}
 local StatusESP = {}
-local CachedSCP = {}
 local Cached = {
     Generators = {},
     Windows = {},
@@ -1083,9 +1106,6 @@ local Cached = {
     SCPs = {}
 }
 
--- =========================================================
--- CACHE OBJECT (GENERATOR, WINDOW, PALLET, SCP)
--- =========================================================
 local function cacheObject(obj)
     local lname = string.lower(obj.Name)
     if obj.Name == "Generator" then
@@ -1096,31 +1116,22 @@ local function cacheObject(obj)
         Cached.Pallets[obj] = true
     elseif string.find(lname, "scp") then
         Cached.SCPs[obj] = true
-        CachedSCP[obj] = true
     end
 end
 
-for _, obj in ipairs(workspace:GetDescendants()) do
-    cacheObject(obj)
-end
-
+for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
 workspace.DescendantAdded:Connect(cacheObject)
-
 workspace.DescendantRemoving:Connect(function(obj)
     Cached.Generators[obj] = nil
     Cached.Windows[obj] = nil
     Cached.Pallets[obj] = nil
     Cached.SCPs[obj] = nil
-    CachedSCP[obj] = nil
     if ESPObjects[obj] then
         ESPObjects[obj]:Destroy()
         ESPObjects[obj] = nil
     end
 end)
 
--- =========================================================
--- CREATE / REMOVE HIGHLIGHT
--- =========================================================
 local function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
@@ -1138,11 +1149,9 @@ local function createESP(obj, color)
     ESPObjects[obj] = h
 
     obj.AncestryChanged:Connect(function(_, parent)
-        if not parent then
-            if ESPObjects[obj] then
-                ESPObjects[obj]:Destroy()
-                ESPObjects[obj] = nil
-            end
+        if not parent and ESPObjects[obj] then
+            ESPObjects[obj]:Destroy()
+            ESPObjects[obj] = nil
         end
     end)
 end
@@ -1154,9 +1163,6 @@ local function removeESP(obj)
     end
 end
 
--- =========================================================
--- GET GAME VALUE (ATTRIBUTE / CHILD)
--- =========================================================
 local function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -1169,9 +1175,6 @@ local function GetGameValue(obj, name)
     return nil
 end
 
--- =========================================================
--- GENERATOR ESP (DENGAN % PROGRESS)
--- =========================================================
 local function ApplyGenHighlight(object, color)
     local h = object:FindFirstChild("GenHighlight") or Instance.new("Highlight")
     h.Name = "GenHighlight"
@@ -1205,7 +1208,6 @@ end
 
 local function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
-
     if not S.ESP_Generator then
         local old = generator:FindFirstChild("GenESP")
         if old then old:Destroy() end
@@ -1213,13 +1215,11 @@ local function UpdateGenerator(generator)
         if h then h:Destroy() end
         return
     end
-
     local root = getRoot()
     if not root then return end
 
     local pos = generator:IsA("Model") and generator:GetPivot().Position or generator.Position
     if not pos then return end
-
     local dist = (pos - root.Position).Magnitude
     if dist > S.ESP_Radius then
         local old = generator:FindFirstChild("GenESP")
@@ -1231,12 +1231,10 @@ local function UpdateGenerator(generator)
 
     local percent = GetGameValue(generator, "RepairProgress") or GetGameValue(generator, "Progress") or 0
     local billboard = generator:FindFirstChild("GenESP")
-
     if percent >= 100 then
         if billboard then billboard:Destroy() end
         return
     end
-
     local cp = math.clamp(percent, 0, 100)
     local color = S.ESP_GenColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
     local text = string.format("[%.0f%%]", percent)
@@ -1252,13 +1250,9 @@ local function UpdateGenerator(generator)
             lbl2.TextColor3 = color
         end
     end
-
     ApplyGenHighlight(generator, color)
 end
 
--- =========================================================
--- MAP ESP (PALLET + WINDOW)
--- =========================================================
 local function UpdateMapESP(obj, root)
     if not obj or not root then return end
     local pos
@@ -1277,7 +1271,6 @@ local function UpdateMapESP(obj, root)
             removeESP(obj)
         end
     end
-
     if obj.Name == "Pallet" or obj.Name == "Palletwrong" then
         if S.ESP_Pallet and distance <= S.ESP_Radius then
             createESP(obj, S.ESP_PalletColor)
@@ -1287,9 +1280,6 @@ local function UpdateMapESP(obj, root)
     end
 end
 
--- =========================================================
--- STATUS ESP (NAMA + JARAK + HP)
--- =========================================================
 local function removeStatusESP(char)
     if StatusESP[char] then
         StatusESP[char]:Destroy()
@@ -1303,7 +1293,6 @@ local function createStatusESP(player, char, root)
         return
     end
     if not root then return end
-
     local head = char:FindFirstChild("Head")
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not head or not hum then return end
@@ -1365,9 +1354,6 @@ local function createStatusESP(player, char, root)
     end
 end
 
--- =========================================================
--- SCP ESP
--- =========================================================
 local function UpdateSCPEsp(root)
     if not S.ESP_SCP then
         for obj in pairs(Cached.SCPs) do
@@ -1375,7 +1361,6 @@ local function UpdateSCPEsp(root)
         end
         return
     end
-
     for obj in pairs(Cached.SCPs) do
         if obj and obj.Parent then
             local pos
@@ -1396,29 +1381,25 @@ local function UpdateSCPEsp(root)
     end
 end
 
--- Expose ke global biar bisa dipakai di Bagian 12
 _G.Roooor_UpdateGenerator = UpdateGenerator
 _G.Roooor_UpdateMapESP = UpdateMapESP
 _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
 _G.Roooor_createStatusESP = createStatusESP
 _G.Roooor_Cached = Cached
 _G.Roooor_StatusESP = StatusESP
+_G.Roooor_createESP = createESP
+_G.Roooor_removeESP = removeESP
 
-print("✅ [7/12] ESP (Fallens Version) loaded")-- =========================================================
--- BAGIAN 8/12 : AUTO PARRY (FALLENS VERSION - ANTI MISS)
+print("✅ [7/14] ESP (Fallens) loaded")-- =========================================================
+-- BAGIAN 8/14 : AUTO PARRY (FALLENS - ANTI MISS)
 -- =========================================================
 
--- Parry state
 local lastParry = 0
 local PARRY_DEBOUNCE = 0.2
 local ParryActive = false
 local hookedKillers = _G.Roooor_HookedKillers or {}
-
 _G.Roooor_HookedKillers = hookedKillers
 
--- =========================================================
--- PARry BUTTON PATH
--- =========================================================
 local AttackPaths = {
     "Slasher-mob.Controls.attack",
     "Masked-mob.Controls.attack",
@@ -1446,9 +1427,6 @@ local function GetAttackButtonForParry()
     return nil
 end
 
--- =========================================================
--- PRESS RIGHT CLICK (PC)
--- =========================================================
 local function pressRightClick()
     pcall(function()
         VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
@@ -1457,9 +1435,6 @@ local function pressRightClick()
     end)
 end
 
--- =========================================================
--- PRESS PARRY BUTTON (MOBILE / PC)
--- =========================================================
 local function pressParryButton()
     if UIS.TouchEnabled then
         local btn = GetParryButton()
@@ -1480,38 +1455,26 @@ local function pressParryButton()
     end
 end
 
--- =========================================================
--- DO PARRY (DENGAN DEBOUNCE)
--- =========================================================
 local function doParry()
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
     lastParry = now
-
     ParryActive = true
-
     if S.Moonwalk then
         S.Moonwalk = false
         _G.ToggleStates["Enable Moonwalk"] = false
     end
-
     pressParryButton()
-
     task.delay(0.3, function()
         ParryActive = false
     end)
 end
 
--- =========================================================
--- RANGE & FACING CHECK (ANTI MISS)
--- =========================================================
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
-
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
-
     local dist = (enemyRoot.Position - myRoot.Position).Magnitude
     return dist <= (S.ParryDist + 5)
 end
@@ -1519,32 +1482,24 @@ end
 local function isFacingTarget(targetChar)
     local myChar = LP.Character
     if not myChar then return false end
-
     local myRoot = myChar:FindFirstChild("HumanoidRootPart")
     local enemyRoot = targetChar:FindFirstChild("HumanoidRootPart")
     if not myRoot or not enemyRoot then return false end
-
     local enemyForward = enemyRoot.CFrame.LookVector
     local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
     local dot = enemyForward:Dot(directionToMe)
-
     return dot >= 0.3
 end
 
--- =========================================================
--- HOOK KILLER (3 METODE DETEKSI)
--- =========================================================
 local function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
 
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
-    -- METODE 1: AnimationPlayed Event
     animator.AnimationPlayed:Connect(function(track)
         if not S.Parry then return end
         local anim = track.Animation
@@ -1558,7 +1513,6 @@ local function hookKiller(char)
         end
     end)
 
-    -- METODE 2 & 3: Loop cepat (anti-miss)
     task.spawn(function()
         while char.Parent and hookedKillers[char] do
             task.wait(0.03)
@@ -1568,8 +1522,6 @@ local function hookKiller(char)
             if not myRoot or not eRoot then continue end
             local dist = (eRoot.Position - myRoot.Position).Magnitude
             if dist > (S.ParryDist + 5) then continue end
-
-            -- Cek anim track yang sedang jalan
             for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                 local anim = track.Animation
                 if anim and anim.AnimationId then
@@ -1587,9 +1539,6 @@ local function hookKiller(char)
     end)
 end
 
--- =========================================================
--- SCAN & HOOK SEMUA KILLER
--- =========================================================
 function scanKillers()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
@@ -1598,7 +1547,6 @@ function scanKillers()
     end
 end
 
--- Auto rescan tiap 0.5 detik
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
@@ -1606,9 +1554,6 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- PARRY CIRCLE VISUAL
--- =========================================================
 _G.Roooor_ParryCircle = nil
 
 function updateParryCircle()
@@ -1620,7 +1565,6 @@ function updateParryCircle()
         end
         return
     end
-
     if not _G.Roooor_ParryCircle then
         _G.Roooor_ParryCircle = Instance.new("Part")
         _G.Roooor_ParryCircle.Shape = Enum.PartType.Cylinder
@@ -1630,7 +1574,6 @@ function updateParryCircle()
         _G.Roooor_ParryCircle.Name = "RoooorParryCircle"
         _G.Roooor_ParryCircle.Parent = workspace
     end
-
     local size = (S.ParryDist + 5) * 2
     _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
     local yOffset = root.Size.Y / 2 + 1.5
@@ -1639,11 +1582,8 @@ function updateParryCircle()
     _G.Roooor_ParryCircle.Transparency = 0.5
 end
 
--- =========================================================
 -- AUTO SKILL CHECK
--- =========================================================
 local skillBusy = false
-
 local function doSkillCheck()
     if skillBusy then return end
     skillBusy = true
@@ -1692,14 +1632,11 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- AIMLOCK BUTTON (dari RoooorHub asli, tetap dipertahankan)
--- =========================================================
+-- AIMLOCK BUTTON (2 MODE: Killer & Survivor)
 _G.AimlockButton = nil
 
 local function createAimlockButton()
     if _G.AimlockButton then _G.AimlockButton:Destroy() end
-
     local btnGui = Instance.new("ScreenGui")
     btnGui.Name = "RoooorAimlockBtn"
     btnGui.ResetOnSpawn = false
@@ -1732,20 +1669,18 @@ local function createAimlockButton()
     lbl2.TextStrokeTransparency = 0.3
     lbl2.Parent = btn
 
-    local lockLbl = Instance.new("TextLabel")
-    lockLbl.Name = "LockLabel"
-    lockLbl.Size = UDim2.new(0, 100, 0, 12)
-    lockLbl.Position = UDim2.new(0.5, -50, 1, 17)
-    lockLbl.BackgroundTransparency = 1
-    lockLbl.Text = "🔓"
-    lockLbl.TextColor3 = C.DIM
-    lockLbl.TextSize = 9
-    lockLbl.Font = Enum.Font.GothamBold
-    lockLbl.Parent = btn
+    local modeLbl = Instance.new("TextLabel")
+    modeLbl.Name = "ModeLabel"
+    modeLbl.Size = UDim2.new(0, 100, 0, 12)
+    modeLbl.Position = UDim2.new(0.5, -50, 1, 17)
+    modeLbl.BackgroundTransparency = 1
+    modeLbl.Text = "KILLER"
+    modeLbl.TextColor3 = C.ACC4
+    modeLbl.TextSize = 9
+    modeLbl.Font = Enum.Font.GothamBold
+    modeLbl.Parent = btn
 
-    local dragging = false
-    local ds, dp
-    local wasDragged = false
+    local dragging, ds, dp, wasDragged = false, nil, nil, false
 
     btn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1756,7 +1691,6 @@ local function createAimlockButton()
             dp = btn.Position
         end
     end)
-
     UIS.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local d = input.Position - ds
@@ -1764,13 +1698,13 @@ local function createAimlockButton()
             btn.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
         end
     end)
-
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
 
+    -- Klik kiri = toggle ON/OFF
     btn.MouseButton1Click:Connect(function()
         if wasDragged then wasDragged = false; return end
         S.Aimlock = not S.Aimlock
@@ -1785,6 +1719,19 @@ local function createAimlockButton()
         end
     end)
 
+    -- Klik kanan = switch mode Killer/Survivor
+    btn.MouseButton2Click:Connect(function()
+        if S.AimlockMode == "Killer" then
+            S.AimlockMode = "Survivor"
+            modeLbl.Text = "SURVIVOR"
+            modeLbl.TextColor3 = C.GRN
+        else
+            S.AimlockMode = "Killer"
+            modeLbl.Text = "KILLER"
+            modeLbl.TextColor3 = C.ACC4
+        end
+    end)
+
     _G.AimlockButton = btnGui
 end
 
@@ -1796,29 +1743,8 @@ local function removeAimlockButton()
         _G.AimlockButton = nil
     end
 end
-
 _G.removeAimlockButton = removeAimlockButton
 
-local function updateAimlockLock()
-    if not _G.AimlockButton then return end
-    local btn = _G.AimlockButton:FindFirstChild("AimlockBtn", true)
-    if btn then
-        local lockLbl = btn:FindFirstChild("LockLabel")
-        if lockLbl then
-            if S.AimlockLocked then
-                lockLbl.Text = "🔒"
-                lockLbl.TextColor3 = C.GOLD
-            else
-                lockLbl.Text = "🔓"
-                lockLbl.TextColor3 = C.DIM
-            end
-        end
-    end
-end
-
-_G.updateAimlockLock = updateAimlockLock
-
--- AIMLOCK LOOP
 task.spawn(function()
     while gui.Parent do
         task.wait(0.03)
@@ -1827,14 +1753,22 @@ task.spawn(function()
             if myRoot then
                 local closest, shortest = nil, S.AimlockRadius
                 for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-                        local hrp = p.Character:FindFirstChild("Head") or p.Character:FindFirstChild("HumanoidRootPart")
-                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                        if hrp and hum and hum.Health > 0 then
-                            local dist = (hrp.Position - myRoot.Position).Magnitude
-                            if dist < shortest then
-                                shortest = dist
-                                closest = hrp
+                    if p ~= LP and p.Character then
+                        local valid = false
+                        if S.AimlockMode == "Killer" and p.Team and p.Team.Name == "Killer" then
+                            valid = true
+                        elseif S.AimlockMode == "Survivor" and p.Team and p.Team.Name == "Survivors" then
+                            valid = true
+                        end
+                        if valid then
+                            local hrp = p.Character:FindFirstChild("Head") or p.Character:FindFirstChild("HumanoidRootPart")
+                            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                            if hrp and hum and hum.Health > 0 then
+                                local dist = (hrp.Position - myRoot.Position).Magnitude
+                                if dist < shortest then
+                                    shortest = dist
+                                    closest = hrp
+                                end
                             end
                         end
                     end
@@ -1849,8 +1783,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [8/12] Auto Parry (Fallens Version) + Skill + Aimlock loaded")-- =========================================================
--- BAGIAN 9/12 : VISUAL + KORBLOX (1 KAKI) + HEADLESS
+print("✅ [8/14] Auto Parry + Skill + Aimlock (2 Mode) loaded")-- =========================================================
+-- BAGIAN 9/14 : VISUAL + KORBLOX + HEADLESS + KILLER + MOONWALK
 -- =========================================================
 
 function applyFullbright(s)
@@ -1943,9 +1877,7 @@ function applyContrast()
     end
 end
 
--- =========================================================
--- KORBLOX (1 KAKI KANAN - AUTO REAPPLY)
--- =========================================================
+-- KORBLOX (1 KAKI KANAN - AUTO REAPPLY - FULL MESH)
 local KorbloxOrig = nil
 
 function applyKorblox(s)
@@ -1970,22 +1902,24 @@ function applyKorblox(s)
 
         rightLeg.Color = Color3.fromRGB(27, 42, 53)
         rightLeg.Material = Enum.Material.Slate
+        rightLeg.Transparency = 0
 
         local oldMesh = rightLeg:FindFirstChild("RoooorKorblox")
         if oldMesh then oldMesh:Destroy() end
 
+        -- Pakai MESH KORBLOX ASLI + scale biar keliatan penuh
         local mesh = Instance.new("SpecialMesh")
         mesh.Name = "RoooorKorblox"
         mesh.MeshType = Enum.MeshType.FileMesh
         mesh.MeshId = "rbxassetid://1395869870"
-        mesh.TextureId = ""
-        mesh.Scale = Vector3.new(1, 1, 1)
+        mesh.TextureId = "rbxassetid://1395869868"  -- tekstur korblox
+        mesh.Scale = Vector3.new(1.15, 1.05, 1.15)  -- scale biar full
         mesh.Parent = rightLeg
 
-        -- Force R6 look kalau R15
+        -- Kalau R15, paksa size kayak R6
         if char:FindFirstChild("Humanoid") and char.Humanoid.RigType == Enum.HumanoidRigType.R15 then
             pcall(function()
-                rightLeg.Size = Vector3.new(1, 2, 1)
+                rightLeg.Size = Vector3.new(1.2, 1.2, 1.2)
             end)
         end
     else
@@ -2004,7 +1938,7 @@ function applyKorblox(s)
     end
 end
 
--- Auto-reapply Korblox tiap 0.5 detik (biar gak ilang)
+-- Auto-reapply Korblox tiap 0.5 detik
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
@@ -2019,17 +1953,16 @@ task.spawn(function()
                     if rightLeg.Color ~= Color3.fromRGB(27, 42, 53) then
                         rightLeg.Color = Color3.fromRGB(27, 42, 53)
                     end
+                    if rightLeg.Transparency ~= 0 then
+                        rightLeg.Transparency = 0
+                    end
                 end
             end
         end
     end
 end)
 
--- =========================================================
 -- HEADLESS (KEPALA INVISIBLE - AUTO REAPPLY)
--- =========================================================
-local HeadlessOrig = nil
-
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -2037,18 +1970,6 @@ function applyHeadless(s)
     if not head then return end
 
     if s then
-        if not HeadlessOrig then
-            HeadlessOrig = {
-                Transparency = head.Transparency,
-                Decals = {}
-            }
-            for _, v in pairs(head:GetChildren()) do
-                if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
-                    table.insert(HeadlessOrig.Decals, {obj = v, transparency = v.Transparency})
-                end
-            end
-        end
-
         head.Transparency = 1
         for _, v in pairs(head:GetChildren()) do
             if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
@@ -2062,11 +1983,9 @@ function applyHeadless(s)
                 v.Transparency = 0
             end
         end
-        HeadlessOrig = nil
     end
 end
 
--- Auto-reapply Headless tiap 0.5 detik
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
@@ -2086,9 +2005,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- WALK SPEED LOOP
--- =========================================================
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -2104,16 +2021,12 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- INSTANT ESCAPE
--- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
-
     local found = nil
     local searchNames = {"fininshline", "finishline", "finish", "gate", "exit", "escape"}
-
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
             local lname = string.lower(obj.Name)
@@ -2126,18 +2039,14 @@ function teleportToFinishLine()
             if found then break end
         end
     end
-
     if not found then
         warn("[RoooorHub] Finish line gak ketemu")
         return
     end
-
     root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
 end
 
--- =========================================================
 -- FAST VAULT
--- =========================================================
 local FastVaultMap = {
     ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
 }
@@ -2148,7 +2057,6 @@ local function hookVault(char)
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
-
     animator.AnimationPlayed:Connect(function(track)
         if not S.FastVault then return end
         local anim = track.Animation
@@ -2180,9 +2088,11 @@ end)
 if LP.Character then hookVault(LP.Character) end
 
 -- =========================================================
--- MOONWALK
+-- MOONWALK FIX (LOBBY = INGAME)
 -- =========================================================
 _G.MoonwalkConn = nil
+_G.MoonwalkGyro = nil
+_G.MoonwalkLoop = nil
 
 local function isDowned()
     local char = LP.Character
@@ -2194,7 +2104,22 @@ end
 
 function startMoonwalk()
     if _G.MoonwalkConn then return end
-    _G.MoonwalkConn = RunService.RenderStepped:Connect(function()
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    pcall(function() hrp:SetNetworkOwner(LP) end)
+
+    if _G.MoonwalkGyro then _G.MoonwalkGyro:Destroy() end
+    _G.MoonwalkGyro = Instance.new("BodyGyro")
+    _G.MoonwalkGyro.Name = "RoooorMoonwalkGyro"
+    _G.MoonwalkGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    _G.MoonwalkGyro.P = 15000
+    _G.MoonwalkGyro.D = 500
+    _G.MoonwalkGyro.Parent = hrp
+
+    _G.MoonwalkConn = RunService.Heartbeat:Connect(function(dt)
         if not S.Moonwalk then return end
         if isDowned() then return end
         local char = LP.Character
@@ -2203,17 +2128,58 @@ function startMoonwalk()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
         if not humanoid or not hrp or not cam then return end
+
+        pcall(function()
+            if hrp:GetNetworkOwner() ~= LP then
+                hrp:SetNetworkOwner(LP)
+            end
+        end)
+
         if humanoid.WalkSpeed ~= S.MoonwalkSlow then
             humanoid.WalkSpeed = S.MoonwalkSlow
         end
+
         local look = cam.CFrame.LookVector
         local flatLook = Vector3.new(look.X, 0, look.Z)
         if flatLook.Magnitude > 0 then
             flatLook = flatLook.Unit
-            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
             local angle = math.sin(tick() * S.MoonwalkSpam) * S.MoonwalkIntensity
-            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+            local targetCFrame = CFrame.new(hrp.Position, hrp.Position + flatLook)
+                * CFrame.Angles(0, math.rad(angle), 0)
+            if _G.MoonwalkGyro then
+                _G.MoonwalkGyro.CFrame = targetCFrame
+            end
             humanoid:Move(Vector3.new(0, 0, 1), true)
+        end
+    end)
+
+    _G.MoonwalkLoop = task.spawn(function()
+        while S.Moonwalk and _G.MoonwalkConn do
+            task.wait(0.05)
+            local char = LP.Character
+            if not char then break end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not hrp then break end
+
+            if hum.WalkSpeed ~= S.MoonwalkSlow then
+                hum.WalkSpeed = S.MoonwalkSlow
+            end
+
+            pcall(function()
+                if hrp:GetNetworkOwner() ~= LP then
+                    hrp:SetNetworkOwner(LP)
+                end
+            end)
+
+            if not hrp:FindFirstChild("RoooorMoonwalkGyro") then
+                _G.MoonwalkGyro = Instance.new("BodyGyro")
+                _G.MoonwalkGyro.Name = "RoooorMoonwalkGyro"
+                _G.MoonwalkGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                _G.MoonwalkGyro.P = 15000
+                _G.MoonwalkGyro.D = 500
+                _G.MoonwalkGyro.Parent = hrp
+            end
         end
     end)
 end
@@ -2222,6 +2188,10 @@ function stopMoonwalk()
     if _G.MoonwalkConn then
         _G.MoonwalkConn:Disconnect()
         _G.MoonwalkConn = nil
+    end
+    if _G.MoonwalkGyro then
+        _G.MoonwalkGyro:Destroy()
+        _G.MoonwalkGyro = nil
     end
     local char = LP.Character
     if char then
@@ -2236,9 +2206,7 @@ function stopMoonwalk()
     end
 end
 
--- =========================================================
 -- KILLER FUNCTIONS
--- =========================================================
 local lastAtk = 0
 task.spawn(function()
     while gui.Parent do
@@ -2299,6 +2267,7 @@ task.spawn(function()
     end
 end)
 
+-- HITBOX (DENGAN HIDE VISUAL)
 local hitboxCache = {}
 task.spawn(function()
     while gui.Parent do
@@ -2316,14 +2285,19 @@ task.spawn(function()
                         for _, part in pairs(parts) do
                             if part and part:IsA("BasePart") then
                                 if not hitboxCache[part] then
-                                    hitboxCache[part] = { Size = part.Size, Transparency = part.Transparency }
+                                    hitboxCache[part] = { Size = part.Size, Transparency = part.Transparency, Material = part.Material, Color = part.Color }
                                 end
                                 local size = S.Killer_HitboxSize or 15
                                 part.Size = Vector3.new(size, size, size)
-                                part.Transparency = 0.7
                                 part.CanCollide = false
-                                part.BrickColor = BrickColor.new("Really red")
-                                part.Material = Enum.Material.Neon
+                                -- HIDE VISUAL kalau S.Killer_Hitbox_Visible = false
+                                if S.Killer_Hitbox_Visible then
+                                    part.Transparency = 0.7
+                                    part.BrickColor = BrickColor.new("Really red")
+                                    part.Material = Enum.Material.Neon
+                                else
+                                    part.Transparency = 1
+                                end
                             end
                         end
                     end
@@ -2335,7 +2309,8 @@ task.spawn(function()
                     part.Size = orig.Size
                     part.Transparency = orig.Transparency
                     part.CanCollide = true
-                    part.Material = Enum.Material.Plastic
+                    part.Material = orig.Material
+                    part.Color = orig.Color
                 end
                 hitboxCache[part] = nil
             end
@@ -2412,9 +2387,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- MOONWALK BUTTON
--- =========================================================
 _G.MoonwalkButton = nil
 
 function createMoonwalkButton()
@@ -2458,9 +2431,7 @@ function createMoonwalkButton()
     lockLbl.TextSize = 9
     lockLbl.Font = Enum.Font.GothamBold
     lockLbl.Parent = btn
-    local dragging = false
-    local ds, dp
-    local wasDragged = false
+    local dragging, ds, dp, wasDragged = false, nil, nil, false
     btn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if S.MoonwalkLocked then return end
@@ -2505,7 +2476,6 @@ _G.createMoonwalkButton = createMoonwalkButton
 function removeMoonwalkButton()
     if _G.MoonwalkButton then _G.MoonwalkButton:Destroy(); _G.MoonwalkButton = nil end
 end
-
 _G.removeMoonwalkButton = removeMoonwalkButton
 
 function updateMoonwalkLock()
@@ -2524,11 +2494,10 @@ function updateMoonwalkLock()
         end
     end
 end
-
 _G.updateMoonwalkLock = updateMoonwalkLock
 
-print("✅ [9/12] Visual + Korblox + Headless + Killer loaded")-- =========================================================
--- BAGIAN 10/12 : ISI TAB FIRE + FIRE FEET
+print("✅ [9/14] Visual + Korblox + Headless + Killer + Moonwalk FIX loaded")-- =========================================================
+-- BAGIAN 10/14 : ISI TAB FIRE + FIRE FEET
 -- =========================================================
 
 makeTab("Fire", "🔥", 1, function()
@@ -2650,8 +2619,8 @@ makeTab("Fire Feet", "👟", 2, function()
     end
 end)
 
-print("✅ [10/12] Tab Fire + Fire Feet loaded")-- =========================================================
--- BAGIAN 11/12 : ISI TAB LAINNYA
+print("✅ [10/14] Tab Fire + Fire Feet loaded")-- =========================================================
+-- BAGIAN 11/14 : ISI TAB ESP + SURVIVOR + KILLER + VISUAL + MOVEMENT + SETTINGS
 -- =========================================================
 
 -- TAB ESP
@@ -2664,8 +2633,8 @@ makeTab("ESP", "👁️", 3, function()
             _G.Roooor_StatusESP = {}
         end
     end)
-    sl("Nama Size", 8, 40, 12, function(v) S.ESP_Size = v end)
-    sl("ESP Radius", 50, 2000, 500, function(v) S.ESP_Radius = v end)
+    sl("Nama Size", 8, 60, 12, function(v) S.ESP_Size = v end)
+    sl("ESP Radius", 50, 5000, 500, function(v) S.ESP_Radius = v end)
     cpk("Default Color", S.ESP_DefaultColor, function(c) S.ESP_DefaultColor = c end)
     cpk("Killer Color", S.ESP_KillerColor, function(c) S.ESP_KillerColor = c end)
     cpk("Survivor Color", S.ESP_SurvivorColor, function(c) S.ESP_SurvivorColor = c end)
@@ -2691,7 +2660,7 @@ end)
 makeTab("Survivor", "🏃", 4, function()
     sec("Auto Parry 360°", "🛡️")
     tog("Enable Auto Parry", false, function(s) S.Parry = s; if s then scanKillers() end end)
-    sl("Parry Distance", 3, 15, 8, function(v) S.ParryDist = v end)
+    sl("Parry Distance", 3, 25, 8, function(v) S.ParryDist = v end)
 
     sec("Parry Circle", "🔵")
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
@@ -2700,15 +2669,15 @@ makeTab("Survivor", "🏃", 4, function()
     sec("Auto Skill Check", "🎯")
     tog("Enable Skill Check", false, function(s) S.Skill = s end)
 
-    sec("Aimlock Killer → Survivor", "🎯")
+    sec("Aimlock (2 Mode)", "🎯")
     tog("Enable Aimlock", false, function(s) S.Aimlock = s end)
-    sl("Aimlock Radius", 50, 2000, 500, function(v) S.AimlockRadius = v end)
+    drp("Aimlock Mode", {"Killer", "Survivor"}, "Killer", function(v) S.AimlockMode = v end)
+    sl("Aimlock Radius", 50, 5000, 500, function(v) S.AimlockRadius = v end)
     tog("Show Aimlock Button", false, function(s)
         if s then createAimlockButton() else removeAimlockButton() end
     end)
     tog("🔒 Lock Aimlock Button", false, function(s)
         S.AimlockLocked = s
-        updateAimlockLock()
     end)
     btn("🔄 Reset Posisi Aimlock", function()
         if _G.AimlockButton then
@@ -2716,6 +2685,7 @@ makeTab("Survivor", "🏃", 4, function()
             if b then b.Position = UDim2.new(0.35, 0, 0.75, 0) end
         end
     end)
+    lbl("Klik kanan tombol 🎯 = switch mode", C.ACC2)
 end)
 
 -- TAB KILLER
@@ -2731,7 +2701,9 @@ makeTab("Killer", "🔪", 5, function()
 
     sec("Hitbox Expander", "📦")
     tog("Enable Hitbox", false, function(s) S.Killer_Hitbox = s end)
-    sl("Hitbox Size", 3, 30, 15, function(v) S.Killer_HitboxSize = v end)
+    sl("Hitbox Size", 3, 50, 15, function(v) S.Killer_HitboxSize = v end)
+    tog("Hide Hitbox Visual", false, function(s) S.Killer_Hitbox_Visible = not s end)
+    lbl("Kalau ON = hitbox invisible, fitur tetap jalan", C.ACC2)
 
     sec("Masked Power", "🎭")
     drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
@@ -2821,8 +2793,8 @@ end)
 makeTab("Movement", "🏃", 7, function()
     sec("Walk Speed", "⚡")
     tog("Enable Walk Speed", false, function(s) S.WalkSpeed = s end)
-    sl("Speed Value", 16, 100, 16, function(v) S.WalkSpeedVal = v end)
-    sl("Speed Boost", 0, 100, 0, function(v) S.WalkSpeedBoost = v end)
+    sl("Speed Value", 16, 200, 16, function(v) S.WalkSpeedVal = v end)
+    sl("Speed Boost", 0, 200, 0, function(v) S.WalkSpeedBoost = v end)
 
     sec("Instant Escape", "🚪")
     btn("🚀 Instant Escape (TP Finish)", function()
@@ -2842,7 +2814,7 @@ makeTab("Movement", "🏃", 7, function()
     sl("Spam Speed", 1, 100, 30, function(v) S.MoonwalkSpam = v end)
     sl("Intensity", 1, 90, 35, function(v) S.MoonwalkIntensity = v end)
     sl("Slow Speed", 5, 30, 13, function(v) S.MoonwalkSlow = v end)
-    lbl("Konsisten Lobby & Ingame", C.GRN)
+    lbl("Lobby & Ingame sama (BodyGyro Fix)", C.GRN)
 
     sec("Moonwalk Floating Button", "🌙")
     tog("Show Moonwalk Button", false, function(s)
@@ -2873,20 +2845,21 @@ makeTab("Settings", "⚙️", 8, function()
     lbl("Klik ⚡ = Buka Menu", C.ACC2)
     lbl("Drag Header = Pindah Window", C.DIM)
     lbl("Drag 🎯/🌙 = Pindah Tombol", C.DIM)
+    lbl("Klik kanan 🎯 = Switch Aimlock Mode", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Premium Ultimate", C.ACC4)
+    lbl("RoooorHub Premium Ultimate + Fallens", C.ACC4)
     lbl("60 Fire + 20 Fire Feet + 25 Sky", C.ACC2)
-    lbl("ESP Fallens + Parry Anti-Miss", C.ACC2)
-    lbl("Korblox 1 Kaki + Headless", C.ACC2)
+    lbl("ESP + Parry Anti-Miss + Aimlock 2 Mode", C.ACC2)
+    lbl("Killer + Visual + Movement + Anti", C.ACC2)
     lbl("Made with 💜", C.ACC3)
 end)
 
-print("✅ [11/12] Isi Tab loaded")-- =========================================================
--- BAGIAN 12/12 : MAIN LOOP + KEYBIND + FINAL
+print("✅ [11/14] Isi Tab loaded")-- =========================================================
+-- BAGIAN 12/14 : MAIN LOOP + KEYBIND + ANTI-RESET + FINAL
 -- =========================================================
 
--- FPS/PING PREMIUM
+-- FPS/PING
 local fpsPanel = Instance.new("Frame")
 fpsPanel.Size = UDim2.new(0, 170, 0, 28)
 fpsPanel.Position = UDim2.new(0.5, -85, 0, 8)
@@ -2940,20 +2913,24 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
--- =========================================================
--- MAIN LOOP - ESP FALLENS
--- =========================================================
+-- MAIN LOOP ESP
 task.spawn(function()
     while gui.Parent do
         local root = getRoot()
         if root then
-            -- STATUS ESP (nama + jarak + hp)
             if S.ESP_Name then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character then
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
                         if hum and hum.Health > 0 then
                             _G.Roooor_createStatusESP(p, p.Character, root)
+                            local bb = _G.Roooor_StatusESP[p.Character]
+                            if bb then
+                                local lbl2 = bb:FindFirstChildOfClass("TextLabel")
+                                if lbl2 and lbl2.TextSize ~= S.ESP_Size then
+                                    lbl2.TextSize = S.ESP_Size
+                                end
+                            end
                         else
                             if _G.Roooor_StatusESP[p.Character] then
                                 _G.Roooor_StatusESP[p.Character]:Destroy()
@@ -2963,34 +2940,24 @@ task.spawn(function()
                     end
                 end
             end
-
-            -- GENERATOR ESP (dengan % progress)
             if S.ESP_Generator then
                 for gen in pairs(_G.Roooor_Cached.Generators) do
                     if gen and gen.Parent then _G.Roooor_UpdateGenerator(gen) end
                 end
             end
-
-            -- PALLET ESP
             if S.ESP_Pallet then
                 for obj in pairs(_G.Roooor_Cached.Pallets) do
                     if obj and obj.Parent then _G.Roooor_UpdateMapESP(obj, root) end
                 end
             end
-
-            -- WINDOW ESP
             if S.ESP_Window then
                 for obj in pairs(_G.Roooor_Cached.Windows) do
                     if obj and obj.Parent then _G.Roooor_UpdateMapESP(obj, root) end
                 end
             end
-
-            -- SCP ESP
             if S.ESP_SCP then
                 _G.Roooor_UpdateSCPEsp(root)
             end
-
-            -- PLAYER HIGHLIGHT (Killer / Survivor / Default)
             if S.ESP_Name then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character then
@@ -3002,32 +2969,35 @@ task.spawn(function()
                                 local dist = (hrp.Position - root.Position).Magnitude
                                 if dist <= S.ESP_Radius then
                                     if p.Team and p.Team.Name == "Killer" then
-                                        createESP(char, S.ESP_KillerColor)
+                                        _G.Roooor_createESP(char, S.ESP_KillerColor)
                                     elseif p.Team and p.Team.Name == "Survivors" then
-                                        createESP(char, S.ESP_SurvivorColor)
+                                        _G.Roooor_createESP(char, S.ESP_SurvivorColor)
                                     else
-                                        createESP(char, S.ESP_DefaultColor)
+                                        _G.Roooor_createESP(char, S.ESP_DefaultColor)
                                     end
                                 else
-                                    removeESP(char)
+                                    _G.Roooor_removeESP(char)
                                 end
                             end
                         else
-                            removeESP(p.Character)
+                            _G.Roooor_removeESP(p.Character)
                         end
                     end
                 end
             end
-
-            updateParryCircle()
         end
         task.wait(0.2)
     end
 end)
 
--- =========================================================
+-- PARRY CIRCLE SMOOTH UPDATE (anti patah-patah)
+RunService.RenderStepped:Connect(function()
+    if S.ParryCircle then
+        updateParryCircle()
+    end
+end)
+
 -- RESPAWN HANDLER
--- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     hookedKillers = {}
@@ -3039,12 +3009,15 @@ LP.CharacterAdded:Connect(function(char)
     if S.Korblox then task.wait(0.3); applyKorblox(true) end
     if S.Headless then task.wait(0.3); applyHeadless(true) end
     if S.FastVault then task.wait(0.5); hookVault(char) end
-    if S.Moonwalk then task.wait(0.5); startMoonwalk() end
+    if S.Moonwalk then
+        task.wait(0.5)
+        stopMoonwalk()
+        task.wait(0.1)
+        startMoonwalk()
+    end
 end)
 
--- =========================================================
 -- KEYBIND RightShift
--- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -3071,17 +3044,83 @@ end
 task.spawn(function()
     while main.Parent do
         task.wait(0.05)
-        local hue = (tick() * 0.3) % 1
-        mainStrk.Color = Color3.fromHSV(hue, 1, 1)
-        mainStrk.Transparency = 0.4
+        if not X.RGBUI then
+            local hue = (tick() * 0.3) % 1
+            mainStrk.Color = Color3.fromHSV(hue, 1, 1)
+            mainStrk.Transparency = 0.4
+        end
     end
 end)
 
 -- =========================================================
--- FINAL PRINT
+-- ANTI-RESET SYSTEM (SLIDER + TOGGLE)
 -- =========================================================
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.3)
+        for name, val in pairs(_G.SliderStates) do
+            if name == "Nama Size" then S.ESP_Size = val end
+            if name == "ESP Radius" then S.ESP_Radius = val end
+            if name == "Parry Distance" then S.ParryDist = val end
+            if name == "Circle Size" then S.ParryCircleSize = val end
+            if name == "Fire Size" then S.FireSize = val end
+            if name == "Aimlock Radius" then S.AimlockRadius = val end
+            if name == "Speed Value" then S.WalkSpeedVal = val end
+            if name == "Speed Boost" then S.WalkSpeedBoost = val end
+            if name == "Animation Speed" then S.FastVaultSpeed = val end
+            if name == "Attack Delay" then S.Killer_AtkDelay = val end
+            if name == "Hitbox Size" then S.Killer_HitboxSize = val end
+            if name == "Stalk Range" then S.Killer_StalkRange = val end
+            if name == "Spam Speed" then S.MoonwalkSpam = val end
+            if name == "Intensity" then S.MoonwalkIntensity = val end
+            if name == "Slow Speed" then S.MoonwalkSlow = val end
+            if name == "Contrast Value" then S.ContrastVal = val end
+            if name == "Saturation" then S.SaturationVal = val end
+            if name == "FOV Value" then S.FOV = val end
+        end
+        for name, state in pairs(_G.ToggleStates) do
+            if name == "Enable ESP Name" then S.ESP_Name = state end
+            if name == "ESP Generator" then S.ESP_Generator = state end
+            if name == "ESP Pallet" then S.ESP_Pallet = state end
+            if name == "ESP Window" then S.ESP_Window = state end
+            if name == "ESP SCP" then S.ESP_SCP = state end
+            if name == "Enable Auto Parry" then
+                if S.Parry ~= state then
+                    S.Parry = state
+                    if state then scanKillers() end
+                end
+            end
+            if name == "Enable Parry Circle" then S.ParryCircle = state end
+            if name == "Enable Fire" then S.FireOn = state end
+            if name == "Enable Fire Feet" then S.FireFeetOn = state end
+            if name == "Enable Skill Check" then S.Skill = state end
+            if name == "Enable Aimlock" then S.Aimlock = state end
+            if name == "Enable Walk Speed" then S.WalkSpeed = state end
+            if name == "Fullbright" then S.Fullbright = state end
+            if name == "No Fog" then S.NoFog = state end
+            if name == "Ultra HD" then S.UltraHD = state end
+            if name == "Contrast" then S.Contrast = state end
+            if name == "Enable FOV" then S.FOVEnabled = state end
+            if name == "Auto Spam Attack" then S.Killer_AutoAtk = state end
+            if name == "Auto Kill All" then S.Killer_KillAll = state end
+            if name == "Enable Hitbox" then S.Killer_Hitbox = state end
+            if name == "Hide Hitbox Visual" then S.Killer_Hitbox_Visible = not state end
+            if name == "Auto Stalk" then S.Killer_AutoStalk = state end
+            if name == "Korblox Legs (1 Kaki)" then S.Korblox = state end
+            if name == "Headless" then S.Headless = state end
+            if name == "Enable Fast Vault" then S.FastVault = state end
+            if name == "Enable Moonwalk" then
+                if S.Moonwalk ~= state then
+                    S.Moonwalk = state
+                    if state then startMoonwalk() else stopMoonwalk() end
+                end
+            end
+        end
+    end
+end)
+
 print("=====================================================")
-print("✅ [12/12] PREMIUM ULTIMATE + FALLENS - LOADED!")
+print("✅ [12/14] PREMIUM ULTIMATE + FALLENS - LOADED!")
 print("🎉 ROOORHUB PREMIUM ULTIMATE - SUCCESS!")
 print("=====================================================")
 print("🔥 Fire         : 60 Efek")
@@ -3089,65 +3128,19 @@ print("👟 Fire Feet    : 20 Efek")
 print("🌤️ Sky          : 25 Sky")
 print("👁️ ESP          : Player + Gen (%) + Pallet + Window + SCP")
 print("🛡️ Auto Parry   : Anti-Miss (3 metode deteksi)")
-print("🎯 Skill Check  : Auto Press")
-print("🔪 Killer       : Auto Attack + Kill All + Hitbox")
+print("🎯 Aimlock      : 2 Mode (Killer / Survivor)")
+print("🔪 Killer       : Auto Attack + Kill All + Hitbox + Masked")
 print("🎨 Visual       : Fullbright + No Fog + FOV + Ultra HD")
-print("💫 Appearance   : Korblox (1 kaki) + Headless")
+print("💫 Appearance   : Korblox (1 kaki full) + Headless")
 print("🚀 Movement     : WalkSpeed + Instant Escape + Fast Vault")
-print("🌙 Moonwalk     : Konsisten Lobby & Ingame")
+print("🌙 Moonwalk     : Lobby & Ingame SAMA (BodyGyro Fix)")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
-print("=====================================================")
--- =========================================================
--- BAGIAN 13 : FITUR TAMBAHAN
--- Survivor + Visual + Anti/Defense + Top 10 Berguna
+print("🖱️ Klik kanan 🎯 = Switch Aimlock Mode")
+print("=====================================================")-- =========================================================
+-- BAGIAN 13/14 : SURVIVOR+ / VISUAL+ / ANTI / TOP 10
 -- =========================================================
 
--- =========================================================
--- STATE BARU
--- =========================================================
-_G.RoooorExtra = _G.RoooorExtra or {
-    -- Survivor
-    AutoPallet = false, AutoPalletRange = 8,
-    AutoVault = false, AutoVaultRange = 10,
-    AutoHeal = false, AutoHealThreshold = 40,
-    AutoRevive = false,
-    AutoRepair = false,
-    SkillPerfect = false,
-    SafeZone = false,
-    EscapeAlert = false, EscapeAlertRange = 60,
-
-    -- Visual
-    KillEffect = false,
-    Trail = false, TrailColor = Color3.fromRGB(180, 80, 255),
-    Aura = false, AuraColor = Color3.fromRGB(180, 80, 255),
-    RGBUI = false,
-    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 255, 200), CrosshairSize = 8,
-    NoClipCamera = false,
-    ZoomOut = false, ZoomOutValue = 500,
-
-    -- Anti/Defense
-    AntiStun = false,
-    AntiBlind = false,
-    AntiGrab = false,
-    AntiHook = false,
-    AntiRagdoll = false,
-    AntiParry = false,
-    AntiKick = false,
-    AntiAFK = false,
-
-    -- Top 10
-    Fly = false, FlySpeed = 50,
-    TPtoPlayer = false,
-    ItemESP = false, ItemESPColor = Color3.fromRGB(255, 255, 100),
-    PlayerList = false,
-}
-
-local X = _G.RoooorExtra
-
--- =========================================================
--- AUTO-DETECT REMOTE
--- =========================================================
 local function findRemote(keyword)
     for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
         if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
@@ -3164,11 +3157,7 @@ local HealRemote = findRemote("heal") or findRemote("medkit")
 local ReviveRemote = findRemote("revive") or findRemote("rescue")
 local RepairRemote = findRemote("repair") or findRemote("generator")
 
--- =========================================================
--- SURVIVOR FEATURES
--- =========================================================
-
--- AUTO PALLET STUN
+-- ============ SURVIVOR ============
 task.spawn(function()
     while gui.Parent do
         task.wait(0.15)
@@ -3186,15 +3175,10 @@ task.spawn(function()
                     end
                 end
                 if killerNear then
-                    -- Cari pallet terdekat
                     for _, obj in ipairs(workspace:GetDescendants()) do
                         if obj:IsA("BasePart") and (obj.Name == "Pallet" or obj.Name == "Palletwrong") then
-                            local dist = (obj.Position - myRoot.Position).Magnitude
-                            if dist <= 15 then
-                                if PalletRemote then
-                                    pcall(function() PalletRemote:FireServer(obj) end)
-                                end
-                                -- Fallback: pakai ProximityPrompt
+                            if (obj.Position - myRoot.Position).Magnitude <= 15 then
+                                if PalletRemote then pcall(function() PalletRemote:FireServer(obj) end) end
                                 local prompt = obj:FindFirstChildOfClass("ProximityPrompt")
                                 if prompt then
                                     pcall(function()
@@ -3213,35 +3197,27 @@ task.spawn(function()
     end
 end)
 
--- AUTO VAULT WINDOW
 task.spawn(function()
     while gui.Parent do
         task.wait(0.15)
         if X.AutoVault then
             local myRoot = getRoot()
             if myRoot then
-                local killerNear = false
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                         local krp = p.Character:FindFirstChild("HumanoidRootPart")
                         if krp and (krp.Position - myRoot.Position).Magnitude <= X.AutoVaultRange + 5 then
-                            killerNear = true
-                            break
-                        end
-                    end
-                end
-                if killerNear then
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj.Name == "Window" then
-                            local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
-                            if pos and (pos - myRoot.Position).Magnitude <= X.AutoVaultRange then
-                                -- Teleport ke window (vault)
-                                local targetPos = pos + (myRoot.Position - pos).Unit * 2 + Vector3.new(0, 2, 0)
-                                pcall(function()
-                                    myRoot.CFrame = CFrame.new(targetPos)
-                                end)
-                                break
+                            for _, obj in ipairs(workspace:GetDescendants()) do
+                                if obj.Name == "Window" then
+                                    local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
+                                    if pos and (pos - myRoot.Position).Magnitude <= X.AutoVaultRange then
+                                        local targetPos = pos + (myRoot.Position - pos).Unit * 2 + Vector3.new(0, 2, 0)
+                                        pcall(function() myRoot.CFrame = CFrame.new(targetPos) end)
+                                        break
+                                    end
+                                end
                             end
+                            break
                         end
                     end
                 end
@@ -3250,59 +3226,44 @@ task.spawn(function()
     end
 end)
 
--- AUTO HEAL SELF
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
         if X.AutoHeal and LP.Character then
             local hum = LP.Character:FindFirstChildOfClass("Humanoid")
             if hum and hum.Health > 0 and hum.Health < X.AutoHealThreshold then
-                if HealRemote then
-                    pcall(function() HealRemote:FireServer() end)
-                end
+                if HealRemote then pcall(function() HealRemote:FireServer() end) end
             end
         end
     end
 end)
 
--- AUTO REVIVE
 task.spawn(function()
     while gui.Parent do
         task.wait(1)
         if X.AutoRevive and LP.Character then
             local hum = LP.Character:FindFirstChildOfClass("Humanoid")
             if hum and hum.Health <= 0 then
-                if ReviveRemote then
-                    pcall(function() ReviveRemote:FireServer() end)
-                end
+                if ReviveRemote then pcall(function() ReviveRemote:FireServer() end) end
             end
         end
     end
 end)
 
--- AUTO REPAIR GENERATOR
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
         if X.AutoRepair and LP.Character then
             local myRoot = getRoot()
             if myRoot then
-                -- Cari generator terdekat
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     if obj.Name == "Generator" then
                         local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
                         if pos and (pos - myRoot.Position).Magnitude <= 15 then
-                            -- Pakai ProximityPrompt kalau ada
                             local prompt = obj:FindFirstChildOfClass("ProximityPrompt", true)
                                 or (obj:IsA("Model") and obj:FindFirstChildWhichIsA("ProximityPrompt", true))
-                            if prompt then
-                                pcall(function()
-                                    prompt:InputHoldBegin()
-                                end)
-                            end
-                            if RepairRemote then
-                                pcall(function() RepairRemote:FireServer(obj) end)
-                            end
+                            if prompt then pcall(function() prompt:InputHoldBegin() end) end
+                            if RepairRemote then pcall(function() RepairRemote:FireServer(obj) end) end
                             break
                         end
                     end
@@ -3312,7 +3273,6 @@ task.spawn(function()
     end
 end)
 
--- AUTO SKILL PERFECT (override doSkillCheck)
 task.spawn(function()
     while gui.Parent do
         task.wait(0.02)
@@ -3324,10 +3284,7 @@ task.spawn(function()
                     local line = check:FindFirstChild("Line")
                     local goal = check:FindFirstChild("Goal")
                     if line and goal then
-                        -- Paksa line ke tengah goal
-                        pcall(function()
-                            line.Rotation = goal.Rotation
-                        end)
+                        pcall(function() line.Rotation = goal.Rotation end)
                     end
                 end
             end
@@ -3335,25 +3292,23 @@ task.spawn(function()
     end
 end)
 
--- SAFE ZONE FINDER (highlight zona aman = jauh dari killer)
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
         if X.SafeZone and LP.Character then
             local myRoot = getRoot()
             if myRoot then
-                local nearestKillerDist = math.huge
+                local nearKiller = math.huge
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                         local krp = p.Character:FindFirstChild("HumanoidRootPart")
                         if krp then
                             local d = (krp.Position - myRoot.Position).Magnitude
-                            if d < nearestKillerDist then nearestKillerDist = d end
+                            if d < nearKiller then nearKiller = d end
                         end
                     end
                 end
-                if nearestKillerDist < 50 then
-                    -- kasih warning (ubah warna layar merah sebentar)
+                if nearKiller < 50 then
                     local warn = PG:FindFirstChild("RoooorWarn")
                     if not warn then
                         warn = Instance.new("Frame")
@@ -3365,16 +3320,13 @@ task.spawn(function()
                         warn.Parent = gui
                     end
                     warn.BackgroundTransparency = 0.3
-                    task.delay(0.3, function()
-                        if warn then warn.BackgroundTransparency = 1 end
-                    end)
+                    task.delay(0.3, function() if warn then warn.BackgroundTransparency = 1 end end)
                 end
             end
         end
     end
 end)
 
--- ESCAPE ALERT
 task.spawn(function()
     while gui.Parent do
         task.wait(0.5)
@@ -3402,9 +3354,7 @@ task.spawn(function()
                                 rnd(al, 10)
                             end
                             al.Visible = true
-                            task.delay(0.8, function()
-                                if al then al.Visible = false end
-                            end)
+                            task.delay(0.8, function() if al then al.Visible = false end end)
                             break
                         end
                     end
@@ -3414,12 +3364,9 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- VISUAL FEATURES
--- =========================================================
+-- ============ VISUAL EXTRA ============
+local trailObj, auraObj = nil, nil
 
--- TRAIL
-local trailObj = nil
 local function applyTrail(s)
     if trailObj then trailObj:Destroy(); trailObj = nil end
     if not s then return end
@@ -3441,8 +3388,6 @@ local function applyTrail(s)
     trailObj.Parent = hrp
 end
 
--- AURA
-local auraObj = nil
 local function applyAura(s)
     if auraObj then auraObj:Destroy(); auraObj = nil end
     if not s then return end
@@ -3461,7 +3406,6 @@ local function applyAura(s)
     auraObj.Parent = hrp
 end
 
--- KILL EFFECT
 local function spawnKillEffect(pos)
     local p = Instance.new("Part")
     p.Anchored = true
@@ -3497,7 +3441,6 @@ task.spawn(function()
     end
 end)
 
--- RGB UI (warna window ganti-ganti)
 task.spawn(function()
     while gui.Parent do
         task.wait(0.05)
@@ -3512,7 +3455,6 @@ task.spawn(function()
     end
 end)
 
--- CROSSHAIR
 local crosshairGui = nil
 local function applyCrosshair(s)
     if crosshairGui then crosshairGui:Destroy(); crosshairGui = nil end
@@ -3541,7 +3483,6 @@ local function applyCrosshair(s)
         end
         ln.Parent = crosshairGui
     end
-    -- dot tengah
     local dot = Instance.new("Frame")
     dot.Size = UDim2.new(0, 2, 0, 2)
     dot.Position = UDim2.new(0.5, -1, 0.5, -1)
@@ -3551,23 +3492,16 @@ local function applyCrosshair(s)
     rnd(dot, 1)
 end
 
--- NO CLIP CAMERA
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
-        if X.NoClipCamera then
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.CanCollide = false
-            end
-        else
-            local cam = workspace.CurrentCamera
-            if cam then cam.CanCollide = true end
+        local cam = workspace.CurrentCamera
+        if cam then
+            cam.CanCollide = not X.NoClipCamera
         end
     end
 end)
 
--- ZOOM OUT
 local function applyZoomOut()
     if X.ZoomOut then
         LP.CameraMaxZoomDistance = X.ZoomOutValue
@@ -3576,56 +3510,38 @@ local function applyZoomOut()
     end
 end
 
--- =========================================================
--- ANTI / DEFENSE
--- =========================================================
-
--- ANTI STUN (reset WalkSpeed & JumpPower kalau ke-reset)
+-- ============ ANTI / DEFENSE ============
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
         if X.AntiStun and LP.Character then
             local hum = LP.Character:FindFirstChildOfClass("Humanoid")
             if hum then
-                if hum.WalkSpeed == 0 and S.WalkSpeed then
-                    hum.WalkSpeed = S.WalkSpeedVal
-                end
-                if hum.JumpPower == 0 then
-                    hum.JumpPower = 50
-                end
-                -- Anti PlatformStand
-                if hum.PlatformStand then
-                    hum.PlatformStand = false
-                end
+                if hum.WalkSpeed == 0 and S.WalkSpeed then hum.WalkSpeed = S.WalkSpeedVal end
+                if hum.JumpPower == 0 then hum.JumpPower = 50 end
+                if hum.PlatformStand then hum.PlatformStand = false end
             end
         end
     end
 end)
 
--- ANTI BLIND (hapus BlurEffect & ColorCorrectionEffect)
 task.spawn(function()
     while gui.Parent do
         task.wait(0.2)
         if X.AntiBlind then
             for _, v in pairs(Lighting:GetChildren()) do
-                if v:IsA("BlurEffect") then
-                    v.Size = 0
-                end
+                if v:IsA("BlurEffect") then v.Size = 0 end
             end
-            -- hapus efek di kamera juga
             local cam = workspace.CurrentCamera
             if cam then
                 for _, v in pairs(cam:GetChildren()) do
-                    if v:IsA("BlurEffect") then
-                        v:Destroy()
-                    end
+                    if v:IsA("BlurEffect") then v:Destroy() end
                 end
             end
         end
     end
 end)
 
--- ANTI GRAB (detach weld ke killer)
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -3645,51 +3561,29 @@ task.spawn(function()
     end
 end)
 
--- ANTI HOOK
 task.spawn(function()
     while gui.Parent do
         task.wait(0.2)
         if X.AntiHook and LP.Character then
             local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                -- Teleport balik kalau kena hook (CFrame goyang)
-                if hrp.Velocity.Magnitude > 200 then
-                    hrp.Velocity = Vector3.new(0, 0, 0)
-                end
+            if hrp and hrp.Velocity.Magnitude > 200 then
+                hrp.Velocity = Vector3.new(0, 0, 0)
             end
         end
     end
 end)
 
--- ANTI RAGDOLL
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
         if X.AntiRagdoll and LP.Character then
             local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.PlatformStand then
-                hum.PlatformStand = false
-            end
-            -- Aktifin state aktif
-            pcall(function()
-                hum:ChangeState(Enum.HumanoidStateType.Running)
-            end)
+            if hum and hum.PlatformStand then hum.PlatformStand = false end
+            pcall(function() hum:ChangeState(Enum.HumanoidStateType.Running) end)
         end
     end
 end)
 
--- ANTI PARRY (killer - spam attack biar parry gagal)
-task.spawn(function()
-    while gui.Parent do
-        task.wait(0.1)
-        if X.AntiParry and S.Killer_AutoAtk then
-            -- Delay attack sedikit random biar parry timing gagal
-            task.wait(math.random(10, 50) / 100)
-        end
-    end
-end)
-
--- ANTI AFK
 task.spawn(function()
     while gui.Parent do
         task.wait(60)
@@ -3703,14 +3597,8 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- TOP 10 BERGUNA
--- =========================================================
-
--- FLY
-local flyBodyVelocity = nil
-local flyBodyGyro = nil
-local flyConn = nil
+-- ============ FLY ============
+local flyBodyVelocity, flyBodyGyro, flyConn = nil, nil, nil
 
 local function startFly()
     if flyConn then return end
@@ -3718,20 +3606,16 @@ local function startFly()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     pcall(function() hrp:SetNetworkOwner(LP) end)
-
     flyBodyVelocity = Instance.new("BodyVelocity")
     flyBodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
     flyBodyVelocity.Parent = hrp
-
     flyBodyGyro = Instance.new("BodyGyro")
     flyBodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     flyBodyGyro.P = 15000
     flyBodyGyro.D = 500
     flyBodyGyro.Parent = hrp
-
     flyConn = RunService.RenderStepped:Connect(function()
         if not X.Fly then return end
         local char = LP.Character
@@ -3739,7 +3623,6 @@ local function startFly()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
         if not hrp or not cam then return end
-
         local moveDir = Vector3.new(0, 0, 0)
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
@@ -3749,15 +3632,8 @@ local function startFly()
                 moveDir = Vector3.new(moveDir.X, 0, moveDir.Z).Unit
             end
         end
-
-        -- Naik / turun
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then
-            moveDir = moveDir + Vector3.new(0, 1, 0)
-        end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveDir = moveDir + Vector3.new(0, -1, 0)
-        end
-
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir + Vector3.new(0, -1, 0) end
         flyBodyVelocity.Velocity = moveDir * X.FlySpeed
         flyBodyGyro.CFrame = cam.CFrame
     end)
@@ -3769,18 +3645,7 @@ local function stopFly()
     if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
 end
 
--- TP TO PLAYER
-local function tpToPlayer(targetName)
-    local target = Players:FindFirstChild(targetName)
-    if not target or not target.Character then return end
-    local hrp = target.Character:FindFirstChild("HumanoidRootPart")
-    local myRoot = getRoot()
-    if hrp and myRoot then
-        myRoot.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
-    end
-end
-
--- ITEM ESP
+-- ============ ITEM ESP ============
 task.spawn(function()
     while gui.Parent do
         task.wait(0.3)
@@ -3790,17 +3655,13 @@ task.spawn(function()
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     local lname = string.lower(obj.Name)
                     if obj:IsA("BasePart") and (
-                        string.find(lname, "medkit") or
-                        string.find(lname, "key") or
-                        string.find(lname, "flashlight") or
-                        string.find(lname, "battery") or
+                        string.find(lname, "medkit") or string.find(lname, "key") or
+                        string.find(lname, "flashlight") or string.find(lname, "battery") or
                         string.find(lname, "bandage")
                     ) then
-                        local dist = (obj.Position - root.Position).Magnitude
-                        if dist <= S.ESP_Radius then
-                            local h = obj:FindFirstChild("RoooorItemHL")
-                            if not h then
-                                h = Instance.new("Highlight")
+                        if (obj.Position - root.Position).Magnitude <= S.ESP_Radius then
+                            if not obj:FindFirstChild("RoooorItemHL") then
+                                local h = Instance.new("Highlight")
                                 h.Name = "RoooorItemHL"
                                 h.FillColor = X.ItemESPColor
                                 h.OutlineColor = X.ItemESPColor
@@ -3822,7 +3683,7 @@ task.spawn(function()
     end
 end)
 
--- PLAYER LIST
+-- ============ PLAYER LIST ============
 local playerListGui = nil
 local function createPlayerList()
     if playerListGui then playerListGui:Destroy() end
@@ -3842,15 +3703,15 @@ local function createPlayerList()
     rnd(frame, 12)
     strk(frame, C.ACC, 1.5)
 
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -10, 0, 25)
-    title.Position = UDim2.new(0, 5, 0, 5)
-    title.BackgroundTransparency = 1
-    title.Text = "👥 PLAYER LIST"
-    title.TextColor3 = C.ACC4
-    title.TextSize = 12
-    title.Font = Enum.Font.GothamBlack
-    title.Parent = frame
+    local title2 = Instance.new("TextLabel")
+    title2.Size = UDim2.new(1, -10, 0, 25)
+    title2.Position = UDim2.new(0, 5, 0, 5)
+    title2.BackgroundTransparency = 1
+    title2.Text = "👥 PLAYER LIST"
+    title2.TextColor3 = C.ACC4
+    title2.TextSize = 12
+    title2.Font = Enum.Font.GothamBlack
+    title2.Parent = frame
 
     local listFrame = Instance.new("ScrollingFrame")
     listFrame.Size = UDim2.new(1, -10, 1, -40)
@@ -3898,14 +3759,9 @@ local function createPlayerList()
 end
 
 -- =========================================================
--- =========================================================
--- BAGIAN 13 : UI TAMBAHAN (TAB BARU)
--- =========================================================
+-- BAGIAN 14/14 : UI TAB BARU + FINAL
 -- =========================================================
 
--- =========================================================
--- TAB SURVIVOR EXTRA
--- =========================================================
 makeTab("Survivor+", "🏃", 9, function()
     sec("Auto Pallet Stun", "🪵")
     tog("Enable Auto Pallet", false, function(s) X.AutoPallet = s end)
@@ -3936,9 +3792,6 @@ makeTab("Survivor+", "🏃", 9, function()
     sl("Alert Range", 20, 200, 60, function(v) X.EscapeAlertRange = v end)
 end)
 
--- =========================================================
--- TAB VISUAL EXTRA
--- =========================================================
 makeTab("Visual+", "🎨", 10, function()
     sec("Kill Effect", "💥")
     tog("Enable Kill Effect", false, function(s) X.KillEffect = s end)
@@ -3965,38 +3818,25 @@ makeTab("Visual+", "🎨", 10, function()
     sl("Zoom Distance", 100, 5000, 500, function(v) X.ZoomOutValue = v; applyZoomOut() end)
 end)
 
--- =========================================================
--- TAB ANTI / DEFENSE
--- =========================================================
 makeTab("Anti", "🛡️", 11, function()
     sec("Anti Stun", "⚡")
     tog("Enable Anti Stun", false, function(s) X.AntiStun = s end)
-
     sec("Anti Blind", "👁️")
     tog("Enable Anti Blind", false, function(s) X.AntiBlind = s end)
-
     sec("Anti Grab", "✋")
     tog("Enable Anti Grab", false, function(s) X.AntiGrab = s end)
-
     sec("Anti Hook", "🪝")
     tog("Enable Anti Hook", false, function(s) X.AntiHook = s end)
-
     sec("Anti Ragdoll", "🤸")
     tog("Enable Anti Ragdoll", false, function(s) X.AntiRagdoll = s end)
-
     sec("Anti Parry (Killer)", "⚔️")
     tog("Enable Anti Parry", false, function(s) X.AntiParry = s end)
-
     sec("Anti Kick", "🚫")
     tog("Enable Anti Kick", false, function(s) X.AntiKick = s end)
-
     sec("Anti AFK", "💤")
     tog("Enable Anti AFK", false, function(s) X.AntiAFK = s end)
 end)
 
--- =========================================================
--- TAB TOP 10 BERGUNA
--- =========================================================
 makeTab("Top 10", "🏆", 12, function()
     sec("Fly", "🕊️")
     tog("Enable Fly", false, function(s)
@@ -4004,11 +3844,11 @@ makeTab("Top 10", "🏆", 12, function()
         if s then startFly() else stopFly() end
     end)
     sl("Fly Speed", 10, 200, 50, function(v) X.FlySpeed = v end)
-    lbl("Kontrol: WASD + Space (naik) + LShift (turun)", C.ACC2)
+    lbl("WASD + Space (naik) + LShift (turun)", C.ACC2)
 
     sec("Teleport", "🌀")
     tog("Enable TP to Player", false, function(s) X.TPtoPlayer = s end)
-    lbl("Klik nama player di Player List", C.DIM)
+    lbl("Klik nama di Player List", C.DIM)
 
     sec("Item ESP", "📦")
     tog("Enable Item ESP", false, function(s) X.ItemESP = s end)
@@ -4024,9 +3864,7 @@ makeTab("Top 10", "🏆", 12, function()
     end)
 end)
 
--- =========================================================
 -- RESPAWN RE-APPLY
--- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
     if X.Trail then applyTrail(true) end
@@ -4035,13 +3873,10 @@ LP.CharacterAdded:Connect(function(char)
     if X.ZoomOut then applyZoomOut() end
 end)
 
--- =========================================================
--- ANTI-RESET UNTUK FITUR BARU
--- =========================================================
+-- ANTI-RESET FITUR BARU
 task.spawn(function()
     while gui.Parent do
         task.wait(0.3)
-        -- Sync toggle dari _G.ToggleStates
         for name, state in pairs(_G.ToggleStates) do
             if name == "Enable Auto Pallet" then X.AutoPallet = state end
             if name == "Enable Auto Vault" then X.AutoVault = state end
@@ -4087,8 +3922,813 @@ task.spawn(function()
     end
 end)
 
-print("✅ [13/13] Fitur Tambahan loaded!")
+print("=====================================================")
+print("✅ [14/14] FITUR TAMBAHAN LOADED!")
+print("🎉 ROOORHUB PREMIUM ULTIMATE - FULL SUCCESS!")
+print("=====================================================")
 print("🏃 Survivor+ : Pallet + Vault + Heal + Revive + Repair + Perfect")
 print("🎨 Visual+   : Kill Effect + Trail + Aura + RGB + Crosshair")
 print("🛡️ Anti      : Stun + Blind + Grab + Hook + Ragdoll + Parry + AFK")
 print("🏆 Top 10    : Fly + TP + Item ESP + Player List")
+print("=====================================================")
+print("⌨️ RightShift = Toggle Menu")
+print("🖱️ Klik kanan 🎯 = Switch Aimlock Mode")
+print("🖱️ Klik nama di Player List = TP")
+print("=====================================================")-- =========================================================
+-- BAGIAN 13/14 : SURVIVOR+ / VISUAL+ / ANTI / TOP 10
+-- =========================================================
+
+local function findRemote(keyword)
+    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+        if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+            if string.find(string.lower(obj.Name), string.lower(keyword)) then
+                return obj
+            end
+        end
+    end
+    return nil
+end
+
+local PalletRemote = findRemote("pallet") or findRemote("drop")
+local HealRemote = findRemote("heal") or findRemote("medkit")
+local ReviveRemote = findRemote("revive") or findRemote("rescue")
+local RepairRemote = findRemote("repair") or findRemote("generator")
+
+-- ============ SURVIVOR ============
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.15)
+        if X.AutoPallet then
+            local myRoot = getRoot()
+            if myRoot then
+                local killerNear = false
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if krp and (krp.Position - myRoot.Position).Magnitude <= X.AutoPalletRange then
+                            killerNear = true
+                            break
+                        end
+                    end
+                end
+                if killerNear then
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("BasePart") and (obj.Name == "Pallet" or obj.Name == "Palletwrong") then
+                            if (obj.Position - myRoot.Position).Magnitude <= 15 then
+                                if PalletRemote then pcall(function() PalletRemote:FireServer(obj) end) end
+                                local prompt = obj:FindFirstChildOfClass("ProximityPrompt")
+                                if prompt then
+                                    pcall(function()
+                                        prompt:InputHoldBegin()
+                                        task.wait(0.05)
+                                        prompt:InputHoldEnd()
+                                    end)
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.15)
+        if X.AutoVault then
+            local myRoot = getRoot()
+            if myRoot then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if krp and (krp.Position - myRoot.Position).Magnitude <= X.AutoVaultRange + 5 then
+                            for _, obj in ipairs(workspace:GetDescendants()) do
+                                if obj.Name == "Window" then
+                                    local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
+                                    if pos and (pos - myRoot.Position).Magnitude <= X.AutoVaultRange then
+                                        local targetPos = pos + (myRoot.Position - pos).Unit * 2 + Vector3.new(0, 2, 0)
+                                        pcall(function() myRoot.CFrame = CFrame.new(targetPos) end)
+                                        break
+                                    end
+                                end
+                            end
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if X.AutoHeal and LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 and hum.Health < X.AutoHealThreshold then
+                if HealRemote then pcall(function() HealRemote:FireServer() end) end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(1)
+        if X.AutoRevive and LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health <= 0 then
+                if ReviveRemote then pcall(function() ReviveRemote:FireServer() end) end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if X.AutoRepair and LP.Character then
+            local myRoot = getRoot()
+            if myRoot then
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj.Name == "Generator" then
+                        local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
+                        if pos and (pos - myRoot.Position).Magnitude <= 15 then
+                            local prompt = obj:FindFirstChildOfClass("ProximityPrompt", true)
+                                or (obj:IsA("Model") and obj:FindFirstChildWhichIsA("ProximityPrompt", true))
+                            if prompt then pcall(function() prompt:InputHoldBegin() end) end
+                            if RepairRemote then pcall(function() RepairRemote:FireServer(obj) end) end
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.02)
+        if X.SkillPerfect and LP.Character then
+            local prompt = PG:FindFirstChild("SkillCheckPromptGui")
+            if prompt then
+                local check = prompt:FindFirstChild("Check")
+                if check and check.Visible then
+                    local line = check:FindFirstChild("Line")
+                    local goal = check:FindFirstChild("Goal")
+                    if line and goal then
+                        pcall(function() line.Rotation = goal.Rotation end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if X.SafeZone and LP.Character then
+            local myRoot = getRoot()
+            if myRoot then
+                local nearKiller = math.huge
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if krp then
+                            local d = (krp.Position - myRoot.Position).Magnitude
+                            if d < nearKiller then nearKiller = d end
+                        end
+                    end
+                end
+                if nearKiller < 50 then
+                    local warn = PG:FindFirstChild("RoooorWarn")
+                    if not warn then
+                        warn = Instance.new("Frame")
+                        warn.Name = "RoooorWarn"
+                        warn.Size = UDim2.new(1, 0, 0, 6)
+                        warn.Position = UDim2.new(0, 0, 0, 0)
+                        warn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                        warn.BorderSizePixel = 0
+                        warn.Parent = gui
+                    end
+                    warn.BackgroundTransparency = 0.3
+                    task.delay(0.3, function() if warn then warn.BackgroundTransparency = 1 end end)
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if X.EscapeAlert and LP.Character then
+            local myRoot = getRoot()
+            if myRoot then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if krp and (krp.Position - myRoot.Position).Magnitude <= X.EscapeAlertRange then
+                            local al = PG:FindFirstChild("RoooorAlert")
+                            if not al then
+                                al = Instance.new("TextLabel")
+                                al.Name = "RoooorAlert"
+                                al.Size = UDim2.new(0, 300, 0, 40)
+                                al.Position = UDim2.new(0.5, -150, 0, 100)
+                                al.BackgroundTransparency = 0.3
+                                al.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                al.TextColor3 = Color3.fromRGB(255, 50, 50)
+                                al.TextSize = 20
+                                al.Font = Enum.Font.GothamBlack
+                                al.Text = "⚠️ KILLER DEKET! ⚠️"
+                                al.TextStrokeTransparency = 0
+                                al.Parent = gui
+                                rnd(al, 10)
+                            end
+                            al.Visible = true
+                            task.delay(0.8, function() if al then al.Visible = false end end)
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ============ VISUAL EXTRA ============
+local trailObj, auraObj = nil, nil
+
+local function applyTrail(s)
+    if trailObj then trailObj:Destroy(); trailObj = nil end
+    if not s then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local a0 = Instance.new("Attachment")
+    a0.Position = Vector3.new(0, 1, 0)
+    a0.Parent = hrp
+    local a1 = Instance.new("Attachment")
+    a1.Position = Vector3.new(0, -1, 0)
+    a1.Parent = hrp
+    trailObj = Instance.new("Trail")
+    trailObj.Attachment0 = a0
+    trailObj.Attachment1 = a1
+    trailObj.Color = ColorSequence.new(X.TrailColor, X.TrailColor)
+    trailObj.Lifetime = 0.5
+    trailObj.Parent = hrp
+end
+
+local function applyAura(s)
+    if auraObj then auraObj:Destroy(); auraObj = nil end
+    if not s then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    auraObj = Instance.new("ParticleEmitter")
+    auraObj.Texture = "rbxassetid://243660364"
+    auraObj.Color = ColorSequence.new(X.AuraColor)
+    auraObj.Size = NumberSequence.new(2)
+    auraObj.Lifetime = NumberRange.new(0.5, 1)
+    auraObj.Rate = 30
+    auraObj.Speed = NumberRange.new(2)
+    auraObj.SpreadAngle = Vector2.new(180, 180)
+    auraObj.Parent = hrp
+end
+
+local function spawnKillEffect(pos)
+    local p = Instance.new("Part")
+    p.Anchored = true
+    p.CanCollide = false
+    p.Material = Enum.Material.Neon
+    p.Shape = Enum.PartType.Ball
+    p.Size = Vector3.new(2, 2, 2)
+    p.Position = pos
+    p.Color = Color3.fromRGB(255, 50, 50)
+    p.Transparency = 0.3
+    p.Parent = workspace
+    TweenService:Create(p, TweenInfo.new(0.5), {
+        Size = Vector3.new(15, 15, 15),
+        Transparency = 1
+    }):Play()
+    task.delay(0.6, function() p:Destroy() end)
+end
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.5)
+        if X.KillEffect then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LP and p.Character then
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health <= 0 then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp then spawnKillEffect(hrp.Position) end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.05)
+        if X.RGBUI then
+            local hue = (tick() * 0.3) % 1
+            mainStrk.Color = Color3.fromHSV(hue, 1, 1)
+            mainGrad.Color = ColorSequence.new(
+                Color3.fromHSV(hue, 1, 0.1),
+                Color3.fromHSV((hue + 0.3) % 1, 1, 0.15)
+            )
+        end
+    end
+end)
+
+local crosshairGui = nil
+local function applyCrosshair(s)
+    if crosshairGui then crosshairGui:Destroy(); crosshairGui = nil end
+    if not s then return end
+    crosshairGui = Instance.new("ScreenGui")
+    crosshairGui.Name = "RoooorCrosshair"
+    crosshairGui.ResetOnSpawn = false
+    crosshairGui.IgnoreGuiInset = true
+    crosshairGui.Parent = PG
+    for i = 1, 4 do
+        local ln = Instance.new("Frame")
+        ln.BackgroundColor3 = X.CrosshairColor
+        ln.BorderSizePixel = 0
+        if i == 1 then
+            ln.Size = UDim2.new(0, X.CrosshairSize, 0, 2)
+            ln.Position = UDim2.new(0.5, -X.CrosshairSize - 3, 0.5, -1)
+        elseif i == 2 then
+            ln.Size = UDim2.new(0, X.CrosshairSize, 0, 2)
+            ln.Position = UDim2.new(0.5, 3, 0.5, -1)
+        elseif i == 3 then
+            ln.Size = UDim2.new(0, 2, 0, X.CrosshairSize)
+            ln.Position = UDim2.new(0.5, -1, 0.5, -X.CrosshairSize - 3)
+        elseif i == 4 then
+            ln.Size = UDim2.new(0, 2, 0, X.CrosshairSize)
+            ln.Position = UDim2.new(0.5, -1, 0.5, 3)
+        end
+        ln.Parent = crosshairGui
+    end
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(0, 2, 0, 2)
+    dot.Position = UDim2.new(0.5, -1, 0.5, -1)
+    dot.BackgroundColor3 = X.CrosshairColor
+    dot.BorderSizePixel = 0
+    dot.Parent = crosshairGui
+    rnd(dot, 1)
+end
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        local cam = workspace.CurrentCamera
+        if cam then
+            cam.CanCollide = not X.NoClipCamera
+        end
+    end
+end)
+
+local function applyZoomOut()
+    if X.ZoomOut then
+        LP.CameraMaxZoomDistance = X.ZoomOutValue
+    else
+        LP.CameraMaxZoomDistance = 128
+    end
+end
+
+-- ============ ANTI / DEFENSE ============
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if X.AntiStun and LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                if hum.WalkSpeed == 0 and S.WalkSpeed then hum.WalkSpeed = S.WalkSpeedVal end
+                if hum.JumpPower == 0 then hum.JumpPower = 50 end
+                if hum.PlatformStand then hum.PlatformStand = false end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.2)
+        if X.AntiBlind then
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("BlurEffect") then v.Size = 0 end
+            end
+            local cam = workspace.CurrentCamera
+            if cam then
+                for _, v in pairs(cam:GetChildren()) do
+                    if v:IsA("BlurEffect") then v:Destroy() end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if X.AntiGrab and LP.Character then
+            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                for _, v in pairs(hrp:GetChildren()) do
+                    if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
+                        local part1 = v.Part1 or v.Part0
+                        if part1 and not part1:IsDescendantOf(LP.Character) then
+                            v:Destroy()
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.2)
+        if X.AntiHook and LP.Character then
+            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and hrp.Velocity.Magnitude > 200 then
+                hrp.Velocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.1)
+        if X.AntiRagdoll and LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum and hum.PlatformStand then hum.PlatformStand = false end
+            pcall(function() hum:ChangeState(Enum.HumanoidStateType.Running) end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while gui.Parent do
+        task.wait(60)
+        if X.AntiAFK then
+            pcall(function()
+                local vu = game:GetService("VirtualUser")
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+        end
+    end
+end)
+
+-- ============ FLY ============
+local flyBodyVelocity, flyBodyGyro, flyConn = nil, nil, nil
+
+local function startFly()
+    if flyConn then return end
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    pcall(function() hrp:SetNetworkOwner(LP) end)
+    flyBodyVelocity = Instance.new("BodyVelocity")
+    flyBodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    flyBodyVelocity.Parent = hrp
+    flyBodyGyro = Instance.new("BodyGyro")
+    flyBodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    flyBodyGyro.P = 15000
+    flyBodyGyro.D = 500
+    flyBodyGyro.Parent = hrp
+    flyConn = RunService.RenderStepped:Connect(function()
+        if not X.Fly then return end
+        local char = LP.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+        if not hrp or not cam then return end
+        local moveDir = Vector3.new(0, 0, 0)
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            local md = hum.MoveDirection
+            if md.Magnitude > 0 then
+                moveDir = cam.CFrame.LookVector * md.Z + cam.CFrame.RightVector * md.X
+                moveDir = Vector3.new(moveDir.X, 0, moveDir.Z).Unit
+            end
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir + Vector3.new(0, -1, 0) end
+        flyBodyVelocity.Velocity = moveDir * X.FlySpeed
+        flyBodyGyro.CFrame = cam.CFrame
+    end)
+end
+
+local function stopFly()
+    if flyConn then flyConn:Disconnect(); flyConn = nil end
+    if flyBodyVelocity then flyBodyVelocity:Destroy(); flyBodyVelocity = nil end
+    if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
+end
+
+-- ============ ITEM ESP ============
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.3)
+        if X.ItemESP then
+            local root = getRoot()
+            if root then
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    local lname = string.lower(obj.Name)
+                    if obj:IsA("BasePart") and (
+                        string.find(lname, "medkit") or string.find(lname, "key") or
+                        string.find(lname, "flashlight") or string.find(lname, "battery") or
+                        string.find(lname, "bandage")
+                    ) then
+                        if (obj.Position - root.Position).Magnitude <= S.ESP_Radius then
+                            if not obj:FindFirstChild("RoooorItemHL") then
+                                local h = Instance.new("Highlight")
+                                h.Name = "RoooorItemHL"
+                                h.FillColor = X.ItemESPColor
+                                h.OutlineColor = X.ItemESPColor
+                                h.FillTransparency = 0.7
+                                h.OutlineTransparency = 0.3
+                                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                h.Parent = obj
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                local h = obj:FindFirstChild("RoooorItemHL")
+                if h then h:Destroy() end
+            end
+        end
+    end
+end)
+
+-- ============ PLAYER LIST ============
+local playerListGui = nil
+local function createPlayerList()
+    if playerListGui then playerListGui:Destroy() end
+    playerListGui = Instance.new("ScreenGui")
+    playerListGui.Name = "RoooorPlayerList"
+    playerListGui.ResetOnSpawn = false
+    playerListGui.IgnoreGuiInset = true
+    playerListGui.Parent = PG
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 220, 0, 300)
+    frame.Position = UDim2.new(0, 15, 0.5, -150)
+    frame.BackgroundColor3 = C.PANEL
+    frame.BackgroundTransparency = 0.2
+    frame.BorderSizePixel = 0
+    frame.Parent = playerListGui
+    rnd(frame, 12)
+    strk(frame, C.ACC, 1.5)
+
+    local title2 = Instance.new("TextLabel")
+    title2.Size = UDim2.new(1, -10, 0, 25)
+    title2.Position = UDim2.new(0, 5, 0, 5)
+    title2.BackgroundTransparency = 1
+    title2.Text = "👥 PLAYER LIST"
+    title2.TextColor3 = C.ACC4
+    title2.TextSize = 12
+    title2.Font = Enum.Font.GothamBlack
+    title2.Parent = frame
+
+    local listFrame = Instance.new("ScrollingFrame")
+    listFrame.Size = UDim2.new(1, -10, 1, -40)
+    listFrame.Position = UDim2.new(0, 5, 0, 35)
+    listFrame.BackgroundTransparency = 1
+    listFrame.BorderSizePixel = 0
+    listFrame.ScrollBarThickness = 3
+    listFrame.ScrollBarImageColor3 = C.ACC
+    listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    listFrame.Parent = frame
+
+    local listL = Instance.new("UIListLayout")
+    listL.Padding = UDim.new(0, 3)
+    listL.Parent = listFrame
+
+    task.spawn(function()
+        while playerListGui and playerListGui.Parent do
+            task.wait(1)
+            if X.PlayerList then
+                for _, c in pairs(listFrame:GetChildren()) do
+                    if c:IsA("TextLabel") then c:Destroy() end
+                end
+                local root = getRoot()
+                for _, p in pairs(Players:GetPlayers()) do
+                    local label = Instance.new("TextLabel")
+                    label.Size = UDim2.new(1, -5, 0, 20)
+                    label.BackgroundTransparency = 1
+                    label.TextColor3 = p == LP and C.ACC4 or C.TXT
+                    label.TextSize = 10
+                    label.Font = Enum.Font.GothamMedium
+                    label.TextXAlignment = Enum.TextXAlignment.Left
+                    local team = p.Team and p.Team.Name or "None"
+                    local dist = 0
+                    if root and p.Character then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp then dist = (hrp.Position - root.Position).Magnitude end
+                    end
+                    label.Text = string.format("%s [%s] %.0f", p.Name, team, dist)
+                    label.Parent = listFrame
+                end
+            end
+        end
+    end)
+end
+
+-- =========================================================
+-- BAGIAN 14/14 : UI TAB BARU + FINAL
+-- =========================================================
+
+makeTab("Survivor+", "🏃", 9, function()
+    sec("Auto Pallet Stun", "🪵")
+    tog("Enable Auto Pallet", false, function(s) X.AutoPallet = s end)
+    sl("Pallet Range", 3, 20, 8, function(v) X.AutoPalletRange = v end)
+
+    sec("Auto Vault Window", "🪟")
+    tog("Enable Auto Vault", false, function(s) X.AutoVault = s end)
+    sl("Vault Range", 5, 25, 10, function(v) X.AutoVaultRange = v end)
+
+    sec("Auto Heal", "💊")
+    tog("Enable Auto Heal", false, function(s) X.AutoHeal = s end)
+    sl("Heal Threshold HP", 10, 100, 40, function(v) X.AutoHealThreshold = v end)
+
+    sec("Auto Revive", "💀")
+    tog("Enable Auto Revive", false, function(s) X.AutoRevive = s end)
+
+    sec("Auto Repair Generator", "⚙️")
+    tog("Enable Auto Repair", false, function(s) X.AutoRepair = s end)
+
+    sec("Skill Check Perfect", "🎯")
+    tog("Enable Perfect Skill", false, function(s) X.SkillPerfect = s end)
+
+    sec("Safe Zone Finder", "🟢")
+    tog("Enable Safe Zone", false, function(s) X.SafeZone = s end)
+
+    sec("Escape Alert", "⚠️")
+    tog("Enable Escape Alert", false, function(s) X.EscapeAlert = s end)
+    sl("Alert Range", 20, 200, 60, function(v) X.EscapeAlertRange = v end)
+end)
+
+makeTab("Visual+", "🎨", 10, function()
+    sec("Kill Effect", "💥")
+    tog("Enable Kill Effect", false, function(s) X.KillEffect = s end)
+
+    sec("Trail", "✨")
+    tog("Enable Trail", false, function(s) X.Trail = s; applyTrail(s) end)
+    cpk("Trail Color", X.TrailColor, function(c) X.TrailColor = c; applyTrail(X.Trail) end)
+
+    sec("Aura Effect", "🌟")
+    tog("Enable Aura", false, function(s) X.Aura = s; applyAura(s) end)
+    cpk("Aura Color", X.AuraColor, function(c) X.AuraColor = c; applyAura(X.Aura) end)
+
+    sec("RGB UI", "🌈")
+    tog("Enable RGB UI", false, function(s) X.RGBUI = s end)
+
+    sec("Custom Crosshair", "➕")
+    tog("Enable Crosshair", false, function(s) X.Crosshair = s; applyCrosshair(s) end)
+    cpk("Crosshair Color", X.CrosshairColor, function(c) X.CrosshairColor = c; applyCrosshair(X.Crosshair) end)
+    sl("Crosshair Size", 3, 30, 8, function(v) X.CrosshairSize = v; applyCrosshair(X.Crosshair) end)
+
+    sec("Camera", "📷")
+    tog("No Clip Camera", false, function(s) X.NoClipCamera = s end)
+    tog("Zoom Out (Unlimited)", false, function(s) X.ZoomOut = s; applyZoomOut() end)
+    sl("Zoom Distance", 100, 5000, 500, function(v) X.ZoomOutValue = v; applyZoomOut() end)
+end)
+
+makeTab("Anti", "🛡️", 11, function()
+    sec("Anti Stun", "⚡")
+    tog("Enable Anti Stun", false, function(s) X.AntiStun = s end)
+    sec("Anti Blind", "👁️")
+    tog("Enable Anti Blind", false, function(s) X.AntiBlind = s end)
+    sec("Anti Grab", "✋")
+    tog("Enable Anti Grab", false, function(s) X.AntiGrab = s end)
+    sec("Anti Hook", "🪝")
+    tog("Enable Anti Hook", false, function(s) X.AntiHook = s end)
+    sec("Anti Ragdoll", "🤸")
+    tog("Enable Anti Ragdoll", false, function(s) X.AntiRagdoll = s end)
+    sec("Anti Parry (Killer)", "⚔️")
+    tog("Enable Anti Parry", false, function(s) X.AntiParry = s end)
+    sec("Anti Kick", "🚫")
+    tog("Enable Anti Kick", false, function(s) X.AntiKick = s end)
+    sec("Anti AFK", "💤")
+    tog("Enable Anti AFK", false, function(s) X.AntiAFK = s end)
+end)
+
+makeTab("Top 10", "🏆", 12, function()
+    sec("Fly", "🕊️")
+    tog("Enable Fly", false, function(s)
+        X.Fly = s
+        if s then startFly() else stopFly() end
+    end)
+    sl("Fly Speed", 10, 200, 50, function(v) X.FlySpeed = v end)
+    lbl("WASD + Space (naik) + LShift (turun)", C.ACC2)
+
+    sec("Teleport", "🌀")
+    tog("Enable TP to Player", false, function(s) X.TPtoPlayer = s end)
+    lbl("Klik nama di Player List", C.DIM)
+
+    sec("Item ESP", "📦")
+    tog("Enable Item ESP", false, function(s) X.ItemESP = s end)
+    cpk("Item Color", X.ItemESPColor, function(c) X.ItemESPColor = c end)
+
+    sec("Player List", "👥")
+    tog("Show Player List", false, function(s)
+        X.PlayerList = s
+        if s then createPlayerList()
+        else
+            if playerListGui then playerListGui:Destroy(); playerListGui = nil end
+        end
+    end)
+end)
+
+-- RESPAWN RE-APPLY
+LP.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    if X.Trail then applyTrail(true) end
+    if X.Aura then applyAura(true) end
+    if X.Crosshair then applyCrosshair(true) end
+    if X.ZoomOut then applyZoomOut() end
+end)
+
+-- ANTI-RESET FITUR BARU
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.3)
+        for name, state in pairs(_G.ToggleStates) do
+            if name == "Enable Auto Pallet" then X.AutoPallet = state end
+            if name == "Enable Auto Vault" then X.AutoVault = state end
+            if name == "Enable Auto Heal" then X.AutoHeal = state end
+            if name == "Enable Auto Revive" then X.AutoRevive = state end
+            if name == "Enable Auto Repair" then X.AutoRepair = state end
+            if name == "Enable Perfect Skill" then X.SkillPerfect = state end
+            if name == "Enable Safe Zone" then X.SafeZone = state end
+            if name == "Enable Escape Alert" then X.EscapeAlert = state end
+            if name == "Enable Kill Effect" then X.KillEffect = state end
+            if name == "Enable Trail" then X.Trail = state end
+            if name == "Enable Aura" then X.Aura = state end
+            if name == "Enable RGB UI" then X.RGBUI = state end
+            if name == "Enable Crosshair" then X.Crosshair = state end
+            if name == "No Clip Camera" then X.NoClipCamera = state end
+            if name == "Zoom Out (Unlimited)" then X.ZoomOut = state end
+            if name == "Enable Anti Stun" then X.AntiStun = state end
+            if name == "Enable Anti Blind" then X.AntiBlind = state end
+            if name == "Enable Anti Grab" then X.AntiGrab = state end
+            if name == "Enable Anti Hook" then X.AntiHook = state end
+            if name == "Enable Anti Ragdoll" then X.AntiRagdoll = state end
+            if name == "Enable Anti Parry" then X.AntiParry = state end
+            if name == "Enable Anti Kick" then X.AntiKick = state end
+            if name == "Enable Anti AFK" then X.AntiAFK = state end
+            if name == "Enable Fly" then
+                if X.Fly ~= state then
+                    X.Fly = state
+                    if state then startFly() else stopFly() end
+                end
+            end
+            if name == "Enable TP to Player" then X.TPtoPlayer = state end
+            if name == "Enable Item ESP" then X.ItemESP = state end
+            if name == "Show Player List" then
+                if X.PlayerList ~= state then
+                    X.PlayerList = state
+                    if state then createPlayerList()
+                    else
+                        if playerListGui then playerListGui:Destroy(); playerListGui = nil end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+print("=====================================================")
+print("✅ [14/14] FITUR TAMBAHAN LOADED!")
+print("🎉 ROOORHUB PREMIUM ULTIMATE - FULL SUCCESS!")
+print("=====================================================")
+print("🏃 Survivor+ : Pallet + Vault + Heal + Revive + Repair + Perfect")
+print("🎨 Visual+   : Kill Effect + Trail + Aura + RGB + Crosshair")
+print("🛡️ Anti      : Stun + Blind + Grab + Hook + Ragdoll + Parry + AFK")
+print("🏆 Top 10    : Fly + TP + Item ESP + Player List")
+print("=====================================================")
+print("⌨️ RightShift = Toggle Menu")
+print("🖱️ Klik kanan 🎯 = Switch Aimlock Mode")
+print("🖱️ Klik nama di Player List = TP")
+print("=====================================================")

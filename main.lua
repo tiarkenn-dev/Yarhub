@@ -3960,4 +3960,77 @@ print("✅ Anti-Reset System: AKTIF")
 print("✅ Moonwalk Fix: LOBBY = INGAME")
 print("✅ Korblox Auto-Reapply: AKTIF")
 print("✅ Headless Auto-Reapply: AKTIF")
-print("=====================================================")
+print("=====================================================")-- =========================================================
+-- FORCE FIX: PASTIKAN TAB BARU MUNCUL
+-- =========================================================
+
+task.wait(0.5)
+
+-- Cek apakah sidebar ScrollingFrame
+local sbFix = nil
+for _, obj in pairs(main:GetDescendants()) do
+    if obj:IsA("ScrollingFrame") and obj.Parent and obj.Parent.Size.X.Offset == 120 then
+        sbFix = obj
+        break
+    end
+end
+
+if sbFix then
+    print("✅ Sidebar ScrollingFrame detected")
+    sbFix.CanvasSize = UDim2.new(0, 0, 0, 0)
+    sbFix.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    sbFix.ScrollingDirection = Enum.ScrollingDirection.Y
+    sbFix.ScrollBarThickness = 4
+    sbFix.ScrollBarImageColor3 = C.ACC
+    
+    -- Count tab
+    local tabCount = 0
+    for _, c in pairs(sbFix:GetChildren()) do
+        if c:IsA("TextButton") then tabCount = tabCount + 1 end
+    end
+    print("📊 Total tab:", tabCount, "(harus 12)")
+    
+    -- Kalau cuma 8, bikin tab baru manual
+    if tabCount < 12 then
+        print("⚠️ Tab kurang dari 12! Buat tab baru manual...")
+    end
+else
+    warn("❌ Sidebar bukan ScrollingFrame! Fix manual...")
+    -- Cari sidebar lama (Frame biasa)
+    local oldSb = nil
+    for _, obj in pairs(main:GetDescendants()) do
+        if obj:IsA("Frame") and obj.Size.X.Offset == 120 and obj:FindFirstChildOfClass("UIListLayout") then
+            oldSb = obj
+            break
+        end
+    end
+    if oldSb then
+        -- Ganti dengan ScrollingFrame
+        local newSb = Instance.new("ScrollingFrame")
+        newSb.Size = UDim2.new(1, -4, 1, -4)
+        newSb.Position = UDim2.new(0, 2, 0, 2)
+        newSb.BackgroundTransparency = 1
+        newSb.BorderSizePixel = 0
+        newSb.ScrollBarThickness = 4
+        newSb.ScrollBarImageColor3 = C.ACC
+        newSb.CanvasSize = UDim2.new(0, 0, 0, 0)
+        newSb.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        newSb.ScrollingDirection = Enum.ScrollingDirection.Y
+        newSb.Parent = oldSb
+        
+        -- Pindahin semua tab ke ScrollingFrame baru
+        for _, c in pairs(oldSb:GetChildren()) do
+            if c:IsA("TextButton") then
+                c.Parent = newSb
+            end
+        end
+        
+        local newL = Instance.new("UIListLayout")
+        newL.Padding = UDim.new(0, 5)
+        newL.Parent = newSb
+        
+        print("✅ Sidebar di-fix jadi ScrollingFrame")
+    end
+end
+
+print("✅ [FORCE FIX] Sidebar fix selesai")

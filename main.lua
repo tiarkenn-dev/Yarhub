@@ -1,6 +1,6 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v2
--- BAGIAN 1/8 : LOADING PREMIUM + CONFIG
+-- ROOORHUB ULTIMATE FIRE EDITION v3
+-- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -26,9 +26,10 @@ local C = {
     ACC3 = Color3.fromRGB(255, 50, 180),
     ACC4 = Color3.fromRGB(255, 200, 50),
     GOLD = Color3.fromRGB(255, 215, 0),
-    FIRE1 = Color3.fromRGB(255, 100, 0),
-    FIRE2 = Color3.fromRGB(255, 200, 0),
-    FIRE3 = Color3.fromRGB(255, 50, 0),
+    FIRE1 = Color3.fromRGB(255, 120, 0),
+    FIRE2 = Color3.fromRGB(255, 220, 80),
+    FIRE3 = Color3.fromRGB(255, 60, 0),
+    FIRE_BRIGHT = Color3.fromRGB(255, 240, 150),
     TXT = Color3.fromRGB(245, 245, 255),
     DIM = Color3.fromRGB(120, 120, 160),
     GRN = Color3.fromRGB(0, 255, 150),
@@ -52,7 +53,7 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- LOADING ANIMATION PREMIUM 4D
+-- LOADING 4D HD
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "RoooorLoading"
@@ -67,12 +68,11 @@ bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bg.BorderSizePixel = 0
 bg.Parent = loadingGui
 
--- Layer 1: Gradient BG
 local bgGrad = Instance.new("UIGradient")
 bgGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 5, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(45, 12, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 5, 0)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 8, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 15, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 8, 0)),
 })
 bgGrad.Rotation = 0
 bgGrad.Parent = bg
@@ -87,12 +87,12 @@ task.spawn(function()
     end
 end)
 
--- Layer 2: Partikel fire (30 aja biar ringan)
-for i = 1, 30 do
+-- Partikel api lebih terang
+for i = 1, 40 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(4, 10), 0, math.random(4, 10))
     p.Position = UDim2.new(math.random(), 0, 1.1, 0)
-    p.BackgroundColor3 = Color3.fromRGB(math.random(200, 255), math.random(50, 150), 0)
+    p.BackgroundColor3 = Color3.fromRGB(255, math.random(100, 220), math.random(0, 100))
     p.BorderSizePixel = 0
     p.Parent = bg
     rnd(p, 999)
@@ -101,18 +101,18 @@ for i = 1, 30 do
         while p.Parent do
             local speed = math.random(8, 18) / 1000
             p.Position = UDim2.new(p.Position.X.Scale, p.Position.X.Offset, p.Position.Y.Scale - speed, 0)
-            p.BackgroundTransparency = p.BackgroundTransparency + 0.01
+            p.BackgroundTransparency = p.BackgroundTransparency + 0.008
             if p.BackgroundTransparency >= 1 or p.Position.Y.Scale < -0.1 then
                 p.Position = UDim2.new(math.random(), 0, 1.1, 0)
                 p.BackgroundTransparency = 0
-                p.BackgroundColor3 = Color3.fromRGB(math.random(200, 255), math.random(50, 150), 0)
+                p.BackgroundColor3 = Color3.fromRGB(255, math.random(100, 220), math.random(0, 100))
             end
             task.wait(0.04)
         end
     end)
 end
 
--- Layer 3: 3D Rotating Rings
+-- Rings
 local ringContainer = Instance.new("Frame")
 ringContainer.Size = UDim2.new(0, 240, 0, 240)
 ringContainer.Position = UDim2.new(0.5, -120, 0.5, -180)
@@ -129,15 +129,15 @@ for i = 1, 4 do
     ring.Parent = ringContainer
 
     local rStrk = Instance.new("UIStroke")
-    rStrk.Thickness = 3 - (i-1) * 0.5
+    rStrk.Thickness = 4 - (i-1) * 0.5
     rStrk.Color = C.FIRE2
-    rStrk.Transparency = 0.1 + (i-1) * 0.15
+    rStrk.Transparency = 0.05 + (i-1) * 0.12
     rStrk.Parent = ring
 
     local rGrad = Instance.new("UIGradient")
     rGrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, C.FIRE3),
-        ColorSequenceKeypoint.new(0.5, C.FIRE2),
+        ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
         ColorSequenceKeypoint.new(1, C.FIRE1),
     })
     rGrad.Parent = rStrk
@@ -145,15 +145,14 @@ for i = 1, 4 do
     table.insert(rings, {ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1})
 end
 
--- Layer 4: Core Fire Icon
 local core = Instance.new("Frame")
 core.Size = UDim2.new(0, 80, 0, 80)
 core.Position = UDim2.new(0.5, -40, 0.5, -40)
-core.BackgroundColor3 = C.FIRE2
+core.BackgroundColor3 = C.FIRE_BRIGHT
 core.Parent = ringContainer
 rnd(core, 999)
 local coreGrad = Instance.new("UIGradient")
-coreGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE2, C.FIRE3)
+coreGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
 coreGrad.Rotation = 45
 coreGrad.Parent = core
 
@@ -165,7 +164,6 @@ coreIcon.TextSize = 44
 coreIcon.Font = Enum.Font.GothamBlack
 coreIcon.Parent = core
 
--- Layer 5: Text Premium
 local welcomeTitle = Instance.new("TextLabel")
 welcomeTitle.Size = UDim2.new(1, 0, 0, 70)
 welcomeTitle.Position = UDim2.new(0, 0, 0.32, 0)
@@ -180,7 +178,7 @@ welcomeTitle.Parent = bg
 local welcomeGrad = Instance.new("UIGradient")
 welcomeGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, C.FIRE1),
-    ColorSequenceKeypoint.new(0.5, C.FIRE2),
+    ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
     ColorSequenceKeypoint.new(1, C.FIRE1),
 })
 welcomeGrad.Parent = welcomeTitle
@@ -199,7 +197,7 @@ subtitle.Parent = bg
 local subGrad = Instance.new("UIGradient")
 subGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, C.FIRE2),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 200)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 220)),
     ColorSequenceKeypoint.new(1, C.FIRE1),
 })
 subGrad.Parent = subtitle
@@ -208,7 +206,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE EDITION v2 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE EDITION v3 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -216,7 +214,6 @@ tagline.TextStrokeTransparency = 0.3
 tagline.TextStrokeColor3 = C.FIRE3
 tagline.Parent = bg
 
--- Layer 6: Progress Bar
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 420, 0, 6)
 progressBar.Position = UDim2.new(0.5, -210, 0.9, 20)
@@ -228,12 +225,12 @@ strk(progressBar, C.FIRE2, 1.5, 0.3)
 
 local progressFill = Instance.new("Frame")
 progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = C.FIRE2
+progressFill.BackgroundColor3 = C.FIRE_BRIGHT
 progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBar
 rnd(progressFill, 3)
 local progGrad = Instance.new("UIGradient")
-progGrad.Color = ColorSequence.new(C.FIRE3, C.FIRE2, Color3.fromRGB(255, 255, 200))
+progGrad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, Color3.fromRGB(255, 255, 220))
 progGrad.Parent = progressFill
 
 local progText = Instance.new("TextLabel")
@@ -246,7 +243,6 @@ progText.TextSize = 11
 progText.Font = Enum.Font.GothamBold
 progText.Parent = progressBar
 
--- Animation loop
 task.spawn(function()
     local t = 0
     while bg.Parent do
@@ -299,7 +295,7 @@ end)
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-    ESP_Name = false, ESP_Size = 12, ESP_Radius = 500,
+    ESP_Name = false, ESP_Size = 14, ESP_Radius = 500,
     ESP_Generator = false, ESP_GenColor = Color3.fromRGB(255, 170, 0),
     ESP_Pallet = false, ESP_PalletColor = Color3.fromRGB(74, 255, 181),
     ESP_Window = false, ESP_WindowColor = Color3.fromRGB(74, 255, 181),
@@ -309,6 +305,8 @@ _G.RoooorS = _G.RoooorS or {
     ESP_KillerColor = Color3.fromRGB(255, 60, 60),
     ESP_SurvivorColor = Color3.fromRGB(60, 255, 120),
     Parry = false, ParryDist = 8,
+    AntiFakeHit = false, DodgeRange = 15,
+    AbyssDodge = false,
     ParryCircle = false, ParryCircleSize = 15,
     Skill = false,
     Aimlock = false, AimlockRadius = 500,
@@ -326,8 +324,8 @@ _G.RoooorS = _G.RoooorS or {
     EightBitCrown = false,
     EightBitSize = 1,
     CrownX = 0, CrownY = 1.2, CrownZ = 0,
-    Trail = false, TrailColor = Color3.fromRGB(255, 100, 0),
-    Aura = false, AuraColor = Color3.fromRGB(255, 100, 0),
+    Trail = false, TrailColor = Color3.fromRGB(255, 120, 0),
+    Aura = false, AuraColor = Color3.fromRGB(255, 120, 0),
     KillEffect = false,
     Crosshair = false, CrosshairColor = Color3.fromRGB(0, 255, 200), CrosshairSize = 8,
     NoClipCamera = false,
@@ -341,7 +339,7 @@ _G.RoooorS = _G.RoooorS or {
     AutoHeal = false, AutoHealThreshold = 40,
     AutoRepair = false,
     AutoRevive = false,
-    AutoDodge = false, DodgeRange = 30,
+    AutoDodge = false,
     AntiGrab = false, AntiHook = false,
     AntiBlind = false, AntiStun = false, AntiRagdoll = false,
     AntiSlow = false, AntiAFK = false,
@@ -355,8 +353,8 @@ local S = _G.RoooorS
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
-print("✅ [1/8] Loading Premium + Config loaded")-- =========================================================
--- BAGIAN 2/8 : FIRE CONFIG + FIRE FEET + SKY + KILLER ANIMS
+print("✅ [1/8] Loading 4D + Config loaded")-- =========================================================
+-- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 local FireList = {
@@ -375,67 +373,74 @@ local FireList = {
 }
 
 local FireConfig = {
-    Classic = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 200, 0) },
-    HellFire = { c1 = Color3.fromRGB(150, 0, 0), c2 = Color3.fromRGB(255, 50, 0), smoke = true },
-    IceFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(200, 240, 255), spark = true },
-    ToxicFire = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(150, 255, 0), smoke = true },
-    VoidFire = { c1 = Color3.fromRGB(80, 0, 150), c2 = Color3.fromRGB(200, 0, 255), spark = true },
-    GoldenKing = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 255, 100), spark = true },
-    SakuraFire = { c1 = Color3.fromRGB(255, 150, 200), c2 = Color3.fromRGB(255, 200, 230), spark = true },
-    EmeraldFire = { c1 = Color3.fromRGB(0, 200, 100), c2 = Color3.fromRGB(100, 255, 150) },
-    BloodFire = { c1 = Color3.fromRGB(200, 0, 0), c2 = Color3.fromRGB(100, 0, 0), smoke = true },
-    ShadowFire = { c1 = Color3.fromRGB(20, 20, 30), c2 = Color3.fromRGB(80, 0, 100), smoke = true },
-    HolyFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 200), spark = true },
-    OceanFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(100, 200, 255) },
-    Firework = { c1 = Color3.fromRGB(255, 0, 100), c2 = Color3.fromRGB(255, 200, 0), rainbow = true, spark = true },
-    Lava = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(100, 20, 0), smoke = true },
+    Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
+    HellFire = { c1 = Color3.fromRGB(180, 0, 0), c2 = Color3.fromRGB(255, 80, 0), smoke = true },
+    IceFire = { c1 = Color3.fromRGB(120, 200, 255), c2 = Color3.fromRGB(220, 240, 255), spark = true },
+    ToxicFire = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(180, 255, 0), smoke = true },
+    VoidFire = { c1 = Color3.fromRGB(100, 0, 180), c2 = Color3.fromRGB(220, 50, 255), spark = true },
+    GoldenKing = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 255, 120), spark = true },
+    SakuraFire = { c1 = Color3.fromRGB(255, 150, 200), c2 = Color3.fromRGB(255, 220, 240), spark = true },
+    EmeraldFire = { c1 = Color3.fromRGB(0, 220, 100), c2 = Color3.fromRGB(120, 255, 170) },
+    BloodFire = { c1 = Color3.fromRGB(220, 0, 0), c2 = Color3.fromRGB(120, 0, 0), smoke = true },
+    ShadowFire = { c1 = Color3.fromRGB(30, 30, 40), c2 = Color3.fromRGB(100, 0, 130), smoke = true },
+    HolyFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 220), spark = true },
+    OceanFire = { c1 = Color3.fromRGB(0, 120, 255), c2 = Color3.fromRGB(120, 220, 255) },
+    Firework = { c1 = Color3.fromRGB(255, 0, 120), c2 = Color3.fromRGB(255, 220, 50), rainbow = true, spark = true },
+    Lava = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(120, 30, 0), smoke = true },
     GhostFire = { c1 = Color3.fromRGB(200, 200, 255), c2 = Color3.fromRGB(255, 255, 255) },
-    CosmicFire = { c1 = Color3.fromRGB(50, 0, 100), c2 = Color3.fromRGB(255, 100, 200), rainbow = true },
-    DragonFire = { c1 = Color3.fromRGB(255, 50, 0), c2 = Color3.fromRGB(255, 200, 0), smoke = true },
+    CosmicFire = { c1 = Color3.fromRGB(80, 0, 150), c2 = Color3.fromRGB(255, 120, 220), rainbow = true },
+    DragonFire = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(255, 220, 50), smoke = true },
     MysteryFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
     RainbowFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true, spark = true },
-    LightningFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(255, 255, 255), spark = true },
-    GalaxyFire = { c1 = Color3.fromRGB(80, 0, 200), c2 = Color3.fromRGB(255, 200, 255), rainbow = true, spark = true },
-    NebulaFire = { c1 = Color3.fromRGB(200, 50, 255), c2 = Color3.fromRGB(50, 200, 255), rainbow = true, spark = true },
-    AuroraFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(100, 255, 100), rainbow = true, spark = true },
-    PhoenixFire = { c1 = Color3.fromRGB(255, 150, 0), c2 = Color3.fromRGB(255, 50, 0), smoke = true },
+    LightningFire = { c1 = Color3.fromRGB(120, 220, 255), c2 = Color3.fromRGB(255, 255, 255), spark = true },
+    GalaxyFire = { c1 = Color3.fromRGB(100, 0, 220), c2 = Color3.fromRGB(255, 200, 255), rainbow = true, spark = true },
+    NebulaFire = { c1 = Color3.fromRGB(220, 80, 255), c2 = Color3.fromRGB(80, 220, 255), rainbow = true, spark = true },
+    AuroraFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(120, 255, 120), rainbow = true, spark = true },
+    PhoenixFire = { c1 = Color3.fromRGB(255, 180, 0), c2 = Color3.fromRGB(255, 80, 0), smoke = true },
     DemonFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 0), smoke = true },
-    AngelFire = { c1 = Color3.fromRGB(255, 255, 200), c2 = Color3.fromRGB(255, 220, 255), spark = true },
-    CrystalFire = { c1 = Color3.fromRGB(200, 255, 255), c2 = Color3.fromRGB(200, 200, 255), spark = true },
-    NeonFire = { c1 = Color3.fromRGB(0, 255, 100), c2 = Color3.fromRGB(255, 0, 200), rainbow = true },
-    PlasmaFire = { c1 = Color3.fromRGB(150, 0, 255), c2 = Color3.fromRGB(0, 200, 255), spark = true },
-    QuantumFire = { c1 = Color3.fromRGB(0, 100, 255), c2 = Color3.fromRGB(255, 0, 100), rainbow = true },
-    LegendaryFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 100, 0), spark = true },
-    MythicFire = { c1 = Color3.fromRGB(200, 0, 255), c2 = Color3.fromRGB(255, 200, 0), rainbow = true },
-    DivineFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 200, 100), spark = true },
-    CursedFire = { c1 = Color3.fromRGB(80, 0, 0), c2 = Color3.fromRGB(200, 0, 200), smoke = true },
-    AncientFire = { c1 = Color3.fromRGB(200, 150, 0), c2 = Color3.fromRGB(100, 50, 0), smoke = true },
-    EternalFire = { c1 = Color3.fromRGB(255, 100, 200), c2 = Color3.fromRGB(100, 200, 255), rainbow = true },
-    InfernoFire = { c1 = Color3.fromRGB(255, 30, 0), c2 = Color3.fromRGB(255, 200, 0), smoke = true },
-    BifrostFire = { c1 = Color3.fromRGB(255, 100, 200), c2 = Color3.fromRGB(100, 255, 200), rainbow = true },
+    AngelFire = { c1 = Color3.fromRGB(255, 255, 220), c2 = Color3.fromRGB(255, 240, 255), spark = true },
+    CrystalFire = { c1 = Color3.fromRGB(220, 255, 255), c2 = Color3.fromRGB(220, 220, 255), spark = true },
+    NeonFire = { c1 = Color3.fromRGB(0, 255, 120), c2 = Color3.fromRGB(255, 0, 220), rainbow = true },
+    PlasmaFire = { c1 = Color3.fromRGB(180, 0, 255), c2 = Color3.fromRGB(0, 220, 255), spark = true },
+    QuantumFire = { c1 = Color3.fromRGB(0, 120, 255), c2 = Color3.fromRGB(255, 0, 120), rainbow = true },
+    LegendaryFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 120, 0), spark = true },
+    MythicFire = { c1 = Color3.fromRGB(220, 0, 255), c2 = Color3.fromRGB(255, 220, 0), rainbow = true },
+    DivineFire = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 220, 120), spark = true },
+    CursedFire = { c1 = Color3.fromRGB(100, 0, 0), c2 = Color3.fromRGB(220, 0, 220), smoke = true },
+    AncientFire = { c1 = Color3.fromRGB(220, 180, 0), c2 = Color3.fromRGB(120, 60, 0), smoke = true },
+    EternalFire = { c1 = Color3.fromRGB(255, 120, 220), c2 = Color3.fromRGB(120, 220, 255), rainbow = true },
+    InfernoFire = { c1 = Color3.fromRGB(255, 40, 0), c2 = Color3.fromRGB(255, 220, 0), smoke = true },
+    BifrostFire = { c1 = Color3.fromRGB(255, 120, 220), c2 = Color3.fromRGB(120, 255, 220), rainbow = true },
     ChaosFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 255), rainbow = true },
     OmegaFire = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 0, 255), rainbow = true },
-    SolarFire = { c1 = Color3.fromRGB(255, 150, 0), c2 = Color3.fromRGB(255, 255, 100), spark = true },
-    LunarFire = { c1 = Color3.fromRGB(200, 220, 255), c2 = Color3.fromRGB(100, 150, 255), spark = true },
-    EclipseFire = { c1 = Color3.fromRGB(50, 0, 100), c2 = Color3.fromRGB(255, 150, 0), spark = true },
-    SolarFlare = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 255, 200), spark = true },
-    VoidStorm = { c1 = Color3.fromRGB(50, 0, 80), c2 = Color3.fromRGB(200, 0, 255), rainbow = true, spark = true },
-    StarFire = { c1 = Color3.fromRGB(255, 255, 200), c2 = Color3.fromRGB(255, 200, 100), spark = true },
-    SupernovaFire = { c1 = Color3.fromRGB(255, 200, 0), c2 = Color3.fromRGB(255, 0, 200), rainbow = true, spark = true },
-    BlackHoleFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(100, 0, 150), smoke = true },
-    MeteorFire = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(200, 30, 0), smoke = true },
-    CometFire = { c1 = Color3.fromRGB(100, 200, 255), c2 = Color3.fromRGB(200, 255, 255), spark = true },
-    FrostFire = { c1 = Color3.fromRGB(200, 240, 255), c2 = Color3.fromRGB(100, 180, 255), spark = true },
-    BlizzardFire = { c1 = Color3.fromRGB(220, 240, 255), c2 = Color3.fromRGB(150, 200, 255), spark = true, smoke = true },
-    ThunderFire = { c1 = Color3.fromRGB(255, 255, 100), c2 = Color3.fromRGB(100, 100, 255), spark = true },
-    StormFire = { c1 = Color3.fromRGB(80, 80, 150), c2 = Color3.fromRGB(200, 200, 255), spark = true, smoke = true },
-    TornadoFire = { c1 = Color3.fromRGB(150, 150, 200), c2 = Color3.fromRGB(80, 80, 120), spark = true, smoke = true },
-    SoulFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(150, 255, 255), spark = true },
-    SpiritFire = { c1 = Color3.fromRGB(200, 255, 255), c2 = Color3.fromRGB(150, 200, 255), spark = true },
-    PhantomFire = { c1 = Color3.fromRGB(100, 0, 150), c2 = Color3.fromRGB(50, 0, 100), smoke = true },
-    WraithFire = { c1 = Color3.fromRGB(30, 0, 50), c2 = Color3.fromRGB(150, 0, 200), smoke = true },
+    SolarFire = { c1 = Color3.fromRGB(255, 180, 0), c2 = Color3.fromRGB(255, 255, 120), spark = true },
+    LunarFire = { c1 = Color3.fromRGB(220, 220, 255), c2 = Color3.fromRGB(120, 170, 255), spark = true },
+    EclipseFire = { c1 = Color3.fromRGB(80, 0, 120), c2 = Color3.fromRGB(255, 180, 0), spark = true },
+    SolarFlare = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 255, 220), spark = true },
+    VoidStorm = { c1 = Color3.fromRGB(80, 0, 120), c2 = Color3.fromRGB(220, 0, 255), rainbow = true, spark = true },
+    StarFire = { c1 = Color3.fromRGB(255, 255, 220), c2 = Color3.fromRGB(255, 220, 120), spark = true },
+    SupernovaFire = { c1 = Color3.fromRGB(255, 220, 0), c2 = Color3.fromRGB(255, 0, 220), rainbow = true, spark = true },
+    BlackHoleFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(120, 0, 180), smoke = true },
+    MeteorFire = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(220, 40, 0), smoke = true },
+    CometFire = { c1 = Color3.fromRGB(120, 220, 255), c2 = Color3.fromRGB(220, 255, 255), spark = true },
+    FrostFire = { c1 = Color3.fromRGB(220, 240, 255), c2 = Color3.fromRGB(120, 200, 255), spark = true },
+    BlizzardFire = { c1 = Color3.fromRGB(240, 250, 255), c2 = Color3.fromRGB(170, 220, 255), spark = true, smoke = true },
+    ThunderFire = { c1 = Color3.fromRGB(255, 255, 120), c2 = Color3.fromRGB(120, 120, 255), spark = true },
+    StormFire = { c1 = Color3.fromRGB(100, 100, 180), c2 = Color3.fromRGB(220, 220, 255), spark = true, smoke = true },
+    TornadoFire = { c1 = Color3.fromRGB(180, 180, 220), c2 = Color3.fromRGB(100, 100, 150), spark = true, smoke = true },
+    SoulFire = { c1 = Color3.fromRGB(0, 255, 220), c2 = Color3.fromRGB(180, 255, 255), spark = true },
+    SpiritFire = { c1 = Color3.fromRGB(220, 255, 255), c2 = Color3.fromRGB(180, 220, 255), spark = true },
+    PhantomFire = { c1 = Color3.fromRGB(120, 0, 180), c2 = Color3.fromRGB(80, 0, 120), smoke = true },
+    WraithFire = { c1 = Color3.fromRGB(50, 0, 80), c2 = Color3.fromRGB(180, 0, 220), smoke = true },
     ReaperFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(255, 0, 0), smoke = true },
 }
+
+-- Fallback: pastikan semua fire ada config
+for _, name in ipairs(FireList) do
+    if not FireConfig[name] then
+        FireConfig[name] = FireConfig.Classic
+    end
+end
 
 local FireFeetList = {
     "Classic", "Blue", "Green", "Purple", "Rainbow",
@@ -445,27 +450,33 @@ local FireFeetList = {
 }
 
 local FireFeetConfig = {
-    Classic = { c1 = Color3.fromRGB(255, 100, 0), c2 = Color3.fromRGB(255, 200, 0) },
-    Blue = { c1 = Color3.fromRGB(0, 150, 255), c2 = Color3.fromRGB(0, 255, 255) },
-    Green = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(150, 255, 0) },
-    Purple = { c1 = Color3.fromRGB(150, 0, 255), c2 = Color3.fromRGB(255, 0, 200) },
+    Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
+    Blue = { c1 = Color3.fromRGB(0, 170, 255), c2 = Color3.fromRGB(0, 255, 255) },
+    Green = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(180, 255, 0) },
+    Purple = { c1 = Color3.fromRGB(180, 0, 255), c2 = Color3.fromRGB(255, 0, 220) },
     Rainbow = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
-    Golden = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 255, 100) },
-    Pink = { c1 = Color3.fromRGB(255, 100, 200), c2 = Color3.fromRGB(255, 180, 220) },
-    Cyan = { c1 = Color3.fromRGB(0, 255, 255), c2 = Color3.fromRGB(100, 255, 255) },
-    RedFire = { c1 = Color3.fromRGB(255, 30, 0), c2 = Color3.fromRGB(255, 100, 0) },
-    Ice = { c1 = Color3.fromRGB(200, 240, 255), c2 = Color3.fromRGB(100, 180, 255) },
-    Toxic = { c1 = Color3.fromRGB(0, 255, 100), c2 = Color3.fromRGB(100, 255, 0) },
-    Electric = { c1 = Color3.fromRGB(255, 255, 100), c2 = Color3.fromRGB(100, 100, 255) },
-    Blood = { c1 = Color3.fromRGB(200, 0, 0), c2 = Color3.fromRGB(100, 0, 0) },
-    Ghost = { c1 = Color3.fromRGB(200, 200, 255), c2 = Color3.fromRGB(255, 255, 255) },
-    Cosmic = { c1 = Color3.fromRGB(80, 0, 200), c2 = Color3.fromRGB(255, 200, 255), rainbow = true },
-    Dragon = { c1 = Color3.fromRGB(255, 50, 0), c2 = Color3.fromRGB(255, 200, 0) },
-    Divine = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 200) },
+    Golden = { c1 = Color3.fromRGB(255, 215, 0), c2 = Color3.fromRGB(255, 255, 120) },
+    Pink = { c1 = Color3.fromRGB(255, 120, 220), c2 = Color3.fromRGB(255, 200, 240) },
+    Cyan = { c1 = Color3.fromRGB(0, 255, 255), c2 = Color3.fromRGB(120, 255, 255) },
+    RedFire = { c1 = Color3.fromRGB(255, 40, 0), c2 = Color3.fromRGB(255, 120, 0) },
+    Ice = { c1 = Color3.fromRGB(220, 240, 255), c2 = Color3.fromRGB(120, 200, 255) },
+    Toxic = { c1 = Color3.fromRGB(0, 255, 120), c2 = Color3.fromRGB(120, 255, 0) },
+    Electric = { c1 = Color3.fromRGB(255, 255, 120), c2 = Color3.fromRGB(120, 120, 255) },
+    Blood = { c1 = Color3.fromRGB(220, 0, 0), c2 = Color3.fromRGB(120, 0, 0) },
+    Ghost = { c1 = Color3.fromRGB(220, 220, 255), c2 = Color3.fromRGB(255, 255, 255) },
+    Cosmic = { c1 = Color3.fromRGB(100, 0, 220), c2 = Color3.fromRGB(255, 220, 255), rainbow = true },
+    Dragon = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(255, 220, 0) },
+    Divine = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 220) },
     Demon = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 0) },
-    Shadow = { c1 = Color3.fromRGB(20, 20, 30), c2 = Color3.fromRGB(80, 0, 100) },
-    Phoenix = { c1 = Color3.fromRGB(255, 150, 0), c2 = Color3.fromRGB(255, 50, 0) },
+    Shadow = { c1 = Color3.fromRGB(30, 30, 40), c2 = Color3.fromRGB(100, 0, 130) },
+    Phoenix = { c1 = Color3.fromRGB(255, 180, 0), c2 = Color3.fromRGB(255, 80, 0) },
 }
+
+for _, name in ipairs(FireFeetList) do
+    if not FireFeetConfig[name] then
+        FireFeetConfig[name] = FireFeetConfig.Classic
+    end
+end
 
 local SkyList = {
     "Default", "Sunset", "Night", "Space", "Alien",
@@ -511,13 +522,11 @@ local function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-print("✅ [2/8] Fire + Fire Feet + Sky + KillerAnims loaded")-- =========================================================
+print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
 -- BAGIAN 3/8 : SEMUA FUNGSI
 -- =========================================================
 
--- ============================
--- FIRE (KEPALA)
--- ============================
+-- FIRE
 local function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -541,7 +550,7 @@ local function applyFire()
     local fire = Instance.new("Fire")
     fire.Name = "RoooorFire"
     fire.Size = S.FireSize
-    fire.Heat = 10
+    fire.Heat = 15
     fire.Color = cfg.c1
     fire.SecondaryColor = cfg.c2
     fire.Parent = head
@@ -564,9 +573,6 @@ local function applyFire()
     end
 end
 
--- ============================
--- FIRE FEET
--- ============================
 local function clearFireFeet()
     if not LP.Character then return end
     local lLeg = LP.Character:FindFirstChild("Left Leg") or LP.Character:FindFirstChild("LeftUpperLeg")
@@ -594,7 +600,7 @@ local function applyFireFeet()
             local fire = Instance.new("Fire")
             fire.Name = "RoooorFootFire"
             fire.Size = 4
-            fire.Heat = 8
+            fire.Heat = 10
             fire.Color = cfg.c1
             fire.SecondaryColor = cfg.c2
             fire.Parent = leg
@@ -602,7 +608,6 @@ local function applyFireFeet()
     end
 end
 
--- Rainbow loop
 task.spawn(function()
     while task.wait(0.15) do
         if S.FireOn and LP.Character then
@@ -638,9 +643,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- 8-BIT CROWN
--- ============================
 local function apply8BitCrown(enable, size, posX, posY, posZ)
     local char = LP.Character
     if not char then return end
@@ -699,7 +702,7 @@ local function apply8BitCrown(enable, size, posX, posY, posZ)
 end
 
 -- =========================================================
--- ESP SYSTEM (FIXED)
+-- ESP FIXED v3 (SEMUA TIPE WORK)
 -- =========================================================
 local ESPObjects = {}
 local StatusESP = {}
@@ -738,21 +741,27 @@ local function createESP(obj, color)
         ESPObjects[obj].OutlineColor = color
         return
     end
-    local h = Instance.new("Highlight")
-    h.FillColor = color
-    h.OutlineColor = color
-    h.FillTransparency = 0.7
-    h.OutlineTransparency = 0.3
-    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    h.Parent = obj
-    ESPObjects[obj] = h
+    pcall(function()
+        local h = Instance.new("Highlight")
+        h.Name = "RoooorESP"
+        h.FillColor = color
+        h.OutlineColor = color
+        h.FillTransparency = 0.6
+        h.OutlineTransparency = 0.2
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        h.Adornee = obj
+        h.Parent = obj
+        ESPObjects[obj] = h
+    end)
 end
 
 local function removeESP(obj)
-    if ESPObjects[obj] then ESPObjects[obj]:Destroy(); ESPObjects[obj] = nil end
+    if ESPObjects[obj] then
+        pcall(function() ESPObjects[obj]:Destroy() end)
+        ESPObjects[obj] = nil
+    end
 end
 
--- PLAYER NAME ESP (yang beneran work)
 local function createStatusESP(player, char, root)
     if not S.ESP_Name then
         if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
@@ -810,14 +819,38 @@ local function createStatusESP(player, char, root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR v3 (TIDAK DIUBAH!)
+-- AUTO PARRY GACOR v4 + ANTI FAKE HIT
 -- =========================================================
 local lastParry = 0
 local PARRY_DEBOUNCE = 0.05
+local lastDodge = 0
+local DODGE_DEBOUNCE = 0.2
 local hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
 
 local function getParryRange() return (S.ParryDist or 8) + 10 end
+
+-- Cek apakah killer BENARAN attack (bukan fake)
+local function isRealAttack(killerChar)
+    local hum = killerChar:FindFirstChildOfClass("Humanoid")
+    if not hum then return false end
+    local anim = hum:FindFirstChildOfClass("Animator")
+    if not anim then return false end
+
+    for _, track in ipairs(anim:GetPlayingAnimationTracks()) do
+        local a = track.Animation
+        if a and a.AnimationId then
+            local id = tostring(a.AnimationId):match("%d+")
+            if id and KillerAnims["rbxassetid://"..id] then
+                -- Cek waktu animasi > 0.05 (beneran main)
+                if track.TimePosition > 0.05 then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
 
 local function GetParryButton()
     local cur = PG
@@ -860,6 +893,27 @@ local function doParry()
     pressParry()
 end
 
+-- DODGE: menghindar ke samping
+local function doDodge(killerRoot)
+    local now = tick()
+    if now - lastDodge < DODGE_DEBOUNCE then return end
+    lastDodge = now
+
+    local myRoot = getRoot()
+    if not myRoot or not killerRoot then return end
+
+    local dirAway = (myRoot.Position - killerRoot.Position).Unit
+    local perpendicular = Vector3.new(-dirAway.Z, 0, dirAway.X)
+    local dodgeDir = math.random() > 0.5 and perpendicular or -perpendicular
+
+    pcall(function()
+        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:Move(dodgeDir * 10, false)
+        end
+    end)
+end
+
 local function isInRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -876,35 +930,58 @@ end
 local function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
+
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local anim = hum:FindFirstChildOfClass("Animator")
     if not anim then return end
 
+    -- TRIGGER 1: Animation hook
     anim.AnimationPlayed:Connect(function(track)
-        if not S.Parry then return end
+        if not S.Parry and not S.AntiFakeHit then return end
         local a = track.Animation
         if not a then return end
         local id = tostring(a.AnimationId):match("%d+")
-        if id and KillerAnims["rbxassetid://"..id] and isInRange(char) then
-            doParry()
+        if not id then return end
+        if not KillerAnims["rbxassetid://"..id] then return end
+
+        local myRoot = getRoot()
+        local eRoot = char:FindFirstChild("HumanoidRootPart")
+        if not myRoot or not eRoot then return end
+        local dist = (eRoot.Position - myRoot.Position).Magnitude
+        if dist > getParryRange() then return end
+
+        task.wait(0.05)
+        if isRealAttack(char) then
+            if S.Parry then doParry() end
+        else
+            if S.AntiFakeHit then doDodge(eRoot) end
         end
     end)
 
+    -- TRIGGER 2: Polling
     task.spawn(function()
         while char.Parent and hookedKillers[char] do
-            task.wait(0.005)
-            if not S.Parry then break end
+            task.wait(0.01)
+            if not S.Parry and not S.AntiFakeHit then break end
+
             local myRoot = getRoot()
             local eRoot = char:FindFirstChild("HumanoidRootPart")
             if not myRoot or not eRoot then continue end
-            if (eRoot.Position - myRoot.Position).Magnitude > getParryRange() + 5 then continue end
+
+            local dist = (eRoot.Position - myRoot.Position).Magnitude
+            if dist > getParryRange() + 5 then continue end
+
             for _, track in ipairs(anim:GetPlayingAnimationTracks()) do
                 local a = track.Animation
                 if a and a.AnimationId then
                     local id = tostring(a.AnimationId):match("%d+")
                     if id and KillerAnims["rbxassetid://"..id] then
-                        doParry()
+                        if isRealAttack(char) then
+                            if S.Parry then doParry() end
+                        elseif S.AntiFakeHit then
+                            doDodge(eRoot)
+                        end
                         break
                     end
                 end
@@ -921,22 +998,81 @@ local function scanKillers()
     end
 end
 
--- ============================
+task.spawn(function()
+    while task.wait(0.3) do
+        if S.Parry or S.AntiFakeHit then scanKillers() end
+    end
+end)
+
+-- =========================================================
+-- AUTO DODGE KILLER ABYSS (Crouch saat Slash)
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.05) do
+        if S.AbyssDodge and LP.Character then
+            local myRoot = getRoot()
+            if myRoot then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character then
+                        local killerName = string.lower(p.Name)
+                        local charName = string.lower(p.Character.Name)
+                        local teamName = p.Team and string.lower(p.Team.Name) or ""
+                        local isAbyss = string.find(killerName, "abyss") or string.find(charName, "abyss") or string.find(teamName, "abyss")
+
+                        if isAbyss then
+                            local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                            local khum = p.Character:FindFirstChildOfClass("Humanoid")
+                            if krp and khum then
+                                local kanim = khum:FindFirstChildOfClass("Animator")
+                                if kanim then
+                                    for _, track in ipairs(kanim:GetPlayingAnimationTracks()) do
+                                        local a = track.Animation
+                                        if a and a.AnimationId then
+                                            local id = tostring(a.AnimationId):match("%d+")
+                                            if id and KillerAnims["rbxassetid://"..id] then
+                                                local dist = (krp.Position - myRoot.Position).Magnitude
+                                                if dist <= 20 then
+                                                    local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+                                                    if hum then
+                                                        pcall(function()
+                                                            hum:ChangeState(Enum.HumanoidStateType.PlatformStanding)
+                                                            task.wait(0.05)
+                                                            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                                                        end)
+                                                        pcall(function()
+                                                            local currentCF = myRoot.CFrame
+                                                            myRoot.CFrame = CFrame.new(currentCF.Position - Vector3.new(0, 2, 0)) * (currentCF - currentCF.Position)
+                                                        end)
+                                                    end
+                                                end
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
 -- VISUAL FUNCTIONS
--- ============================
+-- =========================================================
 local origLighting = {
     Brightness = Lighting.Brightness, ClockTime = Lighting.ClockTime,
     Ambient = Lighting.Ambient, OutdoorAmbient = Lighting.OutdoorAmbient,
     GlobalShadows = Lighting.GlobalShadows, FogEnd = Lighting.FogEnd, FogStart = Lighting.FogStart,
 }
 
--- FULLBRIGHT SLIDER 0-100
 local function applyFullbright(s)
     if s then
-        local intensity = (S.FullbrightVal or 50) / 50
-        Lighting.Brightness = 1 + intensity
-        Lighting.ClockTime = 14
         local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 1)
+        Lighting.Brightness = 0.5 + bright * 2
+        Lighting.ClockTime = 14
         Lighting.Ambient = Color3.new(bright, bright, bright)
         Lighting.OutdoorAmbient = Color3.new(bright, bright, bright)
         Lighting.GlobalShadows = S.FullbrightVal < 80
@@ -1018,9 +1154,7 @@ local function applyContrast()
     end
 end
 
--- ============================
 -- KAKI SATU HILANG
--- ============================
 local KorbloxOrig = nil
 local function applyKorblox(s)
     local char = LP.Character
@@ -1062,9 +1196,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- HEADLESS
--- ============================
 local function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -1099,9 +1231,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- TRAIL FIRE
--- ============================
 local trailFireObj = nil
 local function applyTrail(enable, color)
     local char = LP.Character
@@ -1128,8 +1258,8 @@ local function applyTrail(enable, color)
     local fire = Instance.new("Fire")
     fire.Size = 8
     fire.Heat = 20
-    fire.Color = color or Color3.fromRGB(255, 100, 0)
-    fire.SecondaryColor = Color3.fromRGB(255, 200, 0)
+    fire.Color = color or Color3.fromRGB(255, 120, 0)
+    fire.SecondaryColor = Color3.fromRGB(255, 220, 80)
     fire.Parent = trailFireObj
 
     local smoke = Instance.new("Smoke")
@@ -1140,14 +1270,12 @@ local function applyTrail(enable, color)
     smoke.Parent = trailFireObj
 
     local spark = Instance.new("Sparkles")
-    spark.SparkleColor = color or Color3.fromRGB(255, 200, 0)
+    spark.SparkleColor = color or Color3.fromRGB(255, 220, 80)
     spark.SparkleSize = 2
     spark.Parent = trailFireObj
 end
 
--- ============================
 -- AURA FIRE
--- ============================
 local auraObj = nil
 local function applyAura(enable, color)
     local char = LP.Character
@@ -1158,7 +1286,7 @@ local function applyAura(enable, color)
     if not enable then return end
     auraObj = Instance.new("ParticleEmitter")
     auraObj.Texture = "rbxassetid://243660364"
-    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(255, 100, 0))
+    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(255, 120, 0))
     auraObj.Size = NumberSequence.new(2)
     auraObj.Lifetime = NumberRange.new(0.5, 1)
     auraObj.Rate = 30
@@ -1167,9 +1295,7 @@ local function applyAura(enable, color)
     auraObj.Parent = hrp
 end
 
--- ============================
 -- KILL EFFECT
--- ============================
 local function spawnKillEffect(pos)
     local p = Instance.new("Part")
     p.Anchored = true; p.CanCollide = false
@@ -1184,9 +1310,7 @@ local function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
--- ============================
 -- CROSSHAIR
--- ============================
 local crosshairGui = nil
 local function applyCrosshair(enable, color, size)
     if crosshairGui then crosshairGui:Destroy(); crosshairGui = nil end
@@ -1208,17 +1332,12 @@ local function applyCrosshair(enable, color, size)
     end
 end
 
--- ============================
--- ZOOM OUT
--- ============================
 local function applyZoomOut(enable, val)
     if enable then LP.CameraMaxZoomDistance = val or 500
     else LP.CameraMaxZoomDistance = 128 end
 end
 
--- ============================
 -- TELEPORT FINISH
--- ============================
 local function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
@@ -1237,9 +1356,7 @@ local function teleportToFinishLine()
     else warn("[RoooorHub] Finish gak ketemu") end
 end
 
--- ============================
 -- FLY
--- ============================
 local flyBV, flyBG, flyConn = nil, nil, nil
 local function startFly()
     if flyConn then return end
@@ -1286,9 +1403,7 @@ local function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- ============================
 -- EXPOSE GLOBAL
--- ============================
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8BitCrown = apply8BitCrown
@@ -1315,13 +1430,11 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
-print("✅ [3/8] Semua fungsi loaded (ESP FIXED + Fullbright Slider)")-- =========================================================
+print("✅ [3/8] Semua fungsi loaded (ESP FIXED v3 + Parry v4 + Anti Fake Hit)")-- =========================================================
 -- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA
 -- =========================================================
 
--- ============================
 -- AUTO HEAL
--- ============================
 task.spawn(function()
     while task.wait(0.5) do
         if S.AutoHeal and LP.Character then
@@ -1352,9 +1465,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- AUTO REPAIR
--- ============================
 task.spawn(function()
     while task.wait(0.5) do
         if S.AutoRepair and LP.Character then
@@ -1377,9 +1488,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- AUTO REVIVE
--- ============================
 task.spawn(function()
     while task.wait(1) do
         if S.AutoRevive and LP.Character then
@@ -1408,9 +1517,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- AUTO DODGE
--- ============================
+-- AUTO DODGE (basic)
 task.spawn(function()
     while task.wait(0.15) do
         if S.AutoDodge and LP.Character then
@@ -1436,9 +1543,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- INSTANT INTERACT
--- ============================
 task.spawn(function()
     while task.wait(0.2) do
         if S.InstantInteract and LP.Character then
@@ -1464,9 +1569,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- AUTO VAULT
--- ============================
 task.spawn(function()
     while task.wait(0.25) do
         if S.AutoVault and LP.Character then
@@ -1493,9 +1596,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI GRAB
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         if S.AntiGrab and LP.Character then
@@ -1514,9 +1615,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI HOOK
--- ============================
 task.spawn(function()
     while task.wait(0.2) do
         if S.AntiHook and LP.Character then
@@ -1528,9 +1627,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI BLIND
--- ============================
 task.spawn(function()
     while task.wait(0.3) do
         if S.AntiBlind then
@@ -1547,9 +1644,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI STUN
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         if S.AntiStun and LP.Character then
@@ -1562,9 +1657,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI RAGDOLL
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         if S.AntiRagdoll and LP.Character then
@@ -1577,9 +1670,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI SLOW
--- ============================
 task.spawn(function()
     while task.wait(0.25) do
         if S.AntiSlow and LP.Character then
@@ -1591,9 +1682,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ANTI AFK
--- ============================
 task.spawn(function()
     while task.wait(60) do
         if S.AntiAFK then
@@ -1606,9 +1695,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- SPEED HACK
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         if S.SpeedHack and LP.Character then
@@ -1620,9 +1707,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- WALK SPEED
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         if S.WalkSpeed and not S.SpeedHack and LP.Character then
@@ -1635,9 +1720,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- SAFE ZONE WARNING
--- ============================
+-- SAFE ZONE
 task.spawn(function()
     while task.wait(0.5) do
         if S.SafeZone and LP.Character then
@@ -1672,9 +1755,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- ESCAPE ALERT
--- ============================
 task.spawn(function()
     while task.wait(0.5) do
         if S.EscapeAlert and LP.Character then
@@ -1711,9 +1792,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- KILLER: AUTO ATTACK / KILL ALL / HITBOX
--- ============================
 local lastAtk = 0
 task.spawn(function()
     while task.wait(0.15) do
@@ -1819,9 +1898,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- PLAYER LIST
--- ============================
 local playerListGui = nil
 local function createPlayerList()
     if playerListGui then playerListGui:Destroy() end
@@ -1907,9 +1984,7 @@ local function createPlayerList()
     end)
 end
 
--- ============================
 -- AUTO SKILL CHECK
--- ============================
 local skillBusy = false
 local function doSkillCheck()
     if skillBusy then return end
@@ -1958,9 +2033,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- AIMLOCK LOOP
--- ============================
+-- AIMLOCK
 task.spawn(function()
     while task.wait(0.05) do
         if S.Aimlock then
@@ -1992,9 +2065,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- PARRY CIRCLE
--- ============================
 _G.Roooor_ParryCircle = nil
 local function updateParryCircle()
     local root = getRoot()
@@ -2026,23 +2097,11 @@ RunService.RenderStepped:Connect(function()
     if S.ParryCircle then updateParryCircle() end
 end)
 
--- ============================
--- SCAN KILLER (PARRY)
--- ============================
-task.spawn(function()
-    while task.wait(0.3) do
-        if S.Parry then scanKillers() end
-    end
-end)
-
--- ============================
--- MAIN ESP LOOP (FIXED)
--- ============================
+-- MAIN ESP LOOP
 task.spawn(function()
     while gui.Parent do
         local root = getRoot()
         if root then
-            -- PLAYER ESP
             if S.ESP_Name then
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LP and p.Character then
@@ -2058,7 +2117,6 @@ task.spawn(function()
                     end
                 end
             end
-            -- PALLET ESP
             if S.ESP_Pallet then
                 for obj in pairs(Cached.Pallets) do
                     if obj and obj.Parent then
@@ -2071,7 +2129,6 @@ task.spawn(function()
                     end
                 end
             end
-            -- WINDOW ESP
             if S.ESP_Window then
                 for obj in pairs(Cached.Windows) do
                     if obj and obj.Parent then
@@ -2084,7 +2141,6 @@ task.spawn(function()
                     end
                 end
             end
-            -- SCP ESP
             if S.ESP_SCP then
                 for obj in pairs(Cached.SCPs) do
                     if obj and obj.Parent then
@@ -2097,7 +2153,6 @@ task.spawn(function()
                     end
                 end
             end
-            -- GENERATOR ESP
             if S.ESP_Generator then
                 for gen in pairs(Cached.Generators) do
                     if gen and gen.Parent then
@@ -2110,7 +2165,6 @@ task.spawn(function()
                     end
                 end
             end
-            -- ITEM ESP
             if S.ESP_Item then
                 for obj in pairs(Cached.Items) do
                     if obj and obj.Parent then
@@ -2128,9 +2182,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- KILL EFFECT LOOP
--- ============================
 task.spawn(function()
     while task.wait(0.6) do
         if S.KillEffect then
@@ -2154,9 +2206,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
 -- NO CLIP CAMERA
--- ============================
 task.spawn(function()
     while task.wait(0.15) do
         local cam = workspace.CurrentCamera
@@ -2166,13 +2216,17 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- EXPOSE GLOBAL TAMBAHAN
--- ============================
+-- SCAN KILLER LOOP
+task.spawn(function()
+    while task.wait(0.3) do
+        if S.Parry or S.AntiFakeHit then scanKillers() end
+    end
+end)
+
 _G.Roooor_createPlayerList = createPlayerList
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN (TOMBOL MENU LEBIH KECE)
+-- BAGIAN 5/8 : GUI + KOMPONEN
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -2183,124 +2237,116 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- ============================
--- TOMBOL FLOATING BARU (LEBIH KECE)
+-- TOMBOL MENU KECIL + API TERANG
 -- ============================
 local btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 60, 0, 60)
+btnContainer.Size = UDim2.new(0, 42, 0, 42)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
 -- Outer rotating ring
 local outerRing = Instance.new("Frame")
-outerRing.Size = UDim2.new(1, 8, 1, 8)
-outerRing.Position = UDim2.new(0, -4, 0, -4)
+outerRing.Size = UDim2.new(1, 6, 1, 6)
+outerRing.Position = UDim2.new(0, -3, 0, -3)
 outerRing.BackgroundTransparency = 1
 outerRing.Parent = btnContainer
 local outerRingStroke = Instance.new("UIStroke")
-outerRingStroke.Thickness = 2.5
-outerRingStroke.Color = C.FIRE2
-outerRingStroke.Transparency = 0.2
+outerRingStroke.Thickness = 2
+outerRingStroke.Color = C.FIRE_BRIGHT
+outerRingStroke.Transparency = 0.1
 outerRingStroke.Parent = outerRing
 local outerRingGrad = Instance.new("UIGradient")
 outerRingGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, C.FIRE3),
-    ColorSequenceKeypoint.new(0.5, C.FIRE2),
+    ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
     ColorSequenceKeypoint.new(1, C.FIRE1),
 })
 outerRingGrad.Parent = outerRingStroke
 
--- Inner rotating ring (arah berlawanan)
+-- Inner ring
 local innerRing = Instance.new("Frame")
-innerRing.Size = UDim2.new(1, -4, 1, -4)
-innerRing.Position = UDim2.new(0, 2, 0, 2)
+innerRing.Size = UDim2.new(1, -2, 1, -2)
+innerRing.Position = UDim2.new(0, 1, 0, 1)
 innerRing.BackgroundTransparency = 1
 innerRing.Parent = btnContainer
 local innerRingStroke = Instance.new("UIStroke")
-innerRingStroke.Thickness = 1.5
-innerRingStroke.Color = C.FIRE3
-innerRingStroke.Transparency = 0.4
+innerRingStroke.Thickness = 1
+innerRingStroke.Color = C.FIRE2
+innerRingStroke.Transparency = 0.3
 innerRingStroke.Parent = innerRing
 
 -- Main button
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -12, 1, -12)
-mainBtn.Position = UDim2.new(0, 6, 0, 6)
-mainBtn.BackgroundColor3 = Color3.fromRGB(35, 12, 5)
+mainBtn.Size = UDim2.new(1, -8, 1, -8)
+mainBtn.Position = UDim2.new(0, 4, 0, 4)
+mainBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 5)
 mainBtn.Text = "🔥"
-mainBtn.TextColor3 = C.FIRE2
-mainBtn.TextSize = 24
+mainBtn.TextColor3 = C.FIRE_BRIGHT
+mainBtn.TextSize = 20
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
 mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
--- Button gradient (fire)
 local btnGrad = Instance.new("UIGradient")
 btnGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 15, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 8, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 15, 0)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 20, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(35, 10, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 20, 0)),
 })
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow pulse
+-- Glow pulse terang
 local glow = Instance.new("Frame")
-glow.Size = UDim2.new(1, 20, 1, 20)
-glow.Position = UDim2.new(0, -10, 0, -10)
-glow.BackgroundColor3 = C.FIRE1
-glow.BackgroundTransparency = 0.6
+glow.Size = UDim2.new(1, 16, 1, 16)
+glow.Position = UDim2.new(0, -8, 0, -8)
+glow.BackgroundColor3 = C.FIRE_BRIGHT
+glow.BackgroundTransparency = 0.5
 glow.BorderSizePixel = 0
 glow.ZIndex = -1
 glow.Parent = mainBtn
 rnd(glow, 999)
 
--- Pulse + rotation loop
+-- Animasi loop
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-        -- Outer ring rotation
         outerRing.Rotation = t * 60
         outerRingGrad.Rotation = t * 100
-        -- Inner ring rotation (berlawanan)
         innerRing.Rotation = -t * 90
-        -- Pulse glow
         local pulse = (math.sin(t * 4) + 1) / 2
-        glow.BackgroundTransparency = 0.85 - pulse * 0.4
-        glow.Size = UDim2.new(1, 12 + pulse * 16, 1, 12 + pulse * 16)
-        glow.Position = UDim2.new(0, -6 - pulse * 8, 0, -6 - pulse * 8)
-        -- Btn gradient rotate
+        glow.BackgroundTransparency = 0.75 - pulse * 0.35
+        glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
+        glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
         btnGrad.Rotation = t * 40
-        -- Icon pulse
-        mainBtn.TextSize = 24 + math.sin(t * 5) * 3
+        mainBtn.TextSize = 20 + math.sin(t * 5) * 2
         task.wait(0.03)
     end
 end)
 
--- ============================
--- PARTIKEL FIRE di sekitar tombol
--- ============================
-for i = 1, 8 do
+-- Partikel api di sekitar tombol (lebih terang)
+for i = 1, 10 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 4, 0, 4)
-    particle.BackgroundColor3 = C.FIRE2
+    particle.BackgroundColor3 = C.FIRE_BRIGHT
     particle.BorderSizePixel = 0
     particle.Parent = btnContainer
     rnd(particle, 999)
-    local angle = (i / 8) * math.pi * 2
+    local angle = (i / 10) * math.pi * 2
 
     task.spawn(function()
         while btnContainer.Parent do
             local t = tick()
-            local radius = 38
-            local x = math.cos(t * 2 + angle) * radius
-            local y = math.sin(t * 2 + angle) * radius
+            local radius = 26
+            local x = math.cos(t * 2.5 + angle) * radius
+            local y = math.sin(t * 2.5 + angle) * radius
             particle.Position = UDim2.new(0.5, x - 2, 0.5, y - 2)
-            particle.BackgroundTransparency = 0.3 + math.sin(t * 4 + i) * 0.3
-            particle.BackgroundColor3 = Color3.fromHSV((t * 0.3 + i * 0.1) % 1, 1, 1)
+            particle.BackgroundTransparency = 0.1 + math.sin(t * 5 + i) * 0.25
+            particle.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.08) % 1, 0.75, 1)
             task.wait(0.03)
         end
     end)
@@ -2321,11 +2367,7 @@ rnd(panel, 18)
 strk(panel, C.FIRE2, 2, 0.2)
 
 local panelGrad = Instance.new("UIGradient")
-panelGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C.BG),
-    ColorSequenceKeypoint.new(0.5, C.BG2),
-    ColorSequenceKeypoint.new(1, C.BG),
-})
+panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
@@ -2346,15 +2388,14 @@ hPatch.BackgroundTransparency = 0.1
 hPatch.BorderSizePixel = 0
 hPatch.Parent = header
 
--- NEON LINE FIRE
 local neonLine = Instance.new("Frame")
 neonLine.Size = UDim2.new(1, -40, 0, 3)
 neonLine.Position = UDim2.new(0, 20, 1, -1.5)
-neonLine.BackgroundColor3 = C.FIRE2
+neonLine.BackgroundColor3 = C.FIRE_BRIGHT
 neonLine.BorderSizePixel = 0
 neonLine.Parent = header
 local neonGrad = Instance.new("UIGradient")
-neonGrad.Color = ColorSequence.new(C.FIRE3, C.FIRE2, Color3.fromRGB(255, 255, 200), C.FIRE2, C.FIRE3)
+neonGrad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, Color3.fromRGB(255, 255, 240), C.FIRE_BRIGHT, C.FIRE3)
 neonGrad.Parent = neonLine
 
 task.spawn(function()
@@ -2371,12 +2412,12 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -100, 1, 0)
 hTitle.Position = UDim2.new(0, 18, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v2"
-hTitle.TextColor3 = C.FIRE2
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v3"
+hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 14
 hTitle.Font = Enum.Font.GothamBlack
 hTitle.TextXAlignment = Enum.TextXAlignment.Left
-hTitle.TextStrokeTransparency = 0.3
+hTitle.TextStrokeTransparency = 0.2
 hTitle.TextStrokeColor3 = C.FIRE3
 hTitle.Parent = header
 
@@ -2469,14 +2510,14 @@ local function sec(title, icon)
     deco.Parent = f
     rnd(deco, 2)
     local decoGrad = Instance.new("UIGradient")
-    decoGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE2, C.FIRE3)
+    decoGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
     decoGrad.Parent = deco
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -20, 1, 0)
     l.Position = UDim2.new(0, 16, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = icon .. "  " .. string.upper(title)
-    l.TextColor3 = C.FIRE2
+    l.TextColor3 = C.FIRE_BRIGHT
     l.TextSize = 10
     l.Font = Enum.Font.GothamBlack
     l.TextXAlignment = Enum.TextXAlignment.Left
@@ -2535,7 +2576,7 @@ local function tog(name, def, cb)
 
     t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
     k.Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
-    k.BackgroundColor3 = state and C.FIRE2 or C.DIM
+    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
@@ -2547,10 +2588,10 @@ local function tog(name, def, cb)
         _G.ToggleStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
             Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6),
-            BackgroundColor3 = state and C.FIRE2 or C.DIM
+            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
         }):Play()
         TweenService:Create(t, TweenInfo.new(0.2), {BackgroundColor3 = state and C.FIRE1 or C.PANEL}):Play()
-        fStrk.Color = state and C.FIRE2 or C.FIRE3
+        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
         if cb then pcall(cb, state) end
     end)
 end
@@ -2584,7 +2625,7 @@ local function sl(name, min, max, def, cb)
     v.Position = UDim2.new(1, -50, 0, 4)
     v.BackgroundTransparency = 1
     v.Text = tostring(curVal)
-    v.TextColor3 = C.FIRE2
+    v.TextColor3 = C.FIRE_BRIGHT
     v.TextSize = 10
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -2600,7 +2641,7 @@ local function sl(name, min, max, def, cb)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((curVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = C.FIRE2
+    fill.BackgroundColor3 = C.FIRE_BRIGHT
     fill.BorderSizePixel = 0
     fill.Parent = bg
     rnd(fill, 3)
@@ -2613,7 +2654,7 @@ local function sl(name, min, max, def, cb)
     kn.ZIndex = 2
     kn.Parent = bg
     rnd(kn, 6)
-    strk(kn, C.FIRE2, 2)
+    strk(kn, C.FIRE_BRIGHT, 2)
 
     local drag = false
     local function upd(input)
@@ -2671,7 +2712,7 @@ local function cpk(name, def, cb)
     cB.BorderSizePixel = 0
     cB.Parent = f
     rnd(cB, 4)
-    strk(cB, C.FIRE2, 1.5)
+    strk(cB, C.FIRE_BRIGHT, 1.5)
 
     local presets = {
         Color3.fromRGB(255, 60, 60), Color3.fromRGB(255, 170, 0),
@@ -2702,7 +2743,7 @@ local function btn(name, cb)
     b.AutoButtonColor = false
     b.Parent = cs
     rnd(b, 8)
-    strk(b, C.FIRE2, 1, 0.7)
+    strk(b, C.FIRE_BRIGHT, 1, 0.7)
     b.MouseButton1Click:Connect(function()
         if cb then pcall(cb) end
     end)
@@ -2738,7 +2779,7 @@ local function drp(name, options, def, cb)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
     v.Text = tostring(cur) .. " ▶"
-    v.TextColor3 = C.FIRE2
+    v.TextColor3 = C.FIRE_BRIGHT
     v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -2775,7 +2816,7 @@ local function makeTab(name, icon, order, cb)
     ind.Size = UDim2.new(0, 3, 0, 0)
     ind.Position = UDim2.new(0, 0, 0.5, 0)
     ind.AnchorPoint = Vector2.new(0, 0.5)
-    ind.BackgroundColor3 = C.FIRE2
+    ind.BackgroundColor3 = C.FIRE_BRIGHT
     ind.BorderSizePixel = 0
     ind.Parent = b
     rnd(ind, 2)
@@ -2860,7 +2901,7 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
-print("✅ [5/8] GUI + Komponen (Tombol Kece) loaded")-- =========================================================
+print("✅ [5/8] GUI + Komponen loaded (Tombol Kecil + Api Terang)")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 
@@ -2873,7 +2914,7 @@ makeTab("Fire", "🔥", 1, function()
     sl("Fire Size", 1, 15, 5, function(v) S.FireSize = v; applyFire() end)
 
     sec("Pilih Efek Fire (60)", "🔥")
-    lbl("Klik efek untuk ganti", C.FIRE2)
+    lbl("Klik efek untuk ganti", C.FIRE_BRIGHT)
     for i, fireName in ipairs(FireList) do
         local btn2 = Instance.new("TextButton")
         btn2.Size = UDim2.new(1, -4, 0, 26)
@@ -2885,7 +2926,7 @@ makeTab("Fire", "🔥", 1, function()
         btn2.LayoutOrder = i + 100
         btn2.Parent = cs
         rnd(btn2, 7)
-        local btnStroke = strk(btn2, C.FIRE2, 1, 0.6)
+        strk(btn2, C.FIRE2, 1, 0.6)
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
         btnLbl.Position = UDim2.new(0, 10, 0, 0)
@@ -2927,7 +2968,7 @@ makeTab("Fire Feet", "👟", 2, function()
     tog("Enable Fire Feet", false, function(s) S.FireFeetOn = s; applyFireFeet() end)
 
     sec("Pilih Efek Fire Feet (20)", "🔥")
-    lbl("Klik efek untuk ganti", C.FIRE2)
+    lbl("Klik efek untuk ganti", C.FIRE_BRIGHT)
     for i, fireName in ipairs(FireFeetList) do
         local btn2 = Instance.new("TextButton")
         btn2.Size = UDim2.new(1, -4, 0, 26)
@@ -2939,6 +2980,7 @@ makeTab("Fire Feet", "👟", 2, function()
         btn2.LayoutOrder = i + 200
         btn2.Parent = cs
         rnd(btn2, 7)
+        strk(btn2, C.FIRE2, 1, 0.6)
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
         btnLbl.Position = UDim2.new(0, 10, 0, 0)
@@ -2973,7 +3015,7 @@ makeTab("Fire Feet", "👟", 2, function()
 end)
 
 -- ============================
--- TAB: ESP (FIXED)
+-- TAB: ESP
 -- ============================
 makeTab("ESP", "👁️", 3, function()
     sec("Player ESP + Nama", "🟢")
@@ -3012,13 +3054,25 @@ makeTab("ESP", "👁️", 3, function()
 end)
 
 -- ============================
--- TAB: SURVIVOR
+-- TAB: SURVIVOR (Ada Anti Fake Hit + Abyss Dodge)
 -- ============================
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry 360° GACOR", "🛡️")
+    sec("Auto Parry 360° GACOR v4", "🛡️")
     tog("Enable Auto Parry", false, function(s) S.Parry = s; if s then scanKillers() end end)
     sl("Parry Distance", 3, 25, 8, function(v) S.ParryDist = v end)
-    lbl("Anti-miss + Prediksi gerak killer", C.GRN)
+    lbl("Anti-miss + Prediksi + Real Attack Detect", C.GRN)
+
+    sec("Anti Fake Hit", "⚡")
+    tog("Enable Anti Fake Hit", false, function(s)
+        S.AntiFakeHit = s
+        if s then scanKillers() end
+    end)
+    sl("Dodge Range", 5, 30, 15, function(v) S.DodgeRange = v end)
+    lbl("Kalau killer fake hit, auto hindar", C.FIRE_BRIGHT)
+
+    sec("Anti Abyss Dodge", "🌀")
+    tog("Enable Abyss Dodge", false, function(s) S.AbyssDodge = s end)
+    lbl("Abyss slash = auto jongkok", C.FIRE_BRIGHT)
 
     sec("Parry Circle", "🔵")
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
@@ -3039,7 +3093,6 @@ makeTab("Survivor", "🏃", 4, function()
 
     sec("Auto Dodge Killer", "🏃")
     tog("Enable Auto Dodge", false, function(s) S.AutoDodge = s end)
-    sl("Dodge Range", 10, 100, 30, function(v) S.DodgeRange = v end)
 
     sec("Auto Vault", "🪟")
     tog("Enable Auto Vault", false, function(s) S.AutoVault = s end)
@@ -3118,7 +3171,7 @@ makeTab("Visual", "🎨", 6, function()
         S.FullbrightVal = v
         if S.Fullbright then applyFullbright(true) end
     end)
-    lbl("0 = gelap, 50 = normal, 100 = terang", C.FIRE2)
+    lbl("0 = gelap, 50 = normal, 100 = terang", C.FIRE_BRIGHT)
     tog("No Fog", false, function(s) S.NoFog = s; applyNoFog(s) end)
     tog("Ultra HD", false, function(s) S.UltraHD = s; applyUltraHD() end)
     tog("Contrast", false, function(s) S.Contrast = s; applyContrast() end)
@@ -3130,7 +3183,7 @@ makeTab("Visual", "🎨", 6, function()
     sl("FOV Value", 40, 120, 70, function(v) S.FOV = v; applyFOV() end)
 
     sec("Sky Changer (7 Sky)", "🌤️")
-    lbl("Klik untuk ganti sky", C.FIRE2)
+    lbl("Klik untuk ganti sky", C.FIRE_BRIGHT)
     for i, skyName in ipairs(SkyList) do
         local btn2 = Instance.new("TextButton")
         btn2.Size = UDim2.new(1, -4, 0, 24)
@@ -3142,6 +3195,7 @@ makeTab("Visual", "🎨", 6, function()
         btn2.LayoutOrder = i + 300
         btn2.Parent = cs
         rnd(btn2, 6)
+        strk(btn2, C.FIRE2, 1, 0.6)
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
         btnLbl.Position = UDim2.new(0, 10, 0, 0)
@@ -3188,7 +3242,7 @@ makeTab("8-Bit", "👑", 7, function()
         S.EightBitCrown = s
         apply8BitCrown(s, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
     end)
-    lbl("Mahkota pixel + efek api warna-warni", C.FIRE2)
+    lbl("Mahkota pixel + efek api warna-warni", C.FIRE_BRIGHT)
 
     sec("Ukuran Crown", "📏")
     sl("Size", 0.3, 3, 1, function(v)
@@ -3258,7 +3312,7 @@ makeTab("Visual+", "✨", 8, function()
         S.TrailColor = c
         if S.Trail then applyTrail(true, c) end
     end)
-    lbl("Api muncul di belakang karakter", C.FIRE2)
+    lbl("Api muncul di belakang karakter", C.FIRE_BRIGHT)
 
     sec("Efek Aura Berapi", "🔥")
     tog("Enable Aura Fire", false, function(s)
@@ -3321,11 +3375,10 @@ makeTab("Movement", "🏃", 9, function()
         if s then _G.Roooor_startFly() else _G.Roooor_stopFly() end
     end)
     sl("Fly Speed", 10, 200, 50, function(v) S.FlySpeed = v end)
-    lbl("WASD + Space (naik) + LShift (turun)", C.FIRE2)
+    lbl("WASD + Space (naik) + LShift (turun)", C.FIRE_BRIGHT)
 
     sec("Instant Escape", "🚪")
     btn("🚀 Instant Escape (TP Finish)", function() teleportToFinishLine() end)
-    lbl("Teleport ke finish line/gate", C.FIRE2)
 
     sec("Fast Vault", "🏃")
     tog("Enable Fast Vault", false, function(s) S.FastVault = s end)
@@ -3388,17 +3441,17 @@ end)
 -- ============================
 makeTab("Settings", "⚙️", 12, function()
     sec("Keybind", "⌨️")
-    lbl("Klik tombol 🔥 = Buka Menu", C.FIRE2)
-    lbl("Drag Header = Pindah Window", C.DIM)
-    lbl("Drag 🔥 = Pindah Tombol", C.DIM)
+    lbl("Klik tombol 🔥 = Buka Menu", C.FIRE_BRIGHT)
+    lbl("Drag tombol 🔥 = Pindah posisi", C.DIM)
+    lbl("RightShift = Toggle Menu", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Ultimate Fire v2", C.FIRE2)
-    lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE2)
-    lbl("ESP Fixed + Fullbright Slider 0-100", C.FIRE2)
-    lbl("Auto Parry GACOR v3 (TIDAK DIUBAH)", C.GRN)
+    lbl("RoooorHub Ultimate Fire v3", C.FIRE_BRIGHT)
+    lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE_BRIGHT)
+    lbl("ESP Fixed + Fullbright Slider", C.FIRE_BRIGHT)
+    lbl("Parry v4 + Anti Fake Hit + Abyss Dodge", C.GRN)
     lbl("Auto Skill Check (TIDAK DIUBAH)", C.GRN)
-    lbl("Made with 🔥", C.FIRE2)
+    lbl("Made with 🔥", C.FIRE_BRIGHT)
 end)
 
 print("✅ [7/8] Tab Part 2 loaded")-- =========================================================
@@ -3415,7 +3468,7 @@ LP.CharacterAdded:Connect(function(char)
 
     if S.FireOn then applyFire() end
     if S.FireFeetOn then applyFireFeet() end
-    if S.Parry then scanKillers() end
+    if S.Parry or S.AntiFakeHit then scanKillers() end
     if S.Korblox then task.wait(0.3); applyKorblox(true) end
     if S.Headless then task.wait(0.3); applyHeadless(true) end
     if S.EightBitCrown then task.wait(0.3); apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ) end
@@ -3521,6 +3574,27 @@ task.spawn(function()
                     if state then scanKillers() end
                 end
             end
+            if name == "Enable Anti Fake Hit" then
+                if S.AntiFakeHit ~= state then
+                    S.AntiFakeHit = state
+                    if state then scanKillers() end
+                end
+            end
+            if name == "Enable Abyss Dodge" then
+                if S.AbyssDodge ~= state then
+                    S.AbyssDodge = state
+                end
+            end
+            if name == "Enable ESP Name" then
+                if S.ESP_Name ~= state then
+                    S.ESP_Name = state
+                end
+            end
+            if name == "ESP Generator" then S.ESP_Generator = state end
+            if name == "ESP Pallet" then S.ESP_Pallet = state end
+            if name == "ESP Window" then S.ESP_Window = state end
+            if name == "ESP SCP" then S.ESP_SCP = state end
+            if name == "ESP Item" then S.ESP_Item = state end
         end
     end
 end)
@@ -3536,7 +3610,7 @@ fpsPanel.BackgroundTransparency = 0.3
 fpsPanel.BorderSizePixel = 0
 fpsPanel.Parent = gui
 rnd(fpsPanel, 12)
-strk(fpsPanel, C.FIRE2, 1, 0.5)
+strk(fpsPanel, C.FIRE_BRIGHT, 1, 0.4)
 
 local fpsLbl = Instance.new("TextLabel")
 fpsLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -3565,7 +3639,7 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 -- ============================
--- KEYBIND RightShift (optional)
+-- KEYBIND RightShift
 -- ============================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -3589,14 +3663,14 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("🔥 ROOORHUB ULTIMATE FIRE EDITION v2")
+print("🔥 ROOORHUB ULTIMATE FIRE EDITION v3")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
-print("  1. 🔥 Fire          — 60 Efek")
+print("  1. 🔥 Fire          — 60 Efek (semua work!)")
 print("  2. 👟 Fire Feet     — 20 Efek")
-print("  3. 👁️ ESP           — Player + Gen + Pallet + Window + SCP + Item")
-print("  4. 🏃 Survivor      — Parry GACOR + Skill + Auto Heal/Repair/Revive")
+print("  3. 👁️ ESP           — Player + Gen + Pallet + Window + SCP + Item (FIXED)")
+print("  4. 🏃 Survivor      — Parry v4 + Anti Fake Hit + Abyss Dodge")
 print("  5. 🔪 Killer        — Attack + KillAll + Hitbox + Masked")
 print("  6. 🎨 Visual        — Fullbright Slider 0-100 + NoFog + Sky")
 print("  7. 👑 8-Bit Crown   — Bisa diatur posisi + ukuran")
@@ -3607,16 +3681,13 @@ print(" 11. 🏆 Top 10        — SafeZone + EscapeAlert + PlayerList")
 print(" 12. ⚙️ Settings      — Info + Keybind")
 print("=====================================================")
 print("✨ Loading 4D HD 'SELAMAT DATANG SC PENGANGGURAN'")
-print("🔥 Tombol menu lebih kece (rotating rings + partikel fire)")
-print("⚔️ Auto Parry GACOR v3 (TIDAK DIUBAH - TETAP GACOR)")
-print("🎯 Auto Skill Check (TIDAK DIUBAH)")
-print("👑 8-Bit Crown bisa diatur posisi kiri/kanan/atas/bawah")
-print("🦵 Kaki satu hilang (invisible)")
-print("📊 Fullbright slider 0-100 kecerahan")
-print("👁️ ESP FIXED — semua tipe (Player/Gen/Pallet/Window/SCP/Item)")
+print("🔥 Tombol menu KECIL + API TERANG + BISA DIGESER")
+print("⚔️ Auto Parry GACOR v4 (Real Attack Detection)")
+print("⚡ Anti Fake Hit (fake = dodge, real = parry)")
+print("🌀 Abyss Dodge (Crouch saat slash)")
+print("👁️ ESP FIXED — semua tipe work")
+print("📊 Fullbright slider 0-100")
+print("👑 8-Bit Crown bisa diatur posisi X/Y/Z")
 print("=====================================================")
 print("Total: 60+ FITUR PREMIUM")
-print("=====================================================")
-print("⌨️ RightShift = Toggle Menu")
-print("🖱️ Klik tombol 🔥 = Buka Menu")
 print("=====================================================")

@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v13
+-- ROOORHUB ULTIMATE FIRE EDITION v14
 -- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
@@ -53,7 +53,7 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- SOUND SYSTEM
+-- SOUND SYSTEM (DEFAULT TOGGLE)
 -- =========================================================
 local ToggleSoundId = "rbxassetid://6073491164"
 
@@ -71,7 +71,22 @@ local function playToggleSound()
     end)
 end
 
+local function playMemeSound(soundId, vol)
+    task.spawn(function()
+        pcall(function()
+            local s = Instance.new("Sound")
+            s.SoundId = soundId
+            s.Volume = vol or 0.5
+            s.Parent = SoundService
+            s:Play()
+            task.wait(2)
+            s:Destroy()
+        end)
+    end)
+end
+
 _G.Roooor_playSound = playToggleSound
+_G.Roooor_playMeme = playMemeSound
 
 -- =========================================================
 -- LOADING 4D FIRE RING
@@ -220,7 +235,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE v13 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE v14 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -380,19 +395,50 @@ _G.Roooor_GodMode = _G.Roooor_GodMode or {
     Enabled = false,
 }
 
--- HITBOX 2 MODE
-_G.Roooor_Hitbox = _G.Roooor_Hitbox or {
-    SurvivorMode = false,
-    KillerMode = false,
-    Size = 15,
+-- =========================================================
+-- COMBAT CONFIG (AIMBOT + HITBOX)
+-- =========================================================
+_G.Roooor_Combat = _G.Roooor_Combat or {
+    -- AIMBOT
+    AimlockEnabled = false,
+    Holding = false,
+    AttackHeld = false,
+    Mode = "Killer",
+    Smoothness = 0.15,
+    LockRadius = 100,
+    AimPart = "Head",
+    Predict = true,
+    PredictStrength = 0.12,
+    VisibilityCheck = false,
+    WallCheck = false,
+    FOVCircle = false,
+    FOVRadius = 150,
+
+    -- TRIGGER BOT
+    TriggerBotEnabled = false,
+    TriggerDelay = 0.05,
+
+    -- HITBOX
+    HitboxSurvivor = false,
+    HitboxKiller = false,
+    HitboxSize = 15,
+    HitboxVisible = false,
 }
 
--- AIMLOCK UPGRADE
-_G.Roooor_AimlockUpgrade = _G.Roooor_AimlockUpgrade or {
-    Holding = false,
-    Smoothness = 0.15,
-    Mode = "Killer",
-    LockRadius = 100,
+-- SOUND MEME LIST
+_G.Roooor_MemeSounds = _G.Roooor_MemeSounds or {
+    Bruh = "rbxassetid://9046486083",
+    VineBoom = "rbxassetid://6042053626",
+    Whoosh = "rbxassetid://9109926130",
+    Suspense = "rbxassetid://131471209766485",
+    AirHorn = "rbxassetid://1837879082",
+    Oof = "rbxassetid://4674389555",
+    MinecraftHurt = "rbxassetid://9114363078",
+    Spooky = "rbxassetid://1835822553",
+    Fart = "rbxassetid://131362590418887",
+    CatLaugh = "rbxassetid://131386564897452",
+    Nope = "rbxassetid://1837684306",
+    Wow = "rbxassetid://131361016931955",
 }
 
 print("✅ [1/8] Loading + Config + State + Sound loaded")-- =========================================================
@@ -1381,7 +1427,6 @@ local function applyNoFog(s)
     end)
 end
 
--- Loop no fog (server kadang reset)
 task.spawn(function()
     while task.wait(1) do
         if S.NoFog then
@@ -2459,10 +2504,8 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- HITBOX LAMA (KILLER) - dihapus, pindah ke Extra
--- =========================================================
-
 -- PARRY CIRCLE
+-- =========================================================
 _G.Roooor_ParryCircle = nil
 local function updateParryCircle()
     local root = getRoot()
@@ -2595,7 +2638,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" BARU (BULAT + EMOJI 🔥 + RING API)
+-- TOMBOL MENU 🔥 BARU (BULAT + EMOJI + RING API)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 55, 0, 55)
@@ -2603,7 +2646,7 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Ring luar (api berputar)
+-- Ring luar
 local ring1 = Instance.new("Frame")
 ring1.Size = UDim2.new(1, 10, 1, 10)
 ring1.Position = UDim2.new(0, -5, 0, -5)
@@ -2626,7 +2669,7 @@ ring1Grad.Color = ColorSequence.new({
 })
 ring1Grad.Parent = ring1Stroke
 
--- Ring dalam (api kedua)
+-- Ring dalam
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 4, 1, 4)
 ring2.Position = UDim2.new(0, -2, 0, -2)
@@ -2643,7 +2686,7 @@ local ring2Grad = Instance.new("UIGradient")
 ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
 ring2Grad.Parent = ring2Stroke
 
--- Tombol utama (bulat + emoji api)
+-- Tombol utama
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -14, 1, -14)
 mainBtn.Position = UDim2.new(0, 7, 0, 7)
@@ -2734,9 +2777,7 @@ for i = 1, 10 do
     end)
 end
 
--- =========================================================
--- DRAG MENU
--- =========================================================
+-- Drag tombol
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -2859,8 +2900,7 @@ aimModeLbl.Font = Enum.Font.GothamBlack
 aimModeLbl.TextStrokeTransparency = 0.3
 aimModeLbl.Parent = aimBtn
 
-local Aimlock = _G.Roooor_AimlockBtn
-local AimlockUp = _G.Roooor_AimlockUpgrade
+local Combat = _G.Roooor_Combat
 
 task.spawn(function()
     local t = 0
@@ -2870,9 +2910,9 @@ task.spawn(function()
         aimOuterGrad.Rotation = t * 100
         aimInnerRing.Rotation = -t * 90
         local pulse = (math.sin(t * 4) + 1) / 2
-        local baseTrans = AimlockUp.Holding and 0.3 or 0.7
+        local baseTrans = Combat.Holding and 0.3 or 0.7
         aimGlow.BackgroundTransparency = baseTrans - pulse * 0.25
-        local glowSize = AimlockUp.Holding and 20 or 16
+        local glowSize = Combat.Holding and 20 or 16
         aimGlow.Size = UDim2.new(1, glowSize + pulse * 8, 1, glowSize + pulse * 8)
         aimGlow.Position = UDim2.new(0, -(glowSize/2) - pulse * 4, 0, -(glowSize/2) - pulse * 4)
         aimBtnGrad.Rotation = t * 40
@@ -2917,7 +2957,7 @@ aimBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
-        AimlockUp.Holding = true
+        Combat.Holding = true
         aimBtn.BackgroundColor3 = Color3.fromRGB(30, 60, 120)
     end
 end)
@@ -2925,18 +2965,18 @@ end)
 aimBtn.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
-        AimlockUp.Holding = false
+        Combat.Holding = false
         aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
     end
 end)
 
 aimBtn.MouseButton2Click:Connect(function()
-    if AimlockUp.Mode == "Killer" then
-        AimlockUp.Mode = "Survivor"
+    if Combat.Mode == "Killer" then
+        Combat.Mode = "Survivor"
         aimModeLbl.Text = "SURVIVOR"
         aimModeLbl.TextColor3 = C.GRN
     else
-        AimlockUp.Mode = "Killer"
+        Combat.Mode = "Killer"
         aimModeLbl.Text = "KILLER"
         aimModeLbl.TextColor3 = C.ACC4
     end
@@ -2950,51 +2990,6 @@ task.spawn(function()
     task.wait(0.5)
     if _G.Roooor_setAimlockVisible then
         _G.Roooor_setAimlockVisible(_G.Roooor_AimlockBtn.ShowButton)
-    end
-end)
-
--- AIMLOCK LOOP (SMOOTH)
-task.spawn(function()
-    while aimContainer.Parent do
-        task.wait(0.01)
-        if not AimlockUp.Holding then continue end
-        local myRoot = getRoot()
-        if not myRoot then continue end
-
-        local closest, shortest = nil, AimlockUp.LockRadius
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP and p.Character then
-                local valid = false
-                local teamName = p.Team and p.Team.Name or ""
-
-                if AimlockUp.Mode == "Killer" and teamName == "Killer" then
-                    valid = true
-                elseif AimlockUp.Mode == "Survivor" and teamName == "Survivors" then
-                    valid = true
-                end
-
-                if valid then
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    local hrp = p.Character:FindFirstChild("Head")
-                        or p.Character:FindFirstChild("HumanoidRootPart")
-
-                    if hum and hum.Health > 0 and hrp then
-                        local dist = (hrp.Position - myRoot.Position).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = hrp
-                        end
-                    end
-                end
-            end
-        end
-
-        if closest then
-            local cam = workspace.CurrentCamera
-            local targetCF = CFrame.new(cam.CFrame.Position, closest.Position)
-            local smooth = math.clamp(AimlockUp.Smoothness, 0.01, 1)
-            cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
-        end
     end
 end)
 
@@ -3063,7 +3058,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v13"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v14"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 12
 hTitle.Font = Enum.Font.GothamBlack
@@ -3250,7 +3245,6 @@ local function tog(name, def, cb)
         }):Play()
         fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
 
-        -- Sound
         playToggleSound()
 
         if cb then pcall(cb, state) end
@@ -3480,6 +3474,78 @@ local function drp(name, options, def, cb)
     end)
 end
 
+-- =========================================================
+-- TOGGLE MEME (SOUND BERBEDA PER FITUR)
+-- =========================================================
+local MemeSounds = _G.Roooor_MemeSounds
+
+local function togMeme(name, def, soundId, cb)
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(1, -4, 0, 28)
+    f.BackgroundColor3 = C.BG
+    f.BackgroundTransparency = 0.4
+    f.BorderSizePixel = 0
+    f.Parent = cs
+    rnd(f, 8)
+    local fStrk = strk(f, C.FIRE2, 1, 0.7)
+
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(1, -50, 1, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
+    l.BackgroundTransparency = 1
+    l.Text = name
+    l.TextColor3 = C.TXT
+    l.TextSize = 9
+    l.Font = Enum.Font.GothamMedium
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Parent = f
+
+    local t = Instance.new("Frame")
+    t.Size = UDim2.new(0, 32, 0, 16)
+    t.Position = UDim2.new(1, -40, 0.5, -8)
+    t.BorderSizePixel = 0
+    t.Parent = f
+    rnd(t, 9)
+
+    local k = Instance.new("Frame")
+    k.Size = UDim2.new(0, 11, 0, 11)
+    k.BorderSizePixel = 0
+    k.Parent = t
+    rnd(k, 6)
+
+    local saved = _G.ToggleStates[name]
+    local state = (saved ~= nil) and saved or def
+    _G.ToggleStates[name] = state
+
+    t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
+    k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
+    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+
+    local cB = Instance.new("TextButton")
+    cB.Size = UDim2.new(1, 0, 1, 0)
+    cB.BackgroundTransparency = 1
+    cB.Text = ""
+    cB.Parent = t
+
+    cB.MouseButton1Click:Connect(function()
+        state = not state
+        _G.ToggleStates[name] = state
+        TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
+            Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
+            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+        }):Play()
+        TweenService:Create(t, TweenInfo.new(0.2), {
+            BackgroundColor3 = state and C.FIRE1 or C.PANEL
+        }):Play()
+        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
+
+        playMemeSound(soundId)
+
+        if cb then pcall(cb, state) end
+    end)
+end
+
+-- Tab registry
 local activeTab = nil
 local function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
@@ -3578,6 +3644,7 @@ _G.Roooor_btn = btn
 _G.Roooor_drp = drp
 _G.Roooor_makeTab = makeTab
 _G.Roooor_cs = cs
+_G.Roooor_togMeme = togMeme
 
 mainBtn.MouseButton1Click:Connect(function()
     if wasDragged then
@@ -3593,7 +3660,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI + Tombol R Baru + Aimlock Smooth + Panel Kecil loaded")-- =========================================================
+print("✅ [5/8] GUI + Tombol 🔥 + Aimlock + Panel Kecil loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 local sec = _G.Roooor_sec
@@ -3769,9 +3836,6 @@ end)
 -- ============================================================
 makeTab("Survivor", "🏃", 4, function()
 
-    -- ============================
-    -- AUTO PARRY
-    -- ============================
     sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
@@ -3793,9 +3857,6 @@ makeTab("Survivor", "🏃", 4, function()
         PARRY_DEBOUNCE = v
     end)
 
-    -- ============================
-    -- AUTO SKILL CHECK
-    -- ============================
     sec("Auto Skill Check", "⚡")
 
     tog("Auto Skill Check", false, function(s)
@@ -3808,9 +3869,6 @@ makeTab("Survivor", "🏃", 4, function()
     lbl("Auto trigger saat masuk zona", C.GRN)
     lbl("Zona: goal + 102° s/d + 116°", C.DIM)
 
-    -- ============================
-    -- DODGE & DEFENSE
-    -- ============================
     sec("Dodge & Defense", "🛡️")
 
     tog("Auto Dodge", false, function(s) S.AutoDodge = s end)
@@ -3822,9 +3880,6 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Anti Hook", false, function(s) S.AntiHook = s end)
     tog("Anti Blind", false, function(s) S.AntiBlind = s end)
 
-    -- ============================
-    -- SUPPORT
-    -- ============================
     sec("Support", "💊")
     tog("Auto Heal", false, function(s) S.AutoHeal = s end)
     sl("Heal Threshold", 10, 90, 40, function(v) S.AutoHealThreshold = v end)
@@ -3834,9 +3889,6 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Instant Interact", false, function(s) S.InstantInteract = s end)
     tog("Auto Vault", false, function(s) S.AutoVault = s end)
 
-    -- ============================
-    -- TELEPORT
-    -- ============================
     sec("Teleport", "🌀")
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
@@ -3848,25 +3900,16 @@ makeTab("Survivor", "🏃", 4, function()
         teleportInsideGate()
     end)
 
-    -- ============================
-    -- ANTI SYSTEM
-    -- ============================
     sec("Anti System", "🔒")
     tog("Anti Stun", false, function(s) S.AntiStun = s end)
     tog("Anti Ragdoll", false, function(s) S.AntiRagdoll = s end)
     tog("Anti Slow", false, function(s) S.AntiSlow = s end)
     tog("Anti AFK", false, function(s) S.AntiAFK = s end)
 
-    -- ============================
-    -- PARRY CIRCLE
-    -- ============================
     sec("Parry Circle Visual", "⭕")
     tog("Show Parry Circle", false, function(s) S.ParryCircle = s end)
     sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
 
-    -- ============================
-    -- ALERT
-    -- ============================
     sec("Alert", "⚠️")
     tog("Safe Zone", false, function(s) S.SafeZone = s end)
     tog("Escape Alert", false, function(s) S.EscapeAlert = s end)
@@ -3887,6 +3930,8 @@ local btn = _G.Roooor_btn
 local drp = _G.Roooor_drp
 local makeTab = _G.Roooor_makeTab
 local cs = _G.Roooor_cs
+local togMeme = _G.Roooor_togMeme
+local MemeSounds = _G.Roooor_MemeSounds
 
 -- ============================================================
 -- TAB: KILLER
@@ -3928,21 +3973,34 @@ makeTab("Killer", "🔪", 5, function()
 end)
 
 -- ============================================================
--- TAB: MISC
+-- TAB: MISC (DENGAN SOUND MEME BERBEDA)
 -- ============================================================
 makeTab("Misc", "⚙️", 6, function()
 
+    -- ============================
+    -- MOVEMENT (SOUND MEME)
+    -- ============================
     sec("Movement", "🏃")
-    tog("Walk Speed", false, function(s) S.WalkSpeed = s end)
+
+    togMeme("Walk Speed", false, MemeSounds.Bruh, function(s)
+        S.WalkSpeed = s
+    end)
     sl("Walk Speed Value", 16, 100, 16, function(v) S.WalkSpeedVal = v end)
 
-    tog("Speed Hack", false, function(s) S.SpeedHack = s end)
+    togMeme("Speed Hack", false, MemeSounds.VineBoom, function(s)
+        S.SpeedHack = s
+    end)
     sl("Speed Hack Value", 20, 200, 40, function(v) S.SpeedHackVal = v end)
 
-    tog("No Clip", false, function(s) S.NoClip = s end)
-    tog("No Clip Camera", false, function(s) S.NoClipCamera = s end)
+    togMeme("No Clip", false, MemeSounds.Whoosh, function(s)
+        S.NoClip = s
+    end)
 
-    tog("Fly", false, function(s)
+    togMeme("No Clip Camera", false, MemeSounds.Suspense, function(s)
+        S.NoClipCamera = s
+    end)
+
+    togMeme("Fly", false, MemeSounds.AirHorn, function(s)
         S.Fly = s
         if s then
             _G.Roooor_startFly()
@@ -3952,19 +4010,78 @@ makeTab("Misc", "⚙️", 6, function()
     end)
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
+    -- ============================
+    -- SAFE
+    -- ============================
     sec("Safe", "🔒")
-    tog("Anti AFK", false, function(s) S.AntiAFK = s end)
+    togMeme("Anti AFK", false, MemeSounds.Oof, function(s)
+        S.AntiAFK = s
+    end)
 
+    -- ============================
+    -- CHARACTER
+    -- ============================
     sec("Character", "🎭")
-    tog("Korblox Leg", false, function(s)
+
+    togMeme("Korblox Leg", false, MemeSounds.MinecraftHurt, function(s)
         S.Korblox = s
         applyKorblox(s)
     end)
 
-    tog("Headless", false, function(s)
+    togMeme("Headless", false, MemeSounds.Spooky, function(s)
         S.Headless = s
         applyHeadless(s)
     end)
+
+    -- ============================
+    -- FUN & TROLL (BONUS SOUND)
+    -- ============================
+    sec("Fun & Troll", "😂")
+
+    togMeme("Fart Mode", false, MemeSounds.Fart, function(s)
+        if s then
+            task.spawn(function()
+                while _G.ToggleStates["Fart Mode"] do
+                    _G.Roooor_playMeme(MemeSounds.Fart)
+                    task.wait(3)
+                end
+            end)
+        end
+    end)
+    lbl("Spam suara kentut tiap 3 detik 💨", C.DIM)
+
+    togMeme("Cat Laugh", false, MemeSounds.CatLaugh, function(s)
+        if s then
+            _G.Roooor_playMeme(MemeSounds.CatLaugh)
+        end
+    end)
+
+    togMeme("Nope", false, MemeSounds.Nope, function(s)
+        if s then
+            _G.Roooor_playMeme(MemeSounds.Nope)
+        end
+    end)
+
+    togMeme("Wow", false, MemeSounds.Wow, function(s)
+        if s then
+            _G.Roooor_playMeme(MemeSounds.Wow)
+        end
+    end)
+
+    btn("🔊 Test Semua Sound", function()
+        task.spawn(function()
+            local list = {
+                MemeSounds.Bruh, MemeSounds.VineBoom, MemeSounds.Whoosh,
+                MemeSounds.Suspense, MemeSounds.AirHorn, MemeSounds.Oof,
+                MemeSounds.MinecraftHurt, MemeSounds.Spooky,
+            }
+            for _, sid in ipairs(list) do
+                _G.Roooor_playMeme(sid)
+                task.wait(1.2)
+            end
+        end)
+    end)
+    lbl("Test dulu biar tau sound-nya", C.FIRE_BRIGHT)
 end)
 
 -- ============================================================
@@ -4072,7 +4189,7 @@ makeTab("Player", "👤", 8, function()
 
     sec("Aimlock", "🎯")
     tog("Enable Aimlock", false, function(s)
-        _G.Roooor_AimlockUpgrade.Holding = s
+        _G.Roooor_Combat.AimlockEnabled = s
     end)
 
     tog("Show Aimlock Button", false, function(s)
@@ -4083,21 +4200,22 @@ makeTab("Player", "👤", 8, function()
     end)
 
     drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
-        _G.Roooor_AimlockUpgrade.Mode = v
+        _G.Roooor_Combat.Mode = v
     end)
 
     sl("Smoothness", 0.01, 1, 0.15, function(v)
-        _G.Roooor_AimlockUpgrade.Smoothness = v
+        _G.Roooor_Combat.Smoothness = v
     end)
     lbl("0.01 = instan | 1 = smooth", C.GRN)
 
     sl("Lock Radius", 10, 300, 100, function(v)
-        _G.Roooor_AimlockUpgrade.LockRadius = v
+        _G.Roooor_Combat.LockRadius = v
     end)
 
     sec("Info", "ℹ️")
-    lbl("🎯 Aimlock = Hold tombol 🎯", C.FIRE_BRIGHT)
-    lbl("Klik kanan tombol = ganti mode", C.DIM)
+    lbl("🎯 Aimlock = Hold tombol serang", C.FIRE_BRIGHT)
+    lbl("PC: klik kanan | HP: tombol attack", C.DIM)
+    lbl("Toggle ON = standby (belum lock)", C.DIM)
 
     sec("Keybind", "⌨️")
     lbl("Toggle Menu: Klik tombol 🔥", C.FIRE_BRIGHT)
@@ -4118,9 +4236,8 @@ makeTab("Player", "👤", 8, function()
         _G.Roooor_AutoParry = nil
         _G.Roooor_SkillCheck = nil
         _G.Roooor_AimlockBtn = nil
-        _G.Roooor_AimlockUpgrade = nil
+        _G.Roooor_Combat = nil
         _G.Roooor_GodMode = nil
-        _G.Roooor_Hitbox = nil
     end)
 end)
 
@@ -4134,64 +4251,37 @@ print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- ================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.2)
 
-    -- Re-apply Fire
-    if S.FireOn then
-        pcall(applyFire)
-    end
+    if S.FireOn then pcall(applyFire) end
+    if S.FireFeetOn then pcall(applyFireFeet) end
 
-    -- Re-apply Fire Feet
-    if S.FireFeetOn then
-        pcall(applyFireFeet)
-    end
-
-    -- Re-apply 8-Bit Crown
     if S.EightBitCrown then
         pcall(function()
             apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
         end)
     end
 
-    -- Re-apply Trail
     if S.Trail then
-        pcall(function()
-            applyTrail(true, S.TrailColor)
-        end)
+        pcall(function() applyTrail(true, S.TrailColor) end)
     end
 
-    -- Re-apply Aura
     if S.Aura then
-        pcall(function()
-            applyAura(true, S.AuraColor)
-        end)
+        pcall(function() applyAura(true, S.AuraColor) end)
     end
 
-    -- Re-apply Korblox
     if S.Korblox then
-        pcall(function()
-            applyKorblox(true)
-        end)
+        pcall(function() applyKorblox(true) end)
     end
 
-    -- Re-apply Headless
     if S.Headless then
-        pcall(function()
-            applyHeadless(true)
-        end)
+        pcall(function() applyHeadless(true) end)
     end
 
-    -- Re-apply FOV
-    if S.FOVEnabled then
-        pcall(applyFOV)
-    end
+    if S.FOVEnabled then pcall(applyFOV) end
 
-    -- Re-apply Sky
     if S.SkyId and S.SkyId ~= "Default" then
-        pcall(function()
-            applySky(S.SkyId)
-        end)
+        pcall(function() applySky(S.SkyId) end)
     end
 
-    -- Re-apply No Clip
     if S.NoClip then
         task.wait(0.3)
         for _, v in pairs(char:GetDescendants()) do
@@ -4214,7 +4304,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SCAN PLAYER BARU (KALAU PARRY AKTIF)
+-- AUTO SCAN PLAYER BARU
 -- =========================================================
 Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function(char)
@@ -4233,22 +4323,21 @@ end)
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  🔥 ROOORHUB ULTIMATE FIRE v13 🔥       ║")
+print("║  🔥 ROOORHUB ULTIMATE FIRE v14 🔥       ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry                            ║")
 print("║  ⚡ Auto Skill Check                     ║")
-print("║  🎯 Aimlock Smooth + 2 Mode              ║")
+print("║  🎯 Aimlock Smooth (Hold to Attack)      ║")
 print("║  💡 Fullbright (max 200)                 ║")
 print("║  🌫️ No Fog Fix                           ║")
 print("║  📦 Hitbox 2 Mode (Survivor + Killer)    ║")
 print("║  🛡️ God Mode (Full)                      ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
-print("║  🔊 Sound aktif                          ║")
+print("║  🔊 Sound Meme (Bruh, Oof, dll)          ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol 🔥            ║")
-print("║  🎯 Aimlock: Hold tombol 🎯              ║")
-print("║  🖱️ Klik kanan tombol 🎯 = ganti mode    ║")
+print("║  🎯 Aimlock: Hold tombol serang          ║")
 print("╚══════════════════════════════════════════╝")
 
 print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")

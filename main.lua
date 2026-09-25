@@ -1,7 +1,6 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v9
+-- ROOORHUB ULTIMATE FIRE EDITION v10
 -- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
--- NO MUSIC VERSION
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -197,7 +196,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE v9 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE v10 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -359,9 +358,10 @@ _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     SafeZone = 0.15,
 }
 
--- AIMLOCK
+-- AIMLOCK (dengan ShowButton toggle)
 _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Enabled = true,
+    ShowButton = false,   -- ✅ ON/OFF tombol 🎯 di layar
     Holding = false,
     Mode = "Killer",
     Radius = 500,
@@ -369,7 +369,7 @@ _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Strength = 0.4,
 }
 
-print("✅ [1/8] Loading 4D + Config loaded (NO MUSIC)")-- =========================================================
+print("✅ [1/8] Loading 4D + Config loaded")-- =========================================================
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -962,7 +962,7 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR v9
+-- AUTO PARRY GACOR v10
 -- =========================================================
 local AutoParry = _G.Roooor_AutoParry
 local lastParry = 0
@@ -2532,7 +2532,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" 4D (KECIL - 42px)
+-- TOMBOL MENU "R" 4D (BISA DIGESER)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 42, 0, 42)
@@ -2593,7 +2593,6 @@ mainBtn.AutoButtonColor = false
 mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
--- Button gradient
 local btnGrad = Instance.new("UIGradient")
 btnGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 25, 5)),
@@ -2603,7 +2602,6 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow pulse
 local glow = Instance.new("Frame")
 glow.Size = UDim2.new(1, 16, 1, 16)
 glow.Position = UDim2.new(0, -8, 0, -8)
@@ -2614,7 +2612,6 @@ glow.ZIndex = -1
 glow.Parent = mainBtn
 rnd(glow, 999)
 
--- Inner glow
 local innerGlow = Instance.new("Frame")
 innerGlow.Size = UDim2.new(0.6, 0, 0.6, 0)
 innerGlow.Position = UDim2.new(0.2, 0, 0.2, 0)
@@ -2625,7 +2622,7 @@ innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- Animasi loop
+-- Animasi
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -2672,21 +2669,38 @@ for i = 1, 10 do
     end)
 end
 
--- DRAG MENU
-local dragging, ds, dp, wasDragged = false, nil, nil, false
+-- =========================================================
+-- DRAG MENU "R" (FIX - BISA DIGESER)
+-- =========================================================
+local dragging = false
+local dragStart = nil
+local startPos = nil
+local wasDragged = false
+
 btnContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; wasDragged = false
-        ds = input.Position; dp = btnContainer.Position
+        dragging = true
+        wasDragged = false
+        dragStart = input.Position
+        startPos = btnContainer.Position
     end
 end)
+
 UIS.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local d = input.Position - ds
-        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
-        btnContainer.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
+        local delta = input.Position - dragStart
+        if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
+            wasDragged = true
+        end
+        btnContainer.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
     end
 end)
+
 UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
@@ -2694,7 +2708,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON (HOLD TO AIM + RADIUS)
+-- AIMLOCK FLOATING BUTTON (SHOW/HIDE + HOLD TO AIM)
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2842,6 +2856,23 @@ aimBtn.MouseButton2Click:Connect(function()
     end
 end)
 
+-- =========================================================
+-- SHOW/HIDE AIMLOCK BUTTON
+-- =========================================================
+_G.Roooor_setAimlockVisible = function(visible)
+    if aimBtnGui then
+        aimBtnGui.Enabled = visible
+    end
+end
+
+-- Apply state awal
+task.spawn(function()
+    task.wait(0.5)
+    if _G.Roooor_setAimlockVisible then
+        _G.Roooor_setAimlockVisible(_G.Roooor_AimlockBtn.ShowButton)
+    end
+end)
+
 -- AIMLOCK LOOP
 task.spawn(function()
     while aimContainer.Parent do
@@ -2940,7 +2971,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -100, 1, 0)
 hTitle.Position = UDim2.new(0, 18, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v9"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v10"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 14
 hTitle.Font = Enum.Font.GothamBlack
@@ -3406,7 +3437,7 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
-print("✅ [5/8] GUI + Komponen + Tombol R + Aimlock loaded")-- =========================================================
+print("✅ [5/8] GUI + Komponen + Tombol R + Aimlock ON/OFF loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 
@@ -3555,7 +3586,7 @@ end)
 -- TAB: SURVIVOR
 -- ============================
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry GACOR v9", "🛡️")
+    sec("Auto Parry GACOR v10", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
@@ -3615,7 +3646,16 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Enable Instant Interact", false, function(s) S.InstantInteract = s end)
 
     sec("Aimlock (Hold to Aim)", "🎯")
-    tog("Enable Aimlock", false, function(s)
+    tog("Show Aimlock Button", false, function(s)
+        _G.Roooor_AimlockBtn.ShowButton = s
+        if _G.Roooor_setAimlockVisible then
+            _G.Roooor_setAimlockVisible(s)
+        end
+    end)
+    lbl("ON = tombol 🎯 muncul di layar", C.GRN)
+    lbl("OFF = tombol 🎯 hilang", C.RED)
+
+    tog("Enable Aimlock Function", false, function(s)
         _G.Roooor_AimlockBtn.Enabled = s
     end)
     drp("Aimlock Mode", {"Killer", "Survivor"}, "Killer", function(v)
@@ -4008,10 +4048,10 @@ makeTab("Settings", "⚙️", 13, function()
     lbl("RightShift = Toggle Menu", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Ultimate Fire v9", C.FIRE_BRIGHT)
+    lbl("RoooorHub Ultimate Fire v10", C.FIRE_BRIGHT)
     lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE_BRIGHT)
     lbl("ESP Fallens-Style + Limited Radius", C.GRN)
-    lbl("Parry v9 + Anti-Miss + Abyss Dodge", C.GRN)
+    lbl("Parry v10 + Anti-Miss + Abyss Dodge", C.GRN)
     lbl("Teleport Gate + No Clip + Kill Feed", C.GRN)
     lbl("Stun Notify + Aimlock Hold-to-Aim", C.GRN)
     lbl("Made with 🔥", C.FIRE_BRIGHT)
@@ -4171,9 +4211,17 @@ task.spawn(function()
                     S.KillFeed = state
                 end
             end
-            if name == "Enable Aimlock" then
+            if name == "Enable Aimlock Function" then
                 if _G.Roooor_AimlockBtn.Enabled ~= state then
                     _G.Roooor_AimlockBtn.Enabled = state
+                end
+            end
+            if name == "Show Aimlock Button" then
+                if _G.Roooor_AimlockBtn.ShowButton ~= state then
+                    _G.Roooor_AimlockBtn.ShowButton = state
+                    if _G.Roooor_setAimlockVisible then
+                        _G.Roooor_setAimlockVisible(state)
+                    end
                 end
             end
         end
@@ -4244,14 +4292,14 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("🔥 ROOORHUB ULTIMATE FIRE EDITION v9")
+print("🔥 ROOORHUB ULTIMATE FIRE EDITION v10")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
 print("  1. 🔥 Fire          — 60 Efek")
 print("  2. 👟 Fire Feet     — 20 Efek")
 print("  3. 👁️ ESP           — Fallens-Style + Limited Radius")
-print("  4. 🏃 Survivor      — Parry v9 + Skill Check + Stun Notify")
+print("  4. 🏃 Survivor      — Parry v10 + Skill Check + Aimlock")
 print("  5. 🔪 Killer        — Auto Kill FIXED + Kill Feed + Hitbox")
 print("  6. 🎨 Visual        — Fullbright Slider + Sky")
 print("  7. 👑 8-Bit Crown   — Bisa diatur posisi X/Y/Z")
@@ -4264,12 +4312,14 @@ print(" 13. ⚙️ Settings      — Info + Keybind")
 print("=====================================================")
 print("✨ Loading 4D Fire Ring (SELAMAT DATANG SC PENGANGGURAN)")
 print("🔴 Tombol menu 'R' 4D API (KECIL + BISA DIGESER)")
-print("🎯 AIMLOCK:")
-print("   • FITUR tetap ada di menu")
+print("🎯 AIMLOCK (FITUR TETAP ADA):")
+print("   • Show Aimlock Button = ON/OFF tombol 🎯 di layar")
+print("   • Enable Aimlock Function = aktif/enggak fitur aimlock")
 print("   • Radius + Lock Radius slider")
 print("   • HOLD tombol 🎯 di layar = aim aktif")
 print("   • Klik kanan 🎯 = switch mode")
-print("⚔️ Auto Parry v9 (Anti-Miss buffer +5)")
+print("   • Drag 🎯 = pindah posisi")
+print("⚔️ Auto Parry v10 (Anti-Miss buffer +5)")
 print("💀 Auto Kill All FIX (Anti nyangkut)")
 print("📦 Hitbox Safe (Selalu invisible)")
 print("🎯 Skill Check FIXED (NO COOLDOWN)")

@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v4
+-- ROOORHUB ULTIMATE FIRE EDITION v5
 -- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
 -- =========================================================
 
@@ -204,7 +204,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE EDITION v4 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE EDITION v5 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -366,13 +366,23 @@ _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
     Survivor = Color3.fromRGB(60, 255, 120),
 }
 
+-- AUTO PARRY CONFIG (ANTI-MISS)
 _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
-    ParryDelay = 0,
-    ParryCooldown = 0.2,
     ParryDistance = 15,
     FaceSensitivity = 0.7,
     RequireFacing = true,
+    ParryDelay = 0.05,
+    Cooldown = 0.15,
+    AntiMiss = true,
+}
+
+-- AUTO SKILL CHECK CONFIG (ANTI MELEDAK)
+_G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
+    Enabled = false,
+    PerfectMode = false,
+    SafeZone = 0.15,
+    Cooldown = 0.1,
 }
 
 print("✅ [1/8] Loading 4D + Config loaded")-- =========================================================
@@ -457,7 +467,6 @@ local FireConfig = {
     ReaperFire = { c1 = Color3.fromRGB(0, 0, 0), c2 = Color3.fromRGB(255, 0, 0), smoke = true },
 }
 
--- Fallback
 for _, name in ipairs(FireList) do
     if not FireConfig[name] then FireConfig[name] = FireConfig.Classic end
 end
@@ -724,17 +733,12 @@ local function apply8BitCrown(enable, size, posX, posY, posZ)
 end
 
 -- =========================================================
--- ESP SYSTEM (FALLENS-STYLE - WORK 100%)
+-- ESP SYSTEM (FALLENS-STYLE)
 -- =========================================================
 local ESPObjects = {}
 local StatusESP = {}
 local CachedSCP = {}
-
-local Cached = {
-    Generators = {},
-    Windows = {},
-    Pallets = {},
-}
+local Cached = { Generators = {}, Windows = {}, Pallets = {} }
 
 local GeneratorColor = Color3.fromRGB(255, 170, 0)
 local PalletColor = Color3.fromRGB(74, 255, 181)
@@ -745,20 +749,13 @@ local ESP = _G.Roooor_ESP
 local ESPStatus = _G.Roooor_ESPStatus
 local TeamColors = _G.Roooor_TeamColors
 
--- Cache function
 local function cacheObject(obj)
-    if obj.Name == "Generator" then
-        Cached.Generators[obj] = true
-    elseif obj.Name == "Window" then
-        Cached.Windows[obj] = true
-    elseif obj.Name == "Pallet" or obj.Name == "Palletwrong" then
-        Cached.Pallets[obj] = true
-    end
+    if obj.Name == "Generator" then Cached.Generators[obj] = true
+    elseif obj.Name == "Window" then Cached.Windows[obj] = true
+    elseif obj.Name == "Pallet" or obj.Name == "Palletwrong" then Cached.Pallets[obj] = true end
 
     local name = string.lower(obj.Name)
-    if string.find(name, "scp") then
-        CachedSCP[obj] = true
-    end
+    if string.find(name, "scp") then CachedSCP[obj] = true end
 end
 
 local function removeCache(obj)
@@ -766,19 +763,13 @@ local function removeCache(obj)
     Cached.Windows[obj] = nil
     Cached.Pallets[obj] = nil
     CachedSCP[obj] = nil
-    if ESPObjects[obj] then
-        ESPObjects[obj]:Destroy()
-        ESPObjects[obj] = nil
-    end
+    if ESPObjects[obj] then ESPObjects[obj]:Destroy(); ESPObjects[obj] = nil end
 end
 
-for _, obj in ipairs(workspace:GetDescendants()) do
-    cacheObject(obj)
-end
+for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
--- Create ESP
 local function createESP(obj, color)
     if not obj then return end
 
@@ -795,40 +786,25 @@ local function createESP(obj, color)
     h.OutlineTransparency = 0.3
     h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     h.Parent = obj
-
     ESPObjects[obj] = h
 
     obj.AncestryChanged:Connect(function(_, parent)
         if not parent then
-            if ESPObjects[obj] then
-                ESPObjects[obj]:Destroy()
-                ESPObjects[obj] = nil
-            end
+            if ESPObjects[obj] then ESPObjects[obj]:Destroy(); ESPObjects[obj] = nil end
         end
     end)
 end
 
 local function removeESP(obj)
-    if ESPObjects[obj] then
-        ESPObjects[obj]:Destroy()
-        ESPObjects[obj] = nil
-    end
+    if ESPObjects[obj] then ESPObjects[obj]:Destroy(); ESPObjects[obj] = nil end
 end
 
--- Status ESP
 local function removeStatusESP(char)
-    if StatusESP[char] then
-        StatusESP[char]:Destroy()
-        StatusESP[char] = nil
-    end
+    if StatusESP[char] then StatusESP[char]:Destroy(); StatusESP[char] = nil end
 end
 
 local function createStatusESP(player, char, root)
-    if not ESPStatus.Enabled then
-        removeStatusESP(char)
-        return
-    end
-
+    if not ESPStatus.Enabled then removeStatusESP(char); return end
     if not root then return end
 
     local head = char:FindFirstChild("Head")
@@ -841,10 +817,7 @@ local function createStatusESP(player, char, root)
         or char:GetAttribute("Knocked") == true
 
     local dist = (head.Position - root.Position).Magnitude
-    if dist > ESPStatus.Radius then
-        removeStatusESP(char)
-        return
-    end
+    if dist > ESPStatus.Radius then removeStatusESP(char); return end
 
     local text = ""
     if isDown then text = text .. "🔻 DOWN\n" end
@@ -852,19 +825,13 @@ local function createStatusESP(player, char, root)
     if ESPStatus.ShowDistance then text = text .. string.format("Dist: %.0f\n", dist) end
     if ESPStatus.ShowHealth then text = text .. string.format("HP: %.0f\n", hum.Health) end
 
-    if text == "" then
-        removeStatusESP(char)
-        return
-    end
+    if text == "" then removeStatusESP(char); return end
 
     local billboard = StatusESP[char]
     local teamColor = Color3.new(1, 1, 1)
     if player.Team then
-        if player.Team.Name == "Killer" then
-            teamColor = TeamColors.Killer
-        elseif player.Team.Name == "Survivors" then
-            teamColor = TeamColors.Survivor
-        end
+        if player.Team.Name == "Killer" then teamColor = TeamColors.Killer
+        elseif player.Team.Name == "Survivors" then teamColor = TeamColors.Survivor end
     end
     if isDown then teamColor = Color3.fromRGB(255, 0, 0) end
 
@@ -896,7 +863,6 @@ local function createStatusESP(player, char, root)
     end
 end
 
--- Generator ESP
 local function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -969,78 +935,57 @@ local function UpdateGenerator(generator)
     h.Parent = generator
 end
 
--- Map ESP (Window, Pallet)
 local function UpdateMapESP(obj, root)
     if not obj or not root then return end
 
     local pos
-    if obj:IsA("Model") then
-        pos = obj:GetPivot().Position
-    elseif obj:IsA("BasePart") then
-        pos = obj.Position
-    end
+    if obj:IsA("Model") then pos = obj:GetPivot().Position
+    elseif obj:IsA("BasePart") then pos = obj.Position end
     if not pos then return end
 
     local distance = (pos - root.Position).Magnitude
 
     if obj.Name == "Window" then
-        if ESP.Window and distance <= ESP.Distance then
-            createESP(obj, WindowColor)
-        else
-            removeESP(obj)
-        end
+        if ESP.Window and distance <= ESP.Distance then createESP(obj, WindowColor)
+        else removeESP(obj) end
     end
 
     if obj.Name == "Pallet" or obj.Name == "Palletwrong" then
-        if ESP.Pallet and distance <= ESP.Distance then
-            createESP(obj, PalletColor)
-        else
-            removeESP(obj)
-        end
+        if ESP.Pallet and distance <= ESP.Distance then createESP(obj, PalletColor)
+        else removeESP(obj) end
     end
 end
 
--- SCP ESP
 local function UpdateSCPEsp(root)
     if not ESP.SCP then
-        for obj in pairs(CachedSCP) do
-            removeESP(obj)
-        end
+        for obj in pairs(CachedSCP) do removeESP(obj) end
         return
     end
 
     for obj in pairs(CachedSCP) do
         if obj and obj.Parent then
             local pos
-            if obj:IsA("Model") then
-                pos = obj:GetPivot().Position
-            elseif obj:IsA("BasePart") then
-                pos = obj.Position
-            end
+            if obj:IsA("Model") then pos = obj:GetPivot().Position
+            elseif obj:IsA("BasePart") then pos = obj.Position end
 
             if pos then
                 local dist = (pos - root.Position).Magnitude
-                if dist <= ESP.Distance then
-                    createESP(obj, SCPColor)
-                else
-                    removeESP(obj)
-                end
+                if dist <= ESP.Distance then createESP(obj, SCPColor)
+                else removeESP(obj) end
             end
         end
     end
 end
 
 -- =========================================================
--- AUTO PARRY GACOR v5 (FALLENS-STYLE)
+-- AUTO PARRY GACOR v5 (ANTI-MISS)
 -- =========================================================
 local AutoParry = _G.Roooor_AutoParry
 local lastParry = 0
-local PARRY_DEBOUNCE = 0.15
 local hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
 local ParryActive = false
 
--- Cek facing target
 local function isFacingTarget(targetChar)
     if not AutoParry.RequireFacing then return true end
 
@@ -1055,14 +1000,11 @@ local function isFacingTarget(targetChar)
     local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
     local dot = enemyForward:Dot(directionToMe)
 
-    if AutoParry.FaceSensitivity <= -1 then
-        return true
-    end
+    if AutoParry.FaceSensitivity <= -1 then return true end
 
     return dot >= AutoParry.FaceSensitivity
 end
 
--- Cek range
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -1070,11 +1012,21 @@ local function isInParryRange(killerChar)
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
 
-    local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-    return dist <= AutoParry.ParryDistance
+    -- Anti-Miss buffer +3
+    local buffer = AutoParry.AntiMiss and 3 or 0
+
+    -- Predict 0.1s
+    local vel = enemyRoot.AssemblyLinearVelocity
+    local predicted = enemyRoot.Position + (vel * 0.1)
+
+    local distNow = (enemyRoot.Position - myRoot.Position).Magnitude
+    local distPredict = (predicted - myRoot.Position).Magnitude
+
+    local range = AutoParry.ParryDistance + buffer
+
+    return distNow <= range or distPredict <= range
 end
 
--- Get parry button
 local function GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
@@ -1083,14 +1035,12 @@ local function GetParryButton()
     return current
 end
 
--- Press right click (PC)
 local function pressRightClick()
     VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
     task.wait()
     VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
 end
 
--- Press parry
 local function pressParryButton()
     if UIS.TouchEnabled then
         local btn = GetParryButton()
@@ -1098,7 +1048,6 @@ local function pressParryButton()
             local pos = btn.AbsolutePosition
             local size = btn.AbsoluteSize
             local inset = GuiService:GetGuiInset()
-
             local x = pos.X + size.X/2 + inset.X
             local y = pos.Y + size.Y/2 + inset.Y
 
@@ -1111,47 +1060,38 @@ local function pressParryButton()
     end
 end
 
--- Do parry
 local function doParry()
     local now = tick()
-    if now - lastParry < PARRY_DEBOUNCE then return end
+    if now - lastParry < AutoParry.Cooldown then return end
     lastParry = now
 
     ParryActive = true
     pressParryButton()
 
-    task.delay(0.3, function()
-        ParryActive = false
-    end)
+    task.delay(0.3, function() ParryActive = false end)
 end
 
--- Hook killer
 local function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
 
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
     -- Trigger 1: Animation hook
     animator.AnimationPlayed:Connect(function(track)
         if not AutoParry.Enabled then return end
-
         local anim = track.Animation
         if not anim then return end
-
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-
         local fullId = "rbxassetid://" .. id
 
         if KillerAnims[fullId] then
             if not isInParryRange(char) then return end
             if not isFacingTarget(char) then return end
-
             doParry()
         end
     end)
@@ -1176,9 +1116,7 @@ local function hookKiller(char)
                     if id then
                         local fullId = "rbxassetid://" .. id
                         if KillerAnims[fullId] then
-                            if isFacingTarget(char) then
-                                doParry()
-                            end
+                            if isFacingTarget(char) then doParry() end
                             break
                         end
                     end
@@ -1196,12 +1134,136 @@ local function scanKillers()
     end
 end
 
--- Scan killer loop
 task.spawn(function()
     while task.wait(0.2) do
-        if AutoParry.Enabled then
-            scanKillers()
+        if AutoParry.Enabled then scanKillers() end
+    end
+end)
+
+-- =========================================================
+-- AUTO SKILL CHECK FIXED (ANTI MELEDAK)
+-- =========================================================
+local SkillCheck = _G.Roooor_SkillCheck
+local skillBusy = false
+local lastSkillCheck = 0
+
+local ActionPath = "Survivor-mob.Controls.action.check"
+
+local function GetActionButton()
+    local current = PG
+    for segment in string.gmatch(ActionPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
+end
+
+local function triggerSkillCheck()
+    if skillBusy then return end
+    skillBusy = true
+
+    pcall(function()
+        if UIS.TouchEnabled then
+            local b = GetActionButton()
+            if b and b:IsA("GuiObject") then
+                local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+                local cx = p.X + s.X/2 + i.X
+                local cy = p.Y + s.Y/2 + i.Y
+
+                VirtualInputManager:SendTouchEvent(8822, 0, cx, cy)
+                task.wait(0.005)
+                VirtualInputManager:SendTouchEvent(8822, 2, cx, cy)
+            end
+        else
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+            task.wait(0.005)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
         end
+    end)
+
+    task.wait(0.05)
+    skillBusy = false
+end
+
+-- MAIN SKILL CHECK LOOP (ANTI MELEDAK)
+task.spawn(function()
+    while gui and gui.Parent do
+        task.wait(0.01)
+
+        if not SkillCheck.Enabled then continue end
+
+        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
+        if not prompt then continue end
+
+        local check = prompt:FindFirstChild("Check")
+        if not check or not check.Visible then continue end
+
+        local line = check:FindFirstChild("Line")
+        local goal = check:FindFirstChild("Goal")
+        if not line or not goal then continue end
+
+        local lr = line.Rotation % 360
+        local gr = goal.Rotation % 360
+
+        -- Default goal zone: +102 sampai +116
+        local startZone = (gr + 102) % 360
+        local endZone = (gr + 116) % 360
+
+        -- Check exact zone
+        local inZone = false
+        if startZone > endZone then
+            inZone = (lr >= startZone or lr <= endZone)
+        else
+            inZone = (lr >= startZone and lr <= endZone)
+        end
+
+        -- Predictive check
+        if not inZone then
+            local distanceToZone = 0
+            if startZone > endZone then
+                if lr > endZone and lr < startZone then
+                    distanceToZone = math.min(math.abs(lr - startZone), math.abs(lr - endZone))
+                end
+            else
+                if lr < startZone then
+                    distanceToZone = startZone - lr
+                end
+            end
+
+            if distanceToZone > 0 and distanceToZone <= (SkillCheck.SafeZone * 360) then
+                inZone = true
+            end
+        end
+
+        if inZone then
+            local now = tick()
+            if now - lastSkillCheck < SkillCheck.Cooldown then continue end
+            lastSkillCheck = now
+            triggerSkillCheck()
+        end
+    end
+end)
+
+-- PERFECT MODE (Auto Sukses 100%)
+task.spawn(function()
+    while gui and gui.Parent do
+        task.wait(0.01)
+
+        if not SkillCheck.Enabled then continue end
+        if not SkillCheck.PerfectMode then continue end
+
+        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
+        if not prompt then continue end
+
+        local check = prompt:FindFirstChild("Check")
+        if not check or not check.Visible then continue end
+
+        local line = check:FindFirstChild("Line")
+        local goal = check:FindFirstChild("Goal")
+        if not line or not goal then continue end
+
+        pcall(function()
+            line.Rotation = goal.Rotation + 108
+        end)
     end
 end)
 
@@ -1577,7 +1639,7 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
-print("✅ [3/8] Semua fungsi loaded (ESP Fallens + Parry v5)")-- =========================================================
+print("✅ [3/8] Semua fungsi loaded (ESP + Parry v5 + Skill Check FIXED)")-- =========================================================
 -- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA
 -- =========================================================
 
@@ -1664,7 +1726,7 @@ task.spawn(function()
     end
 end)
 
--- AUTO DODGE (basic)
+-- AUTO DODGE
 task.spawn(function()
     while task.wait(0.15) do
         if S.AutoDodge and LP.Character then
@@ -1690,7 +1752,7 @@ task.spawn(function()
     end
 end)
 
--- AUTO DODGE KILLER ABYSS (Crouch saat Slash)
+-- AUTO DODGE KILLER ABYSS (Crouch)
 task.spawn(function()
     while task.wait(0.05) do
         if S.AbyssDodge and LP.Character then
@@ -2094,55 +2156,6 @@ task.spawn(function()
     end
 end)
 
--- AUTO SKILL CHECK
-local skillBusy = false
-local function doSkillCheck()
-    if skillBusy then return end
-    skillBusy = true
-    pcall(function()
-        if UIS.TouchEnabled then
-            local b = PG
-            for seg in string.gmatch("Survivor-mob.Controls.action.check", "[^%.]+") do
-                b = b and b:FindFirstChild(seg)
-            end
-            if b and b:IsA("GuiObject") then
-                local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
-                VirtualInputManager:SendTouchEvent(8822, 0, p.X + s.X/2 + i.X, p.Y + s.Y/2 + i.Y)
-                VirtualInputManager:SendTouchEvent(8822, 2, p.X + s.X/2 + i.X, p.Y + s.Y/2 + i.Y)
-            end
-        else
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-        end
-    end)
-    task.wait(0.05)
-    skillBusy = false
-end
-
-task.spawn(function()
-    while task.wait(0.05) do
-        if S.Skill then
-            local prompt = PG:FindFirstChild("SkillCheckPromptGui")
-            if prompt then
-                local check = prompt:FindFirstChild("Check")
-                if check and check.Visible then
-                    local line = check:FindFirstChild("Line")
-                    local goal = check:FindFirstChild("Goal")
-                    if line and goal then
-                        local lr = line.Rotation % 360
-                        local gr = goal.Rotation % 360
-                        local sr = (gr + 102) % 360
-                        local er = (gr + 116) % 360
-                        if (sr > er and (lr >= sr or lr <= er)) or (lr >= sr and lr <= er) then
-                            doSkillCheck()
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
 -- AIMLOCK
 task.spawn(function()
     while task.wait(0.05) do
@@ -2217,7 +2230,6 @@ RunService.RenderStepped:Connect(function()
     if now - lastESPUpdate >= 0.05 then
         lastESPUpdate = now
 
-        -- PLAYER ESP
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
                 local char = p.Character
@@ -2246,18 +2258,15 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- GENERATOR ESP
         if ESP.Generator then
             for gen in pairs(Cached.Generators) do
                 UpdateGenerator(gen)
             end
         end
 
-        -- MAP ESP
         for obj in pairs(Cached.Windows) do UpdateMapESP(obj, root) end
         for obj in pairs(Cached.Pallets) do UpdateMapESP(obj, root) end
 
-        -- SCP ESP
         UpdateSCPEsp(root)
     end
 end)
@@ -2292,15 +2301,6 @@ task.spawn(function()
         local cam = workspace.CurrentCamera
         if cam then
             cam.CanCollide = not S.NoClipCamera
-        end
-    end
-end)
-
--- RGB UI LOOP
-task.spawn(function()
-    while task.wait(0.05) do
-        if S.RGBUI and gui and gui.Parent then
-            local hue = (tick() * 0.3) % 1
         end
     end
 end)
@@ -2379,7 +2379,6 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow pulse terang
 local glow = Instance.new("Frame")
 glow.Size = UDim2.new(1, 16, 1, 16)
 glow.Position = UDim2.new(0, -8, 0, -8)
@@ -2390,7 +2389,6 @@ glow.ZIndex = -1
 glow.Parent = mainBtn
 rnd(glow, 999)
 
--- Animasi loop
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -2408,7 +2406,6 @@ task.spawn(function()
     end
 end)
 
--- Partikel api di sekitar tombol
 for i = 1, 10 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 4, 0, 4)
@@ -2492,7 +2489,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -100, 1, 0)
 hTitle.Position = UDim2.new(0, 18, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v4"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v5"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 14
 hTitle.Font = Enum.Font.GothamBlack
@@ -2981,19 +2978,6 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
--- Expose global untuk tab
-_G.Roooor_sec = sec
-_G.Roooor_lbl = lbl
-_G.Roooor_tog = tog
-_G.Roooor_sl = sl
-_G.Roooor_cpk = cpk
-_G.Roooor_btn = btn
-_G.Roooor_drp = drp
-_G.Roooor_makeTab = makeTab
-_G.Roooor_cs = cs
-_G.Roooor_sb = sb
-_G.Roooor_panel = panel
-
 print("✅ [5/8] GUI + Komponen loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
@@ -3108,7 +3092,7 @@ makeTab("Fire Feet", "👟", 2, function()
 end)
 
 -- ============================
--- TAB: ESP (FALLENS-STYLE - FIXED)
+-- TAB: ESP (FALLENS-STYLE)
 -- ============================
 makeTab("ESP", "👁️", 3, function()
     sec("Player ESP", "🟢")
@@ -3139,7 +3123,7 @@ makeTab("ESP", "👁️", 3, function()
 end)
 
 -- ============================
--- TAB: SURVIVOR (Parry v5)
+-- TAB: SURVIVOR (Parry v5 + Skill Check FIXED)
 -- ============================
 makeTab("Survivor", "🏃", 4, function()
     sec("Auto Parry GACOR v5", "🛡️")
@@ -3149,13 +3133,14 @@ makeTab("Survivor", "🏃", 4, function()
     end)
     sl("Parry Distance", 5, 20, 15, function(v) AutoParry.ParryDistance = v end)
     sl("Face Sensitivity", -1, 1, 0.7, function(v) AutoParry.FaceSensitivity = v end)
+    sl("Cooldown", 0.05, 0.5, 0.15, function(v) AutoParry.Cooldown = v end)
+    tog("Anti-Miss (Buffer +3)", true, function(s) AutoParry.AntiMiss = s end)
     lbl("Anti-miss + Real Attack Detect + Facing Check", C.GRN)
     lbl("-1 = matikan cek arah depan", C.DIM)
 
     sec("Anti Fake Hit", "⚡")
     tog("Enable Anti Fake Hit", false, function(s)
         S.AntiFakeHit = s
-        if s then scanKillers() end
     end)
     sl("Dodge Range", 5, 30, 15, function(v) S.DodgeRange = v end)
     lbl("Kalau killer fake hit, auto hindar", C.FIRE_BRIGHT)
@@ -3168,8 +3153,13 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
     sl("Circle Size", 5, 50, 15, function(v) S.ParryCircleSize = v end)
 
-    sec("Auto Skill Check", "🎯")
-    tog("Enable Skill Check", false, function(s) S.Skill = s end)
+    sec("Auto Skill Check (FIXED)", "🎯")
+    tog("Enable Skill Check", false, function(s) SkillCheck.Enabled = s end)
+    tog("Perfect Mode (Auto Sukses)", false, function(s) SkillCheck.PerfectMode = s end)
+    sl("Safe Zone %", 0.05, 0.3, 0.15, function(v) SkillCheck.SafeZone = v end)
+    sl("Cooldown", 0.05, 0.5, 0.1, function(v) SkillCheck.Cooldown = v end)
+    lbl("Safe Zone lebih gede = lebih aman", C.GRN)
+    lbl("Perfect Mode = auto sukses 100%", C.FIRE_BRIGHT)
 
     sec("Auto Heal", "💊")
     tog("Enable Auto Heal", false, function(s) S.AutoHeal = s end)
@@ -3516,7 +3506,7 @@ makeTab("Top 10", "🏆", 11, function()
     tog("Show Player List", false, function(s)
         S.PlayerList = s
         if s then
-            _G.Roooor_createPlayerList()
+            if _G.Roooor_createPlayerList then _G.Roooor_createPlayerList() end
         else
             local plg = PG:FindFirstChild("RoooorPlayerList")
             if plg then plg:Destroy() end
@@ -3536,11 +3526,11 @@ makeTab("Settings", "⚙️", 12, function()
     lbl("RightShift = Toggle Menu", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Ultimate Fire v4", C.FIRE_BRIGHT)
+    lbl("RoooorHub Ultimate Fire v5", C.FIRE_BRIGHT)
     lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE_BRIGHT)
     lbl("ESP Fallens-Style (WORK 100%)", C.GRN)
-    lbl("Parry GACOR v5 + Anti Fake Hit + Abyss Dodge", C.GRN)
-    lbl("Auto Skill Check (TIDAK DIUBAH)", C.GRN)
+    lbl("Parry GACOR v5 + Anti-Miss + Abyss Dodge", C.GRN)
+    lbl("Skill Check FIXED (Anti Meledak)", C.GRN)
     lbl("Made with 🔥", C.FIRE_BRIGHT)
 end)
 
@@ -3674,6 +3664,16 @@ task.spawn(function()
                     S.AbyssDodge = state
                 end
             end
+            if name == "Enable Skill Check" then
+                if SkillCheck.Enabled ~= state then
+                    SkillCheck.Enabled = state
+                end
+            end
+            if name == "Perfect Mode (Auto Sukses)" then
+                if SkillCheck.PerfectMode ~= state then
+                    SkillCheck.PerfectMode = state
+                end
+            end
         end
     end
 end)
@@ -3742,14 +3742,14 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("🔥 ROOORHUB ULTIMATE FIRE EDITION v4")
+print("🔥 ROOORHUB ULTIMATE FIRE EDITION v5")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
 print("  1. 🔥 Fire          — 60 Efek (semua work!)")
 print("  2. 👟 Fire Feet     — 20 Efek")
 print("  3. 👁️ ESP           — FALLENS-STYLE (WORK 100%)")
-print("  4. 🏃 Survivor      — Parry v5 + Anti Fake Hit + Abyss Dodge")
+print("  4. 🏃 Survivor      — Parry v5 + Skill Check FIXED + Abyss Dodge")
 print("  5. 🔪 Killer        — Attack + KillAll + Hitbox + Masked")
 print("  6. 🎨 Visual        — Fullbright Slider 0-100 + NoFog + Sky")
 print("  7. 👑 8-Bit Crown   — Bisa diatur posisi + ukuran")
@@ -3761,7 +3761,8 @@ print(" 12. ⚙️ Settings      — Info + Keybind")
 print("=====================================================")
 print("✨ Loading 4D HD 'SELAMAT DATANG SC PENGANGGURAN'")
 print("🔥 Tombol menu KECIL + API TERANG + BISA DIGESER")
-print("⚔️ Auto Parry GACOR v5 (Face Check + Real Attack Detect)")
+print("⚔️ Auto Parry GACOR v5 (Face Check + Real Attack + Anti-Miss)")
+print("🎯 Skill Check FIXED — Anti Meledak (Safe Zone + Predictive)")
 print("👁️ ESP FALLENS-STYLE — WORK 100% (Highlight + Adornee)")
 print("🌀 Abyss Dodge (Crouch saat slash)")
 print("👑 8-Bit Crown bisa diatur posisi X/Y/Z")

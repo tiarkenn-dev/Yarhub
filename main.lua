@@ -1,6 +1,6 @@
 -- =========================================================
--- ROOORHUB GALAXY v3.0 - FULL FIX
--- BAGIAN 1/8 : LOADING + CONFIG + STATE
+-- ROOORHUB GALAXY v3.1 - NO EXECUTE ANIM
+-- BAGIAN 1/6 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -9,7 +9,6 @@ local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local Stats = game:GetService("Stats")
 local GuiService = game:GetService("GuiService")
 local SoundService = game:GetService("SoundService")
 
@@ -70,9 +69,7 @@ function playToggleSound()
 end
 _G.Roooor_playSound = playToggleSound
 
--- =========================================================
--- LOADING GALAXY (DIPERCEPAT — 1 detik)
--- =========================================================
+-- LOADING GALAXY (CEPET — 1 detik)
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "RoooorLoading"
 loadingGui.ResetOnSpawn = false
@@ -104,7 +101,6 @@ task.spawn(function()
     end
 end)
 
--- Bintang jatuh
 for i = 1, 30 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
@@ -128,7 +124,6 @@ for i = 1, 30 do
     end)
 end
 
--- Ring container
 local ringContainer = Instance.new("Frame")
 ringContainer.Size = UDim2.new(0, 240, 0, 240)
 ringContainer.Position = UDim2.new(0.5, -120, 0.5, -180)
@@ -245,7 +240,6 @@ task.spawn(function()
     end
 end)
 
--- ⚠️ FIX: Loading cepet ilang (1 detik)
 task.delay(1.0, function()
     TweenService:Create(bg, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
     for _, el in pairs(bg:GetDescendants()) do
@@ -264,83 +258,31 @@ task.delay(1.0, function()
     print("[RoooorHub] ✅ Loading GUI destroyed")
 end)
 
--- =========================================================
 -- STATE UTAMA
--- =========================================================
 _G.RoooorS = _G.RoooorS or {
-    -- Fire
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-
-    -- Defense
-    Parry = false, DodgeRange = 15, AbyssDodge = false,
+    DodgeRange = 15, AbyssDodge = false,
     ParryCircle = false, ParryCircleSize = 15,
-
-    -- Movement
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
-    NoClip = false,
-
-    -- Character Visual
-    Korblox = false, Headless = false,
-    EightBitCrown = false,
-    EightBitSize = 1,
-    CrownX = 0,
-    CrownY = 1.2,
-    CrownZ = 0,
-
-    -- Effects
+    NoClip = false, Korblox = false, Headless = false,
+    Killer_AutoAtk = false, Killer_AtkDelay = 0.35, Killer_KillAll = false,
+    MaskedPower = "Cobra", AutoVault = false, InstantInteract = false,
+    EightBitCrown = false, EightBitSize = 1, CrownX = 0, CrownY = 1.2, CrownZ = 0,
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
-    KillEffect = false,
-    ExecuteAnim = true,
-
-    -- Combat
-    Killer_AutoAtk = false, Killer_AtkDelay = 0.35, Killer_KillAll = false,
-    MaskedPower = "Cobra",
-    AutoVault = false, InstantInteract = false,
-
-    -- Camera / UI
-    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 230, 255), CrosshairSize = 8,
-    NoClipCamera = false,
-    ZoomOut = false, ZoomOutValue = 500,
-
-    -- Lighting DASAR
-    Fullbright = false, FullbrightVal = 50,
-    NoFog = false,
-    UltraHD = false,
-    Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
-    FOV = 70, FOVEnabled = false,
-    SkyId = "Default",
-
-    -- LIGHTING HD BARU
-    Bloom = false,
-    BloomIntensity = 1.2,
-    BloomSize = 24,
-    BloomThreshold = 0.8,
-
-    SunRays = false,
-    SunRaysIntensity = 0.15,
-    SunRaysSpread = 1,
-
-    DepthOfField = false,
-    DOFFocusDistance = 20,
-    DOFInFocusRadius = 30,
-    DOFFarIntensity = 0.3,
-
-    Sharpen = false,
-    SharpenAmount = 0.35,
-
-    Cinematic = false,
-    CinematicBarSize = 40,
-    CinematicVignette = 0.4,
-
-    AtmosphereHD = false,
-    AtmosphereDensity = 0.3,
-    AtmosphereHaze = 1.5,
-    AtmosphereGlare = 0.2,
-
-    -- Support
+    KillEffect = false, Crosshair = false, CrosshairColor = Color3.fromRGB(0, 230, 255), CrosshairSize = 8,
+    NoClipCamera = false, ZoomOut = false, ZoomOutValue = 500,
+    Fullbright = false, FullbrightVal = 50, NoFog = false,
+    UltraHD = false, Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
+    FOV = 70, FOVEnabled = false, SkyId = "Default",
+    Bloom = false, BloomIntensity = 1.2, BloomSize = 24, BloomThreshold = 0.8,
+    SunRays = false, SunRaysIntensity = 0.15, SunRaysSpread = 1,
+    DepthOfField = false, DOFFocusDistance = 20, DOFInFocusRadius = 30, DOFFarIntensity = 0.3,
+    Sharpen = false, SharpenAmount = 0.35,
+    Cinematic = false, CinematicBarSize = 40, CinematicVignette = 0.4,
+    AtmosphereHD = false, AtmosphereDensity = 0.3, AtmosphereHaze = 1.5, AtmosphereGlare = 0.2,
     AutoHeal = false, AutoHealThreshold = 40,
     AutoRepair = false, AutoRevive = false, AutoDodge = false,
     AntiGrab = false, AntiHook = false, AntiBlind = false, AntiStun = false,
@@ -380,7 +322,6 @@ _G.Roooor_AutoParry = AutoParry
 SkillCheck = _G.Roooor_SkillCheck or { Enabled = false }
 _G.Roooor_SkillCheck = SkillCheck
 
--- COMBAT — FIX AIMLOCK HOLD-TO-AIM
 Combat = _G.Roooor_Combat or {
     AimlockEnabled = true,
     Holding = false,
@@ -403,8 +344,8 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
--- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
+print("✅ [1/6] Loading + Config + State loaded")-- =========================================================
+-- BAGIAN 2/6 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 FireList = {
@@ -542,13 +483,11 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + SKILL CHECK + HD
+print("✅ [2/6] Fire + Sky + KillerAnims loaded")-- =========================================================
+-- BAGIAN 3/6 : SEMUA FUNGSI + AUTO PARRY + SKILL CHECK + HD
 -- =========================================================
 
--- ============================
 -- FIRE (KEPALA)
--- ============================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -644,9 +583,7 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- 8-BIT CROWN (FULL CONTROL)
--- ============================
+-- 8-BIT CROWN
 function apply8BitCrown(enable, size, posX, posY, posZ)
     local char = LP.Character
     if not char then return end
@@ -703,9 +640,7 @@ function apply8BitCrown(enable, size, posX, posY, posZ)
     emitter.Parent = crown
 end
 
--- ============================
 -- ESP SYSTEM
--- ============================
 ESPObjects = {}
 StatusESP = {}
 CachedSCP = {}
@@ -773,9 +708,6 @@ function createStatusESP(player, char, root)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not head or not hum then return end
     local isDown = hum.Health <= 0 or hum.Health < 2
-        or char:GetAttribute("Downed") == true
-        or char:GetAttribute("IsDown") == true
-        or char:GetAttribute("Knocked") == true
     local dist = (head.Position - root.Position).Magnitude
     if dist > ESPStatus.Radius then removeStatusESP(char); return end
     local text = ""
@@ -911,9 +843,7 @@ function UpdateSCPEsp(root)
     end
 end
 
--- =========================================================
 -- AUTO PARRY
--- =========================================================
 PARRY_DEBOUNCE = 0.2
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
@@ -1020,9 +950,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO SKILL CHECK
--- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
     task.wait()
@@ -1082,14 +1010,7 @@ function startSkillCheck()
     end)
 end
 
-task.spawn(function()
-    task.wait(1)
-    if SkillCheck.Enabled then startSkillCheck() end
-end)
-
--- =========================================================
 -- TELEPORT
--- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
@@ -1138,9 +1059,7 @@ function teleportInsideGate()
     else warn("[RoooorHub] Inside gate gak ketemu") end
 end
 
--- =========================================================
 -- NO CLIP
--- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if S.NoClip and LP.Character then
@@ -1151,9 +1070,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- VISUAL LIGHTING — FUNGSI DASAR
--- =========================================================
+-- VISUAL LIGHTING
 origLighting = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
@@ -1278,10 +1195,7 @@ function applyContrast()
     end
 end
 
--- =========================================================
 -- FITUR HD BARU
--- =========================================================
-
 function applyBloom()
     if S.Bloom then
         if not _G.RoooorBloom then
@@ -1407,9 +1321,7 @@ function applyAtmosphereHD()
     end
 end
 
--- =========================================================
 -- KORBLOX / HEADLESS
--- =========================================================
 KorbloxOrig = nil
 function applyKorblox(s)
     local char = LP.Character
@@ -1484,9 +1396,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- TRAIL / AURA / KILL EFFECT / CROSSHAIR / ZOOM
--- =========================================================
 trailFireObj = nil
 function applyTrail(enable, color)
     local char = LP.Character
@@ -1594,108 +1504,7 @@ function applyZoomOut(enable, val)
     else LP.CameraMaxZoomDistance = 128 end
 end
 
--- =========================================================
--- 🎬 EXECUTE ANIMATION "ROOORHUB" (FIXED v3 — PASTI MUNCUL)
--- =========================================================
-function showExecuteAnim(targetPos)
-    if not S.ExecuteAnim then return end
-
-    -- Part anchor (ukuran normal biar Billboard ke-render sempurna)
-    local part = Instance.new("Part")
-    part.Name = "RoooorExecutePart"
-    part.Anchored = true
-    part.CanCollide = false
-    part.Transparency = 1
-    part.Size = Vector3.new(2, 2, 2)
-    part.Position = targetPos + Vector3.new(0, 6, 0)
-    part.Parent = workspace
-
-    -- Billboard Gui
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "RoooorExecuteGui"
-    billboard.Size = UDim2.new(0, 500, 0, 120)
-    billboard.AlwaysOnTop = true
-    billboard.LightInfluence = 0
-    billboard.MaxDistance = math.huge
-    billboard.Adornee = part
-    billboard.Parent = part
-
-    -- Glow belakang
-    local glowFrame = Instance.new("Frame")
-    glowFrame.Size = UDim2.new(0, 380, 0, 80)
-    glowFrame.Position = UDim2.new(0.5, -190, 0.5, -40)
-    glowFrame.BackgroundColor3 = C.ACC
-    glowFrame.BackgroundTransparency = 0.5
-    glowFrame.BorderSizePixel = 0
-    glowFrame.Parent = billboard
-    rnd(glowFrame, 20)
-
-    -- Text "ROOORHUB"
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "ROOORHUB"
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextSize = 60
-    label.Font = Enum.Font.GothamBlack
-    label.TextStrokeTransparency = 0
-    label.TextStrokeColor3 = C.ACC
-    label.TextTransparency = 1
-    label.Parent = billboard
-
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, C.ACC),
-        ColorSequenceKeypoint.new(0.33, C.ACC2),
-        ColorSequenceKeypoint.new(0.66, C.ACC3),
-        ColorSequenceKeypoint.new(1, C.FIRE_BRIGHT),
-    })
-    grad.Parent = label
-
-    -- Animasi scale-in
-    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    TweenService:Create(label, info, {
-        TextTransparency = 0,
-        TextSize = 70,
-    }):Play()
-    TweenService:Create(glowFrame, info, {
-        BackgroundTransparency = 0.2,
-        Size = UDim2.new(0, 480, 0, 100),
-        Position = UDim2.new(0.5, -240, 0.5, -50),
-    }):Play()
-    TweenService:Create(part, info, {
-        Position = part.Position + Vector3.new(0, 10, 0),
-    }):Play()
-
-    -- Rotate glow
-    task.spawn(function()
-        local t = 0
-        while glowFrame.Parent do
-            t = t + 0.03
-            glowFrame.Rotation = math.sin(t * 2) * 5
-            task.wait(0.03)
-        end
-    end)
-
-    -- Fade out
-    task.delay(0.8, function()
-        TweenService:Create(label, TweenInfo.new(0.7), {
-            TextTransparency = 1,
-            TextSize = 40,
-        }):Play()
-        TweenService:Create(glowFrame, TweenInfo.new(0.7), {
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0, 700, 0, 150),
-            Position = UDim2.new(0.5, -350, 0.5, -75),
-        }):Play()
-        task.wait(0.8)
-        if part then part:Destroy() end
-    end)
-end
-
--- =========================================================
 -- SIMPAN KE _G
--- =========================================================
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8BitCrown = apply8BitCrown
@@ -1723,7 +1532,6 @@ _G.Roooor_teleportToFinishLine = teleportToFinishLine
 _G.Roooor_teleportToGate = teleportToGate
 _G.Roooor_teleportInsideGate = teleportInsideGate
 _G.Roooor_spawnKillEffect = spawnKillEffect
-_G.Roooor_showExecuteAnim = showExecuteAnim
 _G.Roooor_applyBloom = applyBloom
 _G.Roooor_applySunRays = applySunRays
 _G.Roooor_applyDepthOfField = applyDepthOfField
@@ -1731,8 +1539,8 @@ _G.Roooor_applySharpen = applySharpen
 _G.Roooor_applyCinematic = applyCinematic
 _G.Roooor_applyAtmosphereHD = applyAtmosphereHD
 
-print("✅ [3/8] Fungsi + Execute Anim ROOORHUB loaded")-- =========================================================
--- BAGIAN 4/8 : FITUR LOOP + AIMLOCK FIX + EXECUTE MONITOR
+print("✅ [3/6] Semua fungsi + Parry + Skill Check + HD loaded")-- =========================================================
+-- BAGIAN 4/6 : FITUR LOOP + AIMLOCK + KILL FEED + STUN NOTIFY
 -- =========================================================
 
 -- AUTO HEAL
@@ -2227,9 +2035,7 @@ RunService.RenderStepped:Connect(function()
     if S.ParryCircle then updateParryCircle() end
 end)
 
--- =========================================================
--- MAIN ESP LOOP (HEARTBEAT)
--- =========================================================
+-- MAIN ESP LOOP
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
@@ -2266,9 +2072,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- =========================================================
--- AIMLOCK LOOP — HOLD TO AIM (FIX)
--- =========================================================
+-- AIMLOCK LOOP — HOLD TO AIM
 local aimTarget = nil
 
 local function getAimTarget()
@@ -2303,7 +2107,6 @@ local function getAimTarget()
 end
 
 RunService.RenderStepped:Connect(function(dt)
-    -- KUNCI: cek Holding DULU. Kalau gak dipencet, JANGAN lock!
     if not Combat.AimlockEnabled then return end
     if not Combat.Holding then
         aimTarget = nil
@@ -2325,31 +2128,6 @@ RunService.RenderStepped:Connect(function(dt)
     local targetCF = CFrame.new(myPos, myPos + dir)
     local smooth = Combat.Smoothness or 0.35
     cam.CFrame = cam.CFrame:Lerp(targetCF, math.clamp(smooth * (dt * 60), 0, 1))
-end)
-
--- =========================================================
--- MONITOR KILL → TAMPILKAN EXECUTE ANIM "ROOORHUB"
--- =========================================================
-task.spawn(function()
-    local lastHealth = {}
-    while task.wait(0.3) do
-        if not S.ExecuteAnim then continue end
-        for _, p in pairs(Players:GetPlayers()) do
-            if p.Character then
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    local prevHP = lastHealth[p] or hum.Health
-                    if prevHP > 0 and hum.Health <= 0 then
-                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            showExecuteAnim(hrp.Position)
-                        end
-                    end
-                    lastHealth[p] = hum.Health
-                end
-            end
-        end
-    end
 end)
 
 -- KILL EFFECT LOOP
@@ -2454,21 +2232,94 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] Loop + AIMLOCK + EXECUTE MONITOR loaded")-- =========================================================
--- BAGIAN 5/8 : GUI GALAXY + TOMBOL KECIL + AIMLOCK + PANEL
+-- STUN NOTIFY
+stunIcons = {}
+function createStunIcon(killerChar)
+    if stunIcons[killerChar] then return stunIcons[killerChar] end
+    local head = killerChar:FindFirstChild("Head")
+    if not head then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "RoooorStunIcon"
+    billboard.Size = UDim2.new(0, 60, 0, 60)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0, 4, 0)
+    billboard.Adornee = head
+    billboard.Parent = head
+    local icon = Instance.new("TextLabel")
+    icon.Size = UDim2.new(1, 0, 1, 0)
+    icon.BackgroundTransparency = 1
+    icon.Text = "💫"
+    icon.TextColor3 = Color3.fromRGB(220, 180, 255)
+    icon.TextSize = 40
+    icon.Font = Enum.Font.GothamBlack
+    icon.TextStrokeTransparency = 0
+    icon.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    icon.Parent = billboard
+    task.spawn(function()
+        while billboard.Parent do
+            billboard.StudsOffset = Vector3.new(0, 4 + math.sin(tick() * 5) * 0.5, 0)
+            icon.Rotation = math.sin(tick() * 8) * 20
+            task.wait(0.05)
+        end
+    end)
+    stunIcons[killerChar] = billboard
+    return billboard
+end
+
+function removeStunIcon(killerChar)
+    if stunIcons[killerChar] then
+        stunIcons[killerChar]:Destroy()
+        stunIcons[killerChar] = nil
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not S.StunNotify then continue end
+        local myRoot = getRoot()
+        if not myRoot then continue end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                local krp = p.Character:FindFirstChild("HumanoidRootPart")
+                if krp then
+                    local dist = (krp.Position - myRoot.Position).Magnitude
+                    if dist <= 80 then
+                        local isStunned = false
+                        local khum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if khum then
+                            local animator = khum:FindFirstChildOfClass("Animator")
+                            if animator then
+                                for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                                    local a = track.Animation
+                                    if a and a.AnimationId then
+                                        local id = a.AnimationId:match("%d+")
+                                        if id == "123047897844134" then isStunned = true; break end
+                                    end
+                                end
+                            end
+                        end
+                        if isStunned then createStunIcon(p.Character)
+                        else removeStunIcon(p.Character) end
+                    else removeStunIcon(p.Character) end
+                end
+            end
+        end
+    end
+end)
+
+print("✅ [4/6] Loop + Aimlock + Kill Feed + Stun Notify loaded")-- =========================================================
+-- BAGIAN 5/6 : GUI GALAXY + TOMBOL KECIL + AIMLOCK + PANEL
 -- =========================================================
 
 gui = Instance.new("ScreenGui")
 gui.Name = "RoooorHubGalaxy"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = 100  -- ⚠️ FIX: di atas game UI tapi gak nutupin UI lain
+gui.DisplayOrder = 100
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- =========================================================
 -- TOMBOL MENU GALAXY (32×32)
--- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -2627,9 +2478,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- =========================================================
 -- AIMLOCK FLOATING BUTTON
--- =========================================================
 aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
 aimBtnGui.ResetOnSpawn = false
@@ -2770,9 +2619,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- PANEL MENU GALAXY
--- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -2968,9 +2815,7 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- =========================================================
 -- KOMPONEN UI GALAXY
--- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3354,8 +3199,8 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI GALAXY + Panel loaded")-- =========================================================
--- BAGIAN 6/8 : TAB UI PART 1
+print("✅ [5/6] GUI GALAXY + Panel + Aimlock Button loaded")-- =========================================================
+-- BAGIAN 6/6 : TAB UI + FINAL TOUCH + NOTIFIKASI
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3506,7 +3351,6 @@ makeTab("ESP", "👁️", 3, function()
 
     sec("ESP Distance", "📏")
     sl("ESP Radius", 10, 300, 50, function(v) ESP.Distance = v end)
-    lbl("Max 300 (limited biar fokus)", C.GRN)
 
     sec("Status ESP", "🟢")
     tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
@@ -3538,7 +3382,6 @@ makeTab("Survivor", "🏃", 4, function()
         SkillCheck.Enabled = s
         if s then startSkillCheck() end
     end)
-    lbl("Auto trigger saat masuk zona", C.GRN)
 
     sec("Dodge & Defense", "🛡️")
     tog("Auto Dodge", false, function(s) S.AutoDodge = s end)
@@ -3559,7 +3402,7 @@ makeTab("Survivor", "🏃", 4, function()
     sec("Teleport", "🌀")
     btn("TP ke Finish Line", function() teleportToFinishLine() end)
     btn("TP ke Gate", function() teleportToGate() end)
-    btn("TP ke Dalam Gate", function() teleportInsideGate() end)
+    btn("TP ke Dalam Gate", false and nil or function() teleportInsideGate() end)
 
     sec("Anti System", "🔒")
     tog("Anti Stun", false, function(s) S.AntiStun = s end)
@@ -3577,10 +3420,6 @@ makeTab("Survivor", "🏃", 4, function()
     sl("Alert Range", 20, 150, 60, function(v) S.EscapeAlertRange = v end)
 end)
 
-print("✅ [6/8] Tab UI Part 1 loaded")-- =========================================================
--- BAGIAN 7/8 : TAB UI PART 2
--- =========================================================
-
 -- ============================
 -- TAB: KILLER
 -- ============================
@@ -3589,14 +3428,11 @@ makeTab("Killer", "🔪", 5, function()
     tog("Auto Attack", false, function(s) S.Killer_AutoAtk = s end)
     sl("Attack Delay", 0.1, 1, 0.35, function(v) S.Killer_AtkDelay = v end)
     tog("Kill All (Auto Chase + Atk)", false, function(s) S.Killer_KillAll = s end)
-    lbl("⚠️ Auto kejar survivor terdekat", C.RED)
 
     sec("Killer Visual", "💀")
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
     tog("Stun Notify", false, function(s) S.StunNotify = s end)
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
-    tog("Execute Anim (ROOORHUB)", true, function(s) S.ExecuteAnim = s end)
-    lbl("Tulisan ROOORHUB muncul saat kill", C.ACC2)
 
     sec("Masked Power", "🎭")
     drp("Power", {"Cobra", "Bear", "Wolf", "Tiger", "Eagle"}, "Cobra", function(v) S.MaskedPower = v end)
@@ -3624,18 +3460,6 @@ makeTab("Combat", "🎯", 6, function()
     tog("Show Aimlock Button", false, function(s)
         if _G.Roooor_setAimlockVisible then _G.Roooor_setAimlockVisible(s) end
     end)
-    lbl("Tombol 🎯 di kiri layar", C.DIM)
-    lbl("Klik kanan tombol = ganti mode", C.DIM)
-
-    sec("TriggerBot", "⚡")
-    tog("Enable TriggerBot", false, function(s) Combat.TriggerBotEnabled = s end)
-    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v) Combat.TriggerDelay = v end)
-
-    sec("Hitbox Expander", "📦")
-    tog("Hitbox Survivor", false, function(s) Combat.HitboxSurvivor = s end)
-    tog("Hitbox Killer", false, function(s) Combat.HitboxKiller = s end)
-    sl("Hitbox Size", 5, 50, 15, function(v) Combat.HitboxSize = v end)
-    tog("Show Hitbox", false, function(s) Combat.HitboxVisible = s end)
 end)
 
 -- ============================
@@ -3893,10 +3717,8 @@ makeTab("Movement", "🏃", 9, function()
     sec("Fly", "🕊️")
     tog("Enable Fly", false, function(s)
         S.Fly = s
-        if s then startFly() else stopFly() end
     end)
     sl("Fly Speed", 10, 200, 50, function(v) S.FlySpeed = v end)
-    lbl("Space = naik | Shift = turun", C.GRN)
 end)
 
 -- ============================
@@ -3904,10 +3726,9 @@ end)
 -- ============================
 makeTab("Misc", "⚙️", 10, function()
     sec("Info", "ℹ️")
-    lbl("RoooorHub Galaxy v3.0", C.ACC2)
-    lbl("Rebuild + HD Features", C.GRN)
+    lbl("RoooorHub Galaxy v3.1", C.ACC2)
+    lbl("No Execute Anim", C.GRN)
     lbl("Hold-to-Aim Fixed", C.GRN)
-    lbl("Execute Anim ROOORHUB FIXED", C.GRN)
 
     sec("Reset", "🔄")
     btn("Reset Semua Toggle", function()
@@ -3923,14 +3744,13 @@ makeTab("Misc", "⚙️", 10, function()
     lbl("Made with 💜 by RoooorHub", C.ACC3)
 end)
 
-print("✅ [7/8] Tab UI Part 2 loaded")-- =========================================================
--- BAGIAN 8/8 : FINAL TOUCH + NOTIFIKASI + FORCE VISIBILITY
--- =========================================================
+print("✅ [6/6] Tab UI loaded")
 
 -- =========================================================
 -- NOTIFIKASI WELCOME
 -- =========================================================
-function showWelcomeNotif()
+task.spawn(function()
+    task.wait(1.5)
     local notif = Instance.new("ScreenGui")
     notif.Name = "RoooorWelcomeNotif"
     notif.ResetOnSpawn = false
@@ -3957,7 +3777,7 @@ function showWelcomeNotif()
     title.Size = UDim2.new(1, -20, 0, 30)
     title.Position = UDim2.new(0, 10, 0, 8)
     title.BackgroundTransparency = 1
-    title.Text = "✨ ROOORHUB GALAXY v3.0"
+    title.Text = "✨ ROOORHUB GALAXY v3.1"
     title.TextColor3 = C.FIRE_BRIGHT
     title.TextSize = 16
     title.Font = Enum.Font.GothamBlack
@@ -3997,49 +3817,10 @@ function showWelcomeNotif()
         task.wait(0.6)
         notif:Destroy()
     end)
-end
-
-task.spawn(function()
-    task.wait(1.5)
-    showWelcomeNotif()
 end)
 
 -- =========================================================
--- FORCE VISIBILITY CHECK
--- =========================================================
-task.spawn(function()
-    task.wait(2.5)
-    if btnContainer then
-        btnContainer.Visible = true
-        btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
-        print("[RoooorHub] ✅ Tombol menu ada di:", btnContainer.AbsolutePosition)
-    else
-        warn("[RoooorHub] ❌ btnContainer GAK ADA! Bagian 5 gagal load.")
-    end
-
-    if panel then
-        print("[RoooorHub] ✅ Panel OK. Visible =", panel.Visible)
-    else
-        warn("[RoooorHub] ❌ panel GAK ADA!")
-    end
-
-    if gui then
-        print("[RoooorHub] ✅ Main GUI OK. DisplayOrder =", gui.DisplayOrder)
-    else
-        warn("[RoooorHub] ❌ gui GAK ADA!")
-    end
-
-    if cs then
-        local tabCount = 0
-        for _, c in pairs(sb:GetChildren()) do
-            if c:IsA("TextButton") then tabCount = tabCount + 1 end
-        end
-        print("[RoooorHub] ✅ Total Tab:", tabCount)
-    end
-end)
-
--- =========================================================
--- AUTO UPDATE CROWN (kalau char respawn)
+-- AUTO RE-APPLY (CROWN / FIRE / TRAIL / AURA)
 -- =========================================================
 task.spawn(function()
     while task.wait(1) do
@@ -4049,55 +3830,35 @@ task.spawn(function()
                 apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
             end
         end
-    end
-end)
-
--- =========================================================
--- AUTO RE-APPLY FIRE (kalau char respawn)
--- =========================================================
-task.spawn(function()
-    while task.wait(1) do
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             if head and not head:FindFirstChild("RoooorFire") then
                 applyFire()
             end
         end
-    end
-end)
-
--- =========================================================
--- AUTO RE-APPLY TRAIL / AURA
--- =========================================================
-task.spawn(function()
-    while task.wait(1) do
-        if LP.Character then
-            if S.Trail then
-                local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-                local existing = LP.Character:FindFirstChild("RoooorTrailFire")
-                if hrp and not existing then
-                    applyTrail(true, S.TrailColor)
-                end
+        if S.Trail and LP.Character then
+            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+            local existing = LP.Character:FindFirstChild("RoooorTrailFire")
+            if hrp and not existing then
+                applyTrail(true, S.TrailColor)
             end
-            if S.Aura then
-                local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-                if hrp and not auraObj then
-                    applyAura(true, S.AuraColor)
-                end
+        end
+        if S.Aura and LP.Character then
+            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and not auraObj then
+                applyAura(true, S.AuraColor)
             end
         end
     end
 end)
 
 -- =========================================================
--- EVENT: PLAYER JOIN / LEAVE
+-- EVENT PLAYER JOIN / LEAVE
 -- =========================================================
 Players.PlayerAdded:Connect(function(p)
     if p ~= LP and p.Team and p.Team.Name == "Killer" then
         task.wait(2)
-        if p.Character then
-            hookKiller(p.Character)
-        end
+        if p.Character then hookKiller(p.Character) end
     end
 end)
 
@@ -4113,69 +3874,29 @@ Players.PlayerRemoving:Connect(function(p)
 end)
 
 -- =========================================================
--- STOP SKILL CHECK (buat toggle off)
--- =========================================================
-_G.Roooor_stopSkillCheck = function()
-    if SkillHeartbeat then
-        SkillHeartbeat:Disconnect()
-        SkillHeartbeat = nil
-    end
-end
-
--- =========================================================
--- AUTO-OPEN TAB PERTAMA (bikin tampilan awal ada isinya)
+-- FORCE VISIBILITY CHECK
 -- =========================================================
 task.spawn(function()
-    task.wait(1.5)
-    if sb then
-        local firstTab = nil
-        for _, c in pairs(sb:GetChildren()) do
-            if c:IsA("TextButton") then
-                if not firstTab or c.LayoutOrder < firstTab.LayoutOrder then
-                    firstTab = c
-                end
-            end
-        end
-        if firstTab then
-            activeTab = firstTab
-            local ind = firstTab:FindFirstChildOfClass("Frame")
-            if ind then
-                ind.Size = UDim2.new(0, 3, 0, 18)
-            end
-            firstTab.BackgroundTransparency = 0.7
-            for _, c in pairs(firstTab:GetChildren()) do
-                if c:IsA("TextLabel") then
-                    c.TextColor3 = C.TXT
-                end
-            end
-            sec("Fire Control", "⚙️")
-            tog("Enable Fire", false, function(s)
-                S.FireOn = s
-                applyFire()
-            end)
-            sl("Fire Size", 1, 15, 5, function(v)
-                S.FireSize = v
-                applyFire()
-            end)
-            sec("Pilih Efek Fire (60)", "🔥")
-            lbl("Klik efek untuk ganti", C.FIRE_BRIGHT)
-        end
+    task.wait(3)
+    print("════════════════════════════════════════")
+    print("[RoooorHub] DEBUG INFO:")
+    print("  Tombol menu:", btnContainer and "✅ ADA" or "❌ GAK ADA")
+    print("  Panel:", panel and "✅ ADA" or "❌ GAK ADA")
+    print("  GUI:", gui and "✅ ADA" or "❌ GAK ADA")
+    if btnContainer then
+        print("  Posisi tombol:", btnContainer.AbsolutePosition)
     end
+    print("════════════════════════════════════════")
 end)
 
 -- =========================================================
 -- WELCOME MESSAGE
 -- =========================================================
 print("╔════════════════════════════════════════╗")
-print("║   ✨ ROOORHUB GALAXY v3.0 ✨           ║")
-print("║   FULL FIX - ALL FEATURES WORKING     ║")
-print("║   Hold-to-Aim: FIXED                  ║")
-print("║   Execute Anim: ROOORHUB FIXED        ║")
-print("║   Crown: X / Y / Z / Size Control     ║")
-print("║   HD: Bloom, SunRays, DOF, Sharpen    ║")
-print("║   Cinematic, Atmosphere               ║")
+print("║   ✨ ROOORHUB GALAXY v3.1 ✨           ║")
+print("║   NO EXECUTE ANIM                      ║")
+print("║   All Features Working                 ║")
 print("╚════════════════════════════════════════╝")
-print("✅ [8/8] Final Touch + Notifikasi loaded")
+print("✅ [6/6] Final Touch loaded")
 print("🎉 SC SIAP DIGUNAKAN!")
-print("📌 Klik tombol ✨ di KIRI LAYAR untuk buka menu")
-print("📌 Execute Anim muncul otomatis saat ada yang MATI")
+print("📌 Klik tombol ✨ di kiri layar untuk buka menu")

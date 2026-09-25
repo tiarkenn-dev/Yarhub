@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB GALAXY v3.1 - NO EXECUTE ANIM
+-- ROOORHUB GALAXY v3.2 - FULL + EXECUTE ANIM
 -- BAGIAN 1/6 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
@@ -69,12 +69,12 @@ function playToggleSound()
 end
 _G.Roooor_playSound = playToggleSound
 
--- LOADING GALAXY (CEPET — 1 detik)
+-- LOADING GALAXY (1 detik)
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "RoooorLoading"
 loadingGui.ResetOnSpawn = false
 loadingGui.IgnoreGuiInset = true
-loadingGui.DisplayOrder = 999999
+loadingGui.DisplayOrder = 2147483647
 loadingGui.Parent = PG
 
 local bg = Instance.new("Frame")
@@ -258,7 +258,7 @@ task.delay(1.0, function()
     print("[RoooorHub] ✅ Loading GUI destroyed")
 end)
 
--- STATE UTAMA
+-- STATE
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
@@ -290,6 +290,7 @@ _G.RoooorS = _G.RoooorS or {
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     Fly = false, FlySpeed = 50,
     KillFeed = false, StunNotify = false,
+    ExecuteAnim = true,
 }
 S = _G.RoooorS
 
@@ -484,7 +485,7 @@ for _, id in ipairs({
 end
 
 print("✅ [2/6] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/6 : SEMUA FUNGSI + AUTO PARRY + SKILL CHECK + HD
+-- BAGIAN 3/6 : SEMUA FUNGSI + AUTO PARRY + SKILL CHECK + HD + EXECUTE ANIM
 -- =========================================================
 
 -- FIRE (KEPALA)
@@ -1195,7 +1196,6 @@ function applyContrast()
     end
 end
 
--- FITUR HD BARU
 function applyBloom()
     if S.Bloom then
         if not _G.RoooorBloom then
@@ -1303,8 +1303,7 @@ function applyCinematic()
         if _G.RoooorVignette then
             _G.RoooorVignette:Destroy()
             _G.RoooorVignette = nil
-        end
-    end
+        end    end
 end
 
 function applyAtmosphereHD()
@@ -1504,6 +1503,98 @@ function applyZoomOut(enable, val)
     else LP.CameraMaxZoomDistance = 128 end
 end
 
+-- =========================================================
+-- EXECUTE ANIMATION "ROOORHUB"
+-- =========================================================
+function showExecuteAnim(targetPos)
+    if not S.ExecuteAnim then return end
+
+    local part = Instance.new("Part")
+    part.Name = "RoooorExecutePart"
+    part.Anchored = true
+    part.CanCollide = false
+    part.Transparency = 1
+    part.Size = Vector3.new(2, 2, 2)
+    part.Position = targetPos + Vector3.new(0, 6, 0)
+    part.Parent = workspace
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "RoooorExecuteGui"
+    billboard.Size = UDim2.new(0, 500, 0, 120)
+    billboard.AlwaysOnTop = true
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Adornee = part
+    billboard.Parent = part
+
+    local glowFrame = Instance.new("Frame")
+    glowFrame.Size = UDim2.new(0, 380, 0, 80)
+    glowFrame.Position = UDim2.new(0.5, -190, 0.5, -40)
+    glowFrame.BackgroundColor3 = C.ACC
+    glowFrame.BackgroundTransparency = 0.5
+    glowFrame.BorderSizePixel = 0
+    glowFrame.Parent = billboard
+    rnd(glowFrame, 20)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "ROOORHUB"
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 60
+    label.Font = Enum.Font.GothamBlack
+    label.TextStrokeTransparency = 0
+    label.TextStrokeColor3 = C.ACC
+    label.TextTransparency = 1
+    label.Parent = billboard
+
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, C.ACC),
+        ColorSequenceKeypoint.new(0.33, C.ACC2),
+        ColorSequenceKeypoint.new(0.66, C.ACC3),
+        ColorSequenceKeypoint.new(1, C.FIRE_BRIGHT),
+    })
+    grad.Parent = label
+
+    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    TweenService:Create(label, info, {
+        TextTransparency = 0,
+        TextSize = 70,
+    }):Play()
+    TweenService:Create(glowFrame, info, {
+        BackgroundTransparency = 0.2,
+        Size = UDim2.new(0, 480, 0, 100),
+        Position = UDim2.new(0.5, -240, 0.5, -50),
+    }):Play()
+    TweenService:Create(part, info, {
+        Position = part.Position + Vector3.new(0, 10, 0),
+    }):Play()
+
+    task.spawn(function()
+        local t = 0
+        while glowFrame.Parent do
+            t = t + 0.03
+            glowFrame.Rotation = math.sin(t * 2) * 5
+            task.wait(0.03)
+        end
+    end)
+
+    task.delay(0.8, function()
+        TweenService:Create(label, TweenInfo.new(0.7), {
+            TextTransparency = 1,
+            TextSize = 40,
+        }):Play()
+        TweenService:Create(glowFrame, TweenInfo.new(0.7), {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 700, 0, 150),
+            Position = UDim2.new(0.5, -350, 0.5, -75),
+        }):Play()
+        task.wait(0.8)
+        if part then part:Destroy() end
+    end)
+end
+
 -- SIMPAN KE _G
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
@@ -1532,6 +1623,7 @@ _G.Roooor_teleportToFinishLine = teleportToFinishLine
 _G.Roooor_teleportToGate = teleportToGate
 _G.Roooor_teleportInsideGate = teleportInsideGate
 _G.Roooor_spawnKillEffect = spawnKillEffect
+_G.Roooor_showExecuteAnim = showExecuteAnim
 _G.Roooor_applyBloom = applyBloom
 _G.Roooor_applySunRays = applySunRays
 _G.Roooor_applyDepthOfField = applyDepthOfField
@@ -1539,8 +1631,8 @@ _G.Roooor_applySharpen = applySharpen
 _G.Roooor_applyCinematic = applyCinematic
 _G.Roooor_applyAtmosphereHD = applyAtmosphereHD
 
-print("✅ [3/6] Semua fungsi + Parry + Skill Check + HD loaded")-- =========================================================
--- BAGIAN 4/6 : FITUR LOOP + AIMLOCK + KILL FEED + STUN NOTIFY
+print("✅ [3/6] Semua fungsi + Execute Anim loaded")-- =========================================================
+-- BAGIAN 4/6 : FITUR LOOP + AIMLOCK + KILL FEED + MONITOR EXECUTE
 -- =========================================================
 
 -- AUTO HEAL
@@ -2130,6 +2222,29 @@ RunService.RenderStepped:Connect(function(dt)
     cam.CFrame = cam.CFrame:Lerp(targetCF, math.clamp(smooth * (dt * 60), 0, 1))
 end)
 
+-- MONITOR KILL → TAMPILKAN EXECUTE ANIM "ROOORHUB"
+task.spawn(function()
+    local lastHealth = {}
+    while task.wait(0.3) do
+        if not S.ExecuteAnim then continue end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    local prevHP = lastHealth[p] or hum.Health
+                    if prevHP > 0 and hum.Health <= 0 then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            showExecuteAnim(hrp.Position)
+                        end
+                    end
+                    lastHealth[p] = hum.Health
+                end
+            end
+        end
+    end
+end)
+
 -- KILL EFFECT LOOP
 task.spawn(function()
     while task.wait(0.8) do
@@ -2307,7 +2422,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/6] Loop + Aimlock + Kill Feed + Stun Notify loaded")-- =========================================================
+print("✅ [4/6] Loop + Aimlock + Kill Feed + Execute Monitor loaded")-- =========================================================
 -- BAGIAN 5/6 : GUI GALAXY + TOMBOL KECIL + AIMLOCK + PANEL
 -- =========================================================
 
@@ -2315,14 +2430,14 @@ gui = Instance.new("ScreenGui")
 gui.Name = "RoooorHubGalaxy"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = 100
+gui.DisplayOrder = 9999999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- TOMBOL MENU GALAXY (32×32)
+-- TOMBOL MENU GALAXY (32×32) — posisi digeser ke bawah biar gak ketutup chat Roblox
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
-btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
+btnContainer.Position = UDim2.new(0, 15, 0.55, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
@@ -2422,7 +2537,6 @@ task.spawn(function()
     end
 end)
 
--- Partikel orbit
 for i = 1, 8 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 2, 0, 2)
@@ -2446,7 +2560,6 @@ for i = 1, 8 do
     end)
 end
 
--- Drag tombol
 dragging = false
 dragStart = nil
 startPos = nil
@@ -2483,12 +2596,12 @@ aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
 aimBtnGui.ResetOnSpawn = false
 aimBtnGui.IgnoreGuiInset = true
-aimBtnGui.DisplayOrder = 101
+aimBtnGui.DisplayOrder = 9999998
 aimBtnGui.Parent = PG
 
 aimContainer = Instance.new("Frame")
 aimContainer.Size = UDim2.new(0, 40, 0, 40)
-aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
+aimContainer.Position = UDim2.new(0, 15, 0.65, 0)
 aimContainer.BackgroundTransparency = 1
 aimContainer.Parent = aimBtnGui
 
@@ -2612,13 +2725,6 @@ _G.Roooor_setAimlockVisible = function(visible)
     if aimBtnGui then aimBtnGui.Enabled = visible end
 end
 
-task.spawn(function()
-    task.wait(0.5)
-    if _G.Roooor_setAimlockVisible then
-        _G.Roooor_setAimlockVisible(_G.Roooor_AimlockBtn and _G.Roooor_AimlockBtn.ShowButton or false)
-    end
-end)
-
 -- PANEL MENU GALAXY
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
@@ -2636,7 +2742,6 @@ panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
--- Bintang panel
 task.spawn(function()
     local starsGui = Instance.new("Frame")
     starsGui.Size = UDim2.new(1, 0, 1, 0)
@@ -2687,7 +2792,6 @@ task.spawn(function()
     end
 end)
 
--- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = C.PANEL
@@ -2756,7 +2860,6 @@ closeBtn.Parent = header
 rnd(closeBtn, 7)
 strk(closeBtn, C.RED, 1, 0.5)
 
--- SIDEBAR
 sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 105, 1, -58)
 sbFrame.Position = UDim2.new(0, 10, 0, 50)
@@ -2789,7 +2892,6 @@ sbP.PaddingRight = UDim.new(0, 4)
 sbP.PaddingBottom = UDim.new(0, 6)
 sbP.Parent = sb
 
--- CONTENT
 ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -135, 1, -58)
 ct.Position = UDim2.new(0, 122, 0, 50)
@@ -2815,7 +2917,6 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- KOMPONEN UI GALAXY
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3225,7 +3326,6 @@ makeTab("Fire", "🔥", 1, function()
         S.FireSize = v
         applyFire()
     end)
-
     sec("Pilih Efek Fire (60)", "🔥")
     lbl("Klik efek untuk ganti", C.FIRE_BRIGHT)
     for i, fireName in ipairs(FireList) do
@@ -3402,7 +3502,7 @@ makeTab("Survivor", "🏃", 4, function()
     sec("Teleport", "🌀")
     btn("TP ke Finish Line", function() teleportToFinishLine() end)
     btn("TP ke Gate", function() teleportToGate() end)
-    btn("TP ke Dalam Gate", false and nil or function() teleportInsideGate() end)
+    btn("TP ke Dalam Gate", function() teleportInsideGate() end)
 
     sec("Anti System", "🔒")
     tog("Anti Stun", false, function(s) S.AntiStun = s end)
@@ -3433,6 +3533,8 @@ makeTab("Killer", "🔪", 5, function()
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
     tog("Stun Notify", false, function(s) S.StunNotify = s end)
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
+    tog("Execute Anim (ROOORHUB)", true, function(s) S.ExecuteAnim = s end)
+    lbl("Tulisan ROOORHUB muncul saat kill", C.ACC2)
 
     sec("Masked Power", "🎭")
     drp("Power", {"Cobra", "Bear", "Wolf", "Tiger", "Eagle"}, "Cobra", function(v) S.MaskedPower = v end)
@@ -3606,7 +3708,7 @@ makeTab("Visual HD", "✨", 7, function()
 end)
 
 -- ============================
--- TAB: CROWN & CHAR
+-- TAB: CROWN
 -- ============================
 makeTab("Crown", "👑", 8, function()
     sec("👑 8-Bit Crown", "✨")
@@ -3713,12 +3815,6 @@ makeTab("Movement", "🏃", 9, function()
 
     sec("No Clip", "👻")
     tog("Enable NoClip", false, function(s) S.NoClip = s end)
-
-    sec("Fly", "🕊️")
-    tog("Enable Fly", false, function(s)
-        S.Fly = s
-    end)
-    sl("Fly Speed", 10, 200, 50, function(v) S.FlySpeed = v end)
 end)
 
 -- ============================
@@ -3726,8 +3822,8 @@ end)
 -- ============================
 makeTab("Misc", "⚙️", 10, function()
     sec("Info", "ℹ️")
-    lbl("RoooorHub Galaxy v3.1", C.ACC2)
-    lbl("No Execute Anim", C.GRN)
+    lbl("RoooorHub Galaxy v3.2", C.ACC2)
+    lbl("Execute Anim: ROOORHUB", C.GRN)
     lbl("Hold-to-Aim Fixed", C.GRN)
 
     sec("Reset", "🔄")
@@ -3755,7 +3851,7 @@ task.spawn(function()
     notif.Name = "RoooorWelcomeNotif"
     notif.ResetOnSpawn = false
     notif.IgnoreGuiInset = true
-    notif.DisplayOrder = 99999
+    notif.DisplayOrder = 2147483647
     notif.Parent = PG
 
     local frame = Instance.new("Frame")
@@ -3777,7 +3873,7 @@ task.spawn(function()
     title.Size = UDim2.new(1, -20, 0, 30)
     title.Position = UDim2.new(0, 10, 0, 8)
     title.BackgroundTransparency = 1
-    title.Text = "✨ ROOORHUB GALAXY v3.1"
+    title.Text = "✨ ROOORHUB GALAXY v3.2"
     title.TextColor3 = C.FIRE_BRIGHT
     title.TextSize = 16
     title.Font = Enum.Font.GothamBlack
@@ -3874,29 +3970,32 @@ Players.PlayerRemoving:Connect(function(p)
 end)
 
 -- =========================================================
--- FORCE VISIBILITY CHECK
+-- AUTO OPEN PANEL (opsional — kalau mau panel kebuka otomatis)
 -- =========================================================
-task.spawn(function()
-    task.wait(3)
-    print("════════════════════════════════════════")
-    print("[RoooorHub] DEBUG INFO:")
-    print("  Tombol menu:", btnContainer and "✅ ADA" or "❌ GAK ADA")
-    print("  Panel:", panel and "✅ ADA" or "❌ GAK ADA")
-    print("  GUI:", gui and "✅ ADA" or "❌ GAK ADA")
-    if btnContainer then
-        print("  Posisi tombol:", btnContainer.AbsolutePosition)
-    end
-    print("════════════════════════════════════════")
-end)
+-- task.spawn(function()
+--     task.wait(4)
+--     if panel then panel.Visible = true end
+--     task.wait(0.5)
+--     if sb then
+--         for _, c in pairs(sb:GetChildren()) do
+--             if c:IsA("TextButton") then
+--                 c.MouseButton1Click:Fire()
+--                 break
+--             end
+--         end
+--     end
+-- end)
 
 -- =========================================================
 -- WELCOME MESSAGE
 -- =========================================================
 print("╔════════════════════════════════════════╗")
-print("║   ✨ ROOORHUB GALAXY v3.1 ✨           ║")
-print("║   NO EXECUTE ANIM                      ║")
+print("║   ✨ ROOORHUB GALAXY v3.2 ✨           ║")
+print("║   EXECUTE ANIM: ROOORHUB               ║")
+print("║   Hold-to-Aim Fixed                    ║")
 print("║   All Features Working                 ║")
 print("╚════════════════════════════════════════╝")
 print("✅ [6/6] Final Touch loaded")
 print("🎉 SC SIAP DIGUNAKAN!")
-print("📌 Klik tombol ✨ di kiri layar untuk buka menu")
+print("📌 Tombol ✨ di KIRI LAYAR (posisi tengah)")
+print("📌 Tombol 🎯 di KIRI LAYAR (posisi bawah)")

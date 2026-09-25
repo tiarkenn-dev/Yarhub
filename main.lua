@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB PREMIUM ULTIMATE + FALLENS + EXTRA
+-- ROOORHUB PREMIUM ULTIMATE + FALLENS + 8BIT SET
 -- BAGIAN 1/15 : SERVICES + CONFIG + STATE
 -- Executor: Delta
 -- =========================================================
@@ -88,11 +88,16 @@ _G.RoooorExtra = _G.RoooorExtra or {
     TPtoPlayer = false,
     ItemESP = false, ItemESPColor = Color3.fromRGB(255, 255, 100),
     PlayerList = false,
+    -- 8-Bit Set Visual
+    EightBitSet = false,
+    EightBitCrown = false,
+    EightBitHP = false,
+    EightBitCat = false,
 }
 
 local X = _G.RoooorExtra
 
-print("✅ [1/15] Config loaded (Delta Executor) - Moonwalk REMOVED")-- =========================================================
+print("✅ [1/15] Config loaded (Delta Executor) + 8Bit State")-- =========================================================
 -- BAGIAN 2/15 : FIRE LIST + FIRE CONFIG
 -- =========================================================
 
@@ -294,7 +299,6 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- FLOAT BUTTON
 local fBtn = Instance.new("TextButton")
 fBtn.Size = UDim2.new(0, 48, 0, 48)
 fBtn.Position = UDim2.new(0, 15, 0.5, -24)
@@ -360,7 +364,6 @@ task.spawn(function()
     end
 end)
 
--- MAIN WINDOW
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 480, 0, 450)
 main.Position = UDim2.new(0.5, -240, 0.5, -225)
@@ -387,7 +390,6 @@ shadow.ImageTransparency = 0.6
 shadow.ZIndex = -2
 shadow.Parent = main
 
--- HEADER
 local head = Instance.new("Frame")
 head.Size = UDim2.new(1, 0, 0, 50)
 head.BackgroundColor3 = C.PANEL
@@ -503,7 +505,6 @@ fBtn.MouseButton1Click:Connect(function()
     }):Play()
 end)
 
--- SIDEBAR
 local sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 120, 1, -72)
 sbFrame.Position = UDim2.new(0, 12, 0, 62)
@@ -538,7 +539,6 @@ sbP.PaddingRight = UDim.new(0, 4)
 sbP.PaddingBottom = UDim.new(0, 8)
 sbP.Parent = sb
 
--- CONTENT
 local ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -150, 1, -72)
 ct.Position = UDim2.new(0, 140, 0, 62)
@@ -875,7 +875,6 @@ function drp(name, options, def, cb)
     end)
 end
 
--- TAB SYSTEM
 local activeTab = nil
 function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
@@ -948,7 +947,6 @@ function makeTab(name, icon, order, cb)
     end)
 end
 
--- DRAG WINDOW
 local dragW = false
 local dragWStart, dragWPos
 head.InputBegan:Connect(function(input)
@@ -1018,7 +1016,6 @@ function applyFire()
     end
 end
 
--- FIX: auto re-apply fire saat head baru muncul
 LP.CharacterAdded:Connect(function()
     task.wait(1)
     if S.FireOn then applyFire() end
@@ -1033,7 +1030,6 @@ task.spawn(function()
             if head then
                 local fire = head:FindFirstChild("RoooorFire")
                 if not fire then
-                    -- Re-apply kalau fire hilang
                     applyFire()
                 else
                     local cfg = FireConfig[S.FireType] or FireConfig.Classic
@@ -1640,7 +1636,7 @@ task.spawn(function()
     end
 end)
 
--- AIMLOCK BUTTON (2 MODE)
+-- AIMLOCK BUTTON
 _G.AimlockButton = nil
 
 local function createAimlockButton()
@@ -1789,11 +1785,10 @@ task.spawn(function()
     end
 end)
 
-print("✅ [8/15] Auto Parry GACOR + Skill + Aimlock 2 Mode loaded")-- =========================================================
+print("✅ [8/15] Auto Parry GACOR + Skill + Aimlock loaded")-- =========================================================
 -- BAGIAN 9/15 : VISUAL + KORBLOX + HEADLESS + KILLER
 -- =========================================================
 
--- Simpan nilai asli Lighting untuk restore yang benar
 local origLighting = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
@@ -1897,7 +1892,6 @@ function applyContrast()
     end
 end
 
--- KORBLOX
 local KorbloxOrig = nil
 
 function applyKorblox(s)
@@ -1979,7 +1973,6 @@ task.spawn(function()
     end
 end)
 
--- HEADLESS
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -2022,7 +2015,6 @@ task.spawn(function()
     end
 end)
 
--- WALK SPEED LOOP
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -2038,7 +2030,6 @@ task.spawn(function()
     end
 end)
 
--- INSTANT ESCAPE
 function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
@@ -2063,7 +2054,6 @@ function teleportToFinishLine()
     root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
 end
 
--- FAST VAULT
 local FastVaultMap = {
     ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
 }
@@ -2104,7 +2094,6 @@ LP.CharacterAdded:Connect(function(char)
 end)
 if LP.Character then hookVault(LP.Character) end
 
--- KILLER FUNCTIONS
 local lastAtk = 0
 task.spawn(function()
     while gui.Parent do
@@ -2165,7 +2154,6 @@ task.spawn(function()
     end
 end)
 
--- HITBOX
 local hitboxCache = {}
 task.spawn(function()
     while gui.Parent do
@@ -2284,7 +2272,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/15] Visual + Korblox + Headless + Killer loaded (MOONWALK REMOVED)")-- =========================================================
+print("✅ [9/15] Visual + Korblox + Headless + Killer loaded")-- =========================================================
 -- BAGIAN 10/15 : TAB FIRE + FIRE FEET
 -- =========================================================
 
@@ -2411,7 +2399,6 @@ print("✅ [10/15] Tab Fire + Fire Feet loaded")-- =============================
 -- BAGIAN 11/15 : TAB ESP + SURVIVOR + KILLER + VISUAL + MOVEMENT + SETTINGS
 -- =========================================================
 
--- TAB ESP
 makeTab("ESP", "👁️", 3, function()
     sec("Player ESP + Nama", "🟢")
     tog("Enable ESP Name", false, function(s)
@@ -2444,7 +2431,6 @@ makeTab("ESP", "👁️", 3, function()
     cpk("SCP Color", S.ESP_SCPColor, function(c) S.ESP_SCPColor = c end)
 end)
 
--- TAB SURVIVOR
 makeTab("Survivor", "🏃", 4, function()
     sec("Auto Parry 360° GACOR", "🛡️")
     tog("Enable Auto Parry", false, function(s) S.Parry = s; if s then scanKillers() end end)
@@ -2465,9 +2451,7 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Show Aimlock Button", false, function(s)
         if s then createAimlockButton() else removeAimlockButton() end
     end)
-    tog("🔒 Lock Aimlock Button", false, function(s)
-        S.AimlockLocked = s
-    end)
+    tog("🔒 Lock Aimlock Button", false, function(s) S.AimlockLocked = s end)
     btn("🔄 Reset Posisi Aimlock", function()
         if _G.AimlockButton then
             local b = _G.AimlockButton:FindFirstChild("AimlockBtn", true)
@@ -2477,7 +2461,6 @@ makeTab("Survivor", "🏃", 4, function()
     lbl("Klik kanan tombol 🎯 = switch mode", C.ACC2)
 end)
 
--- TAB KILLER
 makeTab("Killer", "🔪", 5, function()
     sec("Auto Attack", "⚔️")
     tog("Auto Spam Attack", false, function(s) S.Killer_AutoAtk = s end)
@@ -2495,9 +2478,7 @@ makeTab("Killer", "🔪", 5, function()
     lbl("Kalau ON = hitbox invisible, fitur tetap jalan", C.ACC2)
 
     sec("Masked Power", "🎭")
-    drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
-        S.MaskedPower = v
-    end)
+    drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v) S.MaskedPower = v end)
     btn("⚡ Activate Power", function() activateMaskedPower(S.MaskedPower or "Cobra") end)
     btn("❌ Deactivate Power", function() deactivateMaskedPower() end)
 
@@ -2506,7 +2487,6 @@ makeTab("Killer", "🔪", 5, function()
     sl("Stalk Range", 50, 500, 150, function(v) S.Killer_StalkRange = v end)
 end)
 
--- TAB VISUAL
 makeTab("Visual", "🎨", 6, function()
     sec("Top 5 Wajib", "⭐")
     tog("Fullbright", false, function(s) S.Fullbright = s; applyFullbright(s) end)
@@ -2578,7 +2558,6 @@ makeTab("Visual", "🎨", 6, function()
     tog("Headless", false, function(s) S.Headless = s; applyHeadless(s) end)
 end)
 
--- TAB MOVEMENT (MOONWALK DIHAPUS)
 makeTab("Movement", "🏃", 7, function()
     sec("Walk Speed", "⚡")
     tog("Enable Walk Speed", false, function(s) S.WalkSpeed = s end)
@@ -2586,20 +2565,14 @@ makeTab("Movement", "🏃", 7, function()
     sl("Speed Boost", 0, 200, 0, function(v) S.WalkSpeedBoost = v end)
 
     sec("Instant Escape", "🚪")
-    btn("🚀 Instant Escape (TP Finish)", function()
-        teleportToFinishLine()
-    end)
+    btn("🚀 Instant Escape (TP Finish)", function() teleportToFinishLine() end)
     lbl("Teleport ke finish line/gate", C.ACC2)
 
     sec("Fast Vault", "🏃")
     tog("Enable Fast Vault", false, function(s) S.FastVault = s end)
     sl("Animation Speed", 1, 5, 1.5, function(v) S.FastVaultSpeed = v end)
-
-    sec("Info", "ℹ️")
-    lbl("Moonwalk dihapus", C.RED)
 end)
 
--- TAB SETTINGS
 makeTab("Settings", "⚙️", 8, function()
     sec("Keybind", "⌨️")
     lbl("RightShift = Toggle Menu", C.ACC2)
@@ -2613,6 +2586,7 @@ makeTab("Settings", "⚙️", 8, function()
     lbl("60 Fire + 20 Fire Feet + 25 Sky", C.ACC2)
     lbl("ESP + Parry GACOR v3 + Aimlock 2 Mode", C.ACC2)
     lbl("Killer + Visual + Movement + Anti", C.ACC2)
+    lbl("8-Bit Crown + HP + Cat Set", C.ACC2)
     lbl("Made with 💜", C.ACC3)
 end)
 
@@ -2673,7 +2647,6 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
--- MAIN LOOP ESP
 task.spawn(function()
     while gui.Parent do
         local root = getRoot()
@@ -2750,14 +2723,12 @@ task.spawn(function()
     end
 end)
 
--- PARRY CIRCLE SMOOTH UPDATE
 RunService.RenderStepped:Connect(function()
     if S.ParryCircle then
         updateParryCircle()
     end
 end)
 
--- RESPAWN HANDLER (MOONWALK DIHAPUS)
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     hookedKillers = {}
@@ -2771,7 +2742,6 @@ LP.CharacterAdded:Connect(function(char)
     if S.FastVault then task.wait(0.5); hookVault(char) end
 end)
 
--- KEYBIND RightShift
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -2785,7 +2755,6 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- BUKA TAB PERTAMA
 task.wait(0.3)
 for _, c in pairs(sb:GetChildren()) do
     if c:IsA("TextButton") then
@@ -2794,7 +2763,6 @@ for _, c in pairs(sb:GetChildren()) do
     end
 end
 
--- WINDOW NEON ANIMATION
 task.spawn(function()
     while main.Parent do
         task.wait(0.05)
@@ -2807,7 +2775,7 @@ task.spawn(function()
 end)
 
 print("✅ [12/15] Main Loop + Keybind loaded")-- =========================================================
--- BAGIAN 13/15 : FITUR TAMBAHAN
+-- BAGIAN 13/15 : FITUR TAMBAHAN + 8-BIT SET
 -- =========================================================
 
 local remoteCache = {}
@@ -2830,7 +2798,6 @@ local HealRemote = findRemote("heal") or findRemote("medkit")
 local ReviveRemote = findRemote("revive") or findRemote("rescue")
 local RepairRemote = findRemote("repair") or findRemote("generator")
 
--- SURVIVOR+
 task.spawn(function()
     while gui.Parent do
         task.wait(0.15)
@@ -3008,7 +2975,6 @@ task.spawn(function()
     end
 end)
 
--- VISUAL EXTRA
 local trailObj, auraObj = nil, nil
 
 local function applyTrail(s)
@@ -3154,7 +3120,6 @@ local function applyZoomOut()
     end
 end
 
--- ANTI / DEFENSE
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
@@ -3241,7 +3206,6 @@ task.spawn(function()
     end
 end)
 
--- FLY
 local flyBodyVelocity, flyBodyGyro, flyConn = nil, nil, nil
 
 local function startFly()
@@ -3289,7 +3253,6 @@ local function stopFly()
     if flyBodyGyro then flyBodyGyro:Destroy(); flyBodyGyro = nil end
 end
 
--- ITEM ESP
 task.spawn(function()
     while gui.Parent do
         task.wait(0.3)
@@ -3327,7 +3290,6 @@ task.spawn(function()
     end
 end)
 
--- PLAYER LIST
 local playerListGui = nil
 local function createPlayerList()
     if playerListGui then playerListGui:Destroy() end
@@ -3402,6 +3364,157 @@ local function createPlayerList()
     end)
 end
 
+-- =========================================================
+-- 8-BIT SET: CROWN + HP BAR + TABBY CAT + EFEK API
+-- =========================================================
+
+local function apply8BitCrown(enable)
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    local old = head:FindFirstChild("Roooor8BitCrown")
+    if old then old:Destroy() end
+    if not enable then return end
+
+    local crown = Instance.new("Part")
+    crown.Name = "Roooor8BitCrown"
+    crown.Size = Vector3.new(2, 1.5, 2)
+    crown.CanCollide = false
+    crown.Massless = true
+    crown.Transparency = 0
+    crown.Parent = head
+
+    local crownMesh = Instance.new("SpecialMesh")
+    crownMesh.MeshType = Enum.MeshType.FileMesh
+    crownMesh.MeshId = "rbxassetid://10138606900"
+    crownMesh.TextureId = "rbxassetid://10138606949"
+    crownMesh.Scale = Vector3.new(1.5, 1.5, 1.5)
+    crownMesh.Parent = crown
+
+    local crownWeld = Instance.new("Weld")
+    crownWeld.Part0 = head
+    crownWeld.Part1 = crown
+    crownWeld.C0 = CFrame.new(0, 1.2, 0)
+    crownWeld.Parent = crown
+
+    local emitter = Instance.new("ParticleEmitter")
+    emitter.Name = "CrownFire"
+    emitter.Texture = "rbxassetid://243660364"
+    emitter.LightEmission = 0.5
+    emitter.Size = NumberSequence.new(1.5)
+    emitter.Lifetime = NumberRange.new(2.5)
+    emitter.Rate = 15
+    emitter.Speed = NumberRange.new(3)
+    emitter.SpreadAngle = Vector2.new(15, 15)
+    emitter.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    emitter.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(131, 253, 255)),
+        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(0, 213, 255)),
+        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 122, 34)),
+        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 255, 0)),
+        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(198, 42, 11))
+    })
+    emitter.Parent = crown
+end
+
+local function apply8BitHP(enable)
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    local old = head:FindFirstChild("Roooor8BitHP")
+    if old then old:Destroy() end
+    if not enable then return end
+
+    local hpBar = Instance.new("Part")
+    hpBar.Name = "Roooor8BitHP"
+    hpBar.Size = Vector3.new(1.5, 1.5, 0.5)
+    hpBar.CanCollide = false
+    hpBar.Massless = true
+    hpBar.Transparency = 0
+    hpBar.Parent = head
+
+    local hpMesh = Instance.new("SpecialMesh")
+    hpMesh.MeshType = Enum.MeshType.FileMesh
+    hpMesh.MeshId = "rbxassetid://10138542409"
+    hpMesh.TextureId = "rbxassetid://10138542374"
+    hpMesh.Scale = Vector3.new(1.2, 1.2, 1.2)
+    hpMesh.Parent = hpBar
+
+    local hpWeld = Instance.new("Weld")
+    hpWeld.Part0 = head
+    hpWeld.Part1 = hpBar
+    hpWeld.C0 = CFrame.new(1.2, 1.0, 0)
+    hpWeld.Parent = hpBar
+
+    local heart = Instance.new("ParticleEmitter")
+    heart.Texture = "rbxassetid://6023564503"
+    heart.Rate = 5
+    heart.Lifetime = NumberRange.new(1.5)
+    heart.Speed = NumberRange.new(1)
+    heart.Size = NumberSequence.new(0.5)
+    heart.Color = ColorSequence.new(Color3.fromRGB(255, 50, 100))
+    heart.Parent = hpBar
+end
+
+local function apply8BitCat(enable)
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local old = char:FindFirstChild("Roooor8BitCat")
+    if old then old:Destroy() end
+    if not enable then return end
+
+    local cat = Instance.new("Part")
+    cat.Name = "Roooor8BitCat"
+    cat.Size = Vector3.new(1.5, 1.5, 1.5)
+    cat.CanCollide = false
+    cat.Massless = true
+    cat.Transparency = 0
+    cat.Parent = char
+
+    local catMesh = Instance.new("SpecialMesh")
+    catMesh.MeshType = Enum.MeshType.FileMesh
+    catMesh.MeshId = "rbxassetid://10159617728"
+    catMesh.Scale = Vector3.new(1, 1, 1)
+    catMesh.Parent = cat
+
+    local catWeld = Instance.new("Weld")
+    catWeld.Part0 = hrp
+    catWeld.Part1 = cat
+    catWeld.C0 = CFrame.new(1.2, 0.8, 0)
+    catWeld.Parent = cat
+end
+
+local function apply8BitSet(enable)
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    for _, name in ipairs({"Roooor8BitCrown", "Roooor8BitHP"}) do
+        local old = head:FindFirstChild(name)
+        if old then old:Destroy() end
+    end
+    local oldCat = char:FindFirstChild("Roooor8BitCat")
+    if oldCat then oldCat:Destroy() end
+
+    if not enable then return end
+
+    apply8BitCrown(true)
+    apply8BitHP(true)
+    apply8BitCat(true)
+end
+
 _G.Roooor_applyTrail = applyTrail
 _G.Roooor_applyAura = applyAura
 _G.Roooor_applyCrosshair = applyCrosshair
@@ -3409,19 +3522,19 @@ _G.Roooor_applyZoomOut = applyZoomOut
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 _G.Roooor_createPlayerList = createPlayerList
+_G.Roooor_apply8BitCrown = apply8BitCrown
+_G.Roooor_apply8BitHP = apply8BitHP
+_G.Roooor_apply8BitCat = apply8BitCat
+_G.Roooor_apply8BitSet = apply8BitSet
 
-print("✅ [13/15] Fitur Tambahan loaded")-- =========================================================
--- BAGIAN 14/15 : TAB UI BARU
+print("✅ [13/15] Fitur Tambahan + 8-Bit Set loaded")-- =========================================================
+-- BAGIAN 14/15 : TAB UI BARU + 8-BIT SET UI
 -- =========================================================
 
 makeTab("Survivor+", "🏃", 9, function()
     sec("Auto Pallet Stun", "🪵")
     tog("Enable Auto Pallet", false, function(s) X.AutoPallet = s end)
     sl("Pallet Range", 3, 20, 8, function(v) X.AutoPalletRange = v end)
-
-    sec("Auto Vault Window", "🪟")
-    tog("Enable Auto Vault", false, function(s) X.AutoVault = s end)
-    sl("Vault Range", 5, 25, 10, function(v) X.AutoVaultRange = v end)
 
     sec("Auto Heal", "💊")
     tog("Enable Auto Heal", false, function(s) X.AutoHeal = s end)
@@ -3468,6 +3581,42 @@ makeTab("Visual+", "🎨", 10, function()
     tog("No Clip Camera", false, function(s) X.NoClipCamera = s end)
     tog("Zoom Out (Unlimited)", false, function(s) X.ZoomOut = s; _G.Roooor_applyZoomOut() end)
     sl("Zoom Distance", 100, 5000, 500, function(v) X.ZoomOutValue = v; _G.Roooor_applyZoomOut() end)
+
+    sec("8-Bit Set (3 in 1)", "👑")
+    tog("👑 8-Bit Royal Crown (+ Efek Api)", false, function(s)
+        X.EightBitCrown = s
+        _G.Roooor_apply8BitCrown(s)
+    end)
+    tog("❤️ 8-Bit HP Bar (+ Partikel Hati)", false, function(s)
+        X.EightBitHP = s
+        _G.Roooor_apply8BitHP(s)
+    end)
+    tog("🐱 8-Bit Tabby Cat", false, function(s)
+        X.EightBitCat = s
+        _G.Roooor_apply8BitCat(s)
+    end)
+    btn("🎁 PASANG SEMUA (3 in 1)", function()
+        X.EightBitSet = true
+        X.EightBitCrown = true
+        X.EightBitHP = true
+        X.EightBitCat = true
+        _G.Roooor_apply8BitSet(true)
+        _G.ToggleStates["👑 8-Bit Royal Crown (+ Efek Api)"] = true
+        _G.ToggleStates["❤️ 8-Bit HP Bar (+ Partikel Hati)"] = true
+        _G.ToggleStates["🐱 8-Bit Tabby Cat"] = true
+    end)
+    btn("❌ LEPAS SEMUA", function()
+        X.EightBitSet = false
+        X.EightBitCrown = false
+        X.EightBitHP = false
+        X.EightBitCat = false
+        _G.Roooor_apply8BitSet(false)
+        _G.ToggleStates["👑 8-Bit Royal Crown (+ Efek Api)"] = false
+        _G.ToggleStates["❤️ 8-Bit HP Bar (+ Partikel Hati)"] = false
+        _G.ToggleStates["🐱 8-Bit Tabby Cat"] = false
+    end)
+    lbl("Efek api mahkota + hati HP bar", C.GRN)
+    lbl("Auto re-apply saat respawn", C.ACC2)
 end)
 
 makeTab("Anti", "🛡️", 11, function()
@@ -3524,24 +3673,104 @@ makeTab("Top 10", "🏆", 12, function()
     end)
 end)
 
-print("✅ [14/15] Tab UI baru loaded")-- =========================================================
--- BAGIAN 15/15 : RESPAWN RE-APPLY + FINAL PRINT
+print("✅ [14/15] Tab UI baru + 8-Bit Set UI loaded")-- =========================================================
+-- BAGIAN 15/15 : RESPAWN RE-APPLY + ANTI-RESET + FINAL PRINT
 -- =========================================================
 
--- RESPAWN RE-APPLY
+-- RESPAWN RE-APPLY FITUR BARU
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
     if X.Trail then _G.Roooor_applyTrail(true) end
     if X.Aura then _G.Roooor_applyAura(true) end
     if X.Crosshair then _G.Roooor_applyCrosshair(true) end
     if X.ZoomOut then _G.Roooor_applyZoomOut() end
+    -- 8-Bit Set Re-Apply
+    if X.EightBitCrown then task.wait(0.3); _G.Roooor_apply8BitCrown(true) end
+    if X.EightBitHP then task.wait(0.3); _G.Roooor_apply8BitHP(true) end
+    if X.EightBitCat then task.wait(0.3); _G.Roooor_apply8BitCat(true) end
+end)
+
+-- ANTI-RESET FITUR BARU
+task.spawn(function()
+    while gui.Parent do
+        task.wait(0.3)
+        for name, state in pairs(_G.ToggleStates) do
+            if name == "Enable Auto Pallet" then X.AutoPallet = state end
+            if name == "Enable Auto Heal" then X.AutoHeal = state end
+            if name == "Enable Auto Revive" then X.AutoRevive = state end
+            if name == "Enable Auto Repair" then X.AutoRepair = state end
+            if name == "Enable Perfect Skill" then X.SkillPerfect = state end
+            if name == "Enable Safe Zone" then X.SafeZone = state end
+            if name == "Enable Escape Alert" then X.EscapeAlert = state end
+            if name == "Enable Kill Effect" then X.KillEffect = state end
+            if name == "Enable Trail" then X.Trail = state end
+            if name == "Enable Aura" then X.Aura = state end
+            if name == "Enable RGB UI" then X.RGBUI = state end
+            if name == "Enable Crosshair" then X.Crosshair = state end
+            if name == "No Clip Camera" then X.NoClipCamera = state end
+            if name == "Zoom Out (Unlimited)" then X.ZoomOut = state end
+            if name == "Enable Anti Stun" then X.AntiStun = state end
+            if name == "Enable Anti Blind" then X.AntiBlind = state end
+            if name == "Enable Anti Grab" then X.AntiGrab = state end
+            if name == "Enable Anti Hook" then X.AntiHook = state end
+            if name == "Enable Anti Ragdoll" then X.AntiRagdoll = state end
+            if name == "Enable Anti Parry" then X.AntiParry = state end
+            if name == "Enable Anti Kick" then X.AntiKick = state end
+            if name == "Enable Anti AFK" then X.AntiAFK = state end
+            if name == "Enable Fly" then
+                if X.Fly ~= state then
+                    X.Fly = state
+                    if state then _G.Roooor_startFly() else _G.Roooor_stopFly() end
+                end
+            end
+            if name == "Enable TP to Player" then X.TPtoPlayer = state end
+            if name == "Enable Item ESP" then X.ItemESP = state end
+            if name == "Show Player List" then
+                if X.PlayerList ~= state then
+                    X.PlayerList = state
+                    if state then _G.Roooor_createPlayerList()
+                    else
+                        local plg = PG:FindFirstChild("RoooorPlayerList")
+                        if plg then plg:Destroy() end
+                    end
+                end
+            end
+            -- 8-Bit Set Anti-Reset
+            if name == "👑 8-Bit Royal Crown (+ Efek Api)" then
+                if X.EightBitCrown ~= state then
+                    X.EightBitCrown = state
+                    _G.Roooor_apply8BitCrown(state)
+                end
+            end
+            if name == "❤️ 8-Bit HP Bar (+ Partikel Hati)" then
+                if X.EightBitHP ~= state then
+                    X.EightBitHP = state
+                    _G.Roooor_apply8BitHP(state)
+                end
+            end
+            if name == "🐱 8-Bit Tabby Cat" then
+                if X.EightBitCat ~= state then
+                    X.EightBitCat = state
+                    _G.Roooor_apply8BitCat(state)
+                end
+            end
+        end
+        for name, val in pairs(_G.SliderStates) do
+            if name == "Pallet Range" then X.AutoPalletRange = val end
+            if name == "Heal Threshold HP" then X.AutoHealThreshold = val end
+            if name == "Alert Range" then X.EscapeAlertRange = val end
+            if name == "Crosshair Size" then X.CrosshairSize = val end
+            if name == "Zoom Distance" then X.ZoomOutValue = val end
+            if name == "Fly Speed" then X.FlySpeed = val end
+        end
+    end
 end)
 
 -- =========================================================
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("✅ [15/15] ROOORHUB PREMIUM ULTIMATE + FALLENS + EXTRA")
+print("✅ [15/15] ROOORHUB PREMIUM ULTIMATE + FALLENS + 8BIT")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
@@ -3551,10 +3780,10 @@ print("  3. 👁️ ESP           — Player + Gen(%) + Pallet + Window + SCP")
 print("  4. 🏃 Survivor      — Parry GACOR v3 + Skill + Aimlock 2 Mode")
 print("  5. 🔪 Killer        — Auto Attack + Kill All + Hitbox + Masked")
 print("  6. 🎨 Visual        — Fullbright + No Fog + FOV + 25 Sky")
-print("  7. 🏃 Movement      — WalkSpeed + FastVault (NO MOONWALK)")
+print("  7. 🏃 Movement      — WalkSpeed + FastVault")
 print("  8. ⚙️ Settings      — Info + Keybind")
 print("  9. 🏃 Survivor+     — Auto Pallet/Heal/Revive/Repair")
-print(" 10. 🎨 Visual+       — Kill Effect + Trail + Aura + RGB + Crosshair")
+print(" 10. 🎨 Visual+       — Kill Effect + Trail + Aura + RGB + 8BIT SET")
 print(" 11. 🛡️ Anti          — Stun + Blind + Grab + Hook + Ragdoll + AFK")
 print(" 12. 🏆 Top 10        — Fly + TP + Item ESP + Player List")
 print("=====================================================")
@@ -3566,7 +3795,12 @@ print("   • Debounce 0.05s (super responsif)")
 print("   • Prediksi gerak killer 0.15s")
 print("   • Range +10 buffer (anti miss)")
 print("   • Polling 0.005s")
-print("   • Silent (gak ada warn)")
+print("=====================================================")
+print("👑 8-BIT SET: Crown + HP Bar + Tabby Cat")
+print("   • Efek api mahkota berwarna")
+print("   • Partikel hati di HP bar")
+print("   • Auto re-apply saat respawn")
+print("   • 3 in 1 tombol PASANG SEMUA")
 print("=====================================================")
 print("🌙 Moonwalk: DIHAPUS TOTAL")
 print("=====================================================")

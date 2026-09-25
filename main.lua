@@ -1,6 +1,6 @@
 -- =========================================================
 -- ROOORHUB
--- BAGIAN 1/8 : LOADING + CONFIG + STATE
+-- BAGIAN 1/8 : LOADING + CONFIG + STATE (FIXED)
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -16,13 +16,13 @@ local SoundService = game:GetService("SoundService")
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
 
--- HELPER: getRoot (dipindah ke atas biar gak error)
+-- ✅ HELPER: getRoot GLOBAL
 function getRoot()
     local c = LP.Character
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-local C = {
+C = {
     BG = Color3.fromRGB(6, 4, 12),
     BG2 = Color3.fromRGB(10, 7, 20),
     PANEL = Color3.fromRGB(15, 10, 28),
@@ -42,13 +42,13 @@ local C = {
     RED = Color3.fromRGB(255, 70, 100),
 }
 
-local function rnd(o, r)
+function rnd(o, r)
     local c = Instance.new("UICorner")
     c.CornerRadius = UDim.new(0, r or 10)
     c.Parent = o
 end
 
-local function strk(o, col, t, tr)
+function strk(o, col, t, tr)
     local s = Instance.new("UIStroke")
     s.Color = col or C.GOLD
     s.Thickness = t or 1.5
@@ -59,22 +59,10 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- SOUND SYSTEM (DISABLED - ANTI ERROR)
+-- SOUND (DISABLED)
 -- =========================================================
-local function playToggleSound()
-    -- Sound disabled untuk mencegah error
-    -- Kalau mau nyalain sound, ganti jadi:
-    -- task.spawn(function()
-    --     pcall(function()
-    --         local s = Instance.new("Sound")
-    --         s.SoundId = "rbxassetid://9120386436"
-    --         s.Volume = 0.4
-    --         s.Parent = SoundService
-    --         s:Play()
-    --         task.wait(2)
-    --         s:Destroy()
-    --     end)
-    -- end)
+function playToggleSound()
+    -- disabled
 end
 
 _G.Roooor_playSound = playToggleSound
@@ -296,7 +284,7 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE (GLOBAL - TANPA LOCAL)
 -- =========================================================
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
@@ -330,27 +318,32 @@ _G.RoooorS = _G.RoooorS or {
     Fly = false, FlySpeed = 50,
     KillFeed = false, StunNotify = false,
 }
-local S = _G.RoooorS
+S = _G.RoooorS
 
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- ESP
-_G.Roooor_ESP = _G.Roooor_ESP or {
+-- ESP GLOBAL
+ESP = _G.Roooor_ESP or {
     Survivor = false, Killer = false, Generator = false,
     Pallet = false, Window = false, SCP = false, Distance = 50,
 }
-_G.Roooor_ESPStatus = _G.Roooor_ESPStatus or {
+_G.Roooor_ESP = ESP
+
+ESPStatus = _G.Roooor_ESPStatus or {
     Enabled = false, ShowName = true, ShowDistance = true,
     ShowHealth = false, Radius = 50,
 }
-_G.Roooor_TeamColors = _G.Roooor_TeamColors or {
+_G.Roooor_ESPStatus = ESPStatus
+
+TeamColors = _G.Roooor_TeamColors or {
     Killer = Color3.fromRGB(255, 60, 60),
     Survivor = Color3.fromRGB(60, 255, 120),
 }
+_G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY
-_G.Roooor_AutoParry = _G.Roooor_AutoParry or {
+-- AUTO PARRY GLOBAL
+AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
     ParryDelay = 0,
@@ -360,25 +353,28 @@ _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Wiggle = false,
     WiggleSpam = 5,
 }
+_G.Roooor_AutoParry = AutoParry
 
--- AUTO SKILL CHECK
-_G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
+-- AUTO SKILL CHECK GLOBAL
+SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
 }
+_G.Roooor_SkillCheck = SkillCheck
 
--- AIMLOCK
+-- AIMLOCK GLOBAL
 _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Enabled = true, ShowButton = false, Holding = false,
     Mode = "Killer", Radius = 500, LockRadius = 50, Strength = 0.4,
 }
 
--- GOD MODE
-_G.Roooor_GodMode = _G.Roooor_GodMode or {
+-- GOD MODE GLOBAL
+GodMode = _G.Roooor_GodMode or {
     Enabled = false,
 }
+_G.Roooor_GodMode = GodMode
 
--- COMBAT
-_G.Roooor_Combat = _G.Roooor_Combat or {
+-- COMBAT GLOBAL
+Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
     AttackHeld = false,
@@ -399,11 +395,12 @@ _G.Roooor_Combat = _G.Roooor_Combat or {
     HitboxSize = 15,
     HitboxVisible = false,
 }
+_G.Roooor_Combat = Combat
 
 print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
--- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
+-- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS (FIXED)
 -- =========================================================
-local FireList = {
+FireList = {
     "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
     "GoldenKing", "SakuraFire", "EmeraldFire", "BloodFire", "ShadowFire",
     "HolyFire", "OceanFire", "Firework", "Lava", "GhostFire",
@@ -418,7 +415,7 @@ local FireList = {
     "SoulFire", "SpiritFire", "PhantomFire", "WraithFire", "ReaperFire"
 }
 
-local FireConfig = {
+FireConfig = {
     Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
     HellFire = { c1 = Color3.fromRGB(180, 0, 0), c2 = Color3.fromRGB(255, 80, 0), smoke = true },
     IceFire = { c1 = Color3.fromRGB(120, 200, 255), c2 = Color3.fromRGB(220, 240, 255), spark = true },
@@ -487,14 +484,14 @@ for _, name in ipairs(FireList) do
     end
 end
 
-local FireFeetList = {
+FireFeetList = {
     "Classic", "Blue", "Green", "Purple", "Rainbow",
     "Golden", "Pink", "Cyan", "RedFire", "Ice",
     "Toxic", "Electric", "Blood", "Ghost", "Cosmic",
     "Dragon", "Divine", "Demon", "Shadow", "Phoenix"
 }
 
-local FireFeetConfig = {
+FireFeetConfig = {
     Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
     Blue = { c1 = Color3.fromRGB(0, 170, 255), c2 = Color3.fromRGB(0, 255, 255) },
     Green = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(180, 255, 0) },
@@ -523,12 +520,12 @@ for _, name in ipairs(FireFeetList) do
     end
 end
 
-local SkyList = {
+SkyList = {
     "Default", "Sunset", "Night", "Space", "Alien",
     "Purple", "Galaxy", "Void",
 }
 
-local SkyIds = {
+SkyIds = {
     Sunset = {
         Bk = "rbxassetid://169210149", Dn = "rbxassetid://169210108",
         Ft = "rbxassetid://169210121", Lf = "rbxassetid://169210133",
@@ -566,7 +563,8 @@ local SkyIds = {
     },
 }
 
-local KillerAnims = {}
+-- ✅ KillerAnims GLOBAL
+KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
     "117042998468241","122812055447896","78935059863801","74968262036854",
@@ -579,13 +577,13 @@ for _, id in ipairs({
 end
 
 print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK
+-- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK (FIXED)
 -- =========================================================
 
 -- ============================
 -- FIRE (KEPALA)
 -- ============================
-local function clearFire()
+function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
     if not head then return end
@@ -596,7 +594,7 @@ local function clearFire()
     end
 end
 
-local function applyFire()
+function applyFire()
     clearFire()
     if not S.FireOn then return end
     local char = LP.Character
@@ -633,7 +631,7 @@ local function applyFire()
     end
 end
 
-local function clearFireFeet()
+function clearFireFeet()
     if not LP.Character then return end
     local lLeg = LP.Character:FindFirstChild("Left Leg") or LP.Character:FindFirstChild("LeftUpperLeg")
     local rLeg = LP.Character:FindFirstChild("Right Leg") or LP.Character:FindFirstChild("RightUpperLeg")
@@ -646,7 +644,7 @@ local function clearFireFeet()
     end
 end
 
-local function applyFireFeet()
+function applyFireFeet()
     clearFireFeet()
     if not S.FireFeetOn then return end
     local char = LP.Character
@@ -708,7 +706,7 @@ end)
 -- ============================
 -- 8-BIT CROWN
 -- ============================
-local function apply8BitCrown(enable, size, posX, posY, posZ)
+function apply8BitCrown(enable, size, posX, posY, posZ)
     local char = LP.Character
     if not char then return end
     local head = char:FindFirstChild("Head")
@@ -767,21 +765,18 @@ local function apply8BitCrown(enable, size, posX, posY, posZ)
 end
 
 -- =========================================================
--- ESP SYSTEM
+-- ESP SYSTEM (GLOBAL)
 -- =========================================================
-local ESPObjects = {}
-local StatusESP = {}
-local CachedSCP = {}
-local Cached = { Generators = {}, Windows = {}, Pallets = {} }
-local GeneratorColor = Color3.fromRGB(255, 170, 0)
-local PalletColor = Color3.fromRGB(74, 255, 181)
-local WindowColor = Color3.fromRGB(74, 255, 181)
-local SCPColor = Color3.fromRGB(255, 0, 0)
-local ESP = _G.Roooor_ESP
-local ESPStatus = _G.Roooor_ESPStatus
-local TeamColors = _G.Roooor_TeamColors
+ESPObjects = {}
+StatusESP = {}
+CachedSCP = {}
+Cached = { Generators = {}, Windows = {}, Pallets = {} }
+GeneratorColor = Color3.fromRGB(255, 170, 0)
+PalletColor = Color3.fromRGB(74, 255, 181)
+WindowColor = Color3.fromRGB(74, 255, 181)
+SCPColor = Color3.fromRGB(255, 0, 0)
 
-local function cacheObject(obj)
+function cacheObject(obj)
     if obj.Name == "Generator" then
         Cached.Generators[obj] = true
     elseif obj.Name == "Window" then
@@ -795,7 +790,7 @@ local function cacheObject(obj)
     end
 end
 
-local function removeCache(obj)
+function removeCache(obj)
     Cached.Generators[obj] = nil
     Cached.Windows[obj] = nil
     Cached.Pallets[obj] = nil
@@ -810,7 +805,7 @@ for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
-local function createESP(obj, color)
+function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
         ESPObjects[obj].FillColor = color
@@ -835,21 +830,21 @@ local function createESP(obj, color)
     end)
 end
 
-local function removeESP(obj)
+function removeESP(obj)
     if ESPObjects[obj] then
         ESPObjects[obj]:Destroy()
         ESPObjects[obj] = nil
     end
 end
 
-local function removeStatusESP(char)
+function removeStatusESP(char)
     if StatusESP[char] then
         StatusESP[char]:Destroy()
         StatusESP[char] = nil
     end
 end
 
-local function createStatusESP(player, char, root)
+function createStatusESP(player, char, root)
     if not ESPStatus.Enabled then
         removeStatusESP(char)
         return
@@ -918,7 +913,7 @@ local function createStatusESP(player, char, root)
     end
 end
 
-local function GetGameValue(obj, name)
+function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
     if attr ~= nil then return attr end
@@ -930,7 +925,7 @@ local function GetGameValue(obj, name)
     return nil
 end
 
-local function UpdateGenerator(generator)
+function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
     if not ESP.Generator then
         local old = generator:FindFirstChild("GenESP")
@@ -985,7 +980,7 @@ local function UpdateGenerator(generator)
     h.Parent = generator
 end
 
-local function UpdateMapESP(obj, root)
+function UpdateMapESP(obj, root)
     if not obj or not root then return end
     local pos
     if obj:IsA("Model") then
@@ -1013,7 +1008,7 @@ local function UpdateMapESP(obj, root)
     end
 end
 
-local function UpdateSCPEsp(root)
+function UpdateSCPEsp(root)
     if not ESP.SCP then
         for obj in pairs(CachedSCP) do removeESP(obj) end
         return
@@ -1039,22 +1034,21 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY
+-- AUTO PARRY (GLOBAL)
 -- =========================================================
-local AutoParry = _G.Roooor_AutoParry
-local PARRY_DEBOUNCE = 0.2
-local lastParry = 0
-local hookedKillers = _G.HookedKillers or {}
+PARRY_DEBOUNCE = 0.2
+lastParry = 0
+hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
-local ParryActive = false
+ParryActive = false
 
-local function pressRightClick()
+function pressRightClick()
     VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
     task.wait()
     VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
 end
 
-local function GetParryButton()
+function GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
         current = current and current:FindFirstChild(segment)
@@ -1062,7 +1056,7 @@ local function GetParryButton()
     return current
 end
 
-local function pressParryButton()
+function pressParryButton()
     if UIS.TouchEnabled then
         local btn = GetParryButton()
         if btn and btn:IsA("GuiObject") then
@@ -1080,7 +1074,7 @@ local function pressParryButton()
     end
 end
 
-local function doParry()
+function doParry()
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
     lastParry = now
@@ -1092,7 +1086,7 @@ local function doParry()
     end)
 end
 
-local function isInParryRange(killerChar)
+function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
     local eRoot = killerChar:FindFirstChild("HumanoidRootPart")
@@ -1101,7 +1095,7 @@ local function isInParryRange(killerChar)
     return dist <= AutoParry.ParryDistance
 end
 
-local function isFacingTarget(targetChar)
+function isFacingTarget(targetChar)
     if not AutoParry.RequireFacing then return true end
     if AutoParry.FaceSensitivity <= -1 then return true end
 
@@ -1117,7 +1111,7 @@ local function isFacingTarget(targetChar)
     return dot >= AutoParry.FaceSensitivity
 end
 
-local function hookKiller(char)
+function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
 
@@ -1141,7 +1135,7 @@ local function hookKiller(char)
     end)
 end
 
-local function scanKillers()
+function scanKillers()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
             hookKiller(p.Character)
@@ -1156,23 +1150,20 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK
+-- AUTO SKILL CHECK (GLOBAL)
 -- =========================================================
-local SkillCheck = _G.Roooor_SkillCheck
-
-local function pressSpace()
+function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
     task.wait()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
 end
 
-local TouchID = 8822
-local ActionPath = "Survivor-mob.Controls.action.check"
+TouchID = 8822
+ActionPath = "Survivor-mob.Controls.action.check"
+SkillHeartbeat = nil
+busy = false
 
-local SkillHeartbeat = nil
-local busy = false
-
-local function GetActionTarget()
+function GetActionTarget()
     local current = PG
     for segment in string.gmatch(ActionPath, "[^%.]+") do
         current = current and current:FindFirstChild(segment)
@@ -1180,7 +1171,7 @@ local function GetActionTarget()
     return current
 end
 
-local function TriggerMobileButton()
+function TriggerMobileButton()
     local b = GetActionTarget()
     if b and b:IsA("GuiObject") then
         local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
@@ -1193,7 +1184,7 @@ local function TriggerMobileButton()
     end
 end
 
-local function startSkillCheck()
+function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
 
     SkillHeartbeat = RunService.RenderStepped:Connect(function()
@@ -1243,9 +1234,9 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- TELEPORT
+-- TELEPORT (GLOBAL)
 -- =========================================================
-local function teleportToFinishLine()
+function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
     local found = nil
@@ -1262,7 +1253,7 @@ local function teleportToFinishLine()
     end
 end
 
-local function teleportToGate()
+function teleportToGate()
     local root = getRoot()
     if not root then return end
     local found = nil
@@ -1282,7 +1273,7 @@ local function teleportToGate()
     end
 end
 
-local function teleportInsideGate()
+function teleportInsideGate()
     local root = getRoot()
     if not root then return end
     local found = nil
@@ -1303,7 +1294,7 @@ local function teleportInsideGate()
 end
 
 -- =========================================================
--- NO CLIP
+-- NO CLIP (GLOBAL)
 -- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
@@ -1318,9 +1309,9 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- VISUAL FUNCTIONS
+-- VISUAL FUNCTIONS (GLOBAL)
 -- =========================================================
-local origLighting = {
+origLighting = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
     Ambient = Lighting.Ambient,
@@ -1330,7 +1321,7 @@ local origLighting = {
     FogStart = Lighting.FogStart,
 }
 
-local function applyFullbright(s)
+function applyFullbright(s)
     if s then
         local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 2)
         Lighting.Brightness = 0.5 + bright * 3
@@ -1359,7 +1350,7 @@ local function applyFullbright(s)
     end
 end
 
-local function applyNoFog(s)
+function applyNoFog(s)
     pcall(function()
         if s then
             for _, v in pairs(Lighting:GetChildren()) do
@@ -1396,7 +1387,7 @@ task.spawn(function()
     end
 end)
 
-local origSky = nil
+origSky = nil
 for _, v in pairs(Lighting:GetChildren()) do
     if v:IsA("Sky") then
         origSky = v:Clone()
@@ -1404,7 +1395,7 @@ for _, v in pairs(Lighting:GetChildren()) do
     end
 end
 
-local function applySky(skyName)
+function applySky(skyName)
     for _, v in pairs(Lighting:GetChildren()) do
         if v:IsA("Sky") then v:Destroy() end
     end
@@ -1423,14 +1414,14 @@ local function applySky(skyName)
     end
 end
 
-local function applyFOV()
+function applyFOV()
     local cam = workspace.CurrentCamera
     if cam then
         cam.FieldOfView = S.FOVEnabled and S.FOV or 70
     end
 end
 
-local function applyUltraHD()
+function applyUltraHD()
     if S.UltraHD then
         pcall(function()
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
@@ -1452,7 +1443,7 @@ local function applyUltraHD()
     end
 end
 
-local function applyContrast()
+function applyContrast()
     if S.Contrast then
         if not _G.ContrastFx then
             _G.ContrastFx = Instance.new("ColorCorrectionEffect")
@@ -1468,9 +1459,9 @@ local function applyContrast()
     end
 end
 
--- KORBLOX
-local KorbloxOrig = nil
-local function applyKorblox(s)
+-- KORBLOX (GLOBAL)
+KorbloxOrig = nil
+function applyKorblox(s)
     local char = LP.Character
     if not char then return end
     local rightLeg = char:FindFirstChild("Right Leg")
@@ -1513,8 +1504,8 @@ task.spawn(function()
     end
 end)
 
--- HEADLESS
-local function applyHeadless(s)
+-- HEADLESS (GLOBAL)
+function applyHeadless(s)
     local char = LP.Character
     if not char then return end
     local head = char:FindFirstChild("Head")
@@ -1554,9 +1545,9 @@ task.spawn(function()
     end
 end)
 
--- TRAIL FIRE
-local trailFireObj = nil
-local function applyTrail(enable, color)
+-- TRAIL FIRE (GLOBAL)
+trailFireObj = nil
+function applyTrail(enable, color)
     local char = LP.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -1602,9 +1593,9 @@ local function applyTrail(enable, color)
     spark.Parent = trailFireObj
 end
 
--- AURA FIRE
-local auraObj = nil
-local function applyAura(enable, color)
+-- AURA FIRE (GLOBAL)
+auraObj = nil
+function applyAura(enable, color)
     local char = LP.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -1627,8 +1618,8 @@ local function applyAura(enable, color)
     auraObj.Parent = hrp
 end
 
--- KILL EFFECT
-local function spawnKillEffect(pos)
+-- KILL EFFECT (GLOBAL)
+function spawnKillEffect(pos)
     local p = Instance.new("Part")
     p.Anchored = true
     p.CanCollide = false
@@ -1648,9 +1639,9 @@ local function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
--- CROSSHAIR
-local crosshairGui = nil
-local function applyCrosshair(enable, color, size)
+-- CROSSHAIR (GLOBAL)
+crosshairGui = nil
+function applyCrosshair(enable, color, size)
     if crosshairGui then
         crosshairGui:Destroy()
         crosshairGui = nil
@@ -1686,7 +1677,7 @@ local function applyCrosshair(enable, color, size)
     end
 end
 
-local function applyZoomOut(enable, val)
+function applyZoomOut(enable, val)
     if enable then
         LP.CameraMaxZoomDistance = val or 500
     else
@@ -1694,9 +1685,9 @@ local function applyZoomOut(enable, val)
     end
 end
 
--- FLY
-local flyBV, flyBG, flyConn = nil, nil, nil
-local function startFly()
+-- FLY (GLOBAL)
+flyBV, flyBG, flyConn = nil, nil, nil
+function startFly()
     if flyConn then return end
     local char = LP.Character
     if not char then return end
@@ -1746,7 +1737,7 @@ local function startFly()
     end)
 end
 
-local function stopFly()
+function stopFly()
     if flyConn then flyConn:Disconnect(); flyConn = nil end
     if flyBV then flyBV:Destroy(); flyBV = nil end
     if flyBG then flyBG:Destroy(); flyBG = nil end
@@ -1786,7 +1777,7 @@ _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
 print("✅ [3/8] Fungsi + Auto Parry + Auto Skill Check loaded")-- =========================================================
--- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA (LIGHTWEIGHT)
+-- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA (FIXED)
 -- =========================================================
 
 -- AUTO HEAL
@@ -2058,9 +2049,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- ANTI SYSTEM GABUNGAN
--- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not LP.Character then continue end
@@ -2206,9 +2195,9 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILL FEED
+-- KILL FEED (GLOBAL)
 -- =========================================================
-local killFeedGui = Instance.new("ScreenGui")
+killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "RoooorKillFeed"
 killFeedGui.ResetOnSpawn = false
 killFeedGui.IgnoreGuiInset = true
@@ -2225,7 +2214,7 @@ killFeedLayout.Padding = UDim.new(0, 4)
 killFeedLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 killFeedLayout.Parent = killFeedFrame
 
-local function addKillFeed(killerName, survivorName)
+function addKillFeed(killerName, survivorName)
     if not S.KillFeed then return end
     local entry = Instance.new("Frame")
     entry.Size = UDim2.new(1, 0, 0, 28)
@@ -2280,11 +2269,11 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- NOTIFIKASI KILLER STUN
+-- NOTIFIKASI KILLER STUN (GLOBAL)
 -- =========================================================
-local stunIcons = {}
+stunIcons = {}
 
-local function createStunIcon(killerChar)
+function createStunIcon(killerChar)
     if stunIcons[killerChar] then return stunIcons[killerChar] end
     local head = killerChar:FindFirstChild("Head")
     if not head then return end
@@ -2320,7 +2309,7 @@ local function createStunIcon(killerChar)
     return billboard
 end
 
-local function removeStunIcon(killerChar)
+function removeStunIcon(killerChar)
     if stunIcons[killerChar] then
         stunIcons[killerChar]:Destroy()
         stunIcons[killerChar] = nil
@@ -2371,7 +2360,7 @@ task.spawn(function()
 end)
 
 -- KILLER: AUTO ATTACK
-local lastAtk = 0
+lastAtk = 0
 task.spawn(function()
     while task.wait(0.2) do
         if S.Killer_AutoAtk then
@@ -2456,10 +2445,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE
+-- PARRY CIRCLE (GLOBAL)
 -- =========================================================
 _G.Roooor_ParryCircle = nil
-local function updateParryCircle()
+function updateParryCircle()
     local root = getRoot()
     if not S.ParryCircle or not root then
         if _G.Roooor_ParryCircle then
@@ -2580,9 +2569,9 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
+-- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK (FIXED)
 -- =========================================================
-local gui = Instance.new("ScreenGui")
+gui = Instance.new("ScreenGui")
 gui.Name = "RoooorHubFire"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
@@ -2590,15 +2579,14 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU R (BULAT + API RING + PARTIKEL)
+-- TOMBOL MENU R
 -- =========================================================
-local btnContainer = Instance.new("Frame")
+btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 55, 0, 55)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Ring 1
 local ring1 = Instance.new("Frame")
 ring1.Size = UDim2.new(1, 10, 1, 10)
 ring1.Position = UDim2.new(0, -5, 0, -5)
@@ -2615,7 +2603,6 @@ local ring1Grad = Instance.new("UIGradient")
 ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE1, C.FIRE_BRIGHT, C.FIRE2, C.FIRE3)
 ring1Grad.Parent = ring1Stroke
 
--- Ring 2
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 4, 1, 4)
 ring2.Position = UDim2.new(0, -2, 0, -2)
@@ -2632,7 +2619,6 @@ local ring2Grad = Instance.new("UIGradient")
 ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
 ring2Grad.Parent = ring2Stroke
 
--- Tombol utama
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -14, 1, -14)
 mainBtn.Position = UDim2.new(0, 7, 0, 7)
@@ -2697,7 +2683,6 @@ task.spawn(function()
     end
 end)
 
--- Partikel orbit
 for i = 1, 10 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 3, 0, 3)
@@ -2723,11 +2708,11 @@ for i = 1, 10 do
     end)
 end
 
--- Drag tombol
-local dragging = false
-local dragStart = nil
-local startPos = nil
-local wasDragged = false
+-- DRAG TOMBOL
+dragging = false
+dragStart = nil
+startPos = nil
+wasDragged = false
 
 btnContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -2763,13 +2748,13 @@ end)
 -- =========================================================
 -- AIMLOCK FLOATING BUTTON
 -- =========================================================
-local aimBtnGui = Instance.new("ScreenGui")
+aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
 aimBtnGui.ResetOnSpawn = false
 aimBtnGui.IgnoreGuiInset = true
 aimBtnGui.Parent = PG
 
-local aimContainer = Instance.new("Frame")
+aimContainer = Instance.new("Frame")
 aimContainer.Size = UDim2.new(0, 46, 0, 46)
 aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
 aimContainer.BackgroundTransparency = 1
@@ -2815,8 +2800,6 @@ aimModeLbl.Font = Enum.Font.GothamBlack
 aimModeLbl.TextStrokeTransparency = 0.3
 aimModeLbl.Parent = aimBtn
 
-local Combat = _G.Roooor_Combat
-
 task.spawn(function()
     local t = 0
     while aimContainer.Parent do
@@ -2829,7 +2812,7 @@ task.spawn(function()
     end
 end)
 
-local aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
+aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
 
 aimContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -2903,7 +2886,7 @@ end)
 -- =========================================================
 -- PANEL MENU UTAMA
 -- =========================================================
-local panel = Instance.new("Frame")
+panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
 panel.BackgroundColor3 = C.BG
@@ -2989,7 +2972,7 @@ rnd(closeBtn, 7)
 strk(closeBtn, C.RED, 1, 0.5)
 
 -- SIDEBAR
-local sbFrame = Instance.new("Frame")
+sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 105, 1, -58)
 sbFrame.Position = UDim2.new(0, 10, 0, 50)
 sbFrame.BackgroundColor3 = C.PANEL
@@ -2999,7 +2982,7 @@ sbFrame.Parent = panel
 rnd(sbFrame, 12)
 strk(sbFrame, C.FIRE2, 1, 0.6)
 
-local sb = Instance.new("ScrollingFrame")
+sb = Instance.new("ScrollingFrame")
 sb.Size = UDim2.new(1, -4, 1, -4)
 sb.Position = UDim2.new(0, 2, 0, 2)
 sb.BackgroundTransparency = 1
@@ -3022,7 +3005,7 @@ sbP.PaddingBottom = UDim.new(0, 6)
 sbP.Parent = sb
 
 -- CONTENT
-local ct = Instance.new("Frame")
+ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -135, 1, -58)
 ct.Position = UDim2.new(0, 122, 0, 50)
 ct.BackgroundColor3 = C.PANEL
@@ -3032,7 +3015,7 @@ ct.Parent = panel
 rnd(ct, 12)
 strk(ct, C.FIRE2, 1, 0.6)
 
-local cs = Instance.new("ScrollingFrame")
+cs = Instance.new("ScrollingFrame")
 cs.Size = UDim2.new(1, -14, 1, -14)
 cs.Position = UDim2.new(0, 7, 0, 7)
 cs.BackgroundTransparency = 1
@@ -3048,9 +3031,9 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI
+-- KOMPONEN UI (GLOBAL)
 -- =========================================================
-local function sec(title, icon)
+function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
     f.BackgroundTransparency = 1
@@ -3080,7 +3063,7 @@ local function sec(title, icon)
     l.Parent = f
 end
 
-local function lbl(text, color)
+function lbl(text, color)
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -4, 0, 16)
     l.BackgroundTransparency = 1
@@ -3092,7 +3075,7 @@ local function lbl(text, color)
     l.Parent = cs
 end
 
-local function tog(name, def, cb)
+function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
@@ -3158,7 +3141,7 @@ local function tog(name, def, cb)
     end)
 end
 
-local function sl(name, min, max, def, cb)
+function sl(name, min, max, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 36)
     f.BackgroundColor3 = C.BG
@@ -3255,7 +3238,7 @@ local function sl(name, min, max, def, cb)
     end)
 end
 
-local function cpk(name, def, cb)
+function cpk(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
@@ -3307,7 +3290,7 @@ local function cpk(name, def, cb)
     end)
 end
 
-local function btn(name, cb)
+function btn(name, cb)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -4, 0, 28)
     b.BackgroundColor3 = C.BG
@@ -3328,7 +3311,7 @@ local function btn(name, cb)
     end)
 end
 
-local function drp(name, options, def, cb)
+function drp(name, options, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
@@ -3381,8 +3364,8 @@ local function drp(name, options, def, cb)
     end)
 end
 
-local activeTab = nil
-local function makeTab(name, icon, order, cb)
+activeTab = nil
+function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -8, 0, 28)
     b.BackgroundColor3 = C.BG
@@ -3495,17 +3478,17 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 print("✅ [5/8] GUI + Tombol R + Aimlock + Panel loaded")-- =========================================================
--- BAGIAN 6/8 : TAB UI PART 1
+-- BAGIAN 6/8 : TAB UI PART 1 (FIXED)
 -- =========================================================
-local sec = _G.Roooor_sec
-local lbl = _G.Roooor_lbl
-local tog = _G.Roooor_tog
-local sl = _G.Roooor_sl
-local cpk = _G.Roooor_cpk
-local btn = _G.Roooor_btn
-local drp = _G.Roooor_drp
-local makeTab = _G.Roooor_makeTab
-local cs = _G.Roooor_cs
+sec = _G.Roooor_sec
+lbl = _G.Roooor_lbl
+tog = _G.Roooor_tog
+sl = _G.Roooor_sl
+cpk = _G.Roooor_cpk
+btn = _G.Roooor_btn
+drp = _G.Roooor_drp
+makeTab = _G.Roooor_makeTab
+cs = _G.Roooor_cs
 
 -- ============================
 -- TAB: FIRE
@@ -3753,17 +3736,17 @@ makeTab("Survivor", "🏃", 4, function()
 end)
 
 print("✅ [6/8] Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
--- BAGIAN 7/8 : TAB UI PART 2
+-- BAGIAN 7/8 : TAB UI PART 2 (FIXED)
 -- =========================================================
-local sec = _G.Roooor_sec
-local lbl = _G.Roooor_lbl
-local tog = _G.Roooor_tog
-local sl = _G.Roooor_sl
-local cpk = _G.Roooor_cpk
-local btn = _G.Roooor_btn
-local drp = _G.Roooor_drp
-local makeTab = _G.Roooor_makeTab
-local cs = _G.Roooor_cs
+sec = _G.Roooor_sec
+lbl = _G.Roooor_lbl
+tog = _G.Roooor_tog
+sl = _G.Roooor_sl
+cpk = _G.Roooor_cpk
+btn = _G.Roooor_btn
+drp = _G.Roooor_drp
+makeTab = _G.Roooor_makeTab
+cs = _G.Roooor_cs
 
 -- ============================================================
 -- TAB: KILLER
@@ -3832,9 +3815,9 @@ makeTab("Misc", "⚙️", 6, function()
     tog("Fly", false, function(s)
         S.Fly = s
         if s then
-            _G.Roooor_startFly()
+            startFly()
         else
-            _G.Roooor_stopFly()
+            stopFly()
         end
     end)
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
@@ -3962,7 +3945,7 @@ makeTab("Player", "👤", 8, function()
 
     sec("Aimlock", "🎯")
     tog("Enable Aimlock", false, function(s)
-        _G.Roooor_Combat.AimlockEnabled = s
+        Combat.AimlockEnabled = s
     end)
 
     tog("Show Aimlock Button", false, function(s)
@@ -3973,16 +3956,16 @@ makeTab("Player", "👤", 8, function()
     end)
 
     drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
-        _G.Roooor_Combat.Mode = v
+        Combat.Mode = v
     end)
 
     sl("Smoothness", 0.01, 1, 0.15, function(v)
-        _G.Roooor_Combat.Smoothness = v
+        Combat.Smoothness = v
     end)
     lbl("0.01 = instan | 1 = smooth", C.GRN)
 
     sl("Lock Radius", 10, 300, 100, function(v)
-        _G.Roooor_Combat.LockRadius = v
+        Combat.LockRadius = v
     end)
 
     sec("Info", "ℹ️")
@@ -4015,28 +3998,26 @@ makeTab("Player", "👤", 8, function()
 end)
 
 print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- =========================================================
--- BAGIAN 8/8 : FINAL - AUTO RE-APPLY + TAB COMBAT + TAB EXTRA
+-- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY (FIXED)
 -- =========================================================
 
-local sec = _G.Roooor_sec
-local lbl = _G.Roooor_lbl
-local tog = _G.Roooor_tog
-local sl = _G.Roooor_sl
-local cpk = _G.Roooor_cpk
-local btn = _G.Roooor_btn
-local drp = _G.Roooor_drp
-local makeTab = _G.Roooor_makeTab
-local cs = _G.Roooor_cs
-
-local Combat = _G.Roooor_Combat
+sec = _G.Roooor_sec
+lbl = _G.Roooor_lbl
+tog = _G.Roooor_tog
+sl = _G.Roooor_sl
+cpk = _G.Roooor_cpk
+btn = _G.Roooor_btn
+drp = _G.Roooor_drp
+makeTab = _G.Roooor_makeTab
+cs = _G.Roooor_cs
 
 -- =========================================================
 -- HELPER: RAYCAST VISIBILITY
 -- =========================================================
-local RayParams = RaycastParams.new()
+RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-local function isVisible(part)
+function isVisible(part)
     if not Combat.VisibilityCheck and not Combat.WallCheck then return true end
     local cam = workspace.CurrentCamera
     if not cam then return true end
@@ -4054,8 +4035,8 @@ end
 -- =========================================================
 -- FOV CIRCLE VISUAL
 -- =========================================================
-local fovGui = nil
-local function createFOVCircle()
+fovGui = nil
+function createFOVCircle()
     if fovGui then fovGui:Destroy(); fovGui = nil end
 
     fovGui = Instance.new("ScreenGui")
@@ -4130,9 +4111,8 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- Auto-detect tombol attack HP
 task.spawn(function()
-    local function getAttackBtn()
+    function getAttackBtn()
         local paths = {
             "Survivor-mob.Controls.Gui-mob",
             "Slasher-mob.Controls.attack",
@@ -4172,7 +4152,7 @@ end)
 -- =========================================================
 -- AIMBOT LOOP (HOLD-TO-ATTACK)
 -- =========================================================
-local lastTrigger = 0
+lastTrigger = 0
 
 task.spawn(function()
     while task.wait(0.01) do
@@ -4264,7 +4244,7 @@ end)
 -- =========================================================
 -- HITBOX 2 MODE
 -- =========================================================
-local hitboxCache = {}
+hitboxCache = {}
 
 task.spawn(function()
     while task.wait(0.5) do
@@ -4322,8 +4302,6 @@ end)
 -- =========================================================
 -- GOD MODE LOOP
 -- =========================================================
-local GodMode = _G.Roooor_GodMode
-
 task.spawn(function()
     while task.wait(0.1) do
         if not GodMode.Enabled then continue end
@@ -4412,7 +4390,7 @@ LP.CharacterAdded:Connect(function(char)
 end)
 
 -- =========================================================
--- AUTO SCAN KILLER (KALAU PARRY AKTIF)
+-- AUTO SCAN KILLER
 -- =========================================================
 task.spawn(function()
     while task.wait(1) do
@@ -4536,42 +4514,42 @@ makeTab("Extra", "✨", 10, function()
 
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
-        _G.Roooor_GodMode.Enabled = s
+        GodMode.Enabled = s
     end)
     lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
 
     sec("Fullbright Max", "💡")
     tog("Fullbright (max 200)", false, function(s)
         S.Fullbright = s
-        _G.Roooor_applyFullbright(s)
+        applyFullbright(s)
     end)
     sl("Brightness Level", 10, 200, 100, function(v)
         S.FullbrightVal = v
-        if S.Fullbright then _G.Roooor_applyFullbright(true) end
+        if S.Fullbright then applyFullbright(true) end
     end)
     lbl("Bisa sampai 200 (super terang)", C.FIRE_BRIGHT)
 
     sec("No Fog (Fix)", "🌫️")
     tog("No Fog (Fix)", false, function(s)
         S.NoFog = s
-        _G.Roooor_applyNoFog(s)
+        applyNoFog(s)
     end)
     lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
 
     sec("Teleport", "🌀")
     btn("🚪 TP ke Finish Line", function()
-        _G.Roooor_teleportToFinishLine()
+        teleportToFinishLine()
     end)
     btn("🚪 TP ke Gate", function()
-        _G.Roooor_teleportToGate()
+        teleportToGate()
     end)
     btn("🚪 TP ke Dalam Gate", function()
-        _G.Roooor_teleportInsideGate()
+        teleportInsideGate()
     end)
 
     sec("Sound", "🔊")
     btn("🔊 Test Sound", function()
-        _G.Roooor_playSound()
+        playToggleSound()
     end)
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)

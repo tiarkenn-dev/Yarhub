@@ -1,7 +1,6 @@
 -- =========================================================
 -- COSMIC HUB — GALAXY EDITION v1
--- BAGIAN 1/8 : LOADING COSMIC + CONFIG + STATE
--- SEMUA FITUR INTI PAKAI LOGIKA STABIL (ESP, PARRY, SKILLCHECK)
+-- BAGIAN 1/8 : LOADING COSMIC + CONFIG + STATE (FIXED)
 -- =========================================================
 
 -- Reset state lama kalau re-inject
@@ -22,6 +21,18 @@ local GuiService = game:GetService("GuiService")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
+
+-- EXPOSE SERVICE (biar Bagian 8 bisa akses)
+_G.Cosmic_LP = LP
+_G.Cosmic_PG = PG
+_G.Cosmic_UIS = UIS
+_G.Cosmic_RunService = RunService
+_G.Cosmic_TweenService = TweenService
+_G.Cosmic_Lighting = Lighting
+_G.Cosmic_ReplicatedStorage = ReplicatedStorage
+_G.Cosmic_VIM = VirtualInputManager
+_G.Cosmic_Stats = Stats
+_G.Cosmic_GuiService = GuiService
 
 -- =========================================================
 -- GALAXY THEME COLOR
@@ -46,6 +57,9 @@ local C = {
     RED         = Color3.fromRGB(255, 80, 120),
 }
 
+-- EXPOSE warna (biar Bagian lain bisa akses)
+_G.Cosmic_C = C
+
 -- Helper
 local function rnd(o, r)
     local c = Instance.new("UICorner")
@@ -63,6 +77,10 @@ local function strk(o, col, t, tr)
     return s
 end
 
+-- EXPOSE helper (biar Bagian lain bisa akses)
+_G.Cosmic_rnd = rnd
+_G.Cosmic_strk = strk
+
 -- =========================================================
 -- LOADING COSMIC 4D (GALAXY STYLE)
 -- =========================================================
@@ -73,7 +91,7 @@ loadingGui.IgnoreGuiInset = true
 loadingGui.DisplayOrder = 999999
 loadingGui.Parent = PG
 
--- Background bintang
+-- Background
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.fromRGB(0, 0, 8)
@@ -99,7 +117,7 @@ task.spawn(function()
     end
 end)
 
--- Bintang jatuh (shooting stars)
+-- Bintang jatuh
 for i = 1, 40 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
@@ -123,7 +141,7 @@ for i = 1, 40 do
     end)
 end
 
--- Ring nebula berputar (4D)
+-- Ring nebula
 local ringContainer = Instance.new("Frame")
 ringContainer.Size = UDim2.new(0, 260, 0, 260)
 ringContainer.Position = UDim2.new(0.5, -130, 0.5, -190)
@@ -157,7 +175,7 @@ for i = 1, 5 do
     table.insert(rings, {ring = ring, grad = rGrad, speed = 30 + i * 20, dir = i % 2 == 0 and -1 or 1})
 end
 
--- Core (planet inti)
+-- Core planet
 local core = Instance.new("Frame")
 core.Size = UDim2.new(0, 90, 0, 90)
 core.Position = UDim2.new(0.5, -45, 0.5, -45)
@@ -240,7 +258,7 @@ local fillGrad = Instance.new("UIGradient")
 fillGrad.Color = ColorSequence.new(C.COSMIC3, C.COSMIC2, C.COSMIC)
 fillGrad.Parent = progressFill
 
--- Animasi utama
+-- Animasi
 task.spawn(function()
     local t = 0
     while bg.Parent do
@@ -262,7 +280,6 @@ task.spawn(function()
     end
 end)
 
--- Progress fill
 task.spawn(function()
     for i = 0, 1, 0.015 do
         if not bg.Parent then break end
@@ -271,7 +288,7 @@ task.spawn(function()
     end
 end)
 
--- Fade out
+-- Fade out (loading selesai)
 task.delay(2.5, function()
     TweenService:Create(bg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     for _, el in pairs(bg:GetDescendants()) do
@@ -290,7 +307,7 @@ task.delay(2.5, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE (EXPOSE GLOBAL)
 -- =========================================================
 _G.CosmicS = {
     -- Fire
@@ -298,9 +315,9 @@ _G.CosmicS = {
     FireFeetOn = false, FireFeetType = "Classic",
     -- Parry
     Parry = false, ParryDistance = 15,
-    ParryCooldown = 0.2,       -- debounce stabil
-    FaceSensitivity = 0.7,     -- -1 = 360°
-    ParryPredict = 0,          -- 0 = no predict
+    ParryCooldown = 0.2,
+    FaceSensitivity = 0.7,
+    ParryPredict = 0,
     ParryRangeVisual = true,
     ParryRangeColor = Color3.fromRGB(160, 80, 255),
     -- Skill Check
@@ -347,16 +364,14 @@ _G.CosmicS = {
     ShowFPS = true, FPSPos = "TopLeft",
 }
 
-local S = _G.CosmicS
 _G.CosmicToggle = {}
 _G.CosmicSlider = {}
 
--- ESP CONFIG
 _G.CosmicESP = {
     Survivor = false, Killer = false,
     Generator = false, Pallet = false,
     Window = false, SCP = false,
-    Distance = 500,             -- default unlimited-ish
+    Distance = 500,
 }
 
 _G.CosmicESPStatus = {
@@ -370,7 +385,6 @@ _G.CosmicTeamColors = {
     Survivor = Color3.fromRGB(60, 255, 120),
 }
 
--- AIMLOCK
 _G.CosmicAimlock = {
     Enabled = false,
     Holding = false,
@@ -382,17 +396,15 @@ _G.CosmicAimlock = {
     LockRadius = 100,
     AimPart = "HumanoidRootPart",
     ShowButton = false,
-    AutoAttack = false,   -- aimbot
+    AutoAttack = false,
 }
 
--- SKILL CHECK
 _G.CosmicSkill = {
     Enabled = false,
     PerfectMode = false,
     SafeZone = 0.15,
 }
 
--- PARRY
 _G.CosmicParry = {
     Enabled = false,
     Distance = 15,
@@ -402,8 +414,8 @@ _G.CosmicParry = {
     RequireFacing = true,
 }
 
-print("✅ [1/8] Cosmic Loading + Config loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
+print("✅ [1/8] Cosmic Loading + Config loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS (FIXED)
 -- =========================================================
 
 local FireList = {
@@ -526,7 +538,7 @@ for _, name in ipairs(FireFeetList) do
 end
 
 -- =========================================================
--- SKY CONFIG (Galaxy Sky + lainnya)
+-- SKY CONFIG
 -- =========================================================
 local SkyList = {
     "Default", "Galaxy", "Nebula", "Cosmic", "Sunset",
@@ -572,7 +584,7 @@ local SkyIds = {
 }
 
 -- =========================================================
--- KILLER ANIMS (untuk Auto Parry detection)
+-- KILLER ANIMS
 -- =========================================================
 local KillerAnims = {}
 for _, id in ipairs({
@@ -584,21 +596,57 @@ for _, id in ipairs({
     "117070354890871","106871536134254","138720291317243"
 }) do KillerAnims["rbxassetid://"..id] = true end
 
--- Stun anim
 local STUN_ANIM = "rbxassetid://123047897844134"
--- Parry anim
 local PARRY_ANIM = "rbxassetid://127096285501517"
--- Break pallet anim
 local BREAK_PALLET_ANIM = "rbxassetid://112166042383605"
+
+-- EXPOSE GLOBAL (biar Bagian 3-8 bisa akses)
+_G.Cosmic_FireList = FireList
+_G.Cosmic_FireConfig = FireConfig
+_G.Cosmic_FireFeetList = FireFeetList
+_G.Cosmic_FireFeetConfig = FireFeetConfig
+_G.Cosmic_SkyList = SkyList
+_G.Cosmic_SkyIds = SkyIds
+_G.Cosmic_KillerAnims = KillerAnims
+_G.Cosmic_STUN_ANIM = STUN_ANIM
+_G.Cosmic_PARRY_ANIM = PARRY_ANIM
+_G.Cosmic_BREAK_PALLET_ANIM = BREAK_PALLET_ANIM
+
+-- Helper getRoot (expose ke global)
+function _G.Cosmic_getRoot()
+    local c = _G.Cosmic_LP.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+print("✅ [2/8] Fire + Sky + KillerAnims loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 3/8 : FUNGSI + PARRY + SKILLCHECK + ESP (FIXED)
+-- =========================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local GuiService = game:GetService("GuiService")
+
+local LP = _G.Cosmic_LP
+local PG = _G.Cosmic_PG
+local C = _G.Cosmic_C
+
+local S = _G.CosmicS
+local FireConfig = _G.Cosmic_FireConfig
+local FireFeetConfig = _G.Cosmic_FireFeetConfig
+local KillerAnims = _G.Cosmic_KillerAnims
+local PARRY_ANIM = _G.Cosmic_PARRY_ANIM
+local BREAK_PALLET_ANIM = _G.Cosmic_BREAK_PALLET_ANIM
+local STUN_ANIM = _G.Cosmic_STUN_ANIM
 
 local function getRoot()
     local c = LP.Character
     return c and c:FindFirstChild("HumanoidRootPart")
 end
-
-print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 3/8 : SEMUA FUNGSI + PARRY + SKILLCHECK + ESP
--- =========================================================
 
 -- ============================
 -- FIRE (KEPALA)
@@ -684,7 +732,6 @@ local function applyFireFeet()
     end
 end
 
--- Rainbow updater
 task.spawn(function()
     while task.wait(0.2) do
         if S.FireOn and LP.Character then
@@ -820,7 +867,6 @@ workspace.DescendantRemoving:Connect(removeCache)
 
 local function createESP(obj, color)
     if not obj then return end
-
     if ESPObjects[obj] then
         ESPObjects[obj].FillColor = color
         ESPObjects[obj].OutlineColor = color
@@ -985,7 +1031,6 @@ end
 
 local function UpdateMapESP(obj, root)
     if not obj or not root then return end
-
     local pos
     if obj:IsA("Model") then pos = obj:GetPivot().Position
     elseif obj:IsA("BasePart") then pos = obj.Position end
@@ -1026,11 +1071,11 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (LOGIKA STABIL + DEBOUNCE + FACE CHECK)
+-- AUTO PARRY
 -- =========================================================
 local CosmicParry = _G.CosmicParry
 local lastParry = 0
-local hookedKillers = _G.CosmicHookKiller or {}
+local hookedKillers = {}
 _G.CosmicHookKiller = hookedKillers
 local ParryActive = false
 local ParryCircle = nil
@@ -1038,24 +1083,20 @@ local ParryCircle = nil
 local function isInParryRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
-
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
 
     local pos = enemyRoot.Position
-    -- Predict opsional
     if CosmicParry.Predict and CosmicParry.Predict > 0 then
         pos = pos + (enemyRoot.AssemblyLinearVelocity * CosmicParry.Predict)
     end
-
     local dist = (pos - myRoot.Position).Magnitude
     return dist <= CosmicParry.Distance
 end
 
--- Face check: killer harus menghadap ke kita
 local function isFacingTarget(targetChar)
     if not CosmicParry.RequireFacing then return true end
-    if CosmicParry.FaceSensitivity <= -1 then return true end  -- -1 = 360°
+    if CosmicParry.FaceSensitivity <= -1 then return true end
 
     local myChar = LP.Character
     if not myChar then return false end
@@ -1067,11 +1108,9 @@ local function isFacingTarget(targetChar)
     local enemyForward = enemyRoot.CFrame.LookVector
     local directionToMe = (myRoot.Position - enemyRoot.Position).Unit
     local dot = enemyForward:Dot(directionToMe)
-
     return dot >= CosmicParry.FaceSensitivity
 end
 
--- Ambil tombol parry
 local function GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
@@ -1095,7 +1134,6 @@ local function pressParryButton()
             local inset = GuiService:GetGuiInset()
             local x = pos.X + size.X/2 + inset.X
             local y = pos.Y + size.Y/2 + inset.Y
-
             VirtualInputManager:SendTouchEvent(8823, 0, x, y)
             task.wait(0.01)
             VirtualInputManager:SendTouchEvent(8823, 2, x, y)
@@ -1111,11 +1149,9 @@ local function doParry()
     lastParry = now
 
     ParryActive = true
-    -- Stop moonwalk kalau aktif (biar gak bentrok)
     if S.Moonwalk then S.Moonwalk = false end
 
     pressParryButton()
-
     task.delay(0.3, function() ParryActive = false end)
 end
 
@@ -1128,10 +1164,8 @@ local function hookKiller(char)
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
-    -- TRIGGER: AnimationPlayed (sama kayak Fallens, lebih ringan)
     animator.AnimationPlayed:Connect(function(track)
         if not CosmicParry.Enabled then return end
-
         local anim = track.Animation
         if not anim then return end
 
@@ -1155,14 +1189,12 @@ local function scanKillers()
     end
 end
 
--- Scan killer setiap 0.8 detik (ringan)
 task.spawn(function()
     while task.wait(0.8) do
         if CosmicParry.Enabled then scanKillers() end
     end
 end)
 
--- Parry range visual (circle di bawah)
 local function updateParryCircle()
     local root = getRoot()
     if not CosmicParry.Enabled or not S.ParryRangeVisual or not root then
@@ -1191,7 +1223,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (LOGIKA STABIL)
+-- AUTO SKILL CHECK
 -- =========================================================
 local CosmicSkill = _G.CosmicSkill
 local skillBusy = false
@@ -1216,7 +1248,6 @@ local function triggerSkillCheck()
                 local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
                 local cx = p.X + s.X/2 + i.X
                 local cy = p.Y + s.Y/2 + i.Y
-
                 VirtualInputManager:SendTouchEvent(8822, 0, cx, cy)
                 task.wait(0.01)
                 VirtualInputManager:SendTouchEvent(8822, 2, cx, cy)
@@ -1232,7 +1263,6 @@ local function triggerSkillCheck()
     skillBusy = false
 end
 
--- Skill check loop (RenderStepped untuk responsif)
 RunService.RenderStepped:Connect(function()
     if not CosmicSkill.Enabled then return end
     if skillBusy then return end
@@ -1250,7 +1280,6 @@ RunService.RenderStepped:Connect(function()
     local lr = line.Rotation % 360
     local gr = goal.Rotation % 360
 
-    -- Zona target: +102 sampai +116 dari goal
     local startZone = (gr + 102) % 360
     local endZone = (gr + 116) % 360
 
@@ -1266,7 +1295,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Perfect mode (auto putar line ke zona)
 task.spawn(function()
     while task.wait(0.005) do
         if not CosmicSkill.Enabled then continue end
@@ -1288,7 +1316,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- TELEPORT FUNCTIONS
+-- TELEPORT
 -- =========================================================
 local function teleportToFinishLine()
     local root = getRoot()
@@ -1341,21 +1369,6 @@ local function teleportInsideGate()
 end
 
 -- =========================================================
--- NO CLIP
--- =========================================================
-task.spawn(function()
-    while task.wait(0.2) do
-        if S.NoClip and LP.Character then
-            for _, v in pairs(LP.Character:GetDescendants()) do
-                if v:IsA("BasePart") and v.CanCollide then
-                    v.CanCollide = false
-                end
-            end
-        end
-    end
-end)
-
--- =========================================================
 -- VISUAL FUNCTIONS
 -- =========================================================
 local origLighting = {
@@ -1401,8 +1414,8 @@ local function applySky(skyName)
     for _, v in pairs(Lighting:GetChildren()) do
         if v:IsA("Sky") then v:Destroy() end
     end
-    if skyName and skyName ~= "Default" and SkyIds[skyName] then
-        local ids = SkyIds[skyName]
+    if skyName and skyName ~= "Default" and _G.Cosmic_SkyIds[skyName] then
+        local ids = _G.Cosmic_SkyIds[skyName]
         local sky = Instance.new("Sky")
         sky.SkyboxBk = ids.Bk
         sky.SkyboxDn = ids.Dn or ids.Bk
@@ -1427,7 +1440,7 @@ local function applyZoomOut(enable, val)
 end
 
 -- =========================================================
--- HD GRAPHICS (BLOOM / SUNRAYS / DOF / SHARPEN / CINEMATIC / ATMOSPHERE)
+-- HD GRAPHICS
 -- =========================================================
 local hdEffects = {}
 
@@ -1441,7 +1454,6 @@ local function ensureEffect(name, class)
 end
 
 local function applyHD()
-    -- Bloom
     if S.Bloom then
         local b = ensureEffect("Bloom", "BloomEffect")
         b.Enabled = true
@@ -1452,7 +1464,6 @@ local function applyHD()
         if hdEffects.Bloom then hdEffects.Bloom:Destroy(); hdEffects.Bloom = nil end
     end
 
-    -- Sun Rays
     if S.SunRays then
         local sr = ensureEffect("SunRays", "SunRaysEffect")
         sr.Enabled = true
@@ -1462,7 +1473,6 @@ local function applyHD()
         if hdEffects.SunRays then hdEffects.SunRays:Destroy(); hdEffects.SunRays = nil end
     end
 
-    -- Depth of Field
     if S.DOF then
         local d = ensureEffect("DOF", "DepthOfFieldEffect")
         d.Enabled = true
@@ -1473,7 +1483,6 @@ local function applyHD()
         if hdEffects.DOF then hdEffects.DOF:Destroy(); hdEffects.DOF = nil end
     end
 
-    -- Sharpen (pakai ColorCorrection, karena SharpenEffect gak ada)
     if S.Sharpen then
         local cc = ensureEffect("Sharpen", "ColorCorrectionEffect")
         cc.Enabled = true
@@ -1483,7 +1492,6 @@ local function applyHD()
         if hdEffects.Sharpen then hdEffects.Sharpen:Destroy(); hdEffects.Sharpen = nil end
     end
 
-    -- Cinematic (bar film + vignette)
     if S.Cinematic then
         local cc = ensureEffect("Cinematic", "ColorCorrectionEffect")
         cc.Enabled = true
@@ -1494,7 +1502,6 @@ local function applyHD()
         if hdEffects.Cinematic then hdEffects.Cinematic:Destroy(); hdEffects.Cinematic = nil end
     end
 
-    -- Atmosphere
     if S.Atmosphere then
         if not hdEffects.Atmosphere or not hdEffects.Atmosphere.Parent then
             local atm = Instance.new("Atmosphere")
@@ -1515,13 +1522,35 @@ local function applyHD()
     end
 end
 
+_G.Cosmic_hdEffects = hdEffects
+
 -- =========================================================
--- EXPOSE GLOBAL
+-- NO CLIP
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.2) do
+        if S.NoClip and LP.Character then
+            for _, v in pairs(LP.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- EXPOSE SEMUA KE GLOBAL
 -- =========================================================
 _G.Cosmic_applyFire = applyFire
 _G.Cosmic_applyFireFeet = applyFireFeet
 _G.Cosmic_apply8BitCrown = apply8BitCrown
+_G.Cosmic_createESP = createESP
 _G.Cosmic_removeESP = removeESP
+_G.Cosmic_createStatusESP = createStatusESP
+_G.Cosmic_UpdateGenerator = UpdateGenerator
+_G.Cosmic_UpdateMapESP = UpdateMapESP
+_G.Cosmic_UpdateSCPEsp = UpdateSCPEsp
 _G.Cosmic_scanKillers = scanKillers
 _G.Cosmic_applyFullbright = applyFullbright
 _G.Cosmic_applyNoFog = applyNoFog
@@ -1533,12 +1562,38 @@ _G.Cosmic_teleportToFinishLine = teleportToFinishLine
 _G.Cosmic_teleportToGate = teleportToGate
 _G.Cosmic_teleportInsideGate = teleportInsideGate
 
-print("✅ [3/8] Fungsi + Parry + Skill Check + ESP + HD loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 4/8 : LOOP UTAMA + KILLER + AIMLOCK + FPS
+print("✅ [3/8] Fungsi + Parry + Skill Check + ESP + HD loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 4/8 : LOOP UTAMA + KILLER + AIMLOCK + FPS (FIXED)
 -- =========================================================
 
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Stats = game:GetService("Stats")
+
+local LP = _G.Cosmic_LP
+local PG = _G.Cosmic_PG
+local C = _G.Cosmic_C
+
+local S = _G.CosmicS
+local ESP = _G.CosmicESP
+local ESPStatus = _G.CosmicESPStatus
+local TeamColors = _G.CosmicTeamColors
+local CosmicParry = _G.CosmicParry
+local CosmicSkill = _G.CosmicSkill
+local CosmicAimlock = _G.CosmicAimlock
+
+local function getRoot()
+    local c = LP.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
 -- =========================================================
--- WALKSPEED SYSTEM (dengan deteksi anim biar gak bentrok)
+-- WALKSPEED + JUMPPOWER
 -- =========================================================
 local function shouldDisableWalkSpeed()
     local char = LP.Character
@@ -1551,11 +1606,11 @@ local function shouldDisableWalkSpeed()
             for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                 local anim = track.Animation
                 if anim and anim.AnimationId then
-                    if anim.AnimationId == PARRY_ANIM then return true end
-                    if anim.AnimationId == BREAK_PALLET_ANIM then return true end
-                    if anim.AnimationId == STUN_ANIM then return true end
+                    if anim.AnimationId == _G.Cosmic_PARRY_ANIM then return true end
+                    if anim.AnimationId == _G.Cosmic_BREAK_PALLET_ANIM then return true end
+                    if anim.AnimationId == _G.Cosmic_STUN_ANIM then return true end
                     local id = anim.AnimationId:match("%d+")
-                    if id and KillerAnims["rbxassetid://"..id] then
+                    if id and _G.Cosmic_KillerAnims["rbxassetid://"..id] then
                         return true
                     end
                 end
@@ -1589,16 +1644,17 @@ task.spawn(function()
     end
 end)
 
--- JumpPower
 task.spawn(function()
     while task.wait(0.3) do
         if S.JumpPower and LP.Character then
             local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.UseJumpPower ~= true then
-                hum.UseJumpPower = true
-            end
-            if hum and hum.JumpPower ~= S.JumpPowerVal then
-                hum.JumpPower = S.JumpPowerVal
+            if hum then
+                if hum.UseJumpPower ~= true then
+                    hum.UseJumpPower = true
+                end
+                if hum.JumpPower ~= S.JumpPowerVal then
+                    hum.JumpPower = S.JumpPowerVal
+                end
             end
         end
     end
@@ -1659,8 +1715,11 @@ local function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
+_G.Cosmic_startFly = startFly
+_G.Cosmic_stopFly = stopFly
+
 -- =========================================================
--- TRAIL / AURA
+-- TRAIL / AURA / KILL EFFECT
 -- =========================================================
 local trailFireObj = nil
 local function applyTrail(enable, color)
@@ -1724,7 +1783,6 @@ local function applyAura(enable, color)
     auraObj.Parent = hrp
 end
 
--- Kill Effect
 local function spawnKillEffect(pos)
     local p = Instance.new("Part")
     p.Anchored = true; p.CanCollide = false
@@ -1740,7 +1798,7 @@ local function spawnKillEffect(pos)
 end
 
 -- =========================================================
--- CROSSHAIR (pakai Drawing API kalau ada, fallback ke Frame GUI)
+-- CROSSHAIR
 -- =========================================================
 local crosshairGui = nil
 local crosshairDrawings = {}
@@ -1757,7 +1815,6 @@ local function applyCrosshair(enable, style, color, size, thick, offsetX, offset
     clearCrosshairGui()
     if not enable then return end
 
-    -- Coba pakai Drawing API kalau ada (ringan & smooth)
     if Drawing and Drawing.new then
         local ok = pcall(function()
             if style == "Plus" then
@@ -1791,7 +1848,6 @@ local function applyCrosshair(enable, style, color, size, thick, offsetX, offset
         end
     end
 
-    -- Fallback: pakai Frame GUI
     _G.Cosmic_crosshairMode = "Gui"
     crosshairGui = Instance.new("ScreenGui")
     crosshairGui.Name = "CosmicCrosshair"
@@ -1820,19 +1876,25 @@ local function applyCrosshair(enable, style, color, size, thick, offsetX, offset
         dot.BackgroundColor3 = col
         dot.BorderSizePixel = 0
         dot.Parent = crosshairGui
-        rnd(dot, 999)
+        local cc = Instance.new("UICorner")
+        cc.CornerRadius = UDim.new(1, 0)
+        cc.Parent = dot
     elseif style == "Circle" then
         local circle = Instance.new("Frame")
         circle.Size = UDim2.new(0, (size or 8) * 2, 0, (size or 8) * 2)
         circle.Position = center - UDim2.new(0, size or 8, 0, size or 8)
         circle.BackgroundTransparency = 1
         circle.Parent = crosshairGui
-        rnd(circle, 999)
-        strk(circle, col, thick or 2)
+        local cc = Instance.new("UICorner")
+        cc.CornerRadius = UDim.new(1, 0)
+        cc.Parent = circle
+        local s = Instance.new("UIStroke")
+        s.Color = col
+        s.Thickness = thick or 2
+        s.Parent = circle
     end
 end
 
--- Update Drawing crosshair tiap frame
 local function updateCrosshairDrawings()
     if _G.Cosmic_crosshairMode ~= "Drawing" then return end
     if #crosshairDrawings == 0 then return end
@@ -1870,10 +1932,13 @@ local function updateCrosshairDrawings()
     end
 end
 
+_G.Cosmic_applyTrail = applyTrail
+_G.Cosmic_applyAura = applyAura
+_G.Cosmic_applyCrosshair = applyCrosshair
+
 -- =========================================================
--- AIMLOCK / AIMBOT (Hold to Aim)
+-- AIMLOCK / AIMBOT
 -- =========================================================
-local Aimlock = _G.CosmicAimlock
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -1893,16 +1958,16 @@ local function getClosestAimTarget()
     if not cam then return nil end
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 
-    local closest, shortest = nil, Aimlock.FOV
+    local closest, shortest = nil, CosmicAimlock.FOV
 
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team then
             local valid = false
-            if Aimlock.Mode == "Killer" and p.Team.Name == "Killer" then valid = true
-            elseif Aimlock.Mode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
+            if CosmicAimlock.Mode == "Killer" and p.Team.Name == "Killer" then valid = true
+            elseif CosmicAimlock.Mode == "Survivor" and p.Team.Name == "Survivors" then valid = true end
 
             if valid then
-                local part = p.Character:FindFirstChild(Aimlock.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
+                local part = p.Character:FindFirstChild(CosmicAimlock.AimPart) or p.Character:FindFirstChild("HumanoidRootPart")
                 local hum = p.Character:FindFirstChildOfClass("Humanoid")
                 if part and hum and hum.Health > 0 then
                     local sp, visible = cam:WorldToViewportPoint(part.Position)
@@ -1923,7 +1988,6 @@ local function getClosestAimTarget()
     return closest
 end
 
--- Auto-attack remote (untuk mode killer)
 local AttackEvent = nil
 pcall(function()
     AttackEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Attacks"):WaitForChild("BasicAttack")
@@ -1931,8 +1995,8 @@ end)
 
 task.spawn(function()
     while task.wait(0.03) do
-        if not Aimlock.Enabled then continue end
-        if not Aimlock.Holding then continue end
+        if not CosmicAimlock.Enabled then continue end
+        if not CosmicAimlock.Holding then continue end
 
         local target = getClosestAimTarget()
         if not target then continue end
@@ -1941,19 +2005,18 @@ task.spawn(function()
         if not cam then continue end
 
         local pos = target.Position
-        if Aimlock.Predict and Aimlock.Predict > 0 then
-            pos = pos + (target.AssemblyLinearVelocity * Aimlock.Predict)
+        if CosmicAimlock.Predict and CosmicAimlock.Predict > 0 then
+            pos = pos + (target.AssemblyLinearVelocity * CosmicAimlock.Predict)
         end
 
         local targetCF = CFrame.new(cam.CFrame.Position, pos)
-        cam.CFrame = cam.CFrame:Lerp(targetCF, Aimlock.Strength)
+        cam.CFrame = cam.CFrame:Lerp(targetCF, CosmicAimlock.Strength)
 
-        -- AimBot: auto-attack kalau mode Killer & target dalam lock radius
-        if Aimlock.AutoAttack and Aimlock.Mode == "Killer" and AttackEvent then
+        if CosmicAimlock.AutoAttack and CosmicAimlock.Mode == "Killer" and AttackEvent then
             local myRoot = getRoot()
             if myRoot then
                 local dist = (target.Position - myRoot.Position).Magnitude
-                if dist <= Aimlock.LockRadius then
+                if dist <= CosmicAimlock.LockRadius then
                     pcall(function() AttackEvent:FireServer(false) end)
                 end
             end
@@ -1962,7 +2025,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILLER: AUTO ATTACK (spam)
+-- KILLER: AUTO ATTACK
 -- =========================================================
 local lastAtk = 0
 task.spawn(function()
@@ -1978,7 +2041,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILLER: KILL ALL (auto TP + attack)
+-- KILLER: KILL ALL
 -- =========================================================
 local function getNearestAliveSurvivor()
     local root = getRoot()
@@ -2027,7 +2090,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILLER: HITBOX (safe)
+-- KILLER: HITBOX
 -- =========================================================
 local hitboxCache = {}
 task.spawn(function()
@@ -2108,7 +2171,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- ESP MAIN LOOP (Heartbeat untuk performa)
+-- ESP MAIN LOOP
 -- =========================================================
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
@@ -2118,7 +2181,6 @@ RunService.Heartbeat:Connect(function()
     if now - lastESPUpdate < 0.08 then return end
     lastESPUpdate = now
 
-    -- Player ESP (SURVIVOR & KILLER UNLIMITED kalau toggle ON)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character then
             local char = p.Character
@@ -2126,29 +2188,35 @@ RunService.Heartbeat:Connect(function()
 
             if hum and hum.Health > 0 then
                 if ESP.Survivor and p.Team and p.Team.Name == "Survivors" then
-                    createESP(char, TeamColors.Survivor)
+                    _G.Cosmic_createESP(char, TeamColors.Survivor)
                 elseif ESP.Killer and p.Team and p.Team.Name == "Killer" then
-                    createESP(char, TeamColors.Killer)
+                    _G.Cosmic_createESP(char, TeamColors.Killer)
                 else
-                    removeESP(char)
+                    _G.Cosmic_removeESP(char)
                 end
             else
-                removeESP(char)
+                _G.Cosmic_removeESP(char)
             end
-            createStatusESP(p, char, root)
+            _G.Cosmic_createStatusESP(p, char, root)
         end
     end
 
     if ESP.Generator then
-        for gen in pairs(Cached.Generators) do
-            UpdateGenerator(gen)
+        for gen in pairs(_G.Cosmic_hdEffects and {} or {}) do end  -- placeholder
+    end
+
+    -- Generator ESP dari cache Bagian 3
+    for gen in pairs(workspace:GetDescendants()) do
+        if gen.Name == "Generator" then
+            _G.Cosmic_UpdateGenerator(gen)
         end
     end
 
-    for obj in pairs(Cached.Windows) do UpdateMapESP(obj, root) end
-    for obj in pairs(Cached.Pallets) do UpdateMapESP(obj, root) end
-
-    UpdateSCPEsp(root)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name == "Window" or obj.Name == "Pallet" or obj.Name == "Palletwrong" then
+            _G.Cosmic_UpdateMapESP(obj, root)
+        end
+    end
 end)
 
 -- =========================================================
@@ -2159,16 +2227,17 @@ fpsPanel.Name = "CosmicFPS"
 fpsPanel.ResetOnSpawn = false
 fpsPanel.IgnoreGuiInset = true
 fpsPanel.Parent = PG
+_G.Cosmic_fpsPanel = fpsPanel
 
 local fpsBox = Instance.new("Frame")
 fpsBox.Size = UDim2.new(0, 170, 0, 26)
-fpsBox.Position = UDim2.new(0, 10, 0, 10)   -- KIRI ATAS
+fpsBox.Position = UDim2.new(0, 10, 0, 10)
 fpsBox.BackgroundColor3 = C.BG
 fpsBox.BackgroundTransparency = 0.25
 fpsBox.BorderSizePixel = 0
 fpsBox.Parent = fpsPanel
-rnd(fpsBox, 8)
-strk(fpsBox, C.COSMIC, 1, 0.3)
+local cc1 = Instance.new("UICorner"); cc1.CornerRadius = UDim.new(0, 8); cc1.Parent = fpsBox
+local ss1 = Instance.new("UIStroke"); ss1.Color = C.COSMIC; ss1.Thickness = 1; ss1.Transparency = 0.3; ss1.Parent = fpsBox
 
 local fpsGrad = Instance.new("UIGradient")
 fpsGrad.Color = ColorSequence.new(C.COSMIC, C.COSMIC2, C.COSMIC3)
@@ -2211,9 +2280,21 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-print("✅ [4/8] Loop utama + Killer + Aimlock + FPS loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL MENU
+print("✅ [4/8] Loop utama + Killer + Aimlock + FPS loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL MENU (FIXED)
 -- =========================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local LP = _G.Cosmic_LP
+local PG = _G.Cosmic_PG
+local C = _G.Cosmic_C
+
+local rnd = _G.Cosmic_rnd
+local strk = _G.Cosmic_strk
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "CosmicHub"
@@ -2222,8 +2303,10 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
+_G.Cosmic_gui = gui
+
 -- =========================================================
--- TOMBOL MENU (PLANET KECIL + BISA DIGESER + ANIMASI GALAXY)
+-- TOMBOL MENU (PLANET KECIL + BISA DIGESER)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 44, 0, 44)
@@ -2231,7 +2314,6 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Ring 1 (outer nebula)
 local ring1 = Instance.new("Frame")
 ring1.Size = UDim2.new(1, 10, 1, 10)
 ring1.Position = UDim2.new(0, -5, 0, -5)
@@ -2246,7 +2328,6 @@ local ring1Grad = Instance.new("UIGradient")
 ring1Grad.Color = ColorSequence.new(C.COSMIC3, C.COSMIC2, C.COSMIC, C.COSMIC3)
 ring1Grad.Parent = ring1Stroke
 
--- Ring 2 (middle orbit)
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 5, 1, 5)
 ring2.Position = UDim2.new(0, -2.5, 0, -2.5)
@@ -2258,7 +2339,6 @@ ring2Stroke.Color = C.COSMIC2
 ring2Stroke.Transparency = 0.3
 ring2Stroke.Parent = ring2
 
--- Ring 3 (inner)
 local ring3 = Instance.new("Frame")
 ring3.Size = UDim2.new(1, -8, 1, -8)
 ring3.Position = UDim2.new(0, 4, 0, 4)
@@ -2270,7 +2350,6 @@ ring3Stroke.Color = C.STAR
 ring3Stroke.Transparency = 0.5
 ring3Stroke.Parent = ring3
 
--- Main button (planet 🌌)
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -12, 1, -12)
 mainBtn.Position = UDim2.new(0, 6, 0, 6)
@@ -2289,7 +2368,6 @@ btnGrad.Color = ColorSequence.new(C.COSMIC, C.PANEL2, C.COSMIC2)
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow
 local glow = Instance.new("Frame")
 glow.Size = UDim2.new(1, 18, 1, 18)
 glow.Position = UDim2.new(0, -9, 0, -9)
@@ -2310,7 +2388,7 @@ innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- Animasi tombol galaxy
+-- Animasi tombol
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -2327,12 +2405,11 @@ task.spawn(function()
         innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
         btnGrad.Rotation = t * 40
         mainBtn.TextSize = 20 + math.sin(t * 5) * 2
-        mainBtn.TextColor3 = Color3.fromHSV((t * 0.15 + 0.7) % 1, 0.7, 1)
         task.wait(0.03)
     end
 end)
 
--- Partikel orbit galaxy (di sekitar tombol)
+-- Partikel orbit
 for i = 1, 12 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 3, 0, 3)
@@ -2357,9 +2434,7 @@ for i = 1, 12 do
     end)
 end
 
--- =========================================================
--- DRAG TOMBOL MENU
--- =========================================================
+-- Drag tombol
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -2392,7 +2467,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON (Hold to Aim)
+-- AIMLOCK FLOATING BUTTON
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "CosmicAimlockBtn"
@@ -2473,7 +2548,6 @@ _G.Cosmic_aimModeLbl = aimModeLbl
 
 local Aimlock = _G.CosmicAimlock
 
--- Animasi aimlock
 task.spawn(function()
     local t = 0
     while aimContainer.Parent do
@@ -2493,7 +2567,6 @@ task.spawn(function()
     end
 end)
 
--- Drag aimlock
 local aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
 aimContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -2514,7 +2587,6 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- Hold to aim
 aimBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
@@ -2530,7 +2602,6 @@ aimBtn.InputEnded:Connect(function(input)
     end
 end)
 
--- Right click switch mode
 aimBtn.MouseButton2Click:Connect(function()
     if Aimlock.Mode == "Killer" then
         Aimlock.Mode = "Survivor"
@@ -2543,7 +2614,6 @@ aimBtn.MouseButton2Click:Connect(function()
     end
 end)
 
--- Global show/hide
 _G.Cosmic_setAimlockVisible = function(visible)
     if aimBtnGui then aimBtnGui.Enabled = visible end
 end
@@ -2567,12 +2637,14 @@ panel.Parent = gui
 rnd(panel, 18)
 strk(panel, C.COSMIC, 2, 0.2)
 
+_G.Cosmic_panel = panel
+
 local panelGrad = Instance.new("UIGradient")
 panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
--- HEADER
+-- Header
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 48)
 header.BackgroundColor3 = C.PANEL
@@ -2589,7 +2661,6 @@ hPatch.BackgroundTransparency = 0.1
 hPatch.BorderSizePixel = 0
 hPatch.Parent = header
 
--- Neon line galaxy
 local neonLine = Instance.new("Frame")
 neonLine.Size = UDim2.new(1, -40, 0, 3)
 neonLine.Position = UDim2.new(0, 20, 1, -1.5)
@@ -2637,7 +2708,7 @@ closeBtn.Parent = header
 rnd(closeBtn, 8)
 strk(closeBtn, C.RED, 1, 0.5)
 
--- SIDEBAR
+-- Sidebar
 local sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 130, 1, -70)
 sbFrame.Position = UDim2.new(0, 12, 0, 60)
@@ -2658,6 +2729,7 @@ sb.ScrollBarImageColor3 = C.COSMIC2
 sb.CanvasSize = UDim2.new(0, 0, 0, 0)
 sb.AutomaticCanvasSize = Enum.AutomaticSize.Y
 sb.Parent = sbFrame
+_G.Cosmic_sb = sb
 
 local sbL = Instance.new("UIListLayout")
 sbL.Padding = UDim.new(0, 4)
@@ -2670,7 +2742,7 @@ sbP.PaddingRight = UDim.new(0, 4)
 sbP.PaddingBottom = UDim.new(0, 6)
 sbP.Parent = sb
 
--- CONTENT
+-- Content
 local ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -160, 1, -70)
 ct.Position = UDim2.new(0, 150, 0, 60)
@@ -2691,6 +2763,7 @@ cs.ScrollBarImageColor3 = C.COSMIC2
 cs.CanvasSize = UDim2.new(0, 0, 0, 0)
 cs.AutomaticCanvasSize = Enum.AutomaticSize.Y
 cs.Parent = ct
+_G.Cosmic_cs = cs
 
 local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
@@ -2922,15 +2995,15 @@ local function cpk(name, def, cb)
     strk(cB, C.COSMIC2, 1.5)
 
     local presets = {
-        Color3.fromRGB(160, 80, 255),   -- Cosmic Purple
-        Color3.fromRGB(0, 200, 255),    -- Cosmic Cyan
-        Color3.fromRGB(255, 80, 200),   -- Cosmic Pink
-        Color3.fromRGB(255, 215, 100),  -- Gold
-        Color3.fromRGB(0, 255, 150),    -- Green
-        Color3.fromRGB(255, 60, 60),    -- Red
-        Color3.fromRGB(200, 220, 255),  -- Star
-        Color3.fromRGB(255, 255, 255),  -- White
-        Color3.fromRGB(20, 20, 30),     -- Dark
+        Color3.fromRGB(160, 80, 255),
+        Color3.fromRGB(0, 200, 255),
+        Color3.fromRGB(255, 80, 200),
+        Color3.fromRGB(255, 215, 100),
+        Color3.fromRGB(0, 255, 150),
+        Color3.fromRGB(255, 60, 60),
+        Color3.fromRGB(200, 220, 255),
+        Color3.fromRGB(255, 255, 255),
+        Color3.fromRGB(20, 20, 30),
     }
     local idx = 1
     for i, c in ipairs(presets) do
@@ -3088,9 +3161,18 @@ local function makeTab(name, icon, order, cb)
     end)
 end
 
--- =========================================================
+-- EXPOSE KOMPONEN KE GLOBAL (biar Bagian 6-7 bisa akses)
+_G.Cosmic_sec = sec
+_G.Cosmic_lbl = lbl
+_G.Cosmic_tog = tog
+_G.Cosmic_sl = sl
+_G.Cosmic_cpk = cpk
+_G.Cosmic_btn = btn
+_G.Cosmic_drp = drp
+_G.Cosmic_makeTab = makeTab
+_G.Cosmic_btnContainer = btnContainer
+
 -- BUKA/TUTUP PANEL
--- =========================================================
 mainBtn.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
     panel.Visible = not panel.Visible
@@ -3100,17 +3182,46 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
-print("✅ [5/8] GUI + Komponen + Tombol Menu + Aimlock loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 6/8 : TAB UI PART 1
+print("✅ [5/8] GUI + Komponen + Tombol Menu + Aimlock loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 6/8 : TAB UI PART 1 (FIXED)
 -- =========================================================
+
+local C = _G.Cosmic_C
+local S = _G.CosmicS
+local ESP = _G.CosmicESP
+local ESPStatus = _G.CosmicESPStatus
+local TeamColors = _G.CosmicTeamColors
+
+local FireList = _G.Cosmic_FireList
+local FireFeetList = _G.Cosmic_FireFeetList
+
+-- Ambil komponen dari Bagian 5
+local sec = _G.Cosmic_sec
+local lbl = _G.Cosmic_lbl
+local tog = _G.Cosmic_tog
+local sl = _G.Cosmic_sl
+local cpk = _G.Cosmic_cpk
+local btn = _G.Cosmic_btn
+local drp = _G.Cosmic_drp
+local makeTab = _G.Cosmic_makeTab
+local cs = _G.Cosmic_cs
+
+local rnd = _G.Cosmic_rnd
+local strk = _G.Cosmic_strk
 
 -- ============================
 -- TAB: FIRE
 -- ============================
 makeTab("Fire", "🔥", 1, function()
     sec("Fire Control", "⚙️")
-    tog("Enable Fire", false, function(s) S.FireOn = s; applyFire() end)
-    sl("Fire Size", 1, 15, 5, function(v) S.FireSize = v; applyFire() end)
+    tog("Enable Fire", false, function(s)
+        S.FireOn = s
+        if _G.Cosmic_applyFire then _G.Cosmic_applyFire() end
+    end)
+    sl("Fire Size", 1, 15, 5, function(v)
+        S.FireSize = v
+        if _G.Cosmic_applyFire then _G.Cosmic_applyFire() end
+    end)
 
     sec("Pilih Efek Fire (60)", "🔥")
     lbl("Klik efek untuk ganti", C.COSMIC2)
@@ -3146,7 +3257,7 @@ makeTab("Fire", "🔥", 1, function()
 
         btn2.MouseButton1Click:Connect(function()
             S.FireType = fireName
-            applyFire()
+            if _G.Cosmic_applyFire then _G.Cosmic_applyFire() end
             for _, c in pairs(cs:GetChildren()) do
                 if c:IsA("TextButton") and c.LayoutOrder > 100 and c.LayoutOrder < 200 then
                     c.BackgroundColor3 = C.BG
@@ -3167,7 +3278,10 @@ end)
 -- ============================
 makeTab("Fire Feet", "👟", 2, function()
     sec("Fire Feet Control", "👟")
-    tog("Enable Fire Feet", false, function(s) S.FireFeetOn = s; applyFireFeet() end)
+    tog("Enable Fire Feet", false, function(s)
+        S.FireFeetOn = s
+        if _G.Cosmic_applyFireFeet then _G.Cosmic_applyFireFeet() end
+    end)
 
     sec("Pilih Efek Fire Feet (20)", "🔥")
     lbl("Klik efek untuk ganti", C.COSMIC2)
@@ -3203,7 +3317,7 @@ makeTab("Fire Feet", "👟", 2, function()
 
         btn2.MouseButton1Click:Connect(function()
             S.FireFeetType = fireName
-            applyFireFeet()
+            if _G.Cosmic_applyFireFeet then _G.Cosmic_applyFireFeet() end
             for _, c in pairs(cs:GetChildren()) do
                 if c:IsA("TextButton") and c.LayoutOrder > 200 and c.LayoutOrder < 300 then
                     c.BackgroundColor3 = C.BG
@@ -3232,13 +3346,13 @@ makeTab("ESP", "👁️", 3, function()
 
     sec("Object ESP", "⚡")
     tog("ESP Generator", false, function(s) ESP.Generator = s end)
-    cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
+    cpk("Gen Color", Color3.fromRGB(255, 170, 0), function(c) end)
     tog("ESP Pallet", false, function(s) ESP.Pallet = s end)
-    cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
+    cpk("Pallet Color", Color3.fromRGB(74, 255, 181), function(c) end)
     tog("ESP Window", false, function(s) ESP.Window = s end)
-    cpk("Window Color", WindowColor, function(c) WindowColor = c end)
+    cpk("Window Color", Color3.fromRGB(74, 255, 181), function(c) end)
     tog("ESP SCP", false, function(s) ESP.SCP = s end)
-    cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
+    cpk("SCP Color", Color3.fromRGB(255, 0, 0), function(c) end)
 
     sec("Object Distance", "📏")
     sl("ESP Radius", 50, 3000, 500, function(v) ESP.Distance = v end)
@@ -3260,7 +3374,7 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Enable Auto Parry", false, function(s)
         _G.CosmicParry.Enabled = s
         S.Parry = s
-        if s then scanKillers() end
+        if s and _G.Cosmic_scanKillers then _G.Cosmic_scanKillers() end
     end)
     sl("Parry Distance", 5, 30, 15, function(v) _G.CosmicParry.Distance = v end)
     sl("Debounce (detik)", 0.05, 0.5, 0.2, function(v) _G.CosmicParry.Debounce = v end)
@@ -3275,7 +3389,7 @@ makeTab("Survivor", "🏃", 4, function()
 
     sec("Parry Range Visual", "🔵")
     tog("Show Parry Range", true, function(s) S.ParryRangeVisual = s end)
-    cpk("Range Color", S.ParryRangeColor, function(c) S.ParryRangeColor = c end)
+    cpk("Range Color", S.ParryRangeColor or Color3.fromRGB(160, 80, 255), function(c) S.ParryRangeColor = c end)
 
     sec("Auto Skill Check (Stabil)", "🎯")
     tog("Enable Skill Check", false, function(s)
@@ -3287,8 +3401,7 @@ makeTab("Survivor", "🏃", 4, function()
         S.SkillCheckPerfect = s
     end)
     lbl("✅ Trigger zona +102 sampai +116", C.GRN)
-    lbl("✅ Polling RenderStepped (smooth)", C.GRN)
-    lbl("✅ Perfect Mode = auto putar line", C.COSMIC2)
+    lbl("✅ RenderStepped (smooth)", C.GRN)
 
     sec("Aimlock / Aimbot (Hold to Aim)", "🎯")
     tog("Show Aimlock Button", false, function(s)
@@ -3355,7 +3468,8 @@ makeTab("Killer", "🔪", 5, function()
     drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v) S.MaskedPower = v end)
     btn("⚡ Activate Power", function()
         pcall(function()
-            local r = ReplicatedStorage:FindFirstChild("Remotes")
+            local RS = _G.Cosmic_ReplicatedStorage
+            local r = RS:FindFirstChild("Remotes")
             if r then
                 local k = r:FindFirstChild("Killers")
                 if k then
@@ -3370,7 +3484,8 @@ makeTab("Killer", "🔪", 5, function()
     end)
     btn("❌ Deactivate Power", function()
         pcall(function()
-            local r = ReplicatedStorage:FindFirstChild("Remotes")
+            local RS = _G.Cosmic_ReplicatedStorage
+            local r = RS:FindFirstChild("Remotes")
             if r then
                 local k = r:FindFirstChild("Killers")
                 if k then
@@ -3385,21 +3500,45 @@ makeTab("Killer", "🔪", 5, function()
     end)
 end)
 
-print("✅ [6/8] Tab Part 1 loaded (Fire, Fire Feet, ESP, Survivor, Killer)")-- =========================================================
--- COSMIC HUB — BAGIAN 7/8 : TAB UI PART 2
+print("✅ [6/8] Tab Part 1 loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 7/8 : TAB UI PART 2 (FIXED)
 -- =========================================================
+
+local C = _G.Cosmic_C
+local S = _G.CosmicS
+local SkyList = _G.Cosmic_SkyList
+
+-- Komponen dari Bagian 5
+local sec = _G.Cosmic_sec
+local lbl = _G.Cosmic_lbl
+local tog = _G.Cosmic_tog
+local sl = _G.Cosmic_sl
+local cpk = _G.Cosmic_cpk
+local btn = _G.Cosmic_btn
+local drp = _G.Cosmic_drp
+local makeTab = _G.Cosmic_makeTab
+local cs = _G.Cosmic_cs
+
+local rnd = _G.Cosmic_rnd
+local strk = _G.Cosmic_strk
 
 -- ============================
 -- TAB: VISUAL
 -- ============================
 makeTab("Visual", "🎨", 6, function()
     sec("Lighting", "☀️")
-    tog("Fullbright", false, function(s) S.Fullbright = s; _G.Cosmic_applyFullbright(s) end)
+    tog("Fullbright", false, function(s)
+        S.Fullbright = s
+        if _G.Cosmic_applyFullbright then _G.Cosmic_applyFullbright(s) end
+    end)
     sl("Fullbright Level (0-100)", 0, 100, 50, function(v)
         S.FullbrightVal = v
-        if S.Fullbright then _G.Cosmic_applyFullbright(true) end
+        if S.Fullbright and _G.Cosmic_applyFullbright then _G.Cosmic_applyFullbright(true) end
     end)
-    tog("No Fog", false, function(s) S.NoFog = s; _G.Cosmic_applyNoFog(s) end)
+    tog("No Fog", false, function(s)
+        S.NoFog = s
+        if _G.Cosmic_applyNoFog then _G.Cosmic_applyNoFog(s) end
+    end)
 
     sec("Sky Changer", "🌌")
     lbl("Klik sky untuk ganti", C.COSMIC2)
@@ -3435,7 +3574,7 @@ makeTab("Visual", "🎨", 6, function()
 
         btn2.MouseButton1Click:Connect(function()
             S.SkyId = skyName
-            _G.Cosmic_applySky(skyName)
+            if _G.Cosmic_applySky then _G.Cosmic_applySky(skyName) end
             for _, c in pairs(cs:GetChildren()) do
                 if c:IsA("TextButton") and c.LayoutOrder > 300 and c.LayoutOrder < 400 then
                     c.BackgroundColor3 = C.BG
@@ -3451,17 +3590,23 @@ makeTab("Visual", "🎨", 6, function()
     end
 
     sec("Camera FOV", "📸")
-    tog("Enable FOV", false, function(s) S.FOVEnabled = s; _G.Cosmic_applyFOV() end)
-    sl("FOV Value", 40, 120, 70, function(v) S.FOV = v; _G.Cosmic_applyFOV() end)
+    tog("Enable FOV", false, function(s)
+        S.FOVEnabled = s
+        if _G.Cosmic_applyFOV then _G.Cosmic_applyFOV() end
+    end)
+    sl("FOV Value", 40, 120, 70, function(v)
+        S.FOV = v
+        if _G.Cosmic_applyFOV then _G.Cosmic_applyFOV() end
+    end)
 
     sec("Zoom Out", "🔍")
     tog("Zoom Out Unlimited", false, function(s)
         S.ZoomOut = s
-        _G.Cosmic_applyZoomOut(s, S.ZoomOutValue)
+        if _G.Cosmic_applyZoomOut then _G.Cosmic_applyZoomOut(s, S.ZoomOutValue) end
     end)
     sl("Max Zoom Distance", 100, 5000, 500, function(v)
         S.ZoomOutValue = v
-        if S.ZoomOut then _G.Cosmic_applyZoomOut(true, v) end
+        if S.ZoomOut and _G.Cosmic_applyZoomOut then _G.Cosmic_applyZoomOut(true, v) end
     end)
 end)
 
@@ -3470,33 +3615,81 @@ end)
 -- ============================
 makeTab("HD Graphics", "💎", 7, function()
     sec("Bloom", "✨")
-    tog("Enable Bloom", false, function(s) S.Bloom = s; _G.Cosmic_applyHD() end)
-    sl("Bloom Intensity", 0, 3, 0.6, function(v) S.BloomIntensity = v; _G.Cosmic_applyHD() end)
-    sl("Bloom Size", 0, 60, 24, function(v) S.BloomSize = v; _G.Cosmic_applyHD() end)
-    sl("Bloom Threshold", 0, 2, 0.9, function(v) S.BloomThreshold = v; _G.Cosmic_applyHD() end)
+    tog("Enable Bloom", false, function(s)
+        S.Bloom = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Bloom Intensity", 0, 3, 0.6, function(v)
+        S.BloomIntensity = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Bloom Size", 0, 60, 24, function(v)
+        S.BloomSize = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Bloom Threshold", 0, 2, 0.9, function(v)
+        S.BloomThreshold = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
 
     sec("Sun Rays", "🌞")
-    tog("Enable Sun Rays", false, function(s) S.SunRays = s; _G.Cosmic_applyHD() end)
-    sl("Sun Rays Intensity", 0, 1, 0.15, function(v) S.SunRaysIntensity = v; _G.Cosmic_applyHD() end)
-    sl("Sun Rays Spread", 0, 2, 1, function(v) S.SunRaysSpread = v; _G.Cosmic_applyHD() end)
+    tog("Enable Sun Rays", false, function(s)
+        S.SunRays = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Sun Rays Intensity", 0, 1, 0.15, function(v)
+        S.SunRaysIntensity = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Sun Rays Spread", 0, 2, 1, function(v)
+        S.SunRaysSpread = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
 
     sec("Depth of Field", "🎬")
-    tog("Enable DOF", false, function(s) S.DOF = s; _G.Cosmic_applyHD() end)
-    sl("Focus Distance", 0, 5, 0.5, function(v) S.DOFFocus = v; _G.Cosmic_applyHD() end)
-    sl("Near Intensity", 0, 1, 0.1, function(v) S.DOFNear = v; _G.Cosmic_applyHD() end)
-    sl("Far Intensity", 0, 1, 1, function(v) S.DOFFar = v; _G.Cosmic_applyHD() end)
+    tog("Enable DOF", false, function(s)
+        S.DOF = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Focus Distance", 0, 5, 0.5, function(v)
+        S.DOFFocus = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Near Intensity", 0, 1, 0.1, function(v)
+        S.DOFNear = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Far Intensity", 0, 1, 1, function(v)
+        S.DOFFar = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
 
     sec("Sharpen (Contrast)", "🔪")
-    tog("Enable Sharpen", false, function(s) S.Sharpen = s; _G.Cosmic_applyHD() end)
-    sl("Sharpen Amount", 0, 1, 0.5, function(v) S.SharpenAmount = v; _G.Cosmic_applyHD() end)
+    tog("Enable Sharpen", false, function(s)
+        S.Sharpen = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Sharpen Amount", 0, 1, 0.5, function(v)
+        S.SharpenAmount = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
 
     sec("Cinematic Mode", "🎥")
-    tog("Enable Cinematic", false, function(s) S.Cinematic = s; _G.Cosmic_applyHD() end)
+    tog("Enable Cinematic", false, function(s)
+        S.Cinematic = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
     lbl("Bar film + tint cinematic", C.COSMIC2)
 
     sec("Atmosphere HD", "🌫️")
-    tog("Enable Atmosphere", false, function(s) S.Atmosphere = s; _G.Cosmic_applyHD() end)
-    sl("Density", 0, 1, 0.3, function(v) S.AtmosphereDensity = v; _G.Cosmic_applyHD() end)
+    tog("Enable Atmosphere", false, function(s)
+        S.Atmosphere = s
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
+    sl("Density", 0, 1, 0.3, function(v)
+        S.AtmosphereDensity = v
+        if _G.Cosmic_applyHD then _G.Cosmic_applyHD() end
+    end)
     lbl("Atmosphere warna galaxy", C.COSMIC2)
 end)
 
@@ -3507,14 +3700,16 @@ makeTab("8-Bit Crown", "👑", 8, function()
     sec("Enable Crown", "👑")
     tog("👑 Enable 8-Bit Crown", false, function(s)
         S.EightBitCrown = s
-        _G.Cosmic_apply8BitCrown(s, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(s, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end
     end)
     lbl("Mahkota + partikel galaxy", C.COSMIC2)
 
     sec("Ukuran Crown", "📏")
     sl("Size", 0.3, 3, 1, function(v)
         S.EightBitSize = v
-        if S.EightBitCrown then
+        if S.EightBitCrown and _G.Cosmic_apply8BitCrown then
             _G.Cosmic_apply8BitCrown(true, v, S.CrownX, S.CrownY, S.CrownZ)
         end
     end)
@@ -3522,7 +3717,7 @@ makeTab("8-Bit Crown", "👑", 8, function()
     sec("Posisi X (Kiri-Kanan)", "↔️")
     sl("X Position", -3, 3, 0, function(v)
         S.CrownX = v
-        if S.EightBitCrown then
+        if S.EightBitCrown and _G.Cosmic_apply8BitCrown then
             _G.Cosmic_apply8BitCrown(true, S.EightBitSize, v, S.CrownY, S.CrownZ)
         end
     end)
@@ -3530,7 +3725,7 @@ makeTab("8-Bit Crown", "👑", 8, function()
     sec("Posisi Y (Atas-Bawah)", "↕️")
     sl("Y Position", -2, 3, 1.2, function(v)
         S.CrownY = v
-        if S.EightBitCrown then
+        if S.EightBitCrown and _G.Cosmic_apply8BitCrown then
             _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, v, S.CrownZ)
         end
     end)
@@ -3538,7 +3733,7 @@ makeTab("8-Bit Crown", "👑", 8, function()
     sec("Posisi Z (Depan-Belakang)", "🔃")
     sl("Z Position", -3, 3, 0, function(v)
         S.CrownZ = v
-        if S.EightBitCrown then
+        if S.EightBitCrown and _G.Cosmic_apply8BitCrown then
             _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, v)
         end
     end)
@@ -3546,23 +3741,33 @@ makeTab("8-Bit Crown", "👑", 8, function()
     sec("Quick Position", "🎯")
     btn("⬆️ Ke Atas", function()
         S.CrownY = (S.CrownY or 1.2) + 0.3
-        _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end
     end)
     btn("⬇️ Ke Bawah", function()
         S.CrownY = (S.CrownY or 1.2) - 0.3
-        _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end
     end)
     btn("⬅️ Ke Kiri", function()
         S.CrownX = (S.CrownX or 0) - 0.3
-        _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end
     end)
     btn("➡️ Ke Kanan", function()
         S.CrownX = (S.CrownX or 0) + 0.3
-        _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end
     end)
     btn("🔄 Reset Posisi", function()
         S.CrownX = 0; S.CrownY = 1.2; S.CrownZ = 0
-        _G.Cosmic_apply8BitCrown(true, S.EightBitSize, 0, 1.2, 0)
+        if _G.Cosmic_apply8BitCrown then
+            _G.Cosmic_apply8BitCrown(true, S.EightBitSize, 0, 1.2, 0)
+        end
     end)
 end)
 
@@ -3573,21 +3778,21 @@ makeTab("Visual+", "✨", 9, function()
     sec("Trail Fire", "🔥")
     tog("Enable Trail Fire", false, function(s)
         S.Trail = s
-        applyTrail(s, S.TrailColor)
+        if _G.Cosmic_applyTrail then _G.Cosmic_applyTrail(s, S.TrailColor) end
     end)
     cpk("Trail Color", S.TrailColor, function(c)
         S.TrailColor = c
-        if S.Trail then applyTrail(true, c) end
+        if S.Trail and _G.Cosmic_applyTrail then _G.Cosmic_applyTrail(true, c) end
     end)
 
     sec("Aura Fire", "🔥")
     tog("Enable Aura Fire", false, function(s)
         S.Aura = s
-        applyAura(s, S.AuraColor)
+        if _G.Cosmic_applyAura then _G.Cosmic_applyAura(s, S.AuraColor) end
     end)
     cpk("Aura Color", S.AuraColor, function(c)
         S.AuraColor = c
-        if S.Aura then applyAura(true, c) end
+        if S.Aura and _G.Cosmic_applyAura then _G.Cosmic_applyAura(true, c) end
     end)
 
     sec("Kill Effect", "💥")
@@ -3596,46 +3801,44 @@ makeTab("Visual+", "✨", 9, function()
     sec("Crosshair", "➕")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
-        if not s then
-            clearCrosshairGui()
-        else
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
+        if _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(s, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
         end
     end)
     drp("Style", {"Plus", "Dot", "Circle"}, "Plus", function(v)
         S.CrosshairStyle = v
-        if S.Crosshair then
-            applyCrosshair(true, v, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, v, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
         end
     end)
     cpk("Crosshair Color", S.CrosshairColor, function(c)
         S.CrosshairColor = c
-        if S.Crosshair then
-            applyCrosshair(true, S.CrosshairStyle, c, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, c, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
         end
     end)
     sl("Size", 3, 30, 8, function(v)
         S.CrosshairSize = v
-        if S.Crosshair then
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, v, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, v, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
         end
     end)
     sl("Thickness", 1, 6, 2, function(v)
         S.CrosshairThick = v
-        if S.Crosshair then
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, v, S.CrosshairX, S.CrosshairY)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, v, S.CrosshairX, S.CrosshairY)
         end
     end)
     sl("Offset X", -100, 100, 0, function(v)
         S.CrosshairX = v
-        if S.Crosshair then
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, v, S.CrosshairY)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, v, S.CrosshairY)
         end
     end)
     sl("Offset Y", -100, 100, 0, function(v)
         S.CrosshairY = v
-        if S.Crosshair then
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, v)
+        if S.Crosshair and _G.Cosmic_applyCrosshair then
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, v)
         end
     end)
 end)
@@ -3647,9 +3850,12 @@ makeTab("Movement", "🏃", 10, function()
     sec("Walk Speed", "⚡")
     tog("Enable Walk Speed", false, function(s)
         S.WalkSpeed = s
-        if not s and LP.Character then
-            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.WalkSpeed = 16 end
+        if not s then
+            local LP = _G.Cosmic_LP
+            if LP.Character then
+                local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+                if hum then hum.WalkSpeed = 16 end
+            end
         end
     end)
     sl("Speed Value", 16, 200, 17.6, function(v) S.WalkSpeedVal = v end)
@@ -3657,9 +3863,12 @@ makeTab("Movement", "🏃", 10, function()
     sec("Jump Power", "🦘")
     tog("Enable Jump Power", false, function(s)
         S.JumpPower = s
-        if not s and LP.Character then
-            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.JumpPower = 50 end
+        if not s then
+            local LP = _G.Cosmic_LP
+            if LP.Character then
+                local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+                if hum then hum.JumpPower = 50 end
+            end
         end
     end)
     sl("Jump Power Value", 0, 300, 50, function(v) S.JumpPowerVal = v end)
@@ -3671,7 +3880,11 @@ makeTab("Movement", "🏃", 10, function()
     sec("Fly", "🕊️")
     tog("Enable Fly", false, function(s)
         S.Fly = s
-        if s then startFly() else stopFly() end
+        if s then
+            if _G.Cosmic_startFly then _G.Cosmic_startFly() end
+        else
+            if _G.Cosmic_stopFly then _G.Cosmic_stopFly() end
+        end
     end)
     sl("Fly Speed", 10, 200, 50, function(v) S.FlySpeed = v end)
     lbl("WASD + Space (naik) + LShift (turun)", C.COSMIC2)
@@ -3717,7 +3930,9 @@ makeTab("Settings", "⚙️", 13, function()
     sec("FPS & Ping Panel", "📊")
     tog("Show FPS/Ping", true, function(s)
         S.ShowFPS = s
-        if fpsPanel then fpsPanel.Enabled = s end
+        if _G.Cosmic_fpsPanel then
+            _G.Cosmic_fpsPanel.Enabled = s
+        end
     end)
     lbl("Posisi: Kiri Atas", C.COSMIC2)
 
@@ -3743,9 +3958,23 @@ makeTab("Settings", "⚙️", 13, function()
     lbl("Galaxy Edition", C.STAR)
 end)
 
-print("✅ [7/8] Tab Part 2 loaded")-- =========================================================
--- COSMIC HUB — BAGIAN 8/8 : RESPAWN + ANTI-RESET + FINAL INIT
+print("✅ [7/8] Tab Part 2 loaded (FIXED)")-- =========================================================
+-- COSMIC HUB — BAGIAN 8/8 : RESPAWN + FINAL INIT (FIXED)
 -- =========================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local LP = _G.Cosmic_LP
+local PG = _G.Cosmic_PG
+local C = _G.Cosmic_C
+
+local S = _G.CosmicS
+local gui = _G.Cosmic_gui
+local panel = _G.Cosmic_panel
+local sb = _G.Cosmic_sb
 
 -- ============================
 -- RESPAWN HANDLER
@@ -3754,82 +3983,127 @@ LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
 
     -- Reset parry hooks (kosongin isi, jangan replace)
-    for k in pairs(hookedKillers) do
-        hookedKillers[k] = nil
+    if _G.CosmicHookKiller then
+        for k in pairs(_G.CosmicHookKiller) do
+            _G.CosmicHookKiller[k] = nil
+        end
     end
 
     -- Auto re-apply semua fitur
-    if S.FireOn then pcall(applyFire) end
-    if S.FireFeetOn then pcall(applyFireFeet) end
-    if S.EightBitCrown then
+    if S.FireOn and _G.Cosmic_applyFire then pcall(_G.Cosmic_applyFire) end
+    if S.FireFeetOn and _G.Cosmic_applyFireFeet then pcall(_G.Cosmic_applyFireFeet) end
+
+    if S.EightBitCrown and _G.Cosmic_apply8BitCrown then
         task.wait(0.3)
         pcall(function()
             _G.Cosmic_apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
         end)
     end
-    if S.Trail then task.wait(0.3); pcall(function() applyTrail(true, S.TrailColor) end) end
-    if S.Aura then task.wait(0.3); pcall(function() applyAura(true, S.AuraColor) end) end
-    if S.Crosshair then
+
+    if S.Trail and _G.Cosmic_applyTrail then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyTrail(true, S.TrailColor) end)
+    end
+
+    if S.Aura and _G.Cosmic_applyAura then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyAura(true, S.AuraColor) end)
+    end
+
+    if S.Crosshair and _G.Cosmic_applyCrosshair then
         task.wait(0.3)
         pcall(function()
-            applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
+            _G.Cosmic_applyCrosshair(true, S.CrosshairStyle, S.CrosshairColor, S.CrosshairSize, S.CrosshairThick, S.CrosshairX, S.CrosshairY)
         end)
     end
-    if S.ZoomOut then task.wait(0.3); pcall(function() _G.Cosmic_applyZoomOut(true, S.ZoomOutValue) end) end
-    if S.Fullbright then task.wait(0.3); pcall(function() _G.Cosmic_applyFullbright(true) end) end
-    if S.NoFog then task.wait(0.3); pcall(function() _G.Cosmic_applyNoFog(true) end) end
-    if S.FOVEnabled then task.wait(0.3); pcall(function() _G.Cosmic_applyFOV() end) end
 
-    -- Re-scan killers kalau parry aktif
-    if _G.CosmicParry.Enabled then
+    if S.ZoomOut and _G.Cosmic_applyZoomOut then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyZoomOut(true, S.ZoomOutValue) end)
+    end
+
+    if S.Fullbright and _G.Cosmic_applyFullbright then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyFullbright(true) end)
+    end
+
+    if S.NoFog and _G.Cosmic_applyNoFog then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyNoFog(true) end)
+    end
+
+    if S.FOVEnabled and _G.Cosmic_applyFOV then
+        task.wait(0.3)
+        pcall(function() _G.Cosmic_applyFOV() end)
+    end
+
+    if (S.Bloom or S.SunRays or S.DOF or S.Sharpen or S.Cinematic or S.Atmosphere) and _G.Cosmic_applyHD then
+        task.wait(0.3)
+        pcall(_G.Cosmic_applyHD)
+    end
+
+    if _G.CosmicParry.Enabled and _G.Cosmic_scanKillers then
         task.wait(0.5)
-        pcall(scanKillers)
+        pcall(_G.Cosmic_scanKillers)
     end
 end)
 
 -- ============================
 -- ANTI-RESET TOGGLE SYNC
--- (kalau GUI di-reset, state tetap sinkron)
 -- ============================
 task.spawn(function()
     while task.wait(0.4) do
         if not gui or not gui.Parent then break end
         for name, state in pairs(_G.CosmicToggle) do
             if name == "Enable Fire" and S.FireOn ~= state then
-                S.FireOn = state; pcall(applyFire)
+                S.FireOn = state
+                if _G.Cosmic_applyFire then pcall(_G.Cosmic_applyFire) end
             end
             if name == "Enable Fire Feet" and S.FireFeetOn ~= state then
-                S.FireFeetOn = state; pcall(applyFireFeet)
+                S.FireFeetOn = state
+                if _G.Cosmic_applyFireFeet then pcall(_G.Cosmic_applyFireFeet) end
             end
             if name == "👑 Enable 8-Bit Crown" and S.EightBitCrown ~= state then
                 S.EightBitCrown = state
-                pcall(function()
-                    _G.Cosmic_apply8BitCrown(state, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
-                end)
+                if _G.Cosmic_apply8BitCrown then
+                    pcall(function()
+                        _G.Cosmic_apply8BitCrown(state, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+                    end)
+                end
             end
             if name == "Enable Trail Fire" and S.Trail ~= state then
                 S.Trail = state
-                pcall(function() applyTrail(state, S.TrailColor) end)
+                if _G.Cosmic_applyTrail then
+                    pcall(function() _G.Cosmic_applyTrail(state, S.TrailColor) end)
+                end
             end
             if name == "Enable Aura Fire" and S.Aura ~= state then
                 S.Aura = state
-                pcall(function() applyAura(state, S.AuraColor) end)
+                if _G.Cosmic_applyAura then
+                    pcall(function() _G.Cosmic_applyAura(state, S.AuraColor) end)
+                end
             end
             if name == "Fullbright" and S.Fullbright ~= state then
                 S.Fullbright = state
-                pcall(function() _G.Cosmic_applyFullbright(state) end)
+                if _G.Cosmic_applyFullbright then
+                    pcall(function() _G.Cosmic_applyFullbright(state) end)
+                end
             end
             if name == "No Fog" and S.NoFog ~= state then
                 S.NoFog = state
-                pcall(function() _G.Cosmic_applyNoFog(state) end)
+                if _G.Cosmic_applyNoFog then
+                    pcall(function() _G.Cosmic_applyNoFog(state) end)
+                end
             end
             if name == "Enable FOV" and S.FOVEnabled ~= state then
                 S.FOVEnabled = state
-                pcall(function() _G.Cosmic_applyFOV() end)
+                if _G.Cosmic_applyFOV then
+                    pcall(function() _G.Cosmic_applyFOV() end)
+                end
             end
             if name == "Enable Auto Parry" and _G.CosmicParry.Enabled ~= state then
                 _G.CosmicParry.Enabled = state
-                if state then pcall(scanKillers) end
+                if state and _G.Cosmic_scanKillers then pcall(_G.Cosmic_scanKillers) end
             end
             if name == "Enable Skill Check" and _G.CosmicSkill.Enabled ~= state then
                 _G.CosmicSkill.Enabled = state
@@ -3849,17 +4123,17 @@ task.spawn(function()
 end)
 
 -- ============================
--- HD EFFECT AUTO RE-APPLY (kalau dihapus game)
+-- HD EFFECT AUTO RE-APPLY
 -- ============================
 Lighting.ChildRemoved:Connect(function(child)
-    if not hdEffects then return end
-    for name, eff in pairs(hdEffects) do
+    if not _G.Cosmic_hdEffects then return end
+    for name, eff in pairs(_G.Cosmic_hdEffects) do
         if eff == child then
-            hdEffects[name] = nil
+            _G.Cosmic_hdEffects[name] = nil
         end
     end
     task.wait(0.5)
-    if S.Bloom or S.SunRays or S.DOF or S.Sharpen or S.Cinematic or S.Atmosphere then
+    if (S.Bloom or S.SunRays or S.DOF or S.Sharpen or S.Cinematic or S.Atmosphere) and _G.Cosmic_applyHD then
         pcall(_G.Cosmic_applyHD)
     end
 end)
@@ -3870,7 +4144,9 @@ end)
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
-        panel.Visible = not panel.Visible
+        if panel then
+            panel.Visible = not panel.Visible
+        end
     end
 end)
 
@@ -3878,10 +4154,12 @@ end)
 -- BUKA TAB PERTAMA (Fire)
 -- ============================
 task.wait(0.3)
-for _, c in pairs(sb:GetChildren()) do
-    if c:IsA("TextButton") then
-        c.MouseButton1Click:Fire()
-        break
+if sb then
+    for _, c in pairs(sb:GetChildren()) do
+        if c:IsA("TextButton") then
+            c.MouseButton1Click:Fire()
+            break
+        end
     end
 end
 
@@ -3935,6 +4213,11 @@ print("   • Sharpen + Cinematic + Atmosphere")
 print("=====================================================")
 print("🌌 TOMBOL MENU GALAXY (KECIL + BISA DIGESER)")
 print("📊 FPS/PING PANEL di KIRI ATAS")
+print("=====================================================")
+print("🌌 Cara pakai:")
+print("   1. Klik tombol 🌌 (kiri atas) untuk buka menu")
+print("   2. Atau tekan RightShift")
+print("   3. HOLD tombol 🎯 untuk aimlock")
 print("=====================================================")
 print("Total: 70+ FITUR PREMIUM — LIGHTWEIGHT")
 print("🌌 Cosmic Hub — Made with 💜")

@@ -61,8 +61,6 @@ _G.RoooorS = _G.RoooorS or {
     Killer_AutoStalk = false, Killer_StalkRange = 150,
     MaskedPower = "Cobra",
     FastVault = false, FastVaultSpeed = 1.5,
-    Moonwalk = false, MoonwalkSpam = 30, MoonwalkIntensity = 35, MoonwalkSlow = 13,
-    MoonwalkLocked = false,
 }
 
 local S = _G.RoooorS
@@ -70,7 +68,6 @@ local S = _G.RoooorS
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- EXTRA STATE (Bagian 13)
 _G.RoooorExtra = _G.RoooorExtra or {
     AutoPallet = false, AutoPalletRange = 8,
     AutoVault = false, AutoVaultRange = 10,
@@ -95,7 +92,7 @@ _G.RoooorExtra = _G.RoooorExtra or {
 
 local X = _G.RoooorExtra
 
-print("✅ [1/15] Config loaded (Delta Executor)")-- =========================================================
+print("✅ [1/15] Config loaded (Delta Executor) - Moonwalk REMOVED")-- =========================================================
 -- BAGIAN 2/15 : FIRE LIST + FIRE CONFIG
 -- =========================================================
 
@@ -234,7 +231,6 @@ local SkyIds = {
     Rainbow = "rbxassetid://159454299", Golden = "rbxassetid://159454299",
 }
 
--- KILLER ANIMATIONS (23 ID dari Fallens)
 local KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -507,7 +503,7 @@ fBtn.MouseButton1Click:Connect(function()
     }):Play()
 end)
 
--- SIDEBAR (SCROLLING - muat banyak tab)
+-- SIDEBAR
 local sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 120, 1, -72)
 sbFrame.Position = UDim2.new(0, 12, 0, 62)
@@ -1022,18 +1018,30 @@ function applyFire()
     end
 end
 
+-- FIX: auto re-apply fire saat head baru muncul
+LP.CharacterAdded:Connect(function()
+    task.wait(1)
+    if S.FireOn then applyFire() end
+    if S.FireFeetOn then applyFireFeet() end
+end)
+
 task.spawn(function()
     while gui.Parent do
         task.wait(0.1)
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
-            local fire = head and head:FindFirstChild("RoooorFire")
-            if fire then
-                local cfg = FireConfig[S.FireType] or FireConfig.Classic
-                if cfg.rainbow then
-                    local t = tick()
-                    fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
-                    fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
+            if head then
+                local fire = head:FindFirstChild("RoooorFire")
+                if not fire then
+                    -- Re-apply kalau fire hilang
+                    applyFire()
+                else
+                    local cfg = FireConfig[S.FireType] or FireConfig.Classic
+                    if cfg.rainbow then
+                        local t = tick()
+                        fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
+                        fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
+                    end
                 end
             end
         end
@@ -1397,20 +1405,18 @@ _G.Roooor_createESP = createESP
 _G.Roooor_removeESP = removeESP
 
 print("✅ [7/15] ESP (Fallens) loaded")-- =========================================================
--- BAGIAN 8/15 : AUTO PARRY (FALLENS) + AIMLOCK 2 MODE
+-- BAGIAN 8/15 : AUTO PARRY GACOR MODE (ANTI MISS v3)
 -- =========================================================
 
 local lastParry = 0
-local PARRY_DEBOUNCE = 0.2
+local PARRY_DEBOUNCE = 0.05
 local ParryActive = false
 local hookedKillers = _G.Roooor_HookedKillers or {}
 _G.Roooor_HookedKillers = hookedKillers
 
-local AttackPaths = {
-    "Slasher-mob.Controls.attack",
-    "Masked-mob.Controls.attack",
-    "Killer-mob.Controls.attack"
-}
+local function getParryRange()
+    return (S.ParryDist or 8) + 10
+end
 
 local function GetParryButton()
     local current = PG
@@ -1420,24 +1426,19 @@ local function GetParryButton()
     return current
 end
 
-local function GetAttackButtonForParry()
-    for _, path in ipairs(AttackPaths) do
-        local current = PG
-        for segment in string.gmatch(path, "[^%.]+") do
-            current = current and current:FindFirstChild(segment)
-        end
-        if current and current:IsA("GuiObject") then
-            return current
-        end
-    end
-    return nil
-end
-
 local function pressRightClick()
     pcall(function()
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
-        task.wait()
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+        local btn = GetParryButton()
+        local x, y = 0, 0
+        if btn and btn:IsA("GuiObject") then
+            local pos = btn.AbsolutePosition + btn.AbsoluteSize / 2
+            local inset = GuiService:GetGuiInset()
+            x = pos.X + inset.X
+            y = pos.Y + inset.Y
+        end
+        VirtualInputManager:SendMouseButtonEvent(x, y, 1, true, game, 0)
+        task.wait(0.005)
+        VirtualInputManager:SendMouseButtonEvent(x, y, 1, false, game, 0)
     end)
 end
 
@@ -1452,7 +1453,7 @@ local function pressParryButton()
             local y = pos.Y + size.Y / 2 + inset.Y
             pcall(function()
                 VirtualInputManager:SendTouchEvent(8823, 0, x, y)
-                task.wait(0.01)
+                task.wait(0.003)
                 VirtualInputManager:SendTouchEvent(8823, 2, x, y)
             end)
         end
@@ -1466,12 +1467,8 @@ local function doParry()
     if now - lastParry < PARRY_DEBOUNCE then return end
     lastParry = now
     ParryActive = true
-    if S.Moonwalk then
-        S.Moonwalk = false
-        _G.ToggleStates["Enable Moonwalk"] = false
-    end
     pressParryButton()
-    task.delay(0.3, function()
+    task.delay(0.08, function()
         ParryActive = false
     end)
 end
@@ -1481,8 +1478,14 @@ local function isInParryRange(killerChar)
     if not myRoot or not killerChar then return false end
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
-    local dist = (enemyRoot.Position - myRoot.Position).Magnitude
-    return dist <= (S.ParryDist + 5)
+
+    local vel = enemyRoot.AssemblyLinearVelocity
+    local predicted = enemyRoot.Position + vel * 0.15
+    local distNow = (enemyRoot.Position - myRoot.Position).Magnitude
+    local distPred = (predicted - myRoot.Position).Magnitude
+
+    local r = getParryRange()
+    return distNow <= r or distPred <= r
 end
 
 local function hookKiller(char)
@@ -1509,13 +1512,15 @@ local function hookKiller(char)
 
     task.spawn(function()
         while char.Parent and hookedKillers[char] do
-            task.wait(0.03)
+            task.wait(0.005)
             if not S.Parry then break end
             local myRoot = getRoot()
             local eRoot = char:FindFirstChild("HumanoidRootPart")
             if not myRoot or not eRoot then continue end
+
             local dist = (eRoot.Position - myRoot.Position).Magnitude
-            if dist > (S.ParryDist + 5) then continue end
+            if dist > getParryRange() + 5 then continue end
+
             for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                 local anim = track.Animation
                 if anim and anim.AnimationId then
@@ -1543,9 +1548,18 @@ end
 
 task.spawn(function()
     while gui.Parent do
-        task.wait(0.5)
+        task.wait(0.2)
         if S.Parry then scanKillers() end
     end
+end)
+
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if S.Parry and p.Team and p.Team.Name == "Killer" then
+            hookKiller(p.Character)
+        end
+    end)
 end)
 
 _G.Roooor_ParryCircle = nil
@@ -1568,7 +1582,7 @@ function updateParryCircle()
         _G.Roooor_ParryCircle.Name = "RoooorParryCircle"
         _G.Roooor_ParryCircle.Parent = workspace
     end
-    local size = (S.ParryDist + 5) * 2
+    local size = (S.ParryCircleSize or 15) * 2
     _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
     local yOffset = root.Size.Y / 2 + 1.5
     _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0)) * CFrame.Angles(0, 0, math.rad(90))
@@ -1775,9 +1789,18 @@ task.spawn(function()
     end
 end)
 
-print("✅ [8/15] Auto Parry + Skill + Aimlock 2 Mode loaded")-- =========================================================
--- BAGIAN 9/15 : VISUAL + KORBLOX + HEADLESS + KILLER + MOONWALK FIX
+print("✅ [8/15] Auto Parry GACOR + Skill + Aimlock 2 Mode loaded")-- =========================================================
+-- BAGIAN 9/15 : VISUAL + KORBLOX + HEADLESS + KILLER
 -- =========================================================
+
+-- Simpan nilai asli Lighting untuk restore yang benar
+local origLighting = {
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    GlobalShadows = Lighting.GlobalShadows,
+}
 
 function applyFullbright(s)
     if s then
@@ -1787,20 +1810,25 @@ function applyFullbright(s)
         Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
         Lighting.GlobalShadows = false
     else
-        Lighting.Brightness = 1
-        Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-        Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-        Lighting.GlobalShadows = true
+        Lighting.Brightness = origLighting.Brightness
+        Lighting.ClockTime = origLighting.ClockTime
+        Lighting.Ambient = origLighting.Ambient
+        Lighting.OutdoorAmbient = origLighting.OutdoorAmbient
+        Lighting.GlobalShadows = origLighting.GlobalShadows
     end
 end
+
+local origFogEnd, origFogStart
+origFogEnd = Lighting.FogEnd
+origFogStart = Lighting.FogStart
 
 function applyNoFog(s)
     if s then
         Lighting.FogEnd = 9e9
         Lighting.FogStart = 9e9
     else
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
+        Lighting.FogEnd = origFogEnd
+        Lighting.FogStart = origFogStart
     end
 end
 
@@ -1869,7 +1897,7 @@ function applyContrast()
     end
 end
 
--- KORBLOX (1 KAKI KANAN - AUTO REAPPLY - FULL MESH)
+-- KORBLOX
 local KorbloxOrig = nil
 
 function applyKorblox(s)
@@ -2076,132 +2104,6 @@ LP.CharacterAdded:Connect(function(char)
 end)
 if LP.Character then hookVault(LP.Character) end
 
--- =========================================================
--- MOONWALK FIX (LOBBY = INGAME - CFrame LANGSUNG + ANTI TELEPORT BACK)
--- =========================================================
-_G.MoonwalkConn = nil
-_G.MoonwalkAntiTP = nil
-_G.MoonwalkLastCF = nil
-_G.MoonwalkHeartbeat = nil
-
-local function isDowned()
-    local char = LP.Character
-    if not char then return false end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return false end
-    return hum.Health <= 0 or hum.Health < 2
-end
-
-function startMoonwalk()
-    if _G.MoonwalkConn then return end
-    local char = LP.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    pcall(function() hrp:SetNetworkOwner(LP) end)
-    _G.MoonwalkLastCF = hrp.CFrame
-
-    _G.MoonwalkConn = RunService.Heartbeat:Connect(function(dt)
-        if not S.Moonwalk then return end
-        if isDowned() then return end
-        local char = LP.Character
-        if not char then return end
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local cam = workspace.CurrentCamera
-        if not humanoid or not hrp or not cam then return end
-
-        pcall(function()
-            if hrp:GetNetworkOwner() ~= LP then
-                hrp:SetNetworkOwner(LP)
-            end
-        end)
-
-        if humanoid.WalkSpeed ~= S.MoonwalkSlow then
-            humanoid.WalkSpeed = S.MoonwalkSlow
-        end
-
-        local look = cam.CFrame.LookVector
-        local flatLook = Vector3.new(look.X, 0, look.Z)
-        if flatLook.Magnitude > 0 then
-            flatLook = flatLook.Unit
-            local angle = math.sin(tick() * S.MoonwalkSpam) * S.MoonwalkIntensity
-            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
-            local targetCF = baseCF * CFrame.Angles(0, math.rad(angle), 0)
-            hrp.CFrame = targetCF
-            _G.MoonwalkLastCF = targetCF
-            humanoid:Move(Vector3.new(0, 0, 1), true)
-        end
-    end)
-
-    _G.MoonwalkAntiTP = RunService.Stepped:Connect(function()
-        if not S.Moonwalk then return end
-        local char = LP.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        if _G.MoonwalkLastCF then
-            local diff = (hrp.Position - _G.MoonwalkLastCF.Position).Magnitude
-            if diff > 15 then
-                hrp.CFrame = _G.MoonwalkLastCF
-            end
-        end
-    end)
-
-    _G.MoonwalkHeartbeat = task.spawn(function()
-        while S.Moonwalk and _G.MoonwalkConn do
-            task.wait(0.03)
-            local char = LP.Character
-            if not char then break end
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hum or not hrp then break end
-
-            if hum.WalkSpeed ~= S.MoonwalkSlow then
-                hum.WalkSpeed = S.MoonwalkSlow
-            end
-
-            pcall(function()
-                if hrp:GetNetworkOwner() ~= LP then
-                    hrp:SetNetworkOwner(LP)
-                end
-            end)
-
-            if hum.PlatformStand then
-                hum.PlatformStand = false
-            end
-            if hum:GetState() == Enum.HumanoidStateType.Freefall then
-                hum:ChangeState(Enum.HumanoidStateType.Running)
-            end
-        end
-    end)
-end
-
-function stopMoonwalk()
-    if _G.MoonwalkConn then
-        _G.MoonwalkConn:Disconnect()
-        _G.MoonwalkConn = nil
-    end
-    if _G.MoonwalkAntiTP then
-        _G.MoonwalkAntiTP:Disconnect()
-        _G.MoonwalkAntiTP = nil
-    end
-    _G.MoonwalkLastCF = nil
-
-    local char = LP.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            if S.WalkSpeed then
-                hum.WalkSpeed = S.WalkSpeedVal + (S.WalkSpeedBoost or 0)
-            else
-                hum.WalkSpeed = 16
-            end
-        end
-    end
-end
-
 -- KILLER FUNCTIONS
 local lastAtk = 0
 task.spawn(function()
@@ -2263,7 +2165,7 @@ task.spawn(function()
     end
 end)
 
--- HITBOX (DENGAN HIDE VISUAL)
+-- HITBOX
 local hitboxCache = {}
 task.spawn(function()
     while gui.Parent do
@@ -2382,116 +2284,7 @@ task.spawn(function()
     end
 end)
 
--- MOONWALK BUTTON
-_G.MoonwalkButton = nil
-
-function createMoonwalkButton()
-    if _G.MoonwalkButton then _G.MoonwalkButton:Destroy() end
-    local btnGui = Instance.new("ScreenGui")
-    btnGui.Name = "RoooorMoonwalkBtn"
-    btnGui.ResetOnSpawn = false
-    btnGui.IgnoreGuiInset = true
-    btnGui.Parent = PG
-    local btn = Instance.new("TextButton")
-    btn.Name = "MoonwalkBtn"
-    btn.Size = UDim2.new(0, 52, 0, 52)
-    btn.Position = UDim2.new(0.65, 0, 0.75, 0)
-    btn.BackgroundColor3 = C.PANEL
-    btn.Text = "🌙"
-    btn.TextColor3 = C.ACC2
-    btn.TextSize = 26
-    btn.Font = Enum.Font.GothamBold
-    btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    btn.Parent = btnGui
-    rnd(btn, 26)
-    local bStrk = strk(btn, C.ACC, 2)
-    local lbl2 = Instance.new("TextLabel")
-    lbl2.Size = UDim2.new(0, 100, 0, 14)
-    lbl2.Position = UDim2.new(0.5, -50, 1, 2)
-    lbl2.BackgroundTransparency = 1
-    lbl2.Text = "MOONWALK"
-    lbl2.TextColor3 = C.ACC2
-    lbl2.TextSize = 10
-    lbl2.Font = Enum.Font.GothamBlack
-    lbl2.TextStrokeTransparency = 0.3
-    lbl2.Parent = btn
-    local lockLbl = Instance.new("TextLabel")
-    lockLbl.Name = "LockLabel"
-    lockLbl.Size = UDim2.new(0, 100, 0, 12)
-    lockLbl.Position = UDim2.new(0.5, -50, 1, 17)
-    lockLbl.BackgroundTransparency = 1
-    lockLbl.Text = "🔓"
-    lockLbl.TextColor3 = C.DIM
-    lockLbl.TextSize = 9
-    lockLbl.Font = Enum.Font.GothamBold
-    lockLbl.Parent = btn
-    local dragging, ds, dp, wasDragged = false, nil, nil, false
-    btn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            if S.MoonwalkLocked then return end
-            dragging = true
-            wasDragged = false
-            ds = input.Position
-            dp = btn.Position
-        end
-    end)
-    UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local d = input.Position - ds
-            if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then wasDragged = true end
-            btn.Position = UDim2.new(dp.X.Scale, dp.X.Offset + d.X, dp.Y.Scale, dp.Y.Offset + d.Y)
-        end
-    end)
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    btn.MouseButton1Click:Connect(function()
-        if wasDragged then wasDragged = false; return end
-        S.Moonwalk = not S.Moonwalk
-        if S.Moonwalk then
-            btn.BackgroundColor3 = C.ACC
-            bStrk.Color = C.ACC2
-            btn.TextColor3 = Color3.new(1, 1, 1)
-            startMoonwalk()
-        else
-            btn.BackgroundColor3 = C.PANEL
-            bStrk.Color = C.ACC
-            btn.TextColor3 = C.ACC2
-            stopMoonwalk()
-        end
-    end)
-    _G.MoonwalkButton = btnGui
-end
-
-_G.createMoonwalkButton = createMoonwalkButton
-
-function removeMoonwalkButton()
-    if _G.MoonwalkButton then _G.MoonwalkButton:Destroy(); _G.MoonwalkButton = nil end
-end
-_G.removeMoonwalkButton = removeMoonwalkButton
-
-function updateMoonwalkLock()
-    if not _G.MoonwalkButton then return end
-    local btn = _G.MoonwalkButton:FindFirstChild("MoonwalkBtn", true)
-    if btn then
-        local lockLbl = btn:FindFirstChild("LockLabel")
-        if lockLbl then
-            if S.MoonwalkLocked then
-                lockLbl.Text = "🔒"
-                lockLbl.TextColor3 = C.GOLD
-            else
-                lockLbl.Text = "🔓"
-                lockLbl.TextColor3 = C.DIM
-            end
-        end
-    end
-end
-_G.updateMoonwalkLock = updateMoonwalkLock
-
-print("✅ [9/15] Visual + Korblox + Headless + Killer + Moonwalk FIX loaded")-- =========================================================
+print("✅ [9/15] Visual + Korblox + Headless + Killer loaded (MOONWALK REMOVED)")-- =========================================================
 -- BAGIAN 10/15 : TAB FIRE + FIRE FEET
 -- =========================================================
 
@@ -2653,9 +2446,10 @@ end)
 
 -- TAB SURVIVOR
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry 360°", "🛡️")
+    sec("Auto Parry 360° GACOR", "🛡️")
     tog("Enable Auto Parry", false, function(s) S.Parry = s; if s then scanKillers() end end)
     sl("Parry Distance", 3, 25, 8, function(v) S.ParryDist = v end)
+    lbl("Anti-miss + Prediksi gerak killer", C.GRN)
 
     sec("Parry Circle", "🔵")
     tog("Enable Parry Circle", false, function(s) S.ParryCircle = s end)
@@ -2784,7 +2578,7 @@ makeTab("Visual", "🎨", 6, function()
     tog("Headless", false, function(s) S.Headless = s; applyHeadless(s) end)
 end)
 
--- TAB MOVEMENT
+-- TAB MOVEMENT (MOONWALK DIHAPUS)
 makeTab("Movement", "🏃", 7, function()
     sec("Walk Speed", "⚡")
     tog("Enable Walk Speed", false, function(s) S.WalkSpeed = s end)
@@ -2801,36 +2595,8 @@ makeTab("Movement", "🏃", 7, function()
     tog("Enable Fast Vault", false, function(s) S.FastVault = s end)
     sl("Animation Speed", 1, 5, 1.5, function(v) S.FastVaultSpeed = v end)
 
-    sec("Moonwalk", "🌙")
-    tog("Enable Moonwalk", false, function(s)
-        S.Moonwalk = s
-        if s then startMoonwalk() else stopMoonwalk() end
-    end)
-    sl("Spam Speed", 1, 100, 30, function(v) S.MoonwalkSpam = v end)
-    sl("Intensity", 1, 90, 35, function(v) S.MoonwalkIntensity = v end)
-    sl("Slow Speed", 5, 30, 13, function(v) S.MoonwalkSlow = v end)
-    lbl("Lobby & Ingame SAMA (CFrame Fix)", C.GRN)
-
-    sec("Moonwalk Floating Button", "🌙")
-    tog("Show Moonwalk Button", false, function(s)
-        if s then
-            createMoonwalkButton()
-            task.wait(0.1)
-            updateMoonwalkLock()
-        else
-            removeMoonwalkButton()
-        end
-    end)
-    tog("🔒 Lock Moonwalk Button", false, function(s)
-        S.MoonwalkLocked = s
-        updateMoonwalkLock()
-    end)
-    btn("🔄 Reset Posisi Moonwalk", function()
-        if _G.MoonwalkButton then
-            local b = _G.MoonwalkButton:FindFirstChild("MoonwalkBtn", true)
-            if b then b.Position = UDim2.new(0.65, 0, 0.75, 0) end
-        end
-    end)
+    sec("Info", "ℹ️")
+    lbl("Moonwalk dihapus", C.RED)
 end)
 
 -- TAB SETTINGS
@@ -2839,19 +2605,19 @@ makeTab("Settings", "⚙️", 8, function()
     lbl("RightShift = Toggle Menu", C.ACC2)
     lbl("Klik ⚡ = Buka Menu", C.ACC2)
     lbl("Drag Header = Pindah Window", C.DIM)
-    lbl("Drag 🎯/🌙 = Pindah Tombol", C.DIM)
+    lbl("Drag 🎯 = Pindah Tombol", C.DIM)
     lbl("Klik kanan 🎯 = Switch Aimlock Mode", C.DIM)
 
     sec("Info", "ℹ️")
     lbl("RoooorHub Premium Ultimate + Fallens", C.ACC4)
     lbl("60 Fire + 20 Fire Feet + 25 Sky", C.ACC2)
-    lbl("ESP + Parry Anti-Miss + Aimlock 2 Mode", C.ACC2)
+    lbl("ESP + Parry GACOR v3 + Aimlock 2 Mode", C.ACC2)
     lbl("Killer + Visual + Movement + Anti", C.ACC2)
     lbl("Made with 💜", C.ACC3)
 end)
 
 print("✅ [11/15] Tab UI utama loaded")-- =========================================================
--- BAGIAN 12/15 : MAIN LOOP + KEYBIND + ANTI-RESET
+-- BAGIAN 12/15 : MAIN LOOP + KEYBIND
 -- =========================================================
 
 local fpsPanel = Instance.new("Frame")
@@ -2991,7 +2757,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- RESPAWN HANDLER
+-- RESPAWN HANDLER (MOONWALK DIHAPUS)
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     hookedKillers = {}
@@ -3003,12 +2769,6 @@ LP.CharacterAdded:Connect(function(char)
     if S.Korblox then task.wait(0.3); applyKorblox(true) end
     if S.Headless then task.wait(0.3); applyHeadless(true) end
     if S.FastVault then task.wait(0.5); hookVault(char) end
-    if S.Moonwalk then
-        task.wait(0.5)
-        stopMoonwalk()
-        task.wait(0.1)
-        startMoonwalk()
-    end
 end)
 
 -- KEYBIND RightShift
@@ -3046,83 +2806,22 @@ task.spawn(function()
     end
 end)
 
--- ANTI-RESET SLIDER + TOGGLE (fitur utama)
-task.spawn(function()
-    while gui.Parent do
-        task.wait(0.3)
-        for name, val in pairs(_G.SliderStates) do
-            if name == "Nama Size" then S.ESP_Size = val end
-            if name == "ESP Radius" then S.ESP_Radius = val end
-            if name == "Parry Distance" then S.ParryDist = val end
-            if name == "Circle Size" then S.ParryCircleSize = val end
-            if name == "Fire Size" then S.FireSize = val end
-            if name == "Aimlock Radius" then S.AimlockRadius = val end
-            if name == "Speed Value" then S.WalkSpeedVal = val end
-            if name == "Speed Boost" then S.WalkSpeedBoost = val end
-            if name == "Animation Speed" then S.FastVaultSpeed = val end
-            if name == "Attack Delay" then S.Killer_AtkDelay = val end
-            if name == "Hitbox Size" then S.Killer_HitboxSize = val end
-            if name == "Stalk Range" then S.Killer_StalkRange = val end
-            if name == "Spam Speed" then S.MoonwalkSpam = val end
-            if name == "Intensity" then S.MoonwalkIntensity = val end
-            if name == "Slow Speed" then S.MoonwalkSlow = val end
-            if name == "Contrast Value" then S.ContrastVal = val end
-            if name == "Saturation" then S.SaturationVal = val end
-            if name == "FOV Value" then S.FOV = val end
-        end
-        for name, state in pairs(_G.ToggleStates) do
-            if name == "Enable ESP Name" then S.ESP_Name = state end
-            if name == "ESP Generator" then S.ESP_Generator = state end
-            if name == "ESP Pallet" then S.ESP_Pallet = state end
-            if name == "ESP Window" then S.ESP_Window = state end
-            if name == "ESP SCP" then S.ESP_SCP = state end
-            if name == "Enable Auto Parry" then
-                if S.Parry ~= state then
-                    S.Parry = state
-                    if state then scanKillers() end
-                end
-            end
-            if name == "Enable Parry Circle" then S.ParryCircle = state end
-            if name == "Enable Fire" then S.FireOn = state end
-            if name == "Enable Fire Feet" then S.FireFeetOn = state end
-            if name == "Enable Skill Check" then S.Skill = state end
-            if name == "Enable Aimlock" then S.Aimlock = state end
-            if name == "Enable Walk Speed" then S.WalkSpeed = state end
-            if name == "Fullbright" then S.Fullbright = state end
-            if name == "No Fog" then S.NoFog = state end
-            if name == "Ultra HD" then S.UltraHD = state end
-            if name == "Contrast" then S.Contrast = state end
-            if name == "Enable FOV" then S.FOVEnabled = state end
-            if name == "Auto Spam Attack" then S.Killer_AutoAtk = state end
-            if name == "Auto Kill All" then S.Killer_KillAll = state end
-            if name == "Enable Hitbox" then S.Killer_Hitbox = state end
-            if name == "Hide Hitbox Visual" then S.Killer_Hitbox_Visible = not state end
-            if name == "Auto Stalk" then S.Killer_AutoStalk = state end
-            if name == "Korblox Legs (1 Kaki)" then S.Korblox = state end
-            if name == "Headless" then S.Headless = state end
-            if name == "Enable Fast Vault" then S.FastVault = state end
-            if name == "Enable Moonwalk" then
-                if S.Moonwalk ~= state then
-                    S.Moonwalk = state
-                    if state then startMoonwalk() else stopMoonwalk() end
-                end
-            end
-        end
-    end
-end)
-
-print("✅ [12/15] Main Loop + Anti-Reset loaded")-- =========================================================
--- BAGIAN 13/15 : FITUR TAMBAHAN (SURVIVOR+ / VISUAL+ / ANTI / TOP 10)
+print("✅ [12/15] Main Loop + Keybind loaded")-- =========================================================
+-- BAGIAN 13/15 : FITUR TAMBAHAN
 -- =========================================================
 
+local remoteCache = {}
 local function findRemote(keyword)
+    if remoteCache[keyword] ~= nil then return remoteCache[keyword] end
     for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
         if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
             if string.find(string.lower(obj.Name), string.lower(keyword)) then
+                remoteCache[keyword] = obj
                 return obj
             end
         end
     end
+    remoteCache[keyword] = false
     return nil
 end
 
@@ -3163,35 +2862,6 @@ task.spawn(function()
                                 end
                                 break
                             end
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while gui.Parent do
-        task.wait(0.15)
-        if X.AutoVault then
-            local myRoot = getRoot()
-            if myRoot then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
-                        if krp and (krp.Position - myRoot.Position).Magnitude <= X.AutoVaultRange + 5 then
-                            for _, obj in ipairs(workspace:GetDescendants()) do
-                                if obj.Name == "Window" then
-                                    local pos = obj:IsA("Model") and obj:GetPivot().Position or (obj:IsA("BasePart") and obj.Position)
-                                    if pos and (pos - myRoot.Position).Magnitude <= X.AutoVaultRange then
-                                        local targetPos = pos + (myRoot.Position - pos).Unit * 2 + Vector3.new(0, 2, 0)
-                                        pcall(function() myRoot.CFrame = CFrame.new(targetPos) end)
-                                        break
-                                    end
-                                end
-                            end
-                            break
                         end
                     end
                 end
@@ -3540,8 +3210,8 @@ task.spawn(function()
         task.wait(0.2)
         if X.AntiHook and LP.Character then
             local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp.Velocity.Magnitude > 200 then
-                hrp.Velocity = Vector3.new(0, 0, 0)
+            if hrp and hrp.AssemblyLinearVelocity.Magnitude > 200 then
+                hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
             end
         end
     end
@@ -3732,7 +3402,6 @@ local function createPlayerList()
     end)
 end
 
--- Expose ke global biar dipakai di Bagian 14
 _G.Roooor_applyTrail = applyTrail
 _G.Roooor_applyAura = applyAura
 _G.Roooor_applyCrosshair = applyCrosshair
@@ -3742,10 +3411,9 @@ _G.Roooor_stopFly = stopFly
 _G.Roooor_createPlayerList = createPlayerList
 
 print("✅ [13/15] Fitur Tambahan loaded")-- =========================================================
--- BAGIAN 14/15 : TAB UI BARU (SURVIVOR+ / VISUAL+ / ANTI / TOP 10)
+-- BAGIAN 14/15 : TAB UI BARU
 -- =========================================================
 
--- SURVIVOR+
 makeTab("Survivor+", "🏃", 9, function()
     sec("Auto Pallet Stun", "🪵")
     tog("Enable Auto Pallet", false, function(s) X.AutoPallet = s end)
@@ -3776,7 +3444,6 @@ makeTab("Survivor+", "🏃", 9, function()
     sl("Alert Range", 20, 200, 60, function(v) X.EscapeAlertRange = v end)
 end)
 
--- VISUAL+
 makeTab("Visual+", "🎨", 10, function()
     sec("Kill Effect", "💥")
     tog("Enable Kill Effect", false, function(s) X.KillEffect = s end)
@@ -3803,7 +3470,6 @@ makeTab("Visual+", "🎨", 10, function()
     sl("Zoom Distance", 100, 5000, 500, function(v) X.ZoomOutValue = v; _G.Roooor_applyZoomOut() end)
 end)
 
--- ANTI
 makeTab("Anti", "🛡️", 11, function()
     sec("Anti Stun", "⚡")
     tog("Enable Anti Stun", false, function(s) X.AntiStun = s end)
@@ -3830,7 +3496,6 @@ makeTab("Anti", "🛡️", 11, function()
     tog("Enable Anti AFK", false, function(s) X.AntiAFK = s end)
 end)
 
--- TOP 10
 makeTab("Top 10", "🏆", 12, function()
     sec("Fly", "🕊️")
     tog("Enable Fly", false, function(s)
@@ -3860,75 +3525,16 @@ makeTab("Top 10", "🏆", 12, function()
 end)
 
 print("✅ [14/15] Tab UI baru loaded")-- =========================================================
--- BAGIAN 15/15 : ANTI-RESET FITUR BARU + RESPAWN + FINAL
+-- BAGIAN 15/15 : RESPAWN RE-APPLY + FINAL PRINT
 -- =========================================================
 
--- RESPAWN RE-APPLY FITUR BARU
+-- RESPAWN RE-APPLY
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
     if X.Trail then _G.Roooor_applyTrail(true) end
     if X.Aura then _G.Roooor_applyAura(true) end
     if X.Crosshair then _G.Roooor_applyCrosshair(true) end
     if X.ZoomOut then _G.Roooor_applyZoomOut() end
-end)
-
--- ANTI-RESET FITUR BARU
-task.spawn(function()
-    while gui.Parent do
-        task.wait(0.3)
-        for name, state in pairs(_G.ToggleStates) do
-            if name == "Enable Auto Pallet" then X.AutoPallet = state end
-            if name == "Enable Auto Vault" then X.AutoVault = state end
-            if name == "Enable Auto Heal" then X.AutoHeal = state end
-            if name == "Enable Auto Revive" then X.AutoRevive = state end
-            if name == "Enable Auto Repair" then X.AutoRepair = state end
-            if name == "Enable Perfect Skill" then X.SkillPerfect = state end
-            if name == "Enable Safe Zone" then X.SafeZone = state end
-            if name == "Enable Escape Alert" then X.EscapeAlert = state end
-            if name == "Enable Kill Effect" then X.KillEffect = state end
-            if name == "Enable Trail" then X.Trail = state end
-            if name == "Enable Aura" then X.Aura = state end
-            if name == "Enable RGB UI" then X.RGBUI = state end
-            if name == "Enable Crosshair" then X.Crosshair = state end
-            if name == "No Clip Camera" then X.NoClipCamera = state end
-            if name == "Zoom Out (Unlimited)" then X.ZoomOut = state end
-            if name == "Enable Anti Stun" then X.AntiStun = state end
-            if name == "Enable Anti Blind" then X.AntiBlind = state end
-            if name == "Enable Anti Grab" then X.AntiGrab = state end
-            if name == "Enable Anti Hook" then X.AntiHook = state end
-            if name == "Enable Anti Ragdoll" then X.AntiRagdoll = state end
-            if name == "Enable Anti Parry" then X.AntiParry = state end
-            if name == "Enable Anti Kick" then X.AntiKick = state end
-            if name == "Enable Anti AFK" then X.AntiAFK = state end
-            if name == "Enable Fly" then
-                if X.Fly ~= state then
-                    X.Fly = state
-                    if state then _G.Roooor_startFly() else _G.Roooor_stopFly() end
-                end
-            end
-            if name == "Enable TP to Player" then X.TPtoPlayer = state end
-            if name == "Enable Item ESP" then X.ItemESP = state end
-            if name == "Show Player List" then
-                if X.PlayerList ~= state then
-                    X.PlayerList = state
-                    if state then _G.Roooor_createPlayerList()
-                    else
-                        local plg = PG:FindFirstChild("RoooorPlayerList")
-                        if plg then plg:Destroy() end
-                    end
-                end
-            end
-        end
-        for name, val in pairs(_G.SliderStates) do
-            if name == "Pallet Range" then X.AutoPalletRange = val end
-            if name == "Vault Range" then X.AutoVaultRange = val end
-            if name == "Heal Threshold HP" then X.AutoHealThreshold = val end
-            if name == "Alert Range" then X.EscapeAlertRange = val end
-            if name == "Crosshair Size" then X.CrosshairSize = val end
-            if name == "Zoom Distance" then X.ZoomOutValue = val end
-            if name == "Fly Speed" then X.FlySpeed = val end
-        end
-    end
 end)
 
 -- =========================================================
@@ -3942,22 +3548,25 @@ print("📋 DAFTAR TAB:")
 print("  1. 🔥 Fire          — 60 Efek")
 print("  2. 👟 Fire Feet     — 20 Efek")
 print("  3. 👁️ ESP           — Player + Gen(%) + Pallet + Window + SCP")
-print("  4. 🏃 Survivor      — Parry + Skill + Aimlock 2 Mode")
+print("  4. 🏃 Survivor      — Parry GACOR v3 + Skill + Aimlock 2 Mode")
 print("  5. 🔪 Killer        — Auto Attack + Kill All + Hitbox + Masked")
 print("  6. 🎨 Visual        — Fullbright + No Fog + FOV + 25 Sky")
-print("  7. 🏃 Movement      — WalkSpeed + FastVault + Moonwalk FIX")
+print("  7. 🏃 Movement      — WalkSpeed + FastVault (NO MOONWALK)")
 print("  8. ⚙️ Settings      — Info + Keybind")
-print("  9. 🏃 Survivor+     — Auto Pallet/Vault/Heal/Revive/Repair")
+print("  9. 🏃 Survivor+     — Auto Pallet/Heal/Revive/Repair")
 print(" 10. 🎨 Visual+       — Kill Effect + Trail + Aura + RGB + Crosshair")
 print(" 11. 🛡️ Anti          — Stun + Blind + Grab + Hook + Ragdoll + AFK")
 print(" 12. 🏆 Top 10        — Fly + TP + Item ESP + Player List")
 print("=====================================================")
 print("⌨️ RightShift = Toggle Menu")
 print("🖱️ Klik kanan 🎯 = Switch Aimlock Mode")
-print("🖱️ Scroll sidebar = Lihat semua tab")
 print("=====================================================")
-print("✅ Anti-Reset System: AKTIF")
-print("✅ Moonwalk Fix: LOBBY = INGAME")
-print("✅ Korblox Auto-Reapply: AKTIF")
-print("✅ Headless Auto-Reapply: AKTIF")
+print("⚔️ Auto Parry GACOR v3: AKTIF")
+print("   • Debounce 0.05s (super responsif)")
+print("   • Prediksi gerak killer 0.15s")
+print("   • Range +10 buffer (anti miss)")
+print("   • Polling 0.005s")
+print("   • Silent (gak ada warn)")
+print("=====================================================")
+print("🌙 Moonwalk: DIHAPUS TOTAL")
 print("=====================================================")

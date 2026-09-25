@@ -1,7 +1,7 @@
 -- =========================================================
 -- ROOORHUB ULTIMATE FIRE EDITION v12
 -- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
--- PARRY FALLENS-STYLE + SKILL CHECK INSTANT + PERFECT
+-- PARRY FALLENS-STYLE + SKILL CHECK FALLENS
 -- LIGHTWEIGHT
 -- =========================================================
 local Players = game:GetService("Players")
@@ -330,8 +330,6 @@ _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
 
 -- =========================================================
 -- AUTO PARRY (FALLENS-STYLE)
--- Default 360° (FaceSensitivity = -1)
--- Ubah slider ke 0.7 → Fallens mode (harus ngadep)
 -- =========================================================
 _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
@@ -345,12 +343,10 @@ _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
 }
 
 -- =========================================================
--- AUTO SKILL CHECK (INSTANT + PERFECT)
+-- AUTO SKILL CHECK (FALLENS ORIGINAL - 1 MODE)
 -- =========================================================
 _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
-    PerfectMode = false,
-    SafeZone = 0.15,
 }
 
 -- AIMLOCK
@@ -544,7 +540,7 @@ end
 
 print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
 -- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY (FALLENS-STYLE)
---              + SKILL CHECK INSTANT + PERFECT
+--              + AUTO SKILL CHECK (FALLENS ORIGINAL)
 -- =========================================================
 
 -- ============================
@@ -1121,20 +1117,9 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (INSTANT + PERFECT)
+-- AUTO SKILL CHECK (FALLENS ORIGINAL - 1 MODE)
 -- =========================================================
 local SkillCheck = _G.Roooor_SkillCheck
-local skillBusy = false
-local ActionPath = "Survivor-mob.Controls.action.check"
-local SkillTouchID = 8822
-
-local function GetActionButton()
-    local current = PG
-    for segment in string.gmatch(ActionPath, "[^%.]+") do
-        current = current and current:FindFirstChild(segment)
-    end
-    return current
-end
 
 local function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1142,106 +1127,82 @@ local function pressSpace()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
 end
 
-local function triggerSkillCheck()
-    if skillBusy then return end
-    skillBusy = true
+local TouchID = 8822
+local ActionPath = "Survivor-mob.Controls.action.check"
 
-    pcall(function()
-        if UIS.TouchEnabled then
-            local b = GetActionButton()
-            if b and b:IsA("GuiObject") then
-                local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
-                local cx = p.X + s.X/2 + i.X
-                local cy = p.Y + s.Y/2 + i.Y
-                VirtualInputManager:SendTouchEvent(SkillTouchID, 0, cx, cy)
-                task.wait(0.005)
-                VirtualInputManager:SendTouchEvent(SkillTouchID, 2, cx, cy)
-            end
-        else
-            pressSpace()
-        end
-    end)
+local SkillHeartbeat = nil
+local busy = false
 
-    task.wait(0.05)
-    skillBusy = false
+local function GetActionTarget()
+    local current = PG
+    for segment in string.gmatch(ActionPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
+    return current
 end
 
--- INSTANT MODE (yang udah work - dipertahankan)
-task.spawn(function()
-    while task.wait(0.005) do
-        if not SkillCheck.Enabled then continue end
-        if SkillCheck.PerfectMode then continue end
+local function TriggerMobileButton()
+    local b = GetActionTarget()
+    if b and b:IsA("GuiObject") then
+        local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+        local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
+        pcall(function()
+            VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+        end)
+    end
+end
+
+-- ✅ FUNGSI START SKILL CHECK (PERSIS FALLENS)
+local function startSkillCheck()
+    if SkillHeartbeat then SkillHeartbeat:Disconnect() end
+
+    SkillHeartbeat = RunService.RenderStepped:Connect(function()
+        if not SkillCheck.Enabled or busy then return end
 
         local prompt = PG:FindFirstChild("SkillCheckPromptGui")
-        if not prompt then continue end
+        if not prompt then return end
+
         local check = prompt:FindFirstChild("Check")
-        if not check or not check.Visible then continue end
+        if not check or not check.Visible then return end
 
         local line = check:FindFirstChild("Line")
         local goal = check:FindFirstChild("Goal")
-        if not line or not goal then continue end
+        if not line or not goal then return end
 
         local lr = line.Rotation % 360
         local gr = goal.Rotation % 360
 
-        local startZone = (gr + 102) % 360
-        local endZone = (gr + 116) % 360
+        -- ✅ ZONA FALLENS ASLI: +102° sampai +116°
+        local startRange = (gr + 102) % 360
+        local endRange   = (gr + 116) % 360
 
-        local inZone = false
-        if startZone > endZone then
-            inZone = (lr >= startZone or lr <= endZone)
-        else
-            inZone = (lr >= startZone and lr <= endZone)
-        end
+        local success =
+            (startRange > endRange and (lr >= startRange or lr <= endRange))
+            or (lr >= startRange and lr <= endRange)
 
-        if not inZone then
-            local distanceToZone = 0
-            if startZone > endZone then
-                if lr > endZone and lr < startZone then
-                    distanceToZone = math.min(math.abs(lr - startZone), math.abs(lr - endZone))
+        if success then
+            busy = true
+
+            task.spawn(function()
+                if UIS.TouchEnabled then
+                    TriggerMobileButton()
+                else
+                    pressSpace()
                 end
-            else
-                if lr < startZone then
-                    distanceToZone = startZone - lr
-                elseif lr > endZone then
-                    distanceToZone = lr - endZone
-                end
-            end
-            if distanceToZone > 0 and distanceToZone <= (SkillCheck.SafeZone * 360) then
-                inZone = true
-            end
+                task.wait(0.05)
+                busy = false
+            end)
         end
+    end)
+end
 
-        if inZone and not skillBusy then
-            triggerSkillCheck()
-        end
-    end
-end)
-
--- PERFECT MODE (BARU - set Line tepat di tengah zona)
+-- AUTO-START kalau toggle udah on (dari state sebelumnya)
 task.spawn(function()
-    while task.wait(0.005) do
-        if not SkillCheck.Enabled then continue end
-        if not SkillCheck.PerfectMode then continue end
-
-        local prompt = PG:FindFirstChild("SkillCheckPromptGui")
-        if not prompt then continue end
-        local check = prompt:FindFirstChild("Check")
-        if not check or not check.Visible then continue end
-
-        local line = check:FindFirstChild("Line")
-        local goal = check:FindFirstChild("Goal")
-        if not line or not goal then continue end
-
-        -- Set line ke tengah zona (goal + 108°)
-        pcall(function()
-            line.Rotation = goal.Rotation + 108
-        end)
-
-        -- Trigger skill check juga
-        if not skillBusy then
-            triggerSkillCheck()
-        end
+    task.wait(1)
+    if SkillCheck.Enabled then
+        startSkillCheck()
     end
 end)
 
@@ -1735,6 +1696,7 @@ _G.Roooor_UpdateGenerator = UpdateGenerator
 _G.Roooor_UpdateMapESP = UpdateMapESP
 _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
 _G.Roooor_scanKillers = scanKillers
+_G.Roooor_startSkillCheck = startSkillCheck
 _G.Roooor_applyFullbright = applyFullbright
 _G.Roooor_applyNoFog = applyNoFog
 _G.Roooor_applySky = applySky
@@ -1754,7 +1716,7 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
-print("✅ [3/8] Fungsi + Parry Fallens-Style + SkillCheck Instant/Perfect loaded")-- =========================================================
+print("✅ [3/8] Fungsi + Parry Fallens + SkillCheck Fallens loaded")-- =========================================================
 -- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA (LIGHTWEIGHT)
 -- =========================================================
 
@@ -2126,7 +2088,7 @@ task.spawn(function()
                         warn.Position = UDim2.new(0, 0, 0, 0)
                         warn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
                         warn.BorderSizePixel = 0
-                        warn.Parent = PG  -- ✅ FIX: gui → PG
+                        warn.Parent = PG
                     end
                     warn.BackgroundTransparency = 0.3
                     task.delay(0.3, function()
@@ -2161,7 +2123,7 @@ task.spawn(function()
                                 al.Font = Enum.Font.GothamBlack
                                 al.Text = "⚠️ KILLER DEKET! ⚠️"
                                 al.TextStrokeTransparency = 0
-                                al.Parent = PG  -- ✅ FIX: gui → PG
+                                al.Parent = PG
                                 rnd(al, 10)
                             end
                             al.Visible = true
@@ -2610,7 +2572,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" 4D (BISA DIGESER)
+-- TOMBOL MENU "R" 4D
 -- =========================================================
 local btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 42, 0, 42)
@@ -2618,7 +2580,6 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Ring 1 (outer)
 local ring1 = Instance.new("Frame")
 ring1.Size = UDim2.new(1, 8, 1, 8)
 ring1.Position = UDim2.new(0, -4, 0, -4)
@@ -2635,7 +2596,6 @@ local ring1Grad = Instance.new("UIGradient")
 ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, C.FIRE1, C.FIRE2, C.FIRE3)
 ring1Grad.Parent = ring1Stroke
 
--- Ring 2 (middle)
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 4, 1, 4)
 ring2.Position = UDim2.new(0, -2, 0, -2)
@@ -2648,7 +2608,6 @@ ring2Stroke.Color = C.FIRE2
 ring2Stroke.Transparency = 0.3
 ring2Stroke.Parent = ring2
 
--- Ring 3 (inner)
 local ring3 = Instance.new("Frame")
 ring3.Size = UDim2.new(1, -8, 1, -8)
 ring3.Position = UDim2.new(0, 4, 0, 4)
@@ -2661,7 +2620,6 @@ ring3Stroke.Color = C.FIRE1
 ring3Stroke.Transparency = 0.5
 ring3Stroke.Parent = ring3
 
--- Main button (HURUF R)
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -12, 1, -12)
 mainBtn.Position = UDim2.new(0, 6, 0, 6)
@@ -2704,7 +2662,6 @@ innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- Animasi
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -2725,7 +2682,6 @@ task.spawn(function()
     end
 end)
 
--- Partikel orbit
 for i = 1, 10 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 3, 0, 3)
@@ -2896,7 +2852,6 @@ task.spawn(function()
     end
 end)
 
--- DRAG AIMLOCK
 local aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
 
 aimContainer.InputBegan:Connect(function(input)
@@ -2930,7 +2885,6 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- HOLD TO AIM
 aimBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
@@ -2960,7 +2914,6 @@ aimBtn.MouseButton2Click:Connect(function()
     end
 end)
 
--- SHOW/HIDE AIMLOCK
 _G.Roooor_setAimlockVisible = function(visible)
     if aimBtnGui then aimBtnGui.Enabled = visible end
 end
@@ -3577,7 +3530,7 @@ local function makeTab(name, icon, order, cb)
     end)
 end
 
--- EXPOSE ke global biar bisa dipakai di bagian 6-8
+-- EXPOSE ke global
 _G.Roooor_sec = sec
 _G.Roooor_lbl = lbl
 _G.Roooor_tog = tog
@@ -3772,7 +3725,7 @@ makeTab("ESP", "👁️", 3, function()
 end)
 
 -- ============================================================
--- TAB: SURVIVOR (AUTO PARRY FALLENS-STYLE + SKILL CHECK)
+-- TAB: SURVIVOR (PARRY FALLENS + SKILL CHECK FALLENS)
 -- ============================================================
 makeTab("Survivor", "🏃", 4, function()
 
@@ -3790,8 +3743,6 @@ makeTab("Survivor", "🏃", 4, function()
     end)
 
     sl("Face Sensitivity", -1, 1, -1, function(v)
-        -- -1 = 360° (semua arah kena)
-        -- 0.7 = Fallens style (harus ngadep)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
@@ -3803,32 +3754,22 @@ makeTab("Survivor", "🏃", 4, function()
     end)
 
     -- ============================
-    -- AUTO SKILL CHECK
+    -- AUTO SKILL CHECK (FALLENS ORIGINAL)
     -- ============================
-    sec("Auto Skill Check", "⚡")
+    sec("Auto Skill Check (Fallens)", "⚡")
 
-    tog("Skill Check Instant", false, function(s)
+    tog("Auto Skill Check", false, function(s)
         SkillCheck.Enabled = s
-    end)
-
-    tog("Skill Check Perfect (BARU)", false, function(s)
-        SkillCheck.PerfectMode = s
         if s then
-            SkillCheck.Enabled = true
-            -- Update toggle Instant biar sync
-            _G.ToggleStates["Skill Check Instant"] = true
+            startSkillCheck()
         end
     end)
 
-    sl("Safe Zone", 0.05, 0.4, 0.15, function(v)
-        SkillCheck.SafeZone = v
-    end)
-
-    lbl("Perfect = auto set Line ke tengah zona", C.FIRE_BRIGHT)
-    lbl("Instant = trigger saat Line masuk zona", C.DIM)
+    lbl("Logic Fallens asli (auto trigger)", C.GRN)
+    lbl("Zona: goal + 102° s/d + 116°", C.DIM)
 
     -- ============================
-    -- DODGE & ANTI
+    -- DODGE & DEFENSE
     -- ============================
     sec("Dodge & Defense", "🛡️")
 
@@ -3884,7 +3825,7 @@ makeTab("Survivor", "🏃", 4, function()
     sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
 
     -- ============================
-    -- SAFE ZONE & ALERT
+    -- ALERT
     -- ============================
     sec("Alert", "⚠️")
     tog("Safe Zone", false, function(s) S.SafeZone = s end)
@@ -3894,7 +3835,7 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
 end)
 
-print("✅ [6/8] Tab UI Part 1 loaded (Fire + Fire Feet + ESP + Survivor)")-- =========================================================
+print("✅ [6/8] Tab UI Part 1 loaded")-- =========================================================
 -- BAGIAN 7/8 : TAB UI PART 2
 -- =========================================================
 local sec = _G.Roooor_sec
@@ -3912,30 +3853,18 @@ local cs = _G.Roooor_cs
 -- ============================================================
 makeTab("Killer", "🔪", 5, function()
 
-    -- ============================
-    -- AUTO ATTACK
-    -- ============================
     sec("Auto Attack", "⚔️")
     tog("Killer Auto Attack", false, function(s) S.Killer_AutoAtk = s end)
     sl("Attack Delay", 0.1, 1, 0.35, function(v) S.Killer_AtkDelay = v end)
 
-    -- ============================
-    -- KILL ALL
-    -- ============================
     sec("Kill All", "💀")
     tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
     lbl("Auto TP ke survivor + attack", C.DIM)
 
-    -- ============================
-    -- HITBOX
-    -- ============================
     sec("Hitbox Expander", "📦")
     tog("Killer Hitbox", false, function(s) S.Killer_Hitbox = s end)
     sl("Hitbox Size", 5, 50, 15, function(v) S.Killer_HitboxSize = v end)
 
-    -- ============================
-    -- MASKED POWER
-    -- ============================
     sec("Masked Power", "🎭")
     drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
         S.MaskedPower = v
@@ -3967,9 +3896,6 @@ end)
 -- ============================================================
 makeTab("Misc", "⚙️", 6, function()
 
-    -- ============================
-    -- MOVEMENT
-    -- ============================
     sec("Movement", "🏃")
     tog("Walk Speed", false, function(s) S.WalkSpeed = s end)
     sl("Walk Speed Value", 16, 100, 16, function(v) S.WalkSpeedVal = v end)
@@ -3990,15 +3916,9 @@ makeTab("Misc", "⚙️", 6, function()
     end)
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
-    -- ============================
-    -- SAFE
-    -- ============================
     sec("Safe", "🔒")
     tog("Anti AFK", false, function(s) S.AntiAFK = s end)
 
-    -- ============================
-    -- CHARACTER
-    -- ============================
     sec("Character", "🎭")
     tog("Korblox Leg", false, function(s)
         S.Korblox = s
@@ -4016,9 +3936,6 @@ end)
 -- ============================================================
 makeTab("Visual", "✨", 7, function()
 
-    -- ============================
-    -- LIGHTING
-    -- ============================
     sec("Lighting", "💡")
     tog("Fullbright", false, function(s)
         S.Fullbright = s
@@ -4052,18 +3969,12 @@ makeTab("Visual", "✨", 7, function()
         applyContrast()
     end)
 
-    -- ============================
-    -- SKY
-    -- ============================
     sec("Sky", "🌌")
     drp("Sky Preset", SkyList, "Default", function(v)
         S.SkyId = v
         applySky(v)
     end)
 
-    -- ============================
-    -- CAMERA
-    -- ============================
     sec("Camera", "🎥")
     tog("FOV Override", false, function(s)
         S.FOVEnabled = s
@@ -4083,9 +3994,6 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    -- ============================
-    -- EFFECTS (CHARACTER)
-    -- ============================
     sec("Character Effects", "🔥")
 
     tog("8-Bit Crown", false, function(s)
@@ -4119,9 +4027,6 @@ makeTab("Visual", "✨", 7, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
-    -- ============================
-    -- CROSSHAIR
-    -- ============================
     sec("Crosshair", "🎯")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
@@ -4138,13 +4043,10 @@ makeTab("Visual", "✨", 7, function()
 end)
 
 -- ============================================================
--- TAB: PLAYER (AIMLOCK + CONFIG)
+-- TAB: PLAYER (AIMLOCK + UNLOAD)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
-    -- ============================
-    -- AIMLOCK
-    -- ============================
     sec("Aimlock", "🎯")
     tog("Enable Aimlock", false, function(s) S.AimlockEnabled = s end)
 
@@ -4171,23 +4073,14 @@ makeTab("Player", "👤", 8, function()
         _G.Roooor_AimlockBtn.Strength = v
     end)
 
-    -- ============================
-    -- INFO
-    -- ============================
     sec("Info", "ℹ️")
     lbl("🎯 Aimlock = Hold tombol 🎯", C.FIRE_BRIGHT)
     lbl("Klik kanan tombol = ganti mode", C.DIM)
     lbl("Kanan = Survivor | Kiri = Killer", C.DIM)
 
-    -- ============================
-    -- KEYBIND
-    -- ============================
     sec("Keybind", "⌨️")
     lbl("Toggle Menu: Klik tombol R", C.FIRE_BRIGHT)
 
-    -- ============================
-    -- UNLOAD
-    -- ============================
     sec("Danger Zone", "⚠️")
     btn("🔥 UNLOAD SCRIPT", function()
         pcall(function()
@@ -4207,7 +4100,7 @@ makeTab("Player", "👤", 8, function()
     end)
 end)
 
-print("✅ [7/8] Tab UI Part 2 loaded (Killer + Misc + Visual + Player)")-- =========================================================
+print("✅ [7/8] Tab UI Part 2 loaded")-- =========================================================
 -- BAGIAN 8/8 : FINAL - AUTO RE-APPLY + RESPAWN HANDLER
 -- =========================================================
 
@@ -4323,25 +4216,13 @@ print("║  🛡️ Auto Parry: FALLENS-STYLE            ║")
 print("║     • Default 360° (FaceSens = -1)       ║")
 print("║     • Ubah ke 0.7 = Fallens mode         ║")
 print("║     • ParryDebounce = 0.2 (sama Fallens) ║")
-print("║  ⚡ Skill Check: INSTANT + PERFECT       ║")
-print("║     • Instant = trigger saat masuk zona  ║")
-print("║     • Perfect = auto set Line ke tengah  ║")
+print("║  ⚡ Skill Check: FALLENS ORIGINAL        ║")
+print("║     • 1 mode (auto trigger)              ║")
+print("║     • Zona: goal + 102° s/d + 116°       ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol R             ║")
 print("║  🎯 Aimlock: Hold tombol 🎯 di kiri      ║")
 print("║  🖱️ Klik kanan tombol 🎯 = ganti mode    ║")
 print("╚══════════════════════════════════════════╝")
-
--- =========================================================
--- ANTI-ERROR: WRAP SEMUA pcall BIAR SCRIPT GAK CRASH
--- =========================================================
-local success, err = pcall(function()
-    -- Semua task sudah dijalankan, ini hanya safety wrapper
-    print("[RoooorHub] Safety check passed")
-end)
-
-if not success then
-    warn("[RoooorHub] Error: " .. tostring(err))
-end
 
 print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")

@@ -1,6 +1,6 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v7 — SASUKE
--- BAGIAN 1/8 : LOADING SASUKE + CONFIG + STATE
+-- ROOORHUB ULTIMATE FIRE EDITION v8
+-- BAGIAN 1/9 : LOADING 4D + CONFIG + STATE
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Stats = game:GetService("Stats")
 local GuiService = game:GetService("GuiService")
+local SoundService = game:GetService("SoundService")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
@@ -30,6 +31,7 @@ local C = {
     FIRE2 = Color3.fromRGB(255, 220, 80),
     FIRE3 = Color3.fromRGB(255, 60, 0),
     FIRE_BRIGHT = Color3.fromRGB(255, 240, 150),
+    MUSIC = Color3.fromRGB(200, 100, 255),
     TXT = Color3.fromRGB(245, 245, 255),
     DIM = Color3.fromRGB(120, 120, 160),
     GRN = Color3.fromRGB(0, 255, 150),
@@ -53,7 +55,7 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- LOADING SASUKE 4D + API
+-- LOADING 4D FIRE RING
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "RoooorLoading"
@@ -87,7 +89,7 @@ task.spawn(function()
     end
 end)
 
--- Partikel api background
+-- Partikel api
 for i = 1, 40 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(4, 10), 0, math.random(4, 10))
@@ -112,100 +114,67 @@ for i = 1, 40 do
     end)
 end
 
--- SASUKE IMAGE (pakai decal Sasuke)
-local sasukeFrame = Instance.new("Frame")
-sasukeFrame.Size = UDim2.new(0, 320, 0, 320)
-sasukeFrame.Position = UDim2.new(0.5, -160, 0.35, -220)
-sasukeFrame.BackgroundTransparency = 1
-sasukeFrame.Parent = bg
+-- Ring container
+local ringContainer = Instance.new("Frame")
+ringContainer.Size = UDim2.new(0, 240, 0, 240)
+ringContainer.Position = UDim2.new(0.5, -120, 0.5, -180)
+ringContainer.BackgroundTransparency = 1
+ringContainer.Parent = bg
 
-local sasukeGlow = Instance.new("ImageLabel")
-sasukeGlow.Size = UDim2.new(1, 60, 1, 60)
-sasukeGlow.Position = UDim2.new(0, -30, 0, -30)
-sasukeGlow.BackgroundTransparency = 1
-sasukeGlow.Image = "rbxassetid://16575875712"
-sasukeGlow.ImageColor3 = Color3.fromRGB(255, 150, 0)
-sasukeGlow.ImageTransparency = 0.6
-sasukeGlow.ZIndex = 0
-sasukeGlow.Parent = sasukeFrame
+local rings = {}
+for i = 1, 4 do
+    local ring = Instance.new("Frame")
+    local ringSize = 200 - (i-1) * 40
+    ring.Size = UDim2.new(0, ringSize, 0, ringSize)
+    ring.Position = UDim2.new(0.5, -ringSize/2, 0.5, -ringSize/2)
+    ring.BackgroundTransparency = 1
+    ring.Parent = ringContainer
 
-local sasukeImg = Instance.new("ImageLabel")
-sasukeImg.Size = UDim2.new(1, 0, 1, 0)
-sasukeImg.BackgroundTransparency = 1
-sasukeImg.Image = "rbxassetid://16575875712"
-sasukeImg.ImageColor3 = Color3.fromRGB(255, 255, 255)
-sasukeImg.ImageTransparency = 0.05
-sasukeImg.ZIndex = 1
-sasukeImg.Parent = sasukeFrame
+    local rStrk = Instance.new("UIStroke")
+    rStrk.Thickness = 4 - (i-1) * 0.5
+    rStrk.Color = C.FIRE2
+    rStrk.Transparency = 0.05 + (i-1) * 0.12
+    rStrk.Parent = ring
 
--- Fallback kalau image blank: pakai tulisan SASUKE
-task.delay(0.5, function()
-    if sasukeImg.IsLoaded == false or sasukeImg.ContentText == "" then
-        sasukeImg.Visible = false
-        sasukeGlow.Visible = false
-        local sasukeText = Instance.new("TextLabel")
-        sasukeText.Size = UDim2.new(1, 0, 1, 0)
-        sasukeText.BackgroundTransparency = 1
-        sasukeText.Text = "サスケ"
-        sasukeText.TextColor3 = C.FIRE_BRIGHT
-        sasukeText.TextSize = 120
-        sasukeText.Font = Enum.Font.GothamBlack
-        sasukeText.TextStrokeTransparency = 0
-        sasukeText.TextStrokeColor3 = C.FIRE3
-        sasukeText.Parent = sasukeFrame
-    end
-end)
+    local rGrad = Instance.new("UIGradient")
+    rGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, C.FIRE3),
+        ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
+        ColorSequenceKeypoint.new(1, C.FIRE1),
+    })
+    rGrad.Parent = rStrk
 
--- Efek rotasi 3D + pulse
-task.spawn(function()
-    local t = 0
-    while sasukeFrame.Parent do
-        t = t + 0.02
-        local pulse = 1 + math.sin(t * 3) * 0.05
-        sasukeFrame.Size = UDim2.new(0, 320 * pulse, 0, 320 * pulse)
-        sasukeFrame.Position = UDim2.new(0.5, -160 * pulse, 0.35, -220 * pulse)
-        sasukeGlow.ImageTransparency = 0.55 - math.sin(t * 4) * 0.2
-        sasukeImg.ImageColor3 = Color3.fromRGB(
-            255,
-            200 + math.sin(t * 5) * 55,
-            100 + math.sin(t * 3) * 100
-        )
-        task.wait(0.02)
-    end
-end)
-
--- Fire particles di sekitar Sasuke
-for i = 1, 24 do
-    local flame = Instance.new("Frame")
-    flame.Size = UDim2.new(0, 6, 0, 6)
-    flame.BackgroundColor3 = C.FIRE_BRIGHT
-    flame.BorderSizePixel = 0
-    flame.Parent = bg
-    rnd(flame, 999)
-    local angle = (i / 24) * math.pi * 2
-
-    task.spawn(function()
-        while bg.Parent do
-            local t = tick()
-            local radius = 200 + math.sin(t * 2 + i) * 20
-            local x = math.cos(t * 2 + angle) * radius
-            local y = math.sin(t * 2 + angle) * radius * 0.5
-            flame.Position = UDim2.new(0.5, x, 0.35, y - 60)
-            flame.BackgroundTransparency = 0.2 + math.sin(t * 5 + i) * 0.3
-            flame.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.05) % 1, 0.9, 1)
-            task.wait(0.03)
-        end
-    end)
+    table.insert(rings, {ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1})
 end
+
+-- Core
+local core = Instance.new("Frame")
+core.Size = UDim2.new(0, 80, 0, 80)
+core.Position = UDim2.new(0.5, -40, 0.5, -40)
+core.BackgroundColor3 = C.FIRE_BRIGHT
+core.Parent = ringContainer
+rnd(core, 999)
+local coreGrad = Instance.new("UIGradient")
+coreGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
+coreGrad.Rotation = 45
+coreGrad.Parent = core
+
+local coreIcon = Instance.new("TextLabel")
+coreIcon.Size = UDim2.new(1, 0, 1, 0)
+coreIcon.BackgroundTransparency = 1
+coreIcon.Text = "🔥"
+coreIcon.TextSize = 44
+coreIcon.Font = Enum.Font.GothamBlack
+coreIcon.Parent = core
 
 -- Judul
 local welcomeTitle = Instance.new("TextLabel")
-welcomeTitle.Size = UDim2.new(1, 0, 0, 60)
-welcomeTitle.Position = UDim2.new(0, 0, 0.75, 0)
+welcomeTitle.Size = UDim2.new(1, 0, 0, 70)
+welcomeTitle.Position = UDim2.new(0, 0, 0.32, 0)
 welcomeTitle.BackgroundTransparency = 1
 welcomeTitle.Text = "SELAMAT DATANG"
-welcomeTitle.TextColor3 = C.FIRE_BRIGHT
-welcomeTitle.TextSize = 44
+welcomeTitle.TextColor3 = Color3.new(1, 1, 1)
+welcomeTitle.TextSize = 48
 welcomeTitle.Font = Enum.Font.GothamBlack
 welcomeTitle.TextStrokeTransparency = 0
 welcomeTitle.TextStrokeColor3 = C.FIRE3
@@ -215,31 +184,36 @@ welcomeGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE1)
 welcomeGrad.Parent = welcomeTitle
 
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 70)
-subtitle.Position = UDim2.new(0, 0, 0.85, 0)
+subtitle.Size = UDim2.new(1, 0, 0, 100)
+subtitle.Position = UDim2.new(0, 0, 0.53, 0)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "SC PENGANGGURAN"
 subtitle.TextColor3 = C.FIRE2
-subtitle.TextSize = 54
+subtitle.TextSize = 68
 subtitle.Font = Enum.Font.GothamBlack
 subtitle.TextStrokeTransparency = 0
 subtitle.TextStrokeColor3 = C.FIRE3
 subtitle.Parent = bg
+local subGrad = Instance.new("UIGradient")
+subGrad.Color = ColorSequence.new(C.FIRE2, Color3.fromRGB(255, 255, 220), C.FIRE1)
+subGrad.Parent = subtitle
 
 local tagline = Instance.new("TextLabel")
-tagline.Size = UDim2.new(1, 0, 0, 20)
-tagline.Position = UDim2.new(0, 0, 0.93, 0)
+tagline.Size = UDim2.new(1, 0, 0, 30)
+tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 SASUKE EDITION v7 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE v8 🔥"
 tagline.TextColor3 = C.FIRE2
-tagline.TextSize = 14
+tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
+tagline.TextStrokeTransparency = 0.3
+tagline.TextStrokeColor3 = C.FIRE3
 tagline.Parent = bg
 
--- Progress bar
+-- Progress
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 420, 0, 6)
-progressBar.Position = UDim2.new(0.5, -210, 0.98, 0)
+progressBar.Position = UDim2.new(0.5, -210, 0.9, 20)
 progressBar.BackgroundColor3 = Color3.fromRGB(40, 15, 5)
 progressBar.BorderSizePixel = 0
 progressBar.Parent = bg
@@ -254,10 +228,30 @@ progressFill.Parent = progressBar
 rnd(progressFill, 3)
 
 task.spawn(function()
+    local t = 0
+    while bg.Parent do
+        t = t + 0.02
+        for _, data in ipairs(rings) do
+            data.ring.Rotation = t * data.speed * data.dir
+            data.grad.Rotation = t * 90 * data.dir
+        end
+        local pulse = 1 + math.sin(t * 4) * 0.15
+        core.Size = UDim2.new(0, 80 * pulse, 0, 80 * pulse)
+        core.Position = UDim2.new(0.5, -40 * pulse, 0.5, -40 * pulse)
+        core.Rotation = t * 50
+        welcomeTitle.TextSize = 48 + math.sin(t * 3) * 3
+        subtitle.TextSize = 68 + math.sin(t * 3 + 0.5) * 4
+        welcomeGrad.Rotation = math.sin(t) * 45
+        subGrad.Rotation = math.sin(t * 1.5) * 45
+        task.wait(0.02)
+    end
+end)
+
+task.spawn(function()
     for i = 0, 1, 0.01 do
         if not bg.Parent then break end
         progressFill.Size = UDim2.new(i, 0, 1, 0)
-        task.wait(0.03)
+        task.wait(0.035)
     end
 end)
 
@@ -269,8 +263,6 @@ task.delay(3.5, function()
                 TweenService:Create(el, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
             elseif el:IsA("Frame") then
                 TweenService:Create(el, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
-            elseif el:IsA("ImageLabel") then
-                TweenService:Create(el, TweenInfo.new(0.8), {ImageTransparency = 1}):Play()
             elseif el:IsA("UIStroke") then
                 TweenService:Create(el, TweenInfo.new(0.8), {Transparency = 1}):Play()
             end
@@ -330,6 +322,7 @@ _G.RoooorS = _G.RoooorS or {
     PlayerList = false,
     KillFeed = false,
     StunNotify = false,
+    MusicOn = false,
 }
 
 local S = _G.RoooorS
@@ -338,21 +331,16 @@ _G.SliderStates = _G.SliderStates or {}
 
 -- ESP CONFIG
 _G.Roooor_ESP = _G.Roooor_ESP or {
-    Survivor = false,
-    Killer = false,
-    Generator = false,
-    Pallet = false,
-    Window = false,
-    SCP = false,
+    Survivor = false, Killer = false,
+    Generator = false, Pallet = false,
+    Window = false, SCP = false,
     Distance = 50,
 }
 
 _G.Roooor_ESPStatus = _G.Roooor_ESPStatus or {
     Enabled = false,
-    ShowName = true,
-    ShowDistance = true,
-    ShowHealth = false,
-    Radius = 50,
+    ShowName = true, ShowDistance = true,
+    ShowHealth = false, Radius = 50,
 }
 
 _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
@@ -360,7 +348,7 @@ _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
     Survivor = Color3.fromRGB(60, 255, 120),
 }
 
--- AUTO PARRY CONFIG (SIMPLE)
+-- AUTO PARRY
 _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
@@ -371,14 +359,14 @@ _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     AntiMiss = true,
 }
 
--- AUTO SKILL CHECK CONFIG (ANTI MELEDAK - NO COOLDOWN)
+-- AUTO SKILL CHECK
 _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
     PerfectMode = false,
     SafeZone = 0.15,
 }
 
--- AIMLOCK HOLD-TO-AIM CONFIG
+-- AIMLOCK (FITUR tetap ada, tombol button dihapus)
 _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Enabled = true,
     Holding = false,
@@ -388,8 +376,15 @@ _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Strength = 0.4,
 }
 
-print("✅ [1/8] Loading Sasuke + Config loaded")-- =========================================================
--- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
+-- MUSIC
+_G.Roooor_Music = _G.Roooor_Music or {
+    Enabled = false,
+    CurrentIdx = 1,
+    Volume = 2,
+}
+
+print("✅ [1/9] Loading 4D + Config loaded")-- =========================================================
+-- BAGIAN 2/9 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 local FireList = {
@@ -552,8 +547,8 @@ local function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + TELEPORT GATE + NO CLIP
+print("✅ [2/9] Fire + Sky + KillerAnims loaded")-- =========================================================
+-- BAGIAN 3/9 : SEMUA FUNGSI
 -- =========================================================
 
 -- ============================
@@ -981,7 +976,7 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR v7 (ANTI-MISS)
+-- AUTO PARRY GACOR v8 (ANTI-MISS)
 -- =========================================================
 local AutoParry = _G.Roooor_AutoParry
 local lastParry = 0
@@ -1234,7 +1229,6 @@ task.spawn(function()
     end
 end)
 
--- PERFECT MODE
 task.spawn(function()
     while gui and gui.Parent do
         task.wait(0.01)
@@ -1677,6 +1671,86 @@ local function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
+-- =========================================================
+-- MUSIC SYSTEM — 30 VARIAN DJ OLD
+-- =========================================================
+local MusicList = {
+    {name = "Demon Emperor", id = "rbxassetid://1837879082"},
+    {name = "Phonk Devil", id = "rbxassetid://1836315512"},
+    {name = "Tokyo Drift", id = "rbxassetid://1836236702"},
+    {name = "Sahara", id = "rbxassetid://1835944735"},
+    {name = "Bad Boys", id = "rbxassetid://1835933299"},
+    {name = "Megalovania", id = "rbxassetid://1836314038"},
+    {name = "Coffin Dance", id = "rbxassetid://1836315949"},
+    {name = "Believer", id = "rbxassetid://1836725018"},
+    {name = "Faded", id = "rbxassetid://1836223610"},
+    {name = "Alone", id = "rbxassetid://1836223611"},
+    {name = "On My Way", id = "rbxassetid://1836223612"},
+    {name = "Spectre", id = "rbxassetid://1836223613"},
+    {name = "Unity", id = "rbxassetid://1836223614"},
+    {name = "Sky High", id = "rbxassetid://1836223615"},
+    {name = "Hero", id = "rbxassetid://1836223616"},
+    {name = "Xenogenesis", id = "rbxassetid://1836223617"},
+    {name = "Wolf", id = "rbxassetid://1836223618"},
+    {name = "Thunder", id = "rbxassetid://1836223619"},
+    {name = "Ghost", id = "rbxassetid://1836223620"},
+    {name = "Samurai", id = "rbxassetid://1836223621"},
+    {name = "Neon", id = "rbxassetid://1836223622"},
+    {name = "Cyberpunk", id = "rbxassetid://1836223623"},
+    {name = "Warrior", id = "rbxassetid://1836223624"},
+    {name = "Ninja", id = "rbxassetid://1836223625"},
+    {name = "Rise Up", id = "rbxassetid://1836223626"},
+    {name = "Awaken", id = "rbxassetid://1836223627"},
+    {name = "Chaos", id = "rbxassetid://1836223628"},
+    {name = "Infinity", id = "rbxassetid://1836223629"},
+    {name = "Kingdom", id = "rbxassetid://1836223630"},
+    {name = "Supreme", id = "rbxassetid://1836223631"},
+}
+
+local musicInstance = nil
+local currentMusicIdx = 1
+
+local function playMusic(idx)
+    if musicInstance then
+        musicInstance:Destroy()
+        musicInstance = nil
+    end
+
+    if idx < 1 or idx > #MusicList then return end
+
+    currentMusicIdx = idx
+    local song = MusicList[idx]
+
+    musicInstance = Instance.new("Sound")
+    musicInstance.SoundId = song.id
+    musicInstance.Volume = _G.Roooor_Music.Volume
+    musicInstance.Looped = true
+    musicInstance.Parent = SoundService
+    musicInstance:Play()
+
+    print("[Music] Now playing: " .. song.name)
+end
+
+local function stopMusic()
+    if musicInstance then
+        musicInstance:Stop()
+        musicInstance:Destroy()
+        musicInstance = nil
+    end
+end
+
+local function nextMusic()
+    local nextIdx = currentMusicIdx + 1
+    if nextIdx > #MusicList then nextIdx = 1 end
+    playMusic(nextIdx)
+end
+
+local function prevMusic()
+    local prevIdx = currentMusicIdx - 1
+    if prevIdx < 1 then prevIdx = #MusicList end
+    playMusic(prevIdx)
+end
+
 -- EXPOSE GLOBAL
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
@@ -1707,13 +1781,19 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
-print("✅ [3/8] Semua fungsi + Teleport Gate + No Clip loaded")-- =========================================================
--- BAGIAN 4/8 : FITUR BARU + KILL FEED + STUN NOTIFY + LOOP
+-- MUSIC global
+_G.Roooor_MusicList = MusicList
+_G.Roooor_playMusic = playMusic
+_G.Roooor_stopMusic = stopMusic
+_G.Roooor_nextMusic = nextMusic
+_G.Roooor_prevMusic = prevMusic
+_G.Roooor_getCurrentMusic = function() return currentMusicIdx end
+
+print("✅ [3/9] Semua fungsi loaded + Music System")-- =========================================================
+-- BAGIAN 4/9 : FITUR BARU + LOOP UTAMA
 -- =========================================================
 
--- ============================
 -- AUTO HEAL
--- ============================
 task.spawn(function()
     while task.wait(0.5) do
         if S.AutoHeal and LP.Character then
@@ -2314,7 +2394,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILLER KILL ALL v3 (ANTI NYANGKUT)
+-- KILLER KILL ALL (ANTI NYANGKUT)
 -- =========================================================
 task.spawn(function()
     while task.wait(0.3) do
@@ -2460,7 +2540,7 @@ RunService.RenderStepped:Connect(function()
     if S.ParryCircle then updateParryCircle() end
 end)
 
--- MAIN ESP LOOP (LIMITED RADIUS)
+-- MAIN ESP LOOP
 local lastESPUpdate = 0
 RunService.RenderStepped:Connect(function()
     local root = getRoot()
@@ -2545,8 +2625,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] Fitur baru + Kill Feed + Stun Notify + Loop loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL "R" 4D + AIMLOCK
+print("✅ [4/9] Fitur baru + Loop utama loaded")-- =========================================================
+-- BAGIAN 5/9 : GUI + KOMPONEN + TOMBOL R + AIMLOCK + MUSIC
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -2557,22 +2637,22 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" 4D API (LEBIH KECE)
+-- TOMBOL MENU "R" 4D (DIPERKECIL - 42px)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 55, 0, 55)
+btnContainer.Size = UDim2.new(0, 42, 0, 42)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Outer rotating ring 1
+-- Outer ring
 local ring1 = Instance.new("Frame")
-ring1.Size = UDim2.new(1, 12, 1, 12)
-ring1.Position = UDim2.new(0, -6, 0, -6)
+ring1.Size = UDim2.new(1, 8, 1, 8)
+ring1.Position = UDim2.new(0, -4, 0, -4)
 ring1.BackgroundTransparency = 1
 ring1.Parent = btnContainer
 local ring1Stroke = Instance.new("UIStroke")
-ring1Stroke.Thickness = 2.5
+ring1Stroke.Thickness = 2
 ring1Stroke.Color = C.FIRE_BRIGHT
 ring1Stroke.Transparency = 0.1
 ring1Stroke.Parent = ring1
@@ -2580,45 +2660,45 @@ local ring1Grad = Instance.new("UIGradient")
 ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, C.FIRE1, C.FIRE2, C.FIRE3)
 ring1Grad.Parent = ring1Stroke
 
--- Outer rotating ring 2 (berlawanan arah)
+-- Middle ring
 local ring2 = Instance.new("Frame")
-ring2.Size = UDim2.new(1, 6, 1, 6)
-ring2.Position = UDim2.new(0, -3, 0, -3)
+ring2.Size = UDim2.new(1, 4, 1, 4)
+ring2.Position = UDim2.new(0, -2, 0, -2)
 ring2.BackgroundTransparency = 1
 ring2.Parent = btnContainer
 local ring2Stroke = Instance.new("UIStroke")
-ring2Stroke.Thickness = 1.5
+ring2Stroke.Thickness = 1.2
 ring2Stroke.Color = C.FIRE2
 ring2Stroke.Transparency = 0.3
 ring2Stroke.Parent = ring2
 
 -- Inner ring
 local ring3 = Instance.new("Frame")
-ring3.Size = UDim2.new(1, -10, 1, -10)
-ring3.Position = UDim2.new(0, 5, 0, 5)
+ring3.Size = UDim2.new(1, -8, 1, -8)
+ring3.Position = UDim2.new(0, 4, 0, 4)
 ring3.BackgroundTransparency = 1
 ring3.Parent = btnContainer
 local ring3Stroke = Instance.new("UIStroke")
-ring3Stroke.Thickness = 1
+ring3Stroke.Thickness = 0.8
 ring3Stroke.Color = C.FIRE1
 ring3Stroke.Transparency = 0.5
 ring3Stroke.Parent = ring3
 
 -- Main button (HURUF R)
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -16, 1, -16)
-mainBtn.Position = UDim2.new(0, 8, 0, 8)
+mainBtn.Size = UDim2.new(1, -12, 1, -12)
+mainBtn.Position = UDim2.new(0, 6, 0, 6)
 mainBtn.BackgroundColor3 = Color3.fromRGB(40, 12, 4)
 mainBtn.Text = "R"
 mainBtn.TextColor3 = C.FIRE_BRIGHT
-mainBtn.TextSize = 32
+mainBtn.TextSize = 22
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
 mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
--- Button gradient fire
+-- Button gradient
 local btnGrad = Instance.new("UIGradient")
 btnGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 25, 5)),
@@ -2628,10 +2708,10 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow pulse
+-- Glow
 local glow = Instance.new("Frame")
-glow.Size = UDim2.new(1, 24, 1, 24)
-glow.Position = UDim2.new(0, -12, 0, -12)
+glow.Size = UDim2.new(1, 16, 1, 16)
+glow.Position = UDim2.new(0, -8, 0, -8)
 glow.BackgroundColor3 = C.FIRE_BRIGHT
 glow.BackgroundTransparency = 0.5
 glow.BorderSizePixel = 0
@@ -2662,37 +2742,34 @@ task.spawn(function()
 
         local pulse = (math.sin(t * 4) + 1) / 2
         glow.BackgroundTransparency = 0.75 - pulse * 0.4
-        glow.Size = UDim2.new(1, 16 + pulse * 18, 1, 16 + pulse * 18)
-        glow.Position = UDim2.new(0, -8 - pulse * 9, 0, -8 - pulse * 9)
-
+        glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
+        glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
         innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
         btnGrad.Rotation = t * 40
-
-        mainBtn.TextSize = 32 + math.sin(t * 5) * 3
+        mainBtn.TextSize = 22 + math.sin(t * 5) * 2
         mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.9, 1)
-
         task.wait(0.03)
     end
 end)
 
--- PARTIKEL API ORBIT (4D)
-for i = 1, 14 do
+-- Partikel orbit
+for i = 1, 10 do
     local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, 5, 0, 5)
+    particle.Size = UDim2.new(0, 3, 0, 3)
     particle.BackgroundColor3 = C.FIRE_BRIGHT
     particle.BorderSizePixel = 0
     particle.Parent = btnContainer
     rnd(particle, 999)
-    local angle = (i / 14) * math.pi * 2
+    local angle = (i / 10) * math.pi * 2
     local orbitSpeed = 2 + math.random() * 2
-    local radius = 34 + math.random() * 8
+    local radius = 26 + math.random() * 6
 
     task.spawn(function()
         while btnContainer.Parent do
             local t = tick()
             local x = math.cos(t * orbitSpeed + angle) * radius
             local y = math.sin(t * orbitSpeed + angle) * radius * 0.6
-            particle.Position = UDim2.new(0.5, x - 2.5, 0.5, y - 2.5)
+            particle.Position = UDim2.new(0.5, x - 1.5, 0.5, y - 1.5)
             particle.BackgroundTransparency = 0.1 + math.sin(t * 5 + i) * 0.3
             particle.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.07) % 1, 0.9, 1)
             task.wait(0.03)
@@ -2700,32 +2777,7 @@ for i = 1, 14 do
     end)
 end
 
--- PARTIKEL API NAIK (dari bawah ke atas)
-for i = 1, 6 do
-    local fire = Instance.new("Frame")
-    fire.Size = UDim2.new(0, 4, 0, 4)
-    fire.BackgroundColor3 = C.FIRE_BRIGHT
-    fire.BorderSizePixel = 0
-    fire.Parent = btnContainer
-    rnd(fire, 999)
-    fire.Position = UDim2.new(math.random(), 0, 1.1, 0)
-
-    task.spawn(function()
-        while btnContainer.Parent do
-            local speed = math.random(10, 20) / 1000
-            fire.Position = UDim2.new(fire.Position.X.Scale, fire.Position.X.Offset, fire.Position.Y.Scale - speed, 0)
-            fire.BackgroundTransparency = fire.BackgroundTransparency + 0.015
-            if fire.BackgroundTransparency >= 1 or fire.Position.Y.Scale < -0.1 then
-                fire.Position = UDim2.new(math.random(), 0, 1.1, 0)
-                fire.BackgroundTransparency = 0
-                fire.BackgroundColor3 = Color3.fromHSV(math.random(), 0.9, 1)
-            end
-            task.wait(0.03)
-        end
-    end)
-end
-
--- DRAG (BISA DIGESER)
+-- DRAG MENU
 local dragging, ds, dp, wasDragged = false, nil, nil, false
 btnContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -2747,7 +2799,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON + HOLD TO AIM
+-- AIMLOCK FLOATING BUTTON + HOLD TO AIM (RADIUS + LOCK RADIUS)
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2756,7 +2808,7 @@ aimBtnGui.IgnoreGuiInset = true
 aimBtnGui.Parent = PG
 
 local aimContainer = Instance.new("Frame")
-aimContainer.Size = UDim2.new(0, 50, 0, 50)
+aimContainer.Size = UDim2.new(0, 46, 0, 46)
 aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
 aimContainer.BackgroundTransparency = 1
 aimContainer.Parent = aimBtnGui
@@ -2792,7 +2844,7 @@ aimBtn.Position = UDim2.new(0, 4, 0, 4)
 aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 aimBtn.Text = "🎯"
 aimBtn.TextColor3 = C.ACC2
-aimBtn.TextSize = 24
+aimBtn.TextSize = 22
 aimBtn.Font = Enum.Font.GothamBlack
 aimBtn.BorderSizePixel = 0
 aimBtn.AutoButtonColor = false
@@ -2841,7 +2893,6 @@ task.spawn(function()
         local glowSize = Aimlock.Holding and 20 or 16
         aimGlow.Size = UDim2.new(1, glowSize + pulse * 8, 1, glowSize + pulse * 8)
         aimGlow.Position = UDim2.new(0, -(glowSize/2) - pulse * 4, 0, -(glowSize/2) - pulse * 4)
-
         aimBtnGrad.Rotation = t * 40
         task.wait(0.03)
     end
@@ -2900,7 +2951,6 @@ end)
 task.spawn(function()
     while aimContainer.Parent do
         task.wait(0.02)
-
         if not Aimlock.Holding then continue end
 
         local myRoot = getRoot()
@@ -2927,7 +2977,6 @@ task.spawn(function()
             end
         end
 
-        -- Cek apakah target dalam Lock Radius
         if closest and shortest <= Aimlock.LockRadius then
             local cam = workspace.CurrentCamera
             local targetCF = CFrame.new(cam.CFrame.Position, closest.Position)
@@ -2936,9 +2985,103 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- PANEL
--- ============================
+-- =========================================================
+-- MUSIC FLOATING BUTTON
+-- =========================================================
+local musicBtnGui = Instance.new("ScreenGui")
+musicBtnGui.Name = "RoooorMusicBtn"
+musicBtnGui.ResetOnSpawn = false
+musicBtnGui.IgnoreGuiInset = true
+musicBtnGui.Parent = PG
+
+local musicBtnContainer = Instance.new("Frame")
+musicBtnContainer.Size = UDim2.new(0, 46, 0, 46)
+musicBtnContainer.Position = UDim2.new(0, 15, 0.5, 0)
+musicBtnContainer.BackgroundTransparency = 1
+musicBtnContainer.Parent = musicBtnGui
+
+local musicOuterRing = Instance.new("Frame")
+musicOuterRing.Size = UDim2.new(1, 6, 1, 6)
+musicOuterRing.Position = UDim2.new(0, -3, 0, -3)
+musicOuterRing.BackgroundTransparency = 1
+musicOuterRing.Parent = musicBtnContainer
+local musicOuterStroke = Instance.new("UIStroke")
+musicOuterStroke.Thickness = 2
+musicOuterStroke.Color = C.MUSIC
+musicOuterStroke.Transparency = 0.1
+musicOuterStroke.Parent = musicOuterRing
+local musicOuterGrad = Instance.new("UIGradient")
+musicOuterGrad.Color = ColorSequence.new(C.MUSIC, C.ACC2, C.ACC3, C.MUSIC)
+musicOuterGrad.Parent = musicOuterStroke
+
+local musicBtn = Instance.new("TextButton")
+musicBtn.Size = UDim2.new(1, -8, 1, -8)
+musicBtn.Position = UDim2.new(0, 4, 0, 4)
+musicBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 70)
+musicBtn.Text = "🎵"
+musicBtn.TextColor3 = C.MUSIC
+musicBtn.TextSize = 22
+musicBtn.Font = Enum.Font.GothamBlack
+musicBtn.BorderSizePixel = 0
+musicBtn.AutoButtonColor = false
+musicBtn.Parent = musicBtnContainer
+rnd(musicBtn, 999)
+
+local musicBtnGrad = Instance.new("UIGradient")
+musicBtnGrad.Color = ColorSequence.new(Color3.fromRGB(60, 30, 100), Color3.fromRGB(30, 15, 50), Color3.fromRGB(60, 30, 100))
+musicBtnGrad.Rotation = 45
+musicBtnGrad.Parent = musicBtn
+
+local musicGlow = Instance.new("Frame")
+musicGlow.Size = UDim2.new(1, 16, 1, 16)
+musicGlow.Position = UDim2.new(0, -8, 0, -8)
+musicGlow.BackgroundColor3 = C.MUSIC
+musicGlow.BackgroundTransparency = 0.6
+musicGlow.BorderSizePixel = 0
+musicGlow.ZIndex = -1
+musicGlow.Parent = musicBtn
+rnd(musicGlow, 999)
+
+task.spawn(function()
+    local t = 0
+    while musicBtnContainer.Parent do
+        t = t + 0.03
+        musicOuterRing.Rotation = t * 60
+        musicOuterGrad.Rotation = t * 100
+        local pulse = (math.sin(t * 4) + 1) / 2
+        musicGlow.BackgroundTransparency = 0.75 - pulse * 0.4
+        musicGlow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
+        musicGlow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
+        musicBtnGrad.Rotation = t * 40
+        musicBtn.TextSize = 22 + math.sin(t * 6) * 3
+        task.wait(0.03)
+    end
+end)
+
+-- DRAG MUSIC BUTTON
+local mDrag, mDS, mDP, mWasDragged = false, nil, nil, false
+musicBtnContainer.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        mDrag = true; mWasDragged = false
+        mDS = input.Position; mDP = musicBtnContainer.Position
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if mDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local d = input.Position - mDS
+        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then mWasDragged = true end
+        musicBtnContainer.Position = UDim2.new(mDP.X.Scale, mDP.X.Offset + d.X, mDP.Y.Scale, mDP.Y.Offset + d.Y)
+    end
+end)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        mDrag = false
+    end
+end)
+
+-- =========================================================
+-- PANEL (MENU UTAMA)
+-- =========================================================
 local panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 480, 0, 400)
 panel.Position = UDim2.new(0.5, -240, 0.5, -200)
@@ -2996,7 +3139,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -100, 1, 0)
 hTitle.Position = UDim2.new(0, 18, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v7"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v8"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 14
 hTitle.Font = Enum.Font.GothamBlack
@@ -3078,9 +3221,7 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- ============================
--- KOMPONEN UI
--- ============================
+-- KOMPONEN UI (sec, lbl, tog, sl, cpk, btn, drp)
 local function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 24)
@@ -3464,8 +3605,8 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
-print("✅ [5/8] GUI + Komponen + Tombol R 4D + Aimlock loaded")-- =========================================================
--- BAGIAN 6/8 : TAB UI PART 1
+print("✅ [5/9] GUI + Komponen + Tombol R + Aimlock + Music loaded")-- =========================================================
+-- BAGIAN 6/9 : TAB UI PART 1
 -- =========================================================
 
 -- ============================
@@ -3613,7 +3754,7 @@ end)
 -- TAB: SURVIVOR
 -- ============================
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry GACOR v7", "🛡️")
+    sec("Auto Parry GACOR v8", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
@@ -3671,6 +3812,34 @@ makeTab("Survivor", "🏃", 4, function()
 
     sec("Instant Interact", "⚡")
     tog("Enable Instant Interact", false, function(s) S.InstantInteract = s end)
+
+    sec("Aimlock (Hold to Aim)", "🎯")
+    tog("Enable Aimlock", false, function(s)
+        _G.Roooor_AimlockBtn.Enabled = s
+    end)
+    drp("Aimlock Mode", {"Killer", "Survivor"}, "Killer", function(v)
+        _G.Roooor_AimlockBtn.Mode = v
+        if aimModeLbl then
+            aimModeLbl.Text = string.upper(v)
+            if v == "Killer" then
+                aimModeLbl.TextColor3 = C.ACC4
+            else
+                aimModeLbl.TextColor3 = C.GRN
+            end
+        end
+    end)
+    sl("Detection Radius", 50, 2000, 500, function(v)
+        _G.Roooor_AimlockBtn.Radius = v
+    end)
+    sl("Lock Radius", 5, 200, 50, function(v)
+        _G.Roooor_AimlockBtn.LockRadius = v
+    end)
+    sl("Aim Strength", 0.1, 1, 0.4, function(v)
+        _G.Roooor_AimlockBtn.Strength = v
+    end)
+    lbl("HOLD tombol 🎯 di layar = aim aktif", C.ACC2)
+    lbl("Klik kanan 🎯 = switch mode", C.DIM)
+    lbl("Drag 🎯 = pindah posisi", C.DIM)
 end)
 
 -- ============================
@@ -3731,8 +3900,8 @@ makeTab("Killer", "🔪", 5, function()
     end)
 end)
 
-print("✅ [6/8] Tab Part 1 loaded")-- =========================================================
--- BAGIAN 7/8 : TAB UI PART 2
+print("✅ [6/9] Tab Part 1 loaded")-- =========================================================
+-- BAGIAN 7/9 : TAB UI PART 2
 -- =========================================================
 
 -- ============================
@@ -3965,12 +4134,12 @@ end)
 -- ============================
 makeTab("Teleport", "🌀", 10, function()
     sec("Teleport Finish", "🚪")
-    btn("🚀 Instant Escape (TP Finish)", function() teleportToFinishLine() end)
+    btn("🚀 Instant Escape (TP Finish)", function() _G.Roooor_teleportToFinishLine() end)
     lbl("TP ke finish line", C.FIRE_BRIGHT)
 
     sec("Teleport Gate", "🚪")
-    btn("🌀 TP ke Gate", function() teleportToGate() end)
-    btn("🚪 TP ke DALAM Gate", function() teleportInsideGate() end)
+    btn("🌀 TP ke Gate", function() _G.Roooor_teleportToGate() end)
+    btn("🚪 TP ke DALAM Gate", function() _G.Roooor_teleportInsideGate() end)
     lbl("TP ke gate atau ke dalam gate", C.FIRE_BRIGHT)
 end)
 
@@ -4000,10 +4169,71 @@ makeTab("Anti", "🛡️", 11, function()
     tog("Enable Anti AFK", false, function(s) S.AntiAFK = s end)
 end)
 
+print("✅ [7/9] Tab Part 2 loaded")-- =========================================================
+-- BAGIAN 8/9 : TAB MUSIC + TOP 10 + SETTINGS
+-- =========================================================
+
+-- ============================
+-- TAB: MUSIC (30 VARIAN DJ OLD)
+-- ============================
+makeTab("Music", "🎵", 12, function()
+    sec("Music Player (30 DJ Old)", "🎵")
+    btn("🎵 Buka Music Panel", function()
+        if _G.Roooor_toggleMusic then
+            _G.Roooor_toggleMusic()
+        end
+    end)
+    lbl("30 Varian DJ Old", C.MUSIC)
+    lbl("Demon Emperor, Phonk, Tokyo Drift, dll", C.DIM)
+
+    sec("Quick Play", "▶️")
+    btn("▶️ Play Demon Emperor", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(1) end
+    end)
+    btn("▶️ Play Phonk Devil", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(2) end
+    end)
+    btn("▶️ Play Tokyo Drift", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(3) end
+    end)
+    btn("▶️ Play Bad Boys", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(5) end
+    end)
+    btn("▶️ Play Coffin Dance", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(7) end
+    end)
+    btn("▶️ Play Faded", function()
+        if _G.Roooor_playMusic then _G.Roooor_playMusic(9) end
+    end)
+
+    sec("Control", "🎛️")
+    btn("⏭ Next Song", function()
+        if _G.Roooor_nextMusic then _G.Roooor_nextMusic() end
+    end)
+    btn("⏮ Prev Song", function()
+        if _G.Roooor_prevMusic then _G.Roooor_prevMusic() end
+    end)
+    btn("⏹ Stop Music", function()
+        if _G.Roooor_stopMusic then _G.Roooor_stopMusic() end
+    end)
+
+    sec("Volume", "🔊")
+    sl("Music Volume", 0, 10, 2, function(v)
+        _G.Roooor_Music.Volume = v
+    end)
+
+    sec("Daftar Lagu (30)", "📋")
+    for i, song in ipairs(MusicList) do
+        btn("🎵 " .. i .. ". " .. song.name, function()
+            if _G.Roooor_playMusic then _G.Roooor_playMusic(i) end
+        end)
+    end
+end)
+
 -- ============================
 -- TAB: TOP 10
 -- ============================
-makeTab("Top 10", "🏆", 12, function()
+makeTab("Top 10", "🏆", 13, function()
     sec("Safe Zone Warning", "🟢")
     tog("Enable Safe Zone", false, function(s) S.SafeZone = s end)
 
@@ -4028,27 +4258,35 @@ end)
 -- ============================
 -- TAB: SETTINGS
 -- ============================
-makeTab("Settings", "⚙️", 13, function()
+makeTab("Settings", "⚙️", 14, function()
     sec("Keybind", "⌨️")
     lbl("Klik tombol R = Buka Menu", C.FIRE_BRIGHT)
     lbl("Drag tombol R = Pindah posisi", C.DIM)
     lbl("HOLD tombol 🎯 = Aim aktif", C.ACC2)
     lbl("Klik kanan 🎯 = Switch mode", C.DIM)
+    lbl("Drag 🎯 = Pindah posisi aimlock", C.DIM)
+    lbl("Klik 🎵 = Buka Music Panel", C.MUSIC)
+    lbl("Drag 🎵 = Pindah posisi music", C.DIM)
     lbl("RightShift = Toggle Menu", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Ultimate Fire v7", C.FIRE_BRIGHT)
-    lbl("Sasuke Loading Edition", C.FIRE_BRIGHT)
+    lbl("RoooorHub Ultimate Fire v8", C.FIRE_BRIGHT)
     lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE_BRIGHT)
     lbl("ESP Fallens-Style + Limited Radius", C.GRN)
-    lbl("Parry v7 + Anti-Miss + Abyss Dodge", C.GRN)
+    lbl("Parry v8 + Anti-Miss + Abyss Dodge", C.GRN)
     lbl("Teleport Gate + No Clip + Kill Feed", C.GRN)
     lbl("Stun Notify + Aimlock Hold-to-Aim", C.GRN)
+    lbl("30 Varian DJ Old Music", C.MUSIC)
     lbl("Made with 🔥", C.FIRE_BRIGHT)
+
+    sec("Credits", "💜")
+    lbl("Developer: Roooor", C.ACC)
+    lbl("Music: DJ Old Collection", C.MUSIC)
+    lbl("UI: Fire Edition", C.FIRE_BRIGHT)
 end)
 
-print("✅ [7/8] Tab Part 2 loaded")-- =========================================================
--- BAGIAN 8/8 : RESPAWN + ANTI-RESET + FPS + FINAL
+print("✅ [8/9] Tab Music + Top 10 + Settings loaded")-- =========================================================
+-- BAGIAN 9/9 : RESPAWN + ANTI-RESET + FPS + FINAL
 -- =========================================================
 
 -- ============================
@@ -4187,6 +4425,21 @@ task.spawn(function()
                     SkillCheck.PerfectMode = state
                 end
             end
+            if name == "Enable Stun Notify" then
+                if S.StunNotify ~= state then
+                    S.StunNotify = state
+                end
+            end
+            if name == "Enable Kill Feed" then
+                if S.KillFeed ~= state then
+                    S.KillFeed = state
+                end
+            end
+            if name == "Enable Aimlock" then
+                if _G.Roooor_AimlockBtn.Enabled ~= state then
+                    _G.Roooor_AimlockBtn.Enabled = state
+                end
+            end
         end
     end
 end)
@@ -4255,31 +4508,37 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("🔥 ROOORHUB ULTIMATE FIRE EDITION v7 — SASUKE")
+print("🔥 ROOORHUB ULTIMATE FIRE EDITION v8")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
 print("  1. 🔥 Fire          — 60 Efek")
 print("  2. 👟 Fire Feet     — 20 Efek")
 print("  3. 👁️ ESP           — Fallens-Style + Limited Radius")
-print("  4. 🏃 Survivor      — Parry v7 + Skill Check FIXED + Stun Notify")
-print("  5. 🔪 Killer        — Auto Kill FIXED + Kill Feed + Hitbox Safe")
+print("  4. 🏃 Survivor      — Parry v8 + Skill Check + Stun Notify")
+print("  5. 🔪 Killer        — Auto Kill FIXED + Kill Feed + Hitbox")
 print("  6. 🎨 Visual        — Fullbright Slider + Sky")
 print("  7. 👑 8-Bit Crown   — Bisa diatur posisi X/Y/Z")
 print("  8. ✨ Visual+       — Trail Fire + Aura Fire + Crosshair")
 print("  9. 🏃 Movement      — WalkSpeed + NoClip + Fly")
 print(" 10. 🌀 Teleport      — TP Gate + TP Inside Gate + TP Finish")
 print(" 11. 🛡️ Anti          — Grab + Hook + Blind + Stun + Ragdoll")
-print(" 12. 🏆 Top 10        — SafeZone + EscapeAlert + PlayerList")
-print(" 13. ⚙️ Settings      — Info + Keybind")
+print(" 12. 🎵 Music         — 30 Varian DJ Old")
+print(" 13. 🏆 Top 10        — SafeZone + EscapeAlert + PlayerList")
+print(" 14. ⚙️ Settings      — Info + Keybind")
 print("=====================================================")
-print("✨ Loading SASUKE 4D (gambar Sasuke + efek api)")
-print("🔴 Tombol menu 'R' 4D API (bisa digeser)")
-print("🎯 AIMLOCK HOLD-TO-AIM:")
-print("   • HOLD tombol 🎯 = aim aktif")
+print("✨ Loading 4D Fire Ring (SELAMAT DATANG SC PENGANGGURAN)")
+print("🔴 Tombol menu 'R' 4D API (KECIL + BISA DIGESER)")
+print("🎯 AIMLOCK:")
+print("   • FITUR tetap ada di menu")
+print("   • Radius + Lock Radius slider")
+print("   • HOLD tombol 🎯 di layar = aim aktif")
 print("   • Klik kanan 🎯 = switch mode")
-print("   • Ada Radius + Lock Radius slider")
-print("⚔️ Auto Parry v7 (Anti-Miss buffer +5)")
+print("🎵 MUSIC:")
+print("   • 30 Varian DJ Old")
+print("   • Tombol 🎵 floating")
+print("   • Demon Emperor, Phonk, Tokyo Drift, dll")
+print("⚔️ Auto Parry v8 (Anti-Miss buffer +5)")
 print("💀 Auto Kill All FIX (Anti nyangkut)")
 print("📦 Hitbox Safe (Selalu invisible)")
 print("🎯 Skill Check FIXED (NO COOLDOWN)")
@@ -4288,5 +4547,5 @@ print("💬 Kill Feed (Khusus Killer)")
 print("🌀 Teleport Gate + Inside Gate")
 print("👻 No Clip")
 print("=====================================================")
-print("Total: 65+ FITUR PREMIUM")
+print("Total: 70+ FITUR PREMIUM")
 print("=====================================================")

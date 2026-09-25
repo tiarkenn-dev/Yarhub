@@ -2589,72 +2589,82 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL 🔥 + AIMLOCK
+-- BAGIAN 5/8 : GUI REDESIGN - GLASSMORPHISM EDITION
 -- =========================================================
+
+-- PALET WARNA BARU
+local NewC = {
+    BG = Color3.fromRGB(12, 8, 25),
+    BG2 = Color3.fromRGB(20, 12, 45),
+    PANEL = Color3.fromRGB(18, 12, 38),
+    PANEL2 = Color3.fromRGB(28, 18, 55),
+    GLASS = Color3.fromRGB(35, 25, 70),
+    GLASS2 = Color3.fromRGB(45, 30, 90),
+    ACC = Color3.fromRGB(180, 100, 255),
+    ACC2 = Color3.fromRGB(0, 220, 255),
+    ACC3 = Color3.fromRGB(255, 80, 200),
+    NEON = Color3.fromRGB(120, 200, 255),
+    NEON2 = Color3.fromRGB(200, 120, 255),
+    TXT = Color3.fromRGB(240, 240, 255),
+    DIM = Color3.fromRGB(130, 130, 170),
+    GRN = Color3.fromRGB(80, 255, 180),
+    RED = Color3.fromRGB(255, 80, 120),
+    GOLD = Color3.fromRGB(255, 220, 100),
+}
+
+-- Update global C
+for k, v in pairs(NewC) do
+    C[k] = v
+end
+
+-- FIRE color tetep (buat fitur fire)
+C.FIRE1 = Color3.fromRGB(255, 120, 0)
+C.FIRE2 = Color3.fromRGB(255, 220, 80)
+C.FIRE3 = Color3.fromRGB(255, 60, 0)
+C.FIRE_BRIGHT = Color3.fromRGB(255, 240, 150)
+
 local gui = Instance.new("ScreenGui")
-gui.Name = "RoooorHubFire"
+gui.Name = "RoooorHubNeo"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU 🔥 BARU (BULAT + EMOJI + RING API)
+-- TOMBOL MENU NEO (BULAT + PULSE)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 55, 0, 55)
+btnContainer.Size = UDim2.new(0, 50, 0, 50)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Ring luar
-local ring1 = Instance.new("Frame")
-ring1.Size = UDim2.new(1, 10, 1, 10)
-ring1.Position = UDim2.new(0, -5, 0, -5)
-ring1.BackgroundTransparency = 1
-ring1.Parent = btnContainer
+-- Outer glow ring
+local outerRing = Instance.new("Frame")
+outerRing.Size = UDim2.new(1, 14, 1, 14)
+outerRing.Position = UDim2.new(0, -7, 0, -7)
+outerRing.BackgroundTransparency = 1
+outerRing.Parent = btnContainer
 
-local ring1Stroke = Instance.new("UIStroke")
-ring1Stroke.Thickness = 3
-ring1Stroke.Color = C.FIRE_BRIGHT
-ring1Stroke.Transparency = 0.1
-ring1Stroke.Parent = ring1
+local outerStroke = Instance.new("UIStroke")
+outerStroke.Thickness = 2
+outerStroke.Color = C.ACC
+outerStroke.Transparency = 0.4
+outerStroke.Parent = outerRing
 
-local ring1Grad = Instance.new("UIGradient")
-ring1Grad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C.FIRE3),
-    ColorSequenceKeypoint.new(0.25, C.FIRE1),
-    ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
-    ColorSequenceKeypoint.new(0.75, C.FIRE2),
-    ColorSequenceKeypoint.new(1, C.FIRE3),
-})
-ring1Grad.Parent = ring1Stroke
+local outerGrad = Instance.new("UIGradient")
+outerGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3, C.ACC)
+outerGrad.Rotation = 0
+outerGrad.Parent = outerStroke
 
--- Ring dalam
-local ring2 = Instance.new("Frame")
-ring2.Size = UDim2.new(1, 4, 1, 4)
-ring2.Position = UDim2.new(0, -2, 0, -2)
-ring2.BackgroundTransparency = 1
-ring2.Parent = btnContainer
-
-local ring2Stroke = Instance.new("UIStroke")
-ring2Stroke.Thickness = 1.5
-ring2Stroke.Color = C.FIRE1
-ring2Stroke.Transparency = 0.3
-ring2Stroke.Parent = ring2
-
-local ring2Grad = Instance.new("UIGradient")
-ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
-ring2Grad.Parent = ring2Stroke
-
--- Tombol utama
+-- Main button bulat
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -14, 1, -14)
-mainBtn.Position = UDim2.new(0, 7, 0, 7)
-mainBtn.BackgroundColor3 = Color3.fromRGB(40, 12, 4)
-mainBtn.Text = "🔥"
-mainBtn.TextColor3 = C.FIRE_BRIGHT
-mainBtn.TextSize = 28
+mainBtn.Size = UDim2.new(1, -4, 1, -4)
+mainBtn.Position = UDim2.new(0, 2, 0, 2)
+mainBtn.BackgroundColor3 = C.PANEL
+mainBtn.Text = "◈"
+mainBtn.TextColor3 = C.NEON
+mainBtn.TextSize = 26
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
@@ -2662,87 +2672,41 @@ mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
 local btnGrad = Instance.new("UIGradient")
-btnGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 25, 5)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 12, 4)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 25, 5)),
-})
+btnGrad.Color = ColorSequence.new(C.PANEL, C.PANEL2, C.PANEL)
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
-local glow = Instance.new("Frame")
-glow.Size = UDim2.new(1, 16, 1, 16)
-glow.Position = UDim2.new(0, -8, 0, -8)
-glow.BackgroundColor3 = C.FIRE_BRIGHT
-glow.BackgroundTransparency = 0.5
-glow.BorderSizePixel = 0
-glow.ZIndex = -1
-glow.Parent = mainBtn
-rnd(glow, 999)
-
+-- Inner glow
 local innerGlow = Instance.new("Frame")
-innerGlow.Size = UDim2.new(0.6, 0, 0.6, 0)
-innerGlow.Position = UDim2.new(0.2, 0, 0.2, 0)
-innerGlow.BackgroundColor3 = C.FIRE1
-innerGlow.BackgroundTransparency = 0.4
+innerGlow.Size = UDim2.new(0.7, 0, 0.7, 0)
+innerGlow.Position = UDim2.new(0.15, 0, 0.15, 0)
+innerGlow.BackgroundColor3 = C.ACC2
+innerGlow.BackgroundTransparency = 0.7
 innerGlow.BorderSizePixel = 0
 innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
+-- Animasi pulse
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-        ring1.Rotation = t * 70
-        ring1Grad.Rotation = t * 120
-        ring2.Rotation = -t * 100
-        ring2Grad.Rotation = t * 80
+        outerRing.Rotation = t * 40
+        outerGrad.Rotation = t * 60
 
-        local pulse = (math.sin(t * 4) + 1) / 2
-        ring1Stroke.Transparency = 0.2 - pulse * 0.15
-        glow.BackgroundTransparency = 0.75 - pulse * 0.4
-        glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
-        glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
-        innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
-        btnGrad.Rotation = t * 40
-        mainBtn.TextSize = 28 + math.sin(t * 5) * 3
-        mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.9, 1)
+        local pulse = (math.sin(t * 3) + 1) / 2
+        outerStroke.Transparency = 0.6 - pulse * 0.4
+        mainBtn.TextSize = 26 + math.sin(t * 4) * 2
+        mainBtn.TextColor3 = Color3.fromHSV((t * 0.1) % 1, 0.7, 1)
+        innerGlow.BackgroundTransparency = 0.7 - pulse * 0.4
+
         task.wait(0.03)
     end
 end)
 
--- Partikel orbit api
-for i = 1, 10 do
-    local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, 3, 0, 3)
-    particle.BackgroundColor3 = C.FIRE_BRIGHT
-    particle.BorderSizePixel = 0
-    particle.Parent = btnContainer
-    rnd(particle, 999)
-
-    local angle = (i / 10) * math.pi * 2
-    local orbitSpeed = 2 + math.random() * 2
-    local radius = 32 + math.random() * 6
-
-    task.spawn(function()
-        while btnContainer.Parent do
-            local t = tick()
-            local x = math.cos(t * orbitSpeed + angle) * radius
-            local y = math.sin(t * orbitSpeed + angle) * radius * 0.6
-            particle.Position = UDim2.new(0.5, x - 1.5, 0.5, y - 1.5)
-            particle.BackgroundTransparency = 0.1 + math.sin(t * 5 + i) * 0.3
-            particle.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.07) % 1, 0.9, 1)
-            task.wait(0.03)
-        end
-    end)
-end
-
--- Drag tombol
-local dragging = false
-local dragStart = nil
-local startPos = nil
-local wasDragged = false
+-- Drag
+local dragging, dragStart, startPos, wasDragged = false, nil, nil, false
 
 btnContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -2776,7 +2740,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON
+-- AIMLOCK FLOATING (GLASS STYLE)
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2790,39 +2754,23 @@ aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
 aimContainer.BackgroundTransparency = 1
 aimContainer.Parent = aimBtnGui
 
-local aimOuterRing = Instance.new("Frame")
-aimOuterRing.Size = UDim2.new(1, 6, 1, 6)
-aimOuterRing.Position = UDim2.new(0, -3, 0, -3)
-aimOuterRing.BackgroundTransparency = 1
-aimOuterRing.Parent = aimContainer
+local aimRing = Instance.new("Frame")
+aimRing.Size = UDim2.new(1, 6, 1, 6)
+aimRing.Position = UDim2.new(0, -3, 0, -3)
+aimRing.BackgroundTransparency = 1
+aimRing.Parent = aimContainer
 
-local aimOuterStroke = Instance.new("UIStroke")
-aimOuterStroke.Thickness = 2
-aimOuterStroke.Color = C.ACC2
-aimOuterStroke.Transparency = 0.1
-aimOuterStroke.Parent = aimOuterRing
-
-local aimOuterGrad = Instance.new("UIGradient")
-aimOuterGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-aimOuterGrad.Parent = aimOuterStroke
-
-local aimInnerRing = Instance.new("Frame")
-aimInnerRing.Size = UDim2.new(1, -2, 1, -2)
-aimInnerRing.Position = UDim2.new(0, 1, 0, 1)
-aimInnerRing.BackgroundTransparency = 1
-aimInnerRing.Parent = aimContainer
-
-local aimInnerStroke = Instance.new("UIStroke")
-aimInnerStroke.Thickness = 1
-aimInnerStroke.Color = C.ACC2
-aimInnerStroke.Transparency = 0.3
-aimInnerStroke.Parent = aimInnerRing
+local aimStroke = Instance.new("UIStroke")
+aimStroke.Thickness = 2
+aimStroke.Color = C.ACC2
+aimStroke.Transparency = 0.2
+aimStroke.Parent = aimRing
 
 local aimBtn = Instance.new("TextButton")
 aimBtn.Size = UDim2.new(1, -8, 1, -8)
 aimBtn.Position = UDim2.new(0, 4, 0, 4)
-aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-aimBtn.Text = "🎯"
+aimBtn.BackgroundColor3 = C.PANEL
+aimBtn.Text = "◎"
 aimBtn.TextColor3 = C.ACC2
 aimBtn.TextSize = 22
 aimBtn.Font = Enum.Font.GothamBlack
@@ -2831,34 +2779,14 @@ aimBtn.AutoButtonColor = false
 aimBtn.Parent = aimContainer
 rnd(aimBtn, 999)
 
-local aimBtnGrad = Instance.new("UIGradient")
-aimBtnGrad.Color = ColorSequence.new(
-    Color3.fromRGB(20, 40, 80),
-    Color3.fromRGB(15, 25, 50),
-    Color3.fromRGB(20, 40, 80)
-)
-aimBtnGrad.Rotation = 45
-aimBtnGrad.Parent = aimBtn
-
-local aimGlow = Instance.new("Frame")
-aimGlow.Size = UDim2.new(1, 16, 1, 16)
-aimGlow.Position = UDim2.new(0, -8, 0, -8)
-aimGlow.BackgroundColor3 = C.ACC2
-aimGlow.BackgroundTransparency = 0.6
-aimGlow.BorderSizePixel = 0
-aimGlow.ZIndex = -1
-aimGlow.Parent = aimBtn
-rnd(aimGlow, 999)
-
 local aimModeLbl = Instance.new("TextLabel")
-aimModeLbl.Size = UDim2.new(0, 100, 0, 14)
+aimModeLbl.Size = UDim2.new(0, 100, 0, 12)
 aimModeLbl.Position = UDim2.new(0.5, -50, 1, 2)
 aimModeLbl.BackgroundTransparency = 1
 aimModeLbl.Text = "KILLER"
-aimModeLbl.TextColor3 = C.ACC4
+aimModeLbl.TextColor3 = C.GOLD
 aimModeLbl.TextSize = 9
 aimModeLbl.Font = Enum.Font.GothamBlack
-aimModeLbl.TextStrokeTransparency = 0.3
 aimModeLbl.Parent = aimBtn
 
 local Combat = _G.Roooor_Combat
@@ -2867,20 +2795,15 @@ task.spawn(function()
     local t = 0
     while aimContainer.Parent do
         t = t + 0.03
-        aimOuterRing.Rotation = t * 60
-        aimOuterGrad.Rotation = t * 100
-        aimInnerRing.Rotation = -t * 90
+        aimRing.Rotation = t * 50
         local pulse = (math.sin(t * 4) + 1) / 2
-        local baseTrans = Combat.Holding and 0.3 or 0.7
-        aimGlow.BackgroundTransparency = baseTrans - pulse * 0.25
-        local glowSize = Combat.Holding and 20 or 16
-        aimGlow.Size = UDim2.new(1, glowSize + pulse * 8, 1, glowSize + pulse * 8)
-        aimGlow.Position = UDim2.new(0, -(glowSize/2) - pulse * 4, 0, -(glowSize/2) - pulse * 4)
-        aimBtnGrad.Rotation = t * 40
+        aimStroke.Transparency = Combat.Holding and (0.1 - pulse * 0.1) or (0.5 - pulse * 0.3)
+        aimBtn.TextColor3 = Combat.Holding and C.GRN or C.ACC2
         task.wait(0.03)
     end
 end)
 
+-- Drag aimlock
 local aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
 
 aimContainer.InputBegan:Connect(function(input)
@@ -2897,9 +2820,7 @@ UIS.InputChanged:Connect(function(input)
     if aimDragging and (input.UserInputType == Enum.UserInputType.MouseMovement
         or input.UserInputType == Enum.UserInputType.Touch) then
         local d = input.Position - aimDS
-        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then
-            aimWasDragged = true
-        end
+        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then aimWasDragged = true end
         aimContainer.Position = UDim2.new(
             aimDP.X.Scale, aimDP.X.Offset + d.X,
             aimDP.Y.Scale, aimDP.Y.Offset + d.Y
@@ -2919,7 +2840,7 @@ aimBtn.InputBegan:Connect(function(input)
         or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
         Combat.Holding = true
-        aimBtn.BackgroundColor3 = Color3.fromRGB(30, 60, 120)
+        aimBtn.BackgroundColor3 = C.GLASS2
     end
 end)
 
@@ -2927,7 +2848,7 @@ aimBtn.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         Combat.Holding = false
-        aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+        aimBtn.BackgroundColor3 = C.PANEL
     end
 end)
 
@@ -2939,7 +2860,7 @@ aimBtn.MouseButton2Click:Connect(function()
     else
         Combat.Mode = "Killer"
         aimModeLbl.Text = "KILLER"
-        aimModeLbl.TextColor3 = C.ACC4
+        aimModeLbl.TextColor3 = C.GOLD
     end
 end)
 
@@ -2955,136 +2876,184 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PANEL (MENU UTAMA) - LEBIH KECIL
+-- PANEL NEO (GLASSMORPHISM)
 -- =========================================================
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 420, 0, 340)
-panel.Position = UDim2.new(0.5, -210, 0.5, -170)
-panel.BackgroundColor3 = C.BG
-panel.BackgroundTransparency = 0.05
+panel.Size = UDim2.new(0, 480, 0, 360)
+panel.Position = UDim2.new(0.5, -240, 0.5, -180)
+panel.BackgroundColor3 = C.GLASS
+panel.BackgroundTransparency = 0.15
 panel.BorderSizePixel = 0
 panel.Visible = false
 panel.Parent = gui
-rnd(panel, 18)
-strk(panel, C.FIRE2, 2, 0.2)
+rnd(panel, 20)
+
+local panelStrk = Instance.new("UIStroke")
+panelStrk.Thickness = 1.5
+panelStrk.Color = C.ACC
+panelStrk.Transparency = 0.4
+panelStrk.Parent = panel
 
 local panelGrad = Instance.new("UIGradient")
-panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
-panelGrad.Rotation = 45
+panelGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, C.BG2),
+    ColorSequenceKeypoint.new(0.5, C.GLASS),
+    ColorSequenceKeypoint.new(1, C.BG2),
+})
+panelGrad.Rotation = 135
+panelGrad.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0.3),
+})
 panelGrad.Parent = panel
 
 -- HEADER
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 40)
-header.BackgroundColor3 = C.PANEL
-header.BackgroundTransparency = 0.1
+header.Size = UDim2.new(1, 0, 0, 46)
+header.BackgroundColor3 = C.PANEL2
+header.BackgroundTransparency = 0.3
 header.BorderSizePixel = 0
 header.Parent = panel
-rnd(header, 18)
+rnd(header, 20)
 
 local hPatch = Instance.new("Frame")
-hPatch.Size = UDim2.new(1, 0, 0, 20)
-hPatch.Position = UDim2.new(0, 0, 1, -20)
-hPatch.BackgroundColor3 = C.PANEL
-hPatch.BackgroundTransparency = 0.1
+hPatch.Size = UDim2.new(1, 0, 0, 22)
+hPatch.Position = UDim2.new(0, 0, 1, -22)
+hPatch.BackgroundColor3 = C.PANEL2
+hPatch.BackgroundTransparency = 0.3
 hPatch.BorderSizePixel = 0
 hPatch.Parent = header
 
+-- NEO line
 local neonLine = Instance.new("Frame")
-neonLine.Size = UDim2.new(1, -40, 0, 3)
-neonLine.Position = UDim2.new(0, 20, 1, -1.5)
-neonLine.BackgroundColor3 = C.FIRE_BRIGHT
+neonLine.Size = UDim2.new(1, -60, 0, 2)
+neonLine.Position = UDim2.new(0, 30, 1, -1)
+neonLine.BackgroundColor3 = C.NEON
 neonLine.BorderSizePixel = 0
 neonLine.Parent = header
 
 local neonGrad = Instance.new("UIGradient")
-neonGrad.Color = ColorSequence.new(
-    C.FIRE3, C.FIRE_BRIGHT,
-    Color3.fromRGB(255, 255, 240),
-    C.FIRE_BRIGHT, C.FIRE3
-)
+neonGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, C.ACC3),
+    ColorSequenceKeypoint.new(0.5, C.ACC2),
+    ColorSequenceKeypoint.new(1, C.ACC),
+})
 neonGrad.Parent = neonLine
 
 task.spawn(function()
     while neonLine.Parent do
-        for i = 0, 1, 0.03 do
+        for i = 0, 1, 0.02 do
             if not neonLine.Parent then break end
             neonGrad.Rotation = i * 360
-            task.wait(0.06)
+            task.wait(0.05)
         end
     end
 end)
 
+-- Icon bulat di header
+local headerIcon = Instance.new("Frame")
+headerIcon.Size = UDim2.new(0, 30, 0, 30)
+headerIcon.Position = UDim2.new(0, 12, 0.5, -15)
+headerIcon.BackgroundColor3 = C.ACC
+headerIcon.BorderSizePixel = 0
+headerIcon.Parent = header
+rnd(headerIcon, 999)
+
+local headerIconGrad = Instance.new("UIGradient")
+headerIconGrad.Color = ColorSequence.new(C.ACC2, C.ACC, C.ACC3)
+headerIconGrad.Rotation = 45
+headerIconGrad.Parent = headerIcon
+
+local headerIconLbl = Instance.new("TextLabel")
+headerIconLbl.Size = UDim2.new(1, 0, 1, 0)
+headerIconLbl.BackgroundTransparency = 1
+headerIconLbl.Text = "◈"
+headerIconLbl.TextColor3 = Color3.new(1, 1, 1)
+headerIconLbl.TextSize = 16
+headerIconLbl.Font = Enum.Font.GothamBlack
+headerIconLbl.Parent = headerIcon
+
 local hTitle = Instance.new("TextLabel")
-hTitle.Size = UDim2.new(1, -80, 1, 0)
-hTitle.Position = UDim2.new(0, 16, 0, 0)
+hTitle.Size = UDim2.new(1, -120, 1, 0)
+hTitle.Position = UDim2.new(0, 52, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v14"
-hTitle.TextColor3 = C.FIRE_BRIGHT
-hTitle.TextSize = 12
+hTitle.Text = "ROOORHUB NEO"
+hTitle.TextColor3 = C.TXT
+hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
 hTitle.TextXAlignment = Enum.TextXAlignment.Left
-hTitle.TextStrokeTransparency = 0.2
-hTitle.TextStrokeColor3 = C.FIRE3
 hTitle.Parent = header
 
+local hSub = Instance.new("TextLabel")
+hSub.Size = UDim2.new(1, -120, 1, 0)
+hSub.Position = UDim2.new(0, 52, 0, 0)
+hSub.BackgroundTransparency = 1
+hSub.Text = "v15 · GLASS EDITION"
+hSub.TextColor3 = C.DIM
+hSub.TextSize = 8
+hSub.Font = Enum.Font.Gotham
+hSub.TextXAlignment = Enum.TextXAlignment.Left
+hSub.TextYAlignment = Enum.TextYAlignment.Bottom
+hSub.Parent = header
+
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 22, 0, 22)
-closeBtn.Position = UDim2.new(1, -30, 0.5, -11)
-closeBtn.BackgroundColor3 = C.PANEL2
+closeBtn.Size = UDim2.new(0, 26, 0, 26)
+closeBtn.Position = UDim2.new(1, -34, 0.5, -13)
+closeBtn.BackgroundColor3 = C.PANEL
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = C.RED
-closeBtn.TextSize = 11
+closeBtn.TextSize = 12
 closeBtn.Font = Enum.Font.GothamBlack
 closeBtn.BorderSizePixel = 0
 closeBtn.AutoButtonColor = false
 closeBtn.Parent = header
-rnd(closeBtn, 7)
-strk(closeBtn, C.RED, 1, 0.5)
+rnd(closeBtn, 999)
 
--- SIDEBAR
-local sbFrame = Instance.new("Frame")
-sbFrame.Size = UDim2.new(0, 105, 1, -58)
-sbFrame.Position = UDim2.new(0, 10, 0, 50)
-sbFrame.BackgroundColor3 = C.PANEL
-sbFrame.BackgroundTransparency = 0.2
-sbFrame.BorderSizePixel = 0
-sbFrame.Parent = panel
-rnd(sbFrame, 12)
-strk(sbFrame, C.FIRE2, 1, 0.6)
+-- =========================================================
+-- TAB BAR (HORIZONTAL DI ATAS)
+-- =========================================================
+local tabBarFrame = Instance.new("Frame")
+tabBarFrame.Size = UDim2.new(1, -20, 0, 38)
+tabBarFrame.Position = UDim2.new(0, 10, 0, 52)
+tabBarFrame.BackgroundColor3 = C.BG
+tabBarFrame.BackgroundTransparency = 0.5
+tabBarFrame.BorderSizePixel = 0
+tabBarFrame.Parent = panel
+rnd(tabBarFrame, 12)
 
-local sb = Instance.new("ScrollingFrame")
-sb.Size = UDim2.new(1, -4, 1, -4)
-sb.Position = UDim2.new(0, 2, 0, 2)
-sb.BackgroundTransparency = 1
-sb.BorderSizePixel = 0
-sb.ScrollBarThickness = 3
-sb.ScrollBarImageColor3 = C.FIRE2
-sb.CanvasSize = UDim2.new(0, 0, 0, 0)
-sb.AutomaticCanvasSize = Enum.AutomaticSize.Y
-sb.Parent = sbFrame
+local tabBar = Instance.new("ScrollingFrame")
+tabBar.Size = UDim2.new(1, -4, 1, -4)
+tabBar.Position = UDim2.new(0, 2, 0, 2)
+tabBar.BackgroundTransparency = 1
+tabBar.BorderSizePixel = 0
+tabBar.ScrollBarThickness = 0
+tabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
+tabBar.AutomaticCanvasSize = Enum.AutomaticSize.X
+tabBar.ScrollingDirection = Enum.ScrollingDirection.X
+tabBar.Parent = tabBarFrame
 
-local sbL = Instance.new("UIListLayout")
-sbL.Padding = UDim.new(0, 4)
-sbL.Parent = sb
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.Padding = UDim.new(0, 4)
+tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+tabLayout.Parent = tabBar
 
-local sbP = Instance.new("UIPadding")
-sbP.PaddingTop = UDim.new(0, 6)
-sbP.PaddingLeft = UDim.new(0, 4)
-sbP.PaddingRight = UDim.new(0, 4)
-sbP.PaddingBottom = UDim.new(0, 6)
-sbP.Parent = sb
+local tabPad = Instance.new("UIPadding")
+tabPad.PaddingLeft = UDim.new(0, 4)
+tabPad.PaddingRight = UDim.new(0, 4)
+tabPad.Parent = tabBar
 
--- CONTENT
+-- =========================================================
+-- CONTENT AREA
+-- =========================================================
 local ct = Instance.new("Frame")
-ct.Size = UDim2.new(1, -135, 1, -58)
-ct.Position = UDim2.new(0, 122, 0, 50)
-ct.BackgroundColor3 = C.PANEL
-ct.BackgroundTransparency = 0.2
+ct.Size = UDim2.new(1, -20, 1, -102)
+ct.Position = UDim2.new(0, 10, 0, 96)
+ct.BackgroundColor3 = C.BG
+ct.BackgroundTransparency = 0.6
 ct.BorderSizePixel = 0
 ct.Parent = panel
 rnd(ct, 12)
-strk(ct, C.FIRE2, 1, 0.6)
 
 local cs = Instance.new("ScrollingFrame")
 cs.Size = UDim2.new(1, -14, 1, -14)
@@ -3092,7 +3061,7 @@ cs.Position = UDim2.new(0, 7, 0, 7)
 cs.BackgroundTransparency = 1
 cs.BorderSizePixel = 0
 cs.ScrollBarThickness = 3
-cs.ScrollBarImageColor3 = C.FIRE2
+cs.ScrollBarImageColor3 = C.ACC
 cs.CanvasSize = UDim2.new(0, 0, 0, 0)
 cs.AutomaticCanvasSize = Enum.AutomaticSize.Y
 cs.Parent = ct
@@ -3102,7 +3071,7 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI
+-- KOMPONEN UI NEO
 -- =========================================================
 local function sec(title, icon)
     local f = Instance.new("Frame")
@@ -3111,15 +3080,15 @@ local function sec(title, icon)
     f.Parent = cs
 
     local deco = Instance.new("Frame")
-    deco.Size = UDim2.new(0, 4, 0, 14)
+    deco.Size = UDim2.new(0, 3, 0, 14)
     deco.Position = UDim2.new(0, 4, 0.5, -7)
-    deco.BackgroundColor3 = C.FIRE2
+    deco.BackgroundColor3 = C.ACC
     deco.BorderSizePixel = 0
     deco.Parent = f
     rnd(deco, 2)
 
     local decoGrad = Instance.new("UIGradient")
-    decoGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
+    decoGrad.Color = ColorSequence.new(C.ACC2, C.ACC, C.ACC3)
     decoGrad.Parent = deco
 
     local l = Instance.new("TextLabel")
@@ -3127,7 +3096,7 @@ local function sec(title, icon)
     l.Position = UDim2.new(0, 14, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = icon .. " " .. string.upper(title)
-    l.TextColor3 = C.FIRE_BRIGHT
+    l.TextColor3 = C.NEON
     l.TextSize = 9
     l.Font = Enum.Font.GothamBlack
     l.TextXAlignment = Enum.TextXAlignment.Left
@@ -3149,16 +3118,20 @@ end
 local function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.BG
+    f.BackgroundColor3 = C.PANEL
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 8)
-    local fStrk = strk(f, C.FIRE2, 1, 0.7)
+    rnd(f, 10)
+    local fStrk = Instance.new("UIStroke")
+    fStrk.Color = C.ACC
+    fStrk.Thickness = 1
+    fStrk.Transparency = 0.6
+    fStrk.Parent = f
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 8, 0, 0)
+    l.Position = UDim2.new(0, 10, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3168,25 +3141,25 @@ local function tog(name, def, cb)
     l.Parent = f
 
     local t = Instance.new("Frame")
-    t.Size = UDim2.new(0, 32, 0, 16)
-    t.Position = UDim2.new(1, -40, 0.5, -8)
+    t.Size = UDim2.new(0, 34, 0, 18)
+    t.Position = UDim2.new(1, -42, 0.5, -9)
     t.BorderSizePixel = 0
     t.Parent = f
-    rnd(t, 9)
+    rnd(t, 999)
 
     local k = Instance.new("Frame")
-    k.Size = UDim2.new(0, 11, 0, 11)
+    k.Size = UDim2.new(0, 12, 0, 12)
     k.BorderSizePixel = 0
     k.Parent = t
-    rnd(k, 6)
+    rnd(k, 999)
 
     local saved = _G.ToggleStates[name]
     local state = (saved ~= nil) and saved or def
     _G.ToggleStates[name] = state
 
-    t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
-    k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
-    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+    t.BackgroundColor3 = state and C.ACC or C.PANEL2
+    k.Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
+    k.BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
@@ -3198,13 +3171,14 @@ local function tog(name, def, cb)
         state = not state
         _G.ToggleStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
-            Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
-            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+            Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6),
+            BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
         }):Play()
         TweenService:Create(t, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.FIRE1 or C.PANEL
+            BackgroundColor3 = state and C.ACC or C.PANEL2
         }):Play()
-        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
+        fStrk.Color = state and C.ACC2 or C.ACC
+        fStrk.Transparency = state and 0.2 or 0.6
 
         playToggleSound()
 
@@ -3215,16 +3189,20 @@ end
 local function sl(name, min, max, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 36)
-    f.BackgroundColor3 = C.BG
+    f.BackgroundColor3 = C.PANEL
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    rnd(f, 10)
+    local fStrk = Instance.new("UIStroke")
+    fStrk.Color = C.ACC
+    fStrk.Thickness = 1
+    fStrk.Transparency = 0.6
+    fStrk.Parent = f
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -55, 0, 14)
-    l.Position = UDim2.new(0, 8, 0, 4)
+    l.Position = UDim2.new(0, 10, 0, 4)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3241,7 +3219,7 @@ local function sl(name, min, max, def, cb)
     v.Position = UDim2.new(1, -48, 0, 4)
     v.BackgroundTransparency = 1
     v.Text = tostring(curVal)
-    v.TextColor3 = C.FIRE_BRIGHT
+    v.TextColor3 = C.ACC2
     v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -3250,27 +3228,30 @@ local function sl(name, min, max, def, cb)
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1, -20, 0, 5)
     bg.Position = UDim2.new(0, 10, 1, -11)
-    bg.BackgroundColor3 = C.PANEL
+    bg.BackgroundColor3 = C.PANEL2
     bg.BorderSizePixel = 0
     bg.Parent = f
-    rnd(bg, 3)
+    rnd(bg, 999)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((curVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = C.FIRE_BRIGHT
+    fill.BackgroundColor3 = C.ACC2
     fill.BorderSizePixel = 0
     fill.Parent = bg
-    rnd(fill, 3)
+    rnd(fill, 999)
+
+    local fillGrad = Instance.new("UIGradient")
+    fillGrad.Color = ColorSequence.new(C.ACC, C.ACC2)
+    fillGrad.Parent = fill
 
     local kn = Instance.new("Frame")
     kn.Size = UDim2.new(0, 11, 0, 11)
     kn.Position = UDim2.new((curVal - min) / (max - min), -5.5, 0.5, -5.5)
-    kn.BackgroundColor3 = C.TXT
+    kn.BackgroundColor3 = Color3.new(1, 1, 1)
     kn.BorderSizePixel = 0
     kn.ZIndex = 2
     kn.Parent = bg
-    rnd(kn, 6)
-    strk(kn, C.FIRE_BRIGHT, 2)
+    rnd(kn, 999)
 
     local drag = false
     local function upd(input)
@@ -3312,16 +3293,20 @@ end
 local function cpk(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.BG
+    f.BackgroundColor3 = C.PANEL
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    rnd(f, 10)
+    local fStrk = Instance.new("UIStroke")
+    fStrk.Color = C.ACC
+    fStrk.Thickness = 1
+    fStrk.Transparency = 0.6
+    fStrk.Parent = f
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 8, 0, 0)
+    l.Position = UDim2.new(0, 10, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3332,13 +3317,12 @@ local function cpk(name, def, cb)
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(0, 30, 0, 15)
-    cB.Position = UDim2.new(1, -38, 0.5, -7.5)
+    cB.Position = UDim2.new(1, -40, 0.5, -7.5)
     cB.BackgroundColor3 = def
     cB.Text = ""
     cB.BorderSizePixel = 0
     cB.Parent = f
-    rnd(cB, 4)
-    strk(cB, C.FIRE_BRIGHT, 1.5)
+    rnd(cB, 999)
 
     local presets = {
         Color3.fromRGB(255, 60, 60),
@@ -3364,7 +3348,7 @@ end
 local function btn(name, cb)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -4, 0, 28)
-    b.BackgroundColor3 = C.BG
+    b.BackgroundColor3 = C.PANEL
     b.BackgroundTransparency = 0.4
     b.Text = name
     b.TextColor3 = C.TXT
@@ -3373,8 +3357,12 @@ local function btn(name, cb)
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
     b.Parent = cs
-    rnd(b, 8)
-    strk(b, C.FIRE_BRIGHT, 1, 0.7)
+    rnd(b, 10)
+    local bStrk = Instance.new("UIStroke")
+    bStrk.Color = C.ACC2
+    bStrk.Thickness = 1
+    bStrk.Transparency = 0.5
+    bStrk.Parent = b
 
     b.MouseButton1Click:Connect(function()
         playToggleSound()
@@ -3385,16 +3373,19 @@ end
 local function drp(name, options, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.BG
+    f.BackgroundColor3 = C.PANEL
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
-    f.Parent = cs
-    rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    f.Parent = cs    rnd(f, 10)
+    local fStrk = Instance.new("UIStroke")
+    fStrk.Color = C.ACC
+    fStrk.Thickness = 1
+    fStrk.Transparency = 0.6
+    fStrk.Parent = f
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0.5, 0, 1, 0)
-    l.Position = UDim2.new(0, 8, 0, 0)
+    l.Position = UDim2.new(0, 10, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3413,9 +3404,9 @@ local function drp(name, options, def, cb)
     v.Size = UDim2.new(0.5, -24, 1, 0)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
-    v.Text = tostring(cur) .. " ▶"
-    v.TextColor3 = C.FIRE_BRIGHT
-    v.TextSize = 8
+    v.Text = tostring(cur) .. " ▾"
+    v.TextColor3 = C.ACC2
+    v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = f
@@ -3430,64 +3421,60 @@ local function drp(name, options, def, cb)
         idx = idx + 1
         if idx > #options then idx = 1 end
         cur = options[idx]
-        v.Text = tostring(cur) .. " ▶"
+        v.Text = tostring(cur) .. " ▾"
         if cb then pcall(cb, cur) end
     end)
 end
 
+-- =========================================================
+-- TAB SYSTEM (HORIZONTAL NEO)
+-- =========================================================
 local activeTab = nil
 local function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -8, 0, 28)
-    b.BackgroundColor3 = C.BG
-    b.BackgroundTransparency = 1
+    b.Size = UDim2.new(0, 80, 1, -4)
+    b.BackgroundColor3 = C.PANEL
+    b.BackgroundTransparency = 0.5
     b.Text = ""
     b.BorderSizePixel = 0
     b.LayoutOrder = order
     b.AutoButtonColor = false
-    b.Parent = sb
-    rnd(b, 7)
+    b.Parent = tabBar
+    rnd(b, 8)
 
-    local ind = Instance.new("Frame")
-    ind.Size = UDim2.new(0, 3, 0, 0)
-    ind.Position = UDim2.new(0, 0, 0.5, 0)
-    ind.AnchorPoint = Vector2.new(0, 0.5)
-    ind.BackgroundColor3 = C.FIRE_BRIGHT
-    ind.BorderSizePixel = 0
-    ind.Parent = b
-    rnd(ind, 2)
+    local bStrk = Instance.new("UIStroke")
+    bStrk.Color = C.ACC
+    bStrk.Thickness = 1
+    bStrk.Transparency = 0.7
+    bStrk.Parent = b
 
     local ico = Instance.new("TextLabel")
-    ico.Size = UDim2.new(0, 20, 1, 0)
-    ico.Position = UDim2.new(0, 6, 0, 0)
+    ico.Size = UDim2.new(1, 0, 0.6, 0)
     ico.BackgroundTransparency = 1
     ico.Text = icon
     ico.TextColor3 = C.DIM
-    ico.TextSize = 13
+    ico.TextSize = 16
     ico.Font = Enum.Font.GothamBold
     ico.Parent = b
 
     local lblT = Instance.new("TextLabel")
-    lblT.Size = UDim2.new(1, -26, 1, 0)
-    lblT.Position = UDim2.new(0, 26, 0, 0)
+    lblT.Size = UDim2.new(1, 0, 0.4, 0)
+    lblT.Position = UDim2.new(0, 0, 0.6, 0)
     lblT.BackgroundTransparency = 1
     lblT.Text = string.upper(name)
     lblT.TextColor3 = C.DIM
     lblT.TextSize = 8
     lblT.Font = Enum.Font.GothamBlack
-    lblT.TextXAlignment = Enum.TextXAlignment.Left
     lblT.Parent = b
 
     b.MouseButton1Click:Connect(function()
         if activeTab == b then return end
         if activeTab then
-            activeTab.BackgroundTransparency = 1
-            local oldInd = activeTab:FindFirstChildOfClass("Frame")
-            if oldInd then
-                TweenService:Create(oldInd, TweenInfo.new(0.2), {
-                    Size = UDim2.new(0, 3, 0, 0)
-                }):Play()
-            end
+            TweenService:Create(activeTab, TweenInfo.new(0.2), {
+                BackgroundTransparency = 0.5
+            }):Play()
+            local oldStrk = activeTab:FindFirstChildOfClass("UIStroke")
+            if oldStrk then oldStrk.Color = C.ACC end
             for _, c in pairs(activeTab:GetChildren()) do
                 if c:IsA("TextLabel") then
                     TweenService:Create(c, TweenInfo.new(0.2), {
@@ -3499,11 +3486,9 @@ local function makeTab(name, icon, order, cb)
 
         activeTab = b
         TweenService:Create(b, TweenInfo.new(0.2), {
-            BackgroundTransparency = 0.7
+            BackgroundTransparency = 0.1
         }):Play()
-        TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-            Size = UDim2.new(0, 3, 0, 18)
-        }):Play()
+        bStrk.Color = C.ACC2
 
         for _, c in pairs(b:GetChildren()) do
             if c:IsA("TextLabel") then
@@ -3534,6 +3519,7 @@ _G.Roooor_drp = drp
 _G.Roooor_makeTab = makeTab
 _G.Roooor_cs = cs
 
+-- Toggle buka/tutup panel
 mainBtn.MouseButton1Click:Connect(function()
     if wasDragged then
         wasDragged = false
@@ -3548,7 +3534,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI + Tombol 🔥 + Aimlock + Panel Kecil loaded")-- =========================================================
+print("✅ [5/8] GUI NEO (Glassmorphism) loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 local sec = _G.Roooor_sec

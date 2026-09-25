@@ -1,6 +1,6 @@
 -- =========================================================
 -- ROOORHUB
--- BAGIAN 1/8 : LOADING + CONFIG + STATE (FIXED)
+-- BAGIAN 1/8 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -16,7 +16,6 @@ local SoundService = game:GetService("SoundService")
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
 
--- ✅ HELPER: getRoot GLOBAL
 function getRoot()
     local c = LP.Character
     return c and c:FindFirstChild("HumanoidRootPart")
@@ -59,10 +58,22 @@ function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- SOUND (DISABLED)
+-- SOUND SYSTEM (BRUH SOUND - PALING WORK)
 -- =========================================================
+local BruhSoundId = "rbxassetid://9120386436"
+
 function playToggleSound()
-    -- disabled
+    task.spawn(function()
+        pcall(function()
+            local s = Instance.new("Sound")
+            s.SoundId = BruhSoundId
+            s.Volume = 0.5
+            s.Parent = SoundService
+            s:Play()
+            task.wait(2)
+            s:Destroy()
+        end)
+    end)
 end
 
 _G.Roooor_playSound = playToggleSound
@@ -284,7 +295,7 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE (GLOBAL - TANPA LOCAL)
+-- STATE
 -- =========================================================
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
@@ -323,7 +334,6 @@ S = _G.RoooorS
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- ESP GLOBAL
 ESP = _G.Roooor_ESP or {
     Survivor = false, Killer = false, Generator = false,
     Pallet = false, Window = false, SCP = false, Distance = 50,
@@ -342,7 +352,6 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY GLOBAL
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
@@ -355,25 +364,21 @@ AutoParry = _G.Roooor_AutoParry or {
 }
 _G.Roooor_AutoParry = AutoParry
 
--- AUTO SKILL CHECK GLOBAL
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- AIMLOCK GLOBAL
 _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Enabled = true, ShowButton = false, Holding = false,
     Mode = "Killer", Radius = 500, LockRadius = 50, Strength = 0.4,
 }
 
--- GOD MODE GLOBAL
 GodMode = _G.Roooor_GodMode or {
     Enabled = false,
 }
 _G.Roooor_GodMode = GodMode
 
--- COMBAT GLOBAL
 Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
@@ -398,7 +403,7 @@ Combat = _G.Roooor_Combat or {
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
--- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS (FIXED)
+-- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 FireList = {
     "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
@@ -563,7 +568,6 @@ SkyIds = {
     },
 }
 
--- ✅ KillerAnims GLOBAL
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -577,7 +581,7 @@ for _, id in ipairs({
 end
 
 print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK (FIXED)
+-- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK
 -- =========================================================
 
 -- ============================
@@ -765,7 +769,7 @@ function apply8BitCrown(enable, size, posX, posY, posZ)
 end
 
 -- =========================================================
--- ESP SYSTEM (GLOBAL)
+-- ESP SYSTEM
 -- =========================================================
 ESPObjects = {}
 StatusESP = {}
@@ -1034,7 +1038,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (GLOBAL)
+-- AUTO PARRY
 -- =========================================================
 PARRY_DEBOUNCE = 0.2
 lastParry = 0
@@ -1150,7 +1154,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (GLOBAL)
+-- AUTO SKILL CHECK
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1234,7 +1238,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- TELEPORT (GLOBAL)
+-- TELEPORT
 -- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
@@ -1294,7 +1298,7 @@ function teleportInsideGate()
 end
 
 -- =========================================================
--- NO CLIP (GLOBAL)
+-- NO CLIP
 -- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
@@ -1309,7 +1313,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- VISUAL FUNCTIONS (GLOBAL)
+-- VISUAL FUNCTIONS
 -- =========================================================
 origLighting = {
     Brightness = Lighting.Brightness,
@@ -1459,7 +1463,6 @@ function applyContrast()
     end
 end
 
--- KORBLOX (GLOBAL)
 KorbloxOrig = nil
 function applyKorblox(s)
     local char = LP.Character
@@ -1504,7 +1507,6 @@ task.spawn(function()
     end
 end)
 
--- HEADLESS (GLOBAL)
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -1545,7 +1547,6 @@ task.spawn(function()
     end
 end)
 
--- TRAIL FIRE (GLOBAL)
 trailFireObj = nil
 function applyTrail(enable, color)
     local char = LP.Character
@@ -1593,7 +1594,6 @@ function applyTrail(enable, color)
     spark.Parent = trailFireObj
 end
 
--- AURA FIRE (GLOBAL)
 auraObj = nil
 function applyAura(enable, color)
     local char = LP.Character
@@ -1618,7 +1618,6 @@ function applyAura(enable, color)
     auraObj.Parent = hrp
 end
 
--- KILL EFFECT (GLOBAL)
 function spawnKillEffect(pos)
     local p = Instance.new("Part")
     p.Anchored = true
@@ -1639,7 +1638,6 @@ function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
--- CROSSHAIR (GLOBAL)
 crosshairGui = nil
 function applyCrosshair(enable, color, size)
     if crosshairGui then
@@ -1685,7 +1683,6 @@ function applyZoomOut(enable, val)
     end
 end
 
--- FLY (GLOBAL)
 flyBV, flyBG, flyConn = nil, nil, nil
 function startFly()
     if flyConn then return end
@@ -1777,7 +1774,7 @@ _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
 print("✅ [3/8] Fungsi + Auto Parry + Auto Skill Check loaded")-- =========================================================
--- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA (FIXED)
+-- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA
 -- =========================================================
 
 -- AUTO HEAL
@@ -2195,7 +2192,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILL FEED (GLOBAL)
+-- KILL FEED
 -- =========================================================
 killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "RoooorKillFeed"
@@ -2269,7 +2266,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- NOTIFIKASI KILLER STUN (GLOBAL)
+-- NOTIFIKASI KILLER STUN
 -- =========================================================
 stunIcons = {}
 
@@ -2445,7 +2442,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE (GLOBAL)
+-- PARRY CIRCLE
 -- =========================================================
 _G.Roooor_ParryCircle = nil
 function updateParryCircle()
@@ -2569,7 +2566,7 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK (FIXED)
+-- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
 -- =========================================================
 gui = Instance.new("ScreenGui")
 gui.Name = "RoooorHubFire"
@@ -2708,7 +2705,6 @@ for i = 1, 10 do
     end)
 end
 
--- DRAG TOMBOL
 dragging = false
 dragStart = nil
 startPos = nil
@@ -2902,7 +2898,6 @@ panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
--- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = C.PANEL
@@ -2971,7 +2966,6 @@ closeBtn.Parent = header
 rnd(closeBtn, 7)
 strk(closeBtn, C.RED, 1, 0.5)
 
--- SIDEBAR
 sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 105, 1, -58)
 sbFrame.Position = UDim2.new(0, 10, 0, 50)
@@ -3004,7 +2998,6 @@ sbP.PaddingRight = UDim.new(0, 4)
 sbP.PaddingBottom = UDim.new(0, 6)
 sbP.Parent = sb
 
--- CONTENT
 ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -135, 1, -58)
 ct.Position = UDim2.new(0, 122, 0, 50)
@@ -3031,7 +3024,7 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI (GLOBAL)
+-- KOMPONEN UI
 -- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
@@ -3452,7 +3445,6 @@ function makeTab(name, icon, order, cb)
     end)
 end
 
--- EXPOSE ke global
 _G.Roooor_sec = sec
 _G.Roooor_lbl = lbl
 _G.Roooor_tog = tog
@@ -3478,7 +3470,7 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 print("✅ [5/8] GUI + Tombol R + Aimlock + Panel loaded")-- =========================================================
--- BAGIAN 6/8 : TAB UI PART 1 (FIXED)
+-- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3736,7 +3728,7 @@ makeTab("Survivor", "🏃", 4, function()
 end)
 
 print("✅ [6/8] Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
--- BAGIAN 7/8 : TAB UI PART 2 (FIXED)
+-- BAGIAN 7/8 : TAB UI PART 2
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3998,9 +3990,8 @@ makeTab("Player", "👤", 8, function()
 end)
 
 print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- =========================================================
--- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY (FIXED)
+-- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
-
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
 tog = _G.Roooor_tog

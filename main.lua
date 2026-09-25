@@ -1,6 +1,7 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v8
--- BAGIAN 1/9 : LOADING 4D + CONFIG + STATE
+-- ROOORHUB ULTIMATE FIRE EDITION v9
+-- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
+-- NO MUSIC VERSION
 -- =========================================================
 
 local Players = game:GetService("Players")
@@ -12,7 +13,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Stats = game:GetService("Stats")
 local GuiService = game:GetService("GuiService")
-local SoundService = game:GetService("SoundService")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
@@ -31,7 +31,6 @@ local C = {
     FIRE2 = Color3.fromRGB(255, 220, 80),
     FIRE3 = Color3.fromRGB(255, 60, 0),
     FIRE_BRIGHT = Color3.fromRGB(255, 240, 150),
-    MUSIC = Color3.fromRGB(200, 100, 255),
     TXT = Color3.fromRGB(245, 245, 255),
     DIM = Color3.fromRGB(120, 120, 160),
     GRN = Color3.fromRGB(0, 255, 150),
@@ -89,7 +88,6 @@ task.spawn(function()
     end
 end)
 
--- Partikel api
 for i = 1, 40 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(4, 10), 0, math.random(4, 10))
@@ -114,7 +112,6 @@ for i = 1, 40 do
     end)
 end
 
--- Ring container
 local ringContainer = Instance.new("Frame")
 ringContainer.Size = UDim2.new(0, 240, 0, 240)
 ringContainer.Position = UDim2.new(0.5, -120, 0.5, -180)
@@ -147,7 +144,6 @@ for i = 1, 4 do
     table.insert(rings, {ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1})
 end
 
--- Core
 local core = Instance.new("Frame")
 core.Size = UDim2.new(0, 80, 0, 80)
 core.Position = UDim2.new(0.5, -40, 0.5, -40)
@@ -167,7 +163,6 @@ coreIcon.TextSize = 44
 coreIcon.Font = Enum.Font.GothamBlack
 coreIcon.Parent = core
 
--- Judul
 local welcomeTitle = Instance.new("TextLabel")
 welcomeTitle.Size = UDim2.new(1, 0, 0, 70)
 welcomeTitle.Position = UDim2.new(0, 0, 0.32, 0)
@@ -202,7 +197,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE v8 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE v9 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -210,7 +205,6 @@ tagline.TextStrokeTransparency = 0.3
 tagline.TextStrokeColor3 = C.FIRE3
 tagline.Parent = bg
 
--- Progress
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 420, 0, 6)
 progressBar.Position = UDim2.new(0.5, -210, 0.9, 20)
@@ -255,7 +249,7 @@ task.spawn(function()
     end
 end)
 
-task.delay(3.5, function()
+task.delay(3, function()
     TweenService:Create(bg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
     for _, el in pairs(bg:GetDescendants()) do
         pcall(function()
@@ -322,7 +316,6 @@ _G.RoooorS = _G.RoooorS or {
     PlayerList = false,
     KillFeed = false,
     StunNotify = false,
-    MusicOn = false,
 }
 
 local S = _G.RoooorS
@@ -366,7 +359,7 @@ _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     SafeZone = 0.15,
 }
 
--- AIMLOCK (FITUR tetap ada, tombol button dihapus)
+-- AIMLOCK
 _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Enabled = true,
     Holding = false,
@@ -376,15 +369,8 @@ _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Strength = 0.4,
 }
 
--- MUSIC
-_G.Roooor_Music = _G.Roooor_Music or {
-    Enabled = false,
-    CurrentIdx = 1,
-    Volume = 2,
-}
-
-print("✅ [1/9] Loading 4D + Config loaded")-- =========================================================
--- BAGIAN 2/9 : FIRE CONFIG + SKY + KILLER ANIMS
+print("✅ [1/8] Loading 4D + Config loaded (NO MUSIC)")-- =========================================================
+-- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 local FireList = {
@@ -547,8 +533,8 @@ local function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-print("✅ [2/9] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/9 : SEMUA FUNGSI
+print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
+-- BAGIAN 3/8 : SEMUA FUNGSI
 -- =========================================================
 
 -- ============================
@@ -976,7 +962,7 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR v8 (ANTI-MISS)
+-- AUTO PARRY GACOR v9
 -- =========================================================
 local AutoParry = _G.Roooor_AutoParry
 local lastParry = 0
@@ -1178,9 +1164,7 @@ local function triggerSkillCheck()
 end
 
 task.spawn(function()
-    while gui and gui.Parent do
-        task.wait(0.01)
-
+    while task.wait(0.01) do
         if not SkillCheck.Enabled then continue end
 
         local prompt = PG:FindFirstChild("SkillCheckPromptGui")
@@ -1229,10 +1213,9 @@ task.spawn(function()
     end
 end)
 
+-- PERFECT MODE
 task.spawn(function()
-    while gui and gui.Parent do
-        task.wait(0.01)
-
+    while task.wait(0.01) do
         if not SkillCheck.Enabled then continue end
         if not SkillCheck.PerfectMode then continue end
 
@@ -1671,86 +1654,6 @@ local function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- =========================================================
--- MUSIC SYSTEM — 30 VARIAN DJ OLD
--- =========================================================
-local MusicList = {
-    {name = "Demon Emperor", id = "rbxassetid://1837879082"},
-    {name = "Phonk Devil", id = "rbxassetid://1836315512"},
-    {name = "Tokyo Drift", id = "rbxassetid://1836236702"},
-    {name = "Sahara", id = "rbxassetid://1835944735"},
-    {name = "Bad Boys", id = "rbxassetid://1835933299"},
-    {name = "Megalovania", id = "rbxassetid://1836314038"},
-    {name = "Coffin Dance", id = "rbxassetid://1836315949"},
-    {name = "Believer", id = "rbxassetid://1836725018"},
-    {name = "Faded", id = "rbxassetid://1836223610"},
-    {name = "Alone", id = "rbxassetid://1836223611"},
-    {name = "On My Way", id = "rbxassetid://1836223612"},
-    {name = "Spectre", id = "rbxassetid://1836223613"},
-    {name = "Unity", id = "rbxassetid://1836223614"},
-    {name = "Sky High", id = "rbxassetid://1836223615"},
-    {name = "Hero", id = "rbxassetid://1836223616"},
-    {name = "Xenogenesis", id = "rbxassetid://1836223617"},
-    {name = "Wolf", id = "rbxassetid://1836223618"},
-    {name = "Thunder", id = "rbxassetid://1836223619"},
-    {name = "Ghost", id = "rbxassetid://1836223620"},
-    {name = "Samurai", id = "rbxassetid://1836223621"},
-    {name = "Neon", id = "rbxassetid://1836223622"},
-    {name = "Cyberpunk", id = "rbxassetid://1836223623"},
-    {name = "Warrior", id = "rbxassetid://1836223624"},
-    {name = "Ninja", id = "rbxassetid://1836223625"},
-    {name = "Rise Up", id = "rbxassetid://1836223626"},
-    {name = "Awaken", id = "rbxassetid://1836223627"},
-    {name = "Chaos", id = "rbxassetid://1836223628"},
-    {name = "Infinity", id = "rbxassetid://1836223629"},
-    {name = "Kingdom", id = "rbxassetid://1836223630"},
-    {name = "Supreme", id = "rbxassetid://1836223631"},
-}
-
-local musicInstance = nil
-local currentMusicIdx = 1
-
-local function playMusic(idx)
-    if musicInstance then
-        musicInstance:Destroy()
-        musicInstance = nil
-    end
-
-    if idx < 1 or idx > #MusicList then return end
-
-    currentMusicIdx = idx
-    local song = MusicList[idx]
-
-    musicInstance = Instance.new("Sound")
-    musicInstance.SoundId = song.id
-    musicInstance.Volume = _G.Roooor_Music.Volume
-    musicInstance.Looped = true
-    musicInstance.Parent = SoundService
-    musicInstance:Play()
-
-    print("[Music] Now playing: " .. song.name)
-end
-
-local function stopMusic()
-    if musicInstance then
-        musicInstance:Stop()
-        musicInstance:Destroy()
-        musicInstance = nil
-    end
-end
-
-local function nextMusic()
-    local nextIdx = currentMusicIdx + 1
-    if nextIdx > #MusicList then nextIdx = 1 end
-    playMusic(nextIdx)
-end
-
-local function prevMusic()
-    local prevIdx = currentMusicIdx - 1
-    if prevIdx < 1 then prevIdx = #MusicList end
-    playMusic(prevIdx)
-end
-
 -- EXPOSE GLOBAL
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
@@ -1781,16 +1684,8 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
--- MUSIC global
-_G.Roooor_MusicList = MusicList
-_G.Roooor_playMusic = playMusic
-_G.Roooor_stopMusic = stopMusic
-_G.Roooor_nextMusic = nextMusic
-_G.Roooor_prevMusic = prevMusic
-_G.Roooor_getCurrentMusic = function() return currentMusicIdx end
-
-print("✅ [3/9] Semua fungsi loaded + Music System")-- =========================================================
--- BAGIAN 4/9 : FITUR BARU + LOOP UTAMA
+print("✅ [3/8] Semua fungsi loaded")-- =========================================================
+-- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA
 -- =========================================================
 
 -- AUTO HEAL
@@ -2625,8 +2520,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/9] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/9 : GUI + KOMPONEN + TOMBOL R + AIMLOCK + MUSIC
+print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
+-- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
 -- =========================================================
 
 local gui = Instance.new("ScreenGui")
@@ -2637,7 +2532,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" 4D (DIPERKECIL - 42px)
+-- TOMBOL MENU "R" 4D (KECIL - 42px)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 42, 0, 42)
@@ -2645,7 +2540,7 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Outer ring
+-- Ring 1 (outer)
 local ring1 = Instance.new("Frame")
 ring1.Size = UDim2.new(1, 8, 1, 8)
 ring1.Position = UDim2.new(0, -4, 0, -4)
@@ -2660,7 +2555,7 @@ local ring1Grad = Instance.new("UIGradient")
 ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, C.FIRE1, C.FIRE2, C.FIRE3)
 ring1Grad.Parent = ring1Stroke
 
--- Middle ring
+-- Ring 2 (middle)
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 4, 1, 4)
 ring2.Position = UDim2.new(0, -2, 0, -2)
@@ -2672,7 +2567,7 @@ ring2Stroke.Color = C.FIRE2
 ring2Stroke.Transparency = 0.3
 ring2Stroke.Parent = ring2
 
--- Inner ring
+-- Ring 3 (inner)
 local ring3 = Instance.new("Frame")
 ring3.Size = UDim2.new(1, -8, 1, -8)
 ring3.Position = UDim2.new(0, 4, 0, 4)
@@ -2708,7 +2603,7 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Glow
+-- Glow pulse
 local glow = Instance.new("Frame")
 glow.Size = UDim2.new(1, 16, 1, 16)
 glow.Position = UDim2.new(0, -8, 0, -8)
@@ -2730,7 +2625,7 @@ innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- ANIMATION LOOP
+-- Animasi loop
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -2799,7 +2694,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON + HOLD TO AIM (RADIUS + LOCK RADIUS)
+-- AIMLOCK FLOATING BUTTON (HOLD TO AIM + RADIUS)
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2947,7 +2842,7 @@ aimBtn.MouseButton2Click:Connect(function()
     end
 end)
 
--- AIMLOCK LOOP (Hold + Radius + Lock Radius)
+-- AIMLOCK LOOP
 task.spawn(function()
     while aimContainer.Parent do
         task.wait(0.02)
@@ -2982,100 +2877,6 @@ task.spawn(function()
             local targetCF = CFrame.new(cam.CFrame.Position, closest.Position)
             cam.CFrame = cam.CFrame:Lerp(targetCF, Aimlock.Strength)
         end
-    end
-end)
-
--- =========================================================
--- MUSIC FLOATING BUTTON
--- =========================================================
-local musicBtnGui = Instance.new("ScreenGui")
-musicBtnGui.Name = "RoooorMusicBtn"
-musicBtnGui.ResetOnSpawn = false
-musicBtnGui.IgnoreGuiInset = true
-musicBtnGui.Parent = PG
-
-local musicBtnContainer = Instance.new("Frame")
-musicBtnContainer.Size = UDim2.new(0, 46, 0, 46)
-musicBtnContainer.Position = UDim2.new(0, 15, 0.5, 0)
-musicBtnContainer.BackgroundTransparency = 1
-musicBtnContainer.Parent = musicBtnGui
-
-local musicOuterRing = Instance.new("Frame")
-musicOuterRing.Size = UDim2.new(1, 6, 1, 6)
-musicOuterRing.Position = UDim2.new(0, -3, 0, -3)
-musicOuterRing.BackgroundTransparency = 1
-musicOuterRing.Parent = musicBtnContainer
-local musicOuterStroke = Instance.new("UIStroke")
-musicOuterStroke.Thickness = 2
-musicOuterStroke.Color = C.MUSIC
-musicOuterStroke.Transparency = 0.1
-musicOuterStroke.Parent = musicOuterRing
-local musicOuterGrad = Instance.new("UIGradient")
-musicOuterGrad.Color = ColorSequence.new(C.MUSIC, C.ACC2, C.ACC3, C.MUSIC)
-musicOuterGrad.Parent = musicOuterStroke
-
-local musicBtn = Instance.new("TextButton")
-musicBtn.Size = UDim2.new(1, -8, 1, -8)
-musicBtn.Position = UDim2.new(0, 4, 0, 4)
-musicBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 70)
-musicBtn.Text = "🎵"
-musicBtn.TextColor3 = C.MUSIC
-musicBtn.TextSize = 22
-musicBtn.Font = Enum.Font.GothamBlack
-musicBtn.BorderSizePixel = 0
-musicBtn.AutoButtonColor = false
-musicBtn.Parent = musicBtnContainer
-rnd(musicBtn, 999)
-
-local musicBtnGrad = Instance.new("UIGradient")
-musicBtnGrad.Color = ColorSequence.new(Color3.fromRGB(60, 30, 100), Color3.fromRGB(30, 15, 50), Color3.fromRGB(60, 30, 100))
-musicBtnGrad.Rotation = 45
-musicBtnGrad.Parent = musicBtn
-
-local musicGlow = Instance.new("Frame")
-musicGlow.Size = UDim2.new(1, 16, 1, 16)
-musicGlow.Position = UDim2.new(0, -8, 0, -8)
-musicGlow.BackgroundColor3 = C.MUSIC
-musicGlow.BackgroundTransparency = 0.6
-musicGlow.BorderSizePixel = 0
-musicGlow.ZIndex = -1
-musicGlow.Parent = musicBtn
-rnd(musicGlow, 999)
-
-task.spawn(function()
-    local t = 0
-    while musicBtnContainer.Parent do
-        t = t + 0.03
-        musicOuterRing.Rotation = t * 60
-        musicOuterGrad.Rotation = t * 100
-        local pulse = (math.sin(t * 4) + 1) / 2
-        musicGlow.BackgroundTransparency = 0.75 - pulse * 0.4
-        musicGlow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
-        musicGlow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
-        musicBtnGrad.Rotation = t * 40
-        musicBtn.TextSize = 22 + math.sin(t * 6) * 3
-        task.wait(0.03)
-    end
-end)
-
--- DRAG MUSIC BUTTON
-local mDrag, mDS, mDP, mWasDragged = false, nil, nil, false
-musicBtnContainer.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        mDrag = true; mWasDragged = false
-        mDS = input.Position; mDP = musicBtnContainer.Position
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if mDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local d = input.Position - mDS
-        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then mWasDragged = true end
-        musicBtnContainer.Position = UDim2.new(mDP.X.Scale, mDP.X.Offset + d.X, mDP.Y.Scale, mDP.Y.Offset + d.Y)
-    end
-end)
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        mDrag = false
     end
 end)
 
@@ -3139,7 +2940,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -100, 1, 0)
 hTitle.Position = UDim2.new(0, 18, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v8"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v9"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 14
 hTitle.Font = Enum.Font.GothamBlack
@@ -3221,7 +3022,7 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- KOMPONEN UI (sec, lbl, tog, sl, cpk, btn, drp)
+-- KOMPONEN UI
 local function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 24)
@@ -3605,8 +3406,8 @@ closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
 end)
 
-print("✅ [5/9] GUI + Komponen + Tombol R + Aimlock + Music loaded")-- =========================================================
--- BAGIAN 6/9 : TAB UI PART 1
+print("✅ [5/8] GUI + Komponen + Tombol R + Aimlock loaded")-- =========================================================
+-- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 
 -- ============================
@@ -3754,7 +3555,7 @@ end)
 -- TAB: SURVIVOR
 -- ============================
 makeTab("Survivor", "🏃", 4, function()
-    sec("Auto Parry GACOR v8", "🛡️")
+    sec("Auto Parry GACOR v9", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
@@ -3900,8 +3701,8 @@ makeTab("Killer", "🔪", 5, function()
     end)
 end)
 
-print("✅ [6/9] Tab Part 1 loaded")-- =========================================================
--- BAGIAN 7/9 : TAB UI PART 2
+print("✅ [6/8] Tab Part 1 loaded")-- =========================================================
+-- BAGIAN 7/8 : TAB UI PART 2
 -- =========================================================
 
 -- ============================
@@ -4169,71 +3970,10 @@ makeTab("Anti", "🛡️", 11, function()
     tog("Enable Anti AFK", false, function(s) S.AntiAFK = s end)
 end)
 
-print("✅ [7/9] Tab Part 2 loaded")-- =========================================================
--- BAGIAN 8/9 : TAB MUSIC + TOP 10 + SETTINGS
--- =========================================================
-
--- ============================
--- TAB: MUSIC (30 VARIAN DJ OLD)
--- ============================
-makeTab("Music", "🎵", 12, function()
-    sec("Music Player (30 DJ Old)", "🎵")
-    btn("🎵 Buka Music Panel", function()
-        if _G.Roooor_toggleMusic then
-            _G.Roooor_toggleMusic()
-        end
-    end)
-    lbl("30 Varian DJ Old", C.MUSIC)
-    lbl("Demon Emperor, Phonk, Tokyo Drift, dll", C.DIM)
-
-    sec("Quick Play", "▶️")
-    btn("▶️ Play Demon Emperor", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(1) end
-    end)
-    btn("▶️ Play Phonk Devil", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(2) end
-    end)
-    btn("▶️ Play Tokyo Drift", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(3) end
-    end)
-    btn("▶️ Play Bad Boys", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(5) end
-    end)
-    btn("▶️ Play Coffin Dance", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(7) end
-    end)
-    btn("▶️ Play Faded", function()
-        if _G.Roooor_playMusic then _G.Roooor_playMusic(9) end
-    end)
-
-    sec("Control", "🎛️")
-    btn("⏭ Next Song", function()
-        if _G.Roooor_nextMusic then _G.Roooor_nextMusic() end
-    end)
-    btn("⏮ Prev Song", function()
-        if _G.Roooor_prevMusic then _G.Roooor_prevMusic() end
-    end)
-    btn("⏹ Stop Music", function()
-        if _G.Roooor_stopMusic then _G.Roooor_stopMusic() end
-    end)
-
-    sec("Volume", "🔊")
-    sl("Music Volume", 0, 10, 2, function(v)
-        _G.Roooor_Music.Volume = v
-    end)
-
-    sec("Daftar Lagu (30)", "📋")
-    for i, song in ipairs(MusicList) do
-        btn("🎵 " .. i .. ". " .. song.name, function()
-            if _G.Roooor_playMusic then _G.Roooor_playMusic(i) end
-        end)
-    end
-end)
-
 -- ============================
 -- TAB: TOP 10
 -- ============================
-makeTab("Top 10", "🏆", 13, function()
+makeTab("Top 10", "🏆", 12, function()
     sec("Safe Zone Warning", "🟢")
     tog("Enable Safe Zone", false, function(s) S.SafeZone = s end)
 
@@ -4258,35 +3998,31 @@ end)
 -- ============================
 -- TAB: SETTINGS
 -- ============================
-makeTab("Settings", "⚙️", 14, function()
+makeTab("Settings", "⚙️", 13, function()
     sec("Keybind", "⌨️")
     lbl("Klik tombol R = Buka Menu", C.FIRE_BRIGHT)
     lbl("Drag tombol R = Pindah posisi", C.DIM)
     lbl("HOLD tombol 🎯 = Aim aktif", C.ACC2)
     lbl("Klik kanan 🎯 = Switch mode", C.DIM)
     lbl("Drag 🎯 = Pindah posisi aimlock", C.DIM)
-    lbl("Klik 🎵 = Buka Music Panel", C.MUSIC)
-    lbl("Drag 🎵 = Pindah posisi music", C.DIM)
     lbl("RightShift = Toggle Menu", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("RoooorHub Ultimate Fire v8", C.FIRE_BRIGHT)
+    lbl("RoooorHub Ultimate Fire v9", C.FIRE_BRIGHT)
     lbl("60 Fire + 20 Fire Feet + 7 Sky", C.FIRE_BRIGHT)
     lbl("ESP Fallens-Style + Limited Radius", C.GRN)
-    lbl("Parry v8 + Anti-Miss + Abyss Dodge", C.GRN)
+    lbl("Parry v9 + Anti-Miss + Abyss Dodge", C.GRN)
     lbl("Teleport Gate + No Clip + Kill Feed", C.GRN)
     lbl("Stun Notify + Aimlock Hold-to-Aim", C.GRN)
-    lbl("30 Varian DJ Old Music", C.MUSIC)
     lbl("Made with 🔥", C.FIRE_BRIGHT)
 
     sec("Credits", "💜")
     lbl("Developer: Roooor", C.ACC)
-    lbl("Music: DJ Old Collection", C.MUSIC)
     lbl("UI: Fire Edition", C.FIRE_BRIGHT)
 end)
 
-print("✅ [8/9] Tab Music + Top 10 + Settings loaded")-- =========================================================
--- BAGIAN 9/9 : RESPAWN + ANTI-RESET + FPS + FINAL
+print("✅ [7/8] Tab Part 2 loaded")-- =========================================================
+-- BAGIAN 8/8 : RESPAWN + ANTI-RESET + FPS + FINAL
 -- =========================================================
 
 -- ============================
@@ -4318,8 +4054,8 @@ end)
 -- ANTI-RESET TOGGLE
 -- ============================
 task.spawn(function()
-    while gui.Parent do
-        task.wait(0.4)
+    while task.wait(0.4) do
+        if not gui or not gui.Parent then break end
         for name, state in pairs(_G.ToggleStates) do
             if name == "👑 Enable 8-Bit Crown" then
                 if S.EightBitCrown ~= state then
@@ -4508,14 +4244,14 @@ end
 -- FINAL PRINT
 -- =========================================================
 print("=====================================================")
-print("🔥 ROOORHUB ULTIMATE FIRE EDITION v8")
+print("🔥 ROOORHUB ULTIMATE FIRE EDITION v9")
 print("🎉 FULL SUCCESS - ALL FEATURES LOADED!")
 print("=====================================================")
 print("📋 DAFTAR TAB:")
 print("  1. 🔥 Fire          — 60 Efek")
 print("  2. 👟 Fire Feet     — 20 Efek")
 print("  3. 👁️ ESP           — Fallens-Style + Limited Radius")
-print("  4. 🏃 Survivor      — Parry v8 + Skill Check + Stun Notify")
+print("  4. 🏃 Survivor      — Parry v9 + Skill Check + Stun Notify")
 print("  5. 🔪 Killer        — Auto Kill FIXED + Kill Feed + Hitbox")
 print("  6. 🎨 Visual        — Fullbright Slider + Sky")
 print("  7. 👑 8-Bit Crown   — Bisa diatur posisi X/Y/Z")
@@ -4523,9 +4259,8 @@ print("  8. ✨ Visual+       — Trail Fire + Aura Fire + Crosshair")
 print("  9. 🏃 Movement      — WalkSpeed + NoClip + Fly")
 print(" 10. 🌀 Teleport      — TP Gate + TP Inside Gate + TP Finish")
 print(" 11. 🛡️ Anti          — Grab + Hook + Blind + Stun + Ragdoll")
-print(" 12. 🎵 Music         — 30 Varian DJ Old")
-print(" 13. 🏆 Top 10        — SafeZone + EscapeAlert + PlayerList")
-print(" 14. ⚙️ Settings      — Info + Keybind")
+print(" 12. 🏆 Top 10        — SafeZone + EscapeAlert + PlayerList")
+print(" 13. ⚙️ Settings      — Info + Keybind")
 print("=====================================================")
 print("✨ Loading 4D Fire Ring (SELAMAT DATANG SC PENGANGGURAN)")
 print("🔴 Tombol menu 'R' 4D API (KECIL + BISA DIGESER)")
@@ -4534,11 +4269,7 @@ print("   • FITUR tetap ada di menu")
 print("   • Radius + Lock Radius slider")
 print("   • HOLD tombol 🎯 di layar = aim aktif")
 print("   • Klik kanan 🎯 = switch mode")
-print("🎵 MUSIC:")
-print("   • 30 Varian DJ Old")
-print("   • Tombol 🎵 floating")
-print("   • Demon Emperor, Phonk, Tokyo Drift, dll")
-print("⚔️ Auto Parry v8 (Anti-Miss buffer +5)")
+print("⚔️ Auto Parry v9 (Anti-Miss buffer +5)")
 print("💀 Auto Kill All FIX (Anti nyangkut)")
 print("📦 Hitbox Safe (Selalu invisible)")
 print("🎯 Skill Check FIXED (NO COOLDOWN)")
@@ -4547,5 +4278,5 @@ print("💬 Kill Feed (Khusus Killer)")
 print("🌀 Teleport Gate + Inside Gate")
 print("👻 No Clip")
 print("=====================================================")
-print("Total: 70+ FITUR PREMIUM")
+print("Total: 65+ FITUR PREMIUM (NO MUSIC)")
 print("=====================================================")

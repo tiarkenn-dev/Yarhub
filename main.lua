@@ -1,6 +1,6 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v14
--- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
+-- ROOORHUB
+-- BAGIAN 1/8 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -53,7 +53,7 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- SOUND SYSTEM (DEFAULT TOGGLE)
+-- SOUND SYSTEM (1 SOUND ONLY)
 -- =========================================================
 local ToggleSoundId = "rbxassetid://6073491164"
 
@@ -220,7 +220,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE v14 🔥"
+tagline.Text = "🔥 ROOORHUB 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -295,17 +295,15 @@ end)
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-    Parry = false, AntiFakeHit = false, DodgeRange = 15,
+    Parry = false, DodgeRange = 15,
     AbyssDodge = false, ParryCircle = false, ParryCircleSize = 15,
-    Skill = false,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false, Korblox = false, Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
-    AutoVault = false,
-    InstantInteract = false,
+    AutoVault = false, InstantInteract = false,
     EightBitCrown = false, EightBitSize = 1, CrownX = 0, CrownY = 1.2, CrownZ = 0,
     Trail = false, TrailColor = Color3.fromRGB(255, 120, 0),
     Aura = false, AuraColor = Color3.fromRGB(255, 120, 0),
@@ -331,7 +329,7 @@ local S = _G.RoooorS
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- ESP CONFIG
+-- ESP
 _G.Roooor_ESP = _G.Roooor_ESP or {
     Survivor = false, Killer = false, Generator = false,
     Pallet = false, Window = false, SCP = false, Distance = 50,
@@ -345,9 +343,7 @@ _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
     Survivor = Color3.fromRGB(60, 255, 120),
 }
 
--- =========================================================
 -- AUTO PARRY
--- =========================================================
 _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
@@ -359,9 +355,7 @@ _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     WiggleSpam = 5,
 }
 
--- =========================================================
--- AUTO SKILL CHECK (1 MODE)
--- =========================================================
+-- AUTO SKILL CHECK
 _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
 }
@@ -377,9 +371,7 @@ _G.Roooor_GodMode = _G.Roooor_GodMode or {
     Enabled = false,
 }
 
--- =========================================================
--- COMBAT CONFIG (AIMBOT + HITBOX)
--- =========================================================
+-- COMBAT (AIMBOT + HITBOX)
 _G.Roooor_Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
@@ -1163,7 +1155,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (1 MODE)
+-- AUTO SKILL CHECK
 -- =========================================================
 local SkillCheck = _G.Roooor_SkillCheck
 
@@ -2589,82 +2581,66 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI REDESIGN - GLASSMORPHISM EDITION
+-- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
 -- =========================================================
-
--- PALET WARNA BARU
-local NewC = {
-    BG = Color3.fromRGB(12, 8, 25),
-    BG2 = Color3.fromRGB(20, 12, 45),
-    PANEL = Color3.fromRGB(18, 12, 38),
-    PANEL2 = Color3.fromRGB(28, 18, 55),
-    GLASS = Color3.fromRGB(35, 25, 70),
-    GLASS2 = Color3.fromRGB(45, 30, 90),
-    ACC = Color3.fromRGB(180, 100, 255),
-    ACC2 = Color3.fromRGB(0, 220, 255),
-    ACC3 = Color3.fromRGB(255, 80, 200),
-    NEON = Color3.fromRGB(120, 200, 255),
-    NEON2 = Color3.fromRGB(200, 120, 255),
-    TXT = Color3.fromRGB(240, 240, 255),
-    DIM = Color3.fromRGB(130, 130, 170),
-    GRN = Color3.fromRGB(80, 255, 180),
-    RED = Color3.fromRGB(255, 80, 120),
-    GOLD = Color3.fromRGB(255, 220, 100),
-}
-
--- Update global C
-for k, v in pairs(NewC) do
-    C[k] = v
-end
-
--- FIRE color tetep (buat fitur fire)
-C.FIRE1 = Color3.fromRGB(255, 120, 0)
-C.FIRE2 = Color3.fromRGB(255, 220, 80)
-C.FIRE3 = Color3.fromRGB(255, 60, 0)
-C.FIRE_BRIGHT = Color3.fromRGB(255, 240, 150)
-
 local gui = Instance.new("ScreenGui")
-gui.Name = "RoooorHubNeo"
+gui.Name = "RoooorHubFire"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU NEO (BULAT + PULSE)
+-- TOMBOL MENU R (BULAT + API RING + PARTIKEL)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 50, 0, 50)
+btnContainer.Size = UDim2.new(0, 55, 0, 55)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Outer glow ring
-local outerRing = Instance.new("Frame")
-outerRing.Size = UDim2.new(1, 14, 1, 14)
-outerRing.Position = UDim2.new(0, -7, 0, -7)
-outerRing.BackgroundTransparency = 1
-outerRing.Parent = btnContainer
+-- Ring 1
+local ring1 = Instance.new("Frame")
+ring1.Size = UDim2.new(1, 10, 1, 10)
+ring1.Position = UDim2.new(0, -5, 0, -5)
+ring1.BackgroundTransparency = 1
+ring1.Parent = btnContainer
 
-local outerStroke = Instance.new("UIStroke")
-outerStroke.Thickness = 2
-outerStroke.Color = C.ACC
-outerStroke.Transparency = 0.4
-outerStroke.Parent = outerRing
+local ring1Stroke = Instance.new("UIStroke")
+ring1Stroke.Thickness = 3
+ring1Stroke.Color = C.FIRE_BRIGHT
+ring1Stroke.Transparency = 0.1
+ring1Stroke.Parent = ring1
 
-local outerGrad = Instance.new("UIGradient")
-outerGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3, C.ACC)
-outerGrad.Rotation = 0
-outerGrad.Parent = outerStroke
+local ring1Grad = Instance.new("UIGradient")
+ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE1, C.FIRE_BRIGHT, C.FIRE2, C.FIRE3)
+ring1Grad.Parent = ring1Stroke
 
--- Main button bulat
+-- Ring 2
+local ring2 = Instance.new("Frame")
+ring2.Size = UDim2.new(1, 4, 1, 4)
+ring2.Position = UDim2.new(0, -2, 0, -2)
+ring2.BackgroundTransparency = 1
+ring2.Parent = btnContainer
+
+local ring2Stroke = Instance.new("UIStroke")
+ring2Stroke.Thickness = 1.5
+ring2Stroke.Color = C.FIRE1
+ring2Stroke.Transparency = 0.3
+ring2Stroke.Parent = ring2
+
+local ring2Grad = Instance.new("UIGradient")
+ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
+ring2Grad.Parent = ring2Stroke
+
+-- Tombol utama
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -4, 1, -4)
-mainBtn.Position = UDim2.new(0, 2, 0, 2)
-mainBtn.BackgroundColor3 = C.PANEL
-mainBtn.Text = "◈"
-mainBtn.TextColor3 = C.NEON
-mainBtn.TextSize = 26
+mainBtn.Size = UDim2.new(1, -14, 1, -14)
+mainBtn.Position = UDim2.new(0, 7, 0, 7)
+mainBtn.BackgroundColor3 = Color3.fromRGB(40, 12, 4)
+mainBtn.Text = "R"
+mainBtn.TextColor3 = C.FIRE_BRIGHT
+mainBtn.TextSize = 24
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
@@ -2672,41 +2648,87 @@ mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
 local btnGrad = Instance.new("UIGradient")
-btnGrad.Color = ColorSequence.new(C.PANEL, C.PANEL2, C.PANEL)
+btnGrad.Color = ColorSequence.new(
+    Color3.fromRGB(80, 25, 5),
+    Color3.fromRGB(40, 12, 4),
+    Color3.fromRGB(80, 25, 5)
+)
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Inner glow
+local glow = Instance.new("Frame")
+glow.Size = UDim2.new(1, 16, 1, 16)
+glow.Position = UDim2.new(0, -8, 0, -8)
+glow.BackgroundColor3 = C.FIRE_BRIGHT
+glow.BackgroundTransparency = 0.5
+glow.BorderSizePixel = 0
+glow.ZIndex = -1
+glow.Parent = mainBtn
+rnd(glow, 999)
+
 local innerGlow = Instance.new("Frame")
-innerGlow.Size = UDim2.new(0.7, 0, 0.7, 0)
-innerGlow.Position = UDim2.new(0.15, 0, 0.15, 0)
-innerGlow.BackgroundColor3 = C.ACC2
-innerGlow.BackgroundTransparency = 0.7
+innerGlow.Size = UDim2.new(0.6, 0, 0.6, 0)
+innerGlow.Position = UDim2.new(0.2, 0, 0.2, 0)
+innerGlow.BackgroundColor3 = C.FIRE1
+innerGlow.BackgroundTransparency = 0.4
 innerGlow.BorderSizePixel = 0
 innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- Animasi pulse
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-        outerRing.Rotation = t * 40
-        outerGrad.Rotation = t * 60
+        ring1.Rotation = t * 70
+        ring1Grad.Rotation = t * 120
+        ring2.Rotation = -t * 100
+        ring2Grad.Rotation = t * 80
 
-        local pulse = (math.sin(t * 3) + 1) / 2
-        outerStroke.Transparency = 0.6 - pulse * 0.4
-        mainBtn.TextSize = 26 + math.sin(t * 4) * 2
-        mainBtn.TextColor3 = Color3.fromHSV((t * 0.1) % 1, 0.7, 1)
-        innerGlow.BackgroundTransparency = 0.7 - pulse * 0.4
-
+        local pulse = (math.sin(t * 4) + 1) / 2
+        ring1Stroke.Transparency = 0.2 - pulse * 0.15
+        glow.BackgroundTransparency = 0.75 - pulse * 0.4
+        glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
+        glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
+        innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
+        btnGrad.Rotation = t * 40
+        mainBtn.TextSize = 24 + math.sin(t * 5) * 2
+        mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.9, 1)
         task.wait(0.03)
     end
 end)
 
--- Drag
-local dragging, dragStart, startPos, wasDragged = false, nil, nil, false
+-- Partikel orbit
+for i = 1, 10 do
+    local particle = Instance.new("Frame")
+    particle.Size = UDim2.new(0, 3, 0, 3)
+    particle.BackgroundColor3 = C.FIRE_BRIGHT
+    particle.BorderSizePixel = 0
+    particle.Parent = btnContainer
+    rnd(particle, 999)
+
+    local angle = (i / 10) * math.pi * 2
+    local orbitSpeed = 2 + math.random() * 2
+    local radius = 32 + math.random() * 6
+
+    task.spawn(function()
+        while btnContainer.Parent do
+            local t = tick()
+            local x = math.cos(t * orbitSpeed + angle) * radius
+            local y = math.sin(t * orbitSpeed + angle) * radius * 0.6
+            particle.Position = UDim2.new(0.5, x - 1.5, 0.5, y - 1.5)
+            particle.BackgroundTransparency = 0.1 + math.sin(t * 5 + i) * 0.3
+            particle.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.07) % 1, 0.9, 1)
+            task.wait(0.03)
+        end
+    end)
+end
+
+-- Drag tombol
+local dragging = false
+local dragStart = nil
+local startPos = nil
+local wasDragged = false
 
 btnContainer.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -2740,7 +2762,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING (GLASS STYLE)
+-- AIMLOCK FLOATING BUTTON
 -- =========================================================
 local aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2754,23 +2776,27 @@ aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
 aimContainer.BackgroundTransparency = 1
 aimContainer.Parent = aimBtnGui
 
-local aimRing = Instance.new("Frame")
-aimRing.Size = UDim2.new(1, 6, 1, 6)
-aimRing.Position = UDim2.new(0, -3, 0, -3)
-aimRing.BackgroundTransparency = 1
-aimRing.Parent = aimContainer
+local aimOuterRing = Instance.new("Frame")
+aimOuterRing.Size = UDim2.new(1, 6, 1, 6)
+aimOuterRing.Position = UDim2.new(0, -3, 0, -3)
+aimOuterRing.BackgroundTransparency = 1
+aimOuterRing.Parent = aimContainer
 
-local aimStroke = Instance.new("UIStroke")
-aimStroke.Thickness = 2
-aimStroke.Color = C.ACC2
-aimStroke.Transparency = 0.2
-aimStroke.Parent = aimRing
+local aimOuterStroke = Instance.new("UIStroke")
+aimOuterStroke.Thickness = 2
+aimOuterStroke.Color = C.ACC2
+aimOuterStroke.Transparency = 0.1
+aimOuterStroke.Parent = aimOuterRing
+
+local aimOuterGrad = Instance.new("UIGradient")
+aimOuterGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
+aimOuterGrad.Parent = aimOuterStroke
 
 local aimBtn = Instance.new("TextButton")
 aimBtn.Size = UDim2.new(1, -8, 1, -8)
 aimBtn.Position = UDim2.new(0, 4, 0, 4)
-aimBtn.BackgroundColor3 = C.PANEL
-aimBtn.Text = "◎"
+aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+aimBtn.Text = "🎯"
 aimBtn.TextColor3 = C.ACC2
 aimBtn.TextSize = 22
 aimBtn.Font = Enum.Font.GothamBlack
@@ -2780,13 +2806,14 @@ aimBtn.Parent = aimContainer
 rnd(aimBtn, 999)
 
 local aimModeLbl = Instance.new("TextLabel")
-aimModeLbl.Size = UDim2.new(0, 100, 0, 12)
+aimModeLbl.Size = UDim2.new(0, 100, 0, 14)
 aimModeLbl.Position = UDim2.new(0.5, -50, 1, 2)
 aimModeLbl.BackgroundTransparency = 1
 aimModeLbl.Text = "KILLER"
-aimModeLbl.TextColor3 = C.GOLD
+aimModeLbl.TextColor3 = C.ACC4
 aimModeLbl.TextSize = 9
 aimModeLbl.Font = Enum.Font.GothamBlack
+aimModeLbl.TextStrokeTransparency = 0.3
 aimModeLbl.Parent = aimBtn
 
 local Combat = _G.Roooor_Combat
@@ -2795,15 +2822,14 @@ task.spawn(function()
     local t = 0
     while aimContainer.Parent do
         t = t + 0.03
-        aimRing.Rotation = t * 50
+        aimOuterRing.Rotation = t * 60
+        aimOuterGrad.Rotation = t * 100
         local pulse = (math.sin(t * 4) + 1) / 2
-        aimStroke.Transparency = Combat.Holding and (0.1 - pulse * 0.1) or (0.5 - pulse * 0.3)
-        aimBtn.TextColor3 = Combat.Holding and C.GRN or C.ACC2
+        aimOuterStroke.Transparency = Combat.Holding and (0.1 - pulse * 0.1) or (0.5 - pulse * 0.3)
         task.wait(0.03)
     end
 end)
 
--- Drag aimlock
 local aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
 
 aimContainer.InputBegan:Connect(function(input)
@@ -2840,7 +2866,7 @@ aimBtn.InputBegan:Connect(function(input)
         or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
         Combat.Holding = true
-        aimBtn.BackgroundColor3 = C.GLASS2
+        aimBtn.BackgroundColor3 = Color3.fromRGB(30, 60, 120)
     end
 end)
 
@@ -2848,7 +2874,7 @@ aimBtn.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         Combat.Holding = false
-        aimBtn.BackgroundColor3 = C.PANEL
+        aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
     end
 end)
 
@@ -2860,7 +2886,7 @@ aimBtn.MouseButton2Click:Connect(function()
     else
         Combat.Mode = "Killer"
         aimModeLbl.Text = "KILLER"
-        aimModeLbl.TextColor3 = C.GOLD
+        aimModeLbl.TextColor3 = C.ACC4
     end
 end)
 
@@ -2876,184 +2902,136 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PANEL NEO (GLASSMORPHISM)
+-- PANEL MENU UTAMA
 -- =========================================================
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 480, 0, 360)
-panel.Position = UDim2.new(0.5, -240, 0.5, -180)
-panel.BackgroundColor3 = C.GLASS
-panel.BackgroundTransparency = 0.15
+panel.Size = UDim2.new(0, 420, 0, 340)
+panel.Position = UDim2.new(0.5, -210, 0.5, -170)
+panel.BackgroundColor3 = C.BG
+panel.BackgroundTransparency = 0.05
 panel.BorderSizePixel = 0
 panel.Visible = false
 panel.Parent = gui
-rnd(panel, 20)
-
-local panelStrk = Instance.new("UIStroke")
-panelStrk.Thickness = 1.5
-panelStrk.Color = C.ACC
-panelStrk.Transparency = 0.4
-panelStrk.Parent = panel
+rnd(panel, 18)
+strk(panel, C.FIRE2, 2, 0.2)
 
 local panelGrad = Instance.new("UIGradient")
-panelGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C.BG2),
-    ColorSequenceKeypoint.new(0.5, C.GLASS),
-    ColorSequenceKeypoint.new(1, C.BG2),
-})
-panelGrad.Rotation = 135
-panelGrad.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0.1),
-    NumberSequenceKeypoint.new(1, 0.3),
-})
+panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
+panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
 -- HEADER
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 46)
-header.BackgroundColor3 = C.PANEL2
-header.BackgroundTransparency = 0.3
+header.Size = UDim2.new(1, 0, 0, 40)
+header.BackgroundColor3 = C.PANEL
+header.BackgroundTransparency = 0.1
 header.BorderSizePixel = 0
 header.Parent = panel
-rnd(header, 20)
+rnd(header, 18)
 
 local hPatch = Instance.new("Frame")
-hPatch.Size = UDim2.new(1, 0, 0, 22)
-hPatch.Position = UDim2.new(0, 0, 1, -22)
-hPatch.BackgroundColor3 = C.PANEL2
-hPatch.BackgroundTransparency = 0.3
+hPatch.Size = UDim2.new(1, 0, 0, 20)
+hPatch.Position = UDim2.new(0, 0, 1, -20)
+hPatch.BackgroundColor3 = C.PANEL
+hPatch.BackgroundTransparency = 0.1
 hPatch.BorderSizePixel = 0
 hPatch.Parent = header
 
--- NEO line
 local neonLine = Instance.new("Frame")
-neonLine.Size = UDim2.new(1, -60, 0, 2)
-neonLine.Position = UDim2.new(0, 30, 1, -1)
-neonLine.BackgroundColor3 = C.NEON
+neonLine.Size = UDim2.new(1, -40, 0, 3)
+neonLine.Position = UDim2.new(0, 20, 1, -1.5)
+neonLine.BackgroundColor3 = C.FIRE_BRIGHT
 neonLine.BorderSizePixel = 0
 neonLine.Parent = header
 
 local neonGrad = Instance.new("UIGradient")
-neonGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C.ACC3),
-    ColorSequenceKeypoint.new(0.5, C.ACC2),
-    ColorSequenceKeypoint.new(1, C.ACC),
-})
+neonGrad.Color = ColorSequence.new(
+    C.FIRE3, C.FIRE_BRIGHT,
+    Color3.fromRGB(255, 255, 240),
+    C.FIRE_BRIGHT, C.FIRE3
+)
 neonGrad.Parent = neonLine
 
 task.spawn(function()
     while neonLine.Parent do
-        for i = 0, 1, 0.02 do
+        for i = 0, 1, 0.03 do
             if not neonLine.Parent then break end
             neonGrad.Rotation = i * 360
-            task.wait(0.05)
+            task.wait(0.06)
         end
     end
 end)
 
--- Icon bulat di header
-local headerIcon = Instance.new("Frame")
-headerIcon.Size = UDim2.new(0, 30, 0, 30)
-headerIcon.Position = UDim2.new(0, 12, 0.5, -15)
-headerIcon.BackgroundColor3 = C.ACC
-headerIcon.BorderSizePixel = 0
-headerIcon.Parent = header
-rnd(headerIcon, 999)
-
-local headerIconGrad = Instance.new("UIGradient")
-headerIconGrad.Color = ColorSequence.new(C.ACC2, C.ACC, C.ACC3)
-headerIconGrad.Rotation = 45
-headerIconGrad.Parent = headerIcon
-
-local headerIconLbl = Instance.new("TextLabel")
-headerIconLbl.Size = UDim2.new(1, 0, 1, 0)
-headerIconLbl.BackgroundTransparency = 1
-headerIconLbl.Text = "◈"
-headerIconLbl.TextColor3 = Color3.new(1, 1, 1)
-headerIconLbl.TextSize = 16
-headerIconLbl.Font = Enum.Font.GothamBlack
-headerIconLbl.Parent = headerIcon
-
 local hTitle = Instance.new("TextLabel")
-hTitle.Size = UDim2.new(1, -120, 1, 0)
-hTitle.Position = UDim2.new(0, 52, 0, 0)
+hTitle.Size = UDim2.new(1, -80, 1, 0)
+hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "ROOORHUB NEO"
-hTitle.TextColor3 = C.TXT
+hTitle.Text = "🔥 ROOORHUB"
+hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
 hTitle.TextXAlignment = Enum.TextXAlignment.Left
+hTitle.TextStrokeTransparency = 0.2
+hTitle.TextStrokeColor3 = C.FIRE3
 hTitle.Parent = header
 
-local hSub = Instance.new("TextLabel")
-hSub.Size = UDim2.new(1, -120, 1, 0)
-hSub.Position = UDim2.new(0, 52, 0, 0)
-hSub.BackgroundTransparency = 1
-hSub.Text = "v15 · GLASS EDITION"
-hSub.TextColor3 = C.DIM
-hSub.TextSize = 8
-hSub.Font = Enum.Font.Gotham
-hSub.TextXAlignment = Enum.TextXAlignment.Left
-hSub.TextYAlignment = Enum.TextYAlignment.Bottom
-hSub.Parent = header
-
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 26, 0, 26)
-closeBtn.Position = UDim2.new(1, -34, 0.5, -13)
-closeBtn.BackgroundColor3 = C.PANEL
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -30, 0.5, -11)
+closeBtn.BackgroundColor3 = C.PANEL2
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = C.RED
-closeBtn.TextSize = 12
+closeBtn.TextSize = 11
 closeBtn.Font = Enum.Font.GothamBlack
 closeBtn.BorderSizePixel = 0
 closeBtn.AutoButtonColor = false
 closeBtn.Parent = header
-rnd(closeBtn, 999)
+rnd(closeBtn, 7)
+strk(closeBtn, C.RED, 1, 0.5)
 
--- =========================================================
--- TAB BAR (HORIZONTAL DI ATAS)
--- =========================================================
-local tabBarFrame = Instance.new("Frame")
-tabBarFrame.Size = UDim2.new(1, -20, 0, 38)
-tabBarFrame.Position = UDim2.new(0, 10, 0, 52)
-tabBarFrame.BackgroundColor3 = C.BG
-tabBarFrame.BackgroundTransparency = 0.5
-tabBarFrame.BorderSizePixel = 0
-tabBarFrame.Parent = panel
-rnd(tabBarFrame, 12)
+-- SIDEBAR
+local sbFrame = Instance.new("Frame")
+sbFrame.Size = UDim2.new(0, 105, 1, -58)
+sbFrame.Position = UDim2.new(0, 10, 0, 50)
+sbFrame.BackgroundColor3 = C.PANEL
+sbFrame.BackgroundTransparency = 0.2
+sbFrame.BorderSizePixel = 0
+sbFrame.Parent = panel
+rnd(sbFrame, 12)
+strk(sbFrame, C.FIRE2, 1, 0.6)
 
-local tabBar = Instance.new("ScrollingFrame")
-tabBar.Size = UDim2.new(1, -4, 1, -4)
-tabBar.Position = UDim2.new(0, 2, 0, 2)
-tabBar.BackgroundTransparency = 1
-tabBar.BorderSizePixel = 0
-tabBar.ScrollBarThickness = 0
-tabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
-tabBar.AutomaticCanvasSize = Enum.AutomaticSize.X
-tabBar.ScrollingDirection = Enum.ScrollingDirection.X
-tabBar.Parent = tabBarFrame
+local sb = Instance.new("ScrollingFrame")
+sb.Size = UDim2.new(1, -4, 1, -4)
+sb.Position = UDim2.new(0, 2, 0, 2)
+sb.BackgroundTransparency = 1
+sb.BorderSizePixel = 0
+sb.ScrollBarThickness = 3
+sb.ScrollBarImageColor3 = C.FIRE2
+sb.CanvasSize = UDim2.new(0, 0, 0, 0)
+sb.AutomaticCanvasSize = Enum.AutomaticSize.Y
+sb.Parent = sbFrame
 
-local tabLayout = Instance.new("UIListLayout")
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 4)
-tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-tabLayout.Parent = tabBar
+local sbL = Instance.new("UIListLayout")
+sbL.Padding = UDim.new(0, 4)
+sbL.Parent = sb
 
-local tabPad = Instance.new("UIPadding")
-tabPad.PaddingLeft = UDim.new(0, 4)
-tabPad.PaddingRight = UDim.new(0, 4)
-tabPad.Parent = tabBar
+local sbP = Instance.new("UIPadding")
+sbP.PaddingTop = UDim.new(0, 6)
+sbP.PaddingLeft = UDim.new(0, 4)
+sbP.PaddingRight = UDim.new(0, 4)
+sbP.PaddingBottom = UDim.new(0, 6)
+sbP.Parent = sb
 
--- =========================================================
--- CONTENT AREA
--- =========================================================
+-- CONTENT
 local ct = Instance.new("Frame")
-ct.Size = UDim2.new(1, -20, 1, -102)
-ct.Position = UDim2.new(0, 10, 0, 96)
-ct.BackgroundColor3 = C.BG
-ct.BackgroundTransparency = 0.6
+ct.Size = UDim2.new(1, -135, 1, -58)
+ct.Position = UDim2.new(0, 122, 0, 50)
+ct.BackgroundColor3 = C.PANEL
+ct.BackgroundTransparency = 0.2
 ct.BorderSizePixel = 0
 ct.Parent = panel
 rnd(ct, 12)
+strk(ct, C.FIRE2, 1, 0.6)
 
 local cs = Instance.new("ScrollingFrame")
 cs.Size = UDim2.new(1, -14, 1, -14)
@@ -3061,7 +3039,7 @@ cs.Position = UDim2.new(0, 7, 0, 7)
 cs.BackgroundTransparency = 1
 cs.BorderSizePixel = 0
 cs.ScrollBarThickness = 3
-cs.ScrollBarImageColor3 = C.ACC
+cs.ScrollBarImageColor3 = C.FIRE2
 cs.CanvasSize = UDim2.new(0, 0, 0, 0)
 cs.AutomaticCanvasSize = Enum.AutomaticSize.Y
 cs.Parent = ct
@@ -3071,7 +3049,7 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI NEO
+-- KOMPONEN UI
 -- =========================================================
 local function sec(title, icon)
     local f = Instance.new("Frame")
@@ -3080,15 +3058,15 @@ local function sec(title, icon)
     f.Parent = cs
 
     local deco = Instance.new("Frame")
-    deco.Size = UDim2.new(0, 3, 0, 14)
+    deco.Size = UDim2.new(0, 4, 0, 14)
     deco.Position = UDim2.new(0, 4, 0.5, -7)
-    deco.BackgroundColor3 = C.ACC
+    deco.BackgroundColor3 = C.FIRE2
     deco.BorderSizePixel = 0
     deco.Parent = f
     rnd(deco, 2)
 
     local decoGrad = Instance.new("UIGradient")
-    decoGrad.Color = ColorSequence.new(C.ACC2, C.ACC, C.ACC3)
+    decoGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
     decoGrad.Parent = deco
 
     local l = Instance.new("TextLabel")
@@ -3096,7 +3074,7 @@ local function sec(title, icon)
     l.Position = UDim2.new(0, 14, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = icon .. " " .. string.upper(title)
-    l.TextColor3 = C.NEON
+    l.TextColor3 = C.FIRE_BRIGHT
     l.TextSize = 9
     l.Font = Enum.Font.GothamBlack
     l.TextXAlignment = Enum.TextXAlignment.Left
@@ -3118,20 +3096,16 @@ end
 local function tog(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.PANEL
+    f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 10)
-    local fStrk = Instance.new("UIStroke")
-    fStrk.Color = C.ACC
-    fStrk.Thickness = 1
-    fStrk.Transparency = 0.6
-    fStrk.Parent = f
+    rnd(f, 8)
+    local fStrk = strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3141,25 +3115,25 @@ local function tog(name, def, cb)
     l.Parent = f
 
     local t = Instance.new("Frame")
-    t.Size = UDim2.new(0, 34, 0, 18)
-    t.Position = UDim2.new(1, -42, 0.5, -9)
+    t.Size = UDim2.new(0, 32, 0, 16)
+    t.Position = UDim2.new(1, -40, 0.5, -8)
     t.BorderSizePixel = 0
     t.Parent = f
-    rnd(t, 999)
+    rnd(t, 9)
 
     local k = Instance.new("Frame")
-    k.Size = UDim2.new(0, 12, 0, 12)
+    k.Size = UDim2.new(0, 11, 0, 11)
     k.BorderSizePixel = 0
     k.Parent = t
-    rnd(k, 999)
+    rnd(k, 6)
 
     local saved = _G.ToggleStates[name]
     local state = (saved ~= nil) and saved or def
     _G.ToggleStates[name] = state
 
-    t.BackgroundColor3 = state and C.ACC or C.PANEL2
-    k.Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
-    k.BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
+    t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
+    k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
+    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
@@ -3171,14 +3145,13 @@ local function tog(name, def, cb)
         state = not state
         _G.ToggleStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
-            Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6),
-            BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
+            Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
+            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
         }):Play()
         TweenService:Create(t, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.ACC or C.PANEL2
+            BackgroundColor3 = state and C.FIRE1 or C.PANEL
         }):Play()
-        fStrk.Color = state and C.ACC2 or C.ACC
-        fStrk.Transparency = state and 0.2 or 0.6
+        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
 
         playToggleSound()
 
@@ -3189,20 +3162,16 @@ end
 local function sl(name, min, max, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 36)
-    f.BackgroundColor3 = C.PANEL
+    f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 10)
-    local fStrk = Instance.new("UIStroke")
-    fStrk.Color = C.ACC
-    fStrk.Thickness = 1
-    fStrk.Transparency = 0.6
-    fStrk.Parent = f
+    rnd(f, 8)
+    strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -55, 0, 14)
-    l.Position = UDim2.new(0, 10, 0, 4)
+    l.Position = UDim2.new(0, 8, 0, 4)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3219,7 +3188,7 @@ local function sl(name, min, max, def, cb)
     v.Position = UDim2.new(1, -48, 0, 4)
     v.BackgroundTransparency = 1
     v.Text = tostring(curVal)
-    v.TextColor3 = C.ACC2
+    v.TextColor3 = C.FIRE_BRIGHT
     v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -3228,30 +3197,27 @@ local function sl(name, min, max, def, cb)
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1, -20, 0, 5)
     bg.Position = UDim2.new(0, 10, 1, -11)
-    bg.BackgroundColor3 = C.PANEL2
+    bg.BackgroundColor3 = C.PANEL
     bg.BorderSizePixel = 0
     bg.Parent = f
-    rnd(bg, 999)
+    rnd(bg, 3)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((curVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = C.ACC2
+    fill.BackgroundColor3 = C.FIRE_BRIGHT
     fill.BorderSizePixel = 0
     fill.Parent = bg
-    rnd(fill, 999)
-
-    local fillGrad = Instance.new("UIGradient")
-    fillGrad.Color = ColorSequence.new(C.ACC, C.ACC2)
-    fillGrad.Parent = fill
+    rnd(fill, 3)
 
     local kn = Instance.new("Frame")
     kn.Size = UDim2.new(0, 11, 0, 11)
     kn.Position = UDim2.new((curVal - min) / (max - min), -5.5, 0.5, -5.5)
-    kn.BackgroundColor3 = Color3.new(1, 1, 1)
+    kn.BackgroundColor3 = C.TXT
     kn.BorderSizePixel = 0
     kn.ZIndex = 2
     kn.Parent = bg
-    rnd(kn, 999)
+    rnd(kn, 6)
+    strk(kn, C.FIRE_BRIGHT, 2)
 
     local drag = false
     local function upd(input)
@@ -3293,20 +3259,16 @@ end
 local function cpk(name, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.PANEL
+    f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
     f.Parent = cs
-    rnd(f, 10)
-    local fStrk = Instance.new("UIStroke")
-    fStrk.Color = C.ACC
-    fStrk.Thickness = 1
-    fStrk.Transparency = 0.6
-    fStrk.Parent = f
+    rnd(f, 8)
+    strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3317,12 +3279,13 @@ local function cpk(name, def, cb)
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(0, 30, 0, 15)
-    cB.Position = UDim2.new(1, -40, 0.5, -7.5)
+    cB.Position = UDim2.new(1, -38, 0.5, -7.5)
     cB.BackgroundColor3 = def
     cB.Text = ""
     cB.BorderSizePixel = 0
     cB.Parent = f
-    rnd(cB, 999)
+    rnd(cB, 4)
+    strk(cB, C.FIRE_BRIGHT, 1.5)
 
     local presets = {
         Color3.fromRGB(255, 60, 60),
@@ -3348,7 +3311,7 @@ end
 local function btn(name, cb)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -4, 0, 28)
-    b.BackgroundColor3 = C.PANEL
+    b.BackgroundColor3 = C.BG
     b.BackgroundTransparency = 0.4
     b.Text = name
     b.TextColor3 = C.TXT
@@ -3357,12 +3320,8 @@ local function btn(name, cb)
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
     b.Parent = cs
-    rnd(b, 10)
-    local bStrk = Instance.new("UIStroke")
-    bStrk.Color = C.ACC2
-    bStrk.Thickness = 1
-    bStrk.Transparency = 0.5
-    bStrk.Parent = b
+    rnd(b, 8)
+    strk(b, C.FIRE_BRIGHT, 1, 0.7)
 
     b.MouseButton1Click:Connect(function()
         playToggleSound()
@@ -3373,19 +3332,16 @@ end
 local function drp(name, options, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.PANEL
+    f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
-    f.Parent = cs    rnd(f, 10)
-    local fStrk = Instance.new("UIStroke")
-    fStrk.Color = C.ACC
-    fStrk.Thickness = 1
-    fStrk.Transparency = 0.6
-    fStrk.Parent = f
+    f.Parent = cs
+    rnd(f, 8)
+    strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0.5, 0, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
@@ -3404,9 +3360,9 @@ local function drp(name, options, def, cb)
     v.Size = UDim2.new(0.5, -24, 1, 0)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
-    v.Text = tostring(cur) .. " ▾"
-    v.TextColor3 = C.ACC2
-    v.TextSize = 9
+    v.Text = tostring(cur) .. " ▶"
+    v.TextColor3 = C.FIRE_BRIGHT
+    v.TextSize = 8
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = f
@@ -3421,60 +3377,64 @@ local function drp(name, options, def, cb)
         idx = idx + 1
         if idx > #options then idx = 1 end
         cur = options[idx]
-        v.Text = tostring(cur) .. " ▾"
+        v.Text = tostring(cur) .. " ▶"
         if cb then pcall(cb, cur) end
     end)
 end
 
--- =========================================================
--- TAB SYSTEM (HORIZONTAL NEO)
--- =========================================================
 local activeTab = nil
 local function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, 80, 1, -4)
-    b.BackgroundColor3 = C.PANEL
-    b.BackgroundTransparency = 0.5
+    b.Size = UDim2.new(1, -8, 0, 28)
+    b.BackgroundColor3 = C.BG
+    b.BackgroundTransparency = 1
     b.Text = ""
     b.BorderSizePixel = 0
     b.LayoutOrder = order
     b.AutoButtonColor = false
-    b.Parent = tabBar
-    rnd(b, 8)
+    b.Parent = sb
+    rnd(b, 7)
 
-    local bStrk = Instance.new("UIStroke")
-    bStrk.Color = C.ACC
-    bStrk.Thickness = 1
-    bStrk.Transparency = 0.7
-    bStrk.Parent = b
+    local ind = Instance.new("Frame")
+    ind.Size = UDim2.new(0, 3, 0, 0)
+    ind.Position = UDim2.new(0, 0, 0.5, 0)
+    ind.AnchorPoint = Vector2.new(0, 0.5)
+    ind.BackgroundColor3 = C.FIRE_BRIGHT
+    ind.BorderSizePixel = 0
+    ind.Parent = b
+    rnd(ind, 2)
 
     local ico = Instance.new("TextLabel")
-    ico.Size = UDim2.new(1, 0, 0.6, 0)
+    ico.Size = UDim2.new(0, 20, 1, 0)
+    ico.Position = UDim2.new(0, 6, 0, 0)
     ico.BackgroundTransparency = 1
     ico.Text = icon
     ico.TextColor3 = C.DIM
-    ico.TextSize = 16
+    ico.TextSize = 13
     ico.Font = Enum.Font.GothamBold
     ico.Parent = b
 
     local lblT = Instance.new("TextLabel")
-    lblT.Size = UDim2.new(1, 0, 0.4, 0)
-    lblT.Position = UDim2.new(0, 0, 0.6, 0)
+    lblT.Size = UDim2.new(1, -26, 1, 0)
+    lblT.Position = UDim2.new(0, 26, 0, 0)
     lblT.BackgroundTransparency = 1
     lblT.Text = string.upper(name)
     lblT.TextColor3 = C.DIM
     lblT.TextSize = 8
     lblT.Font = Enum.Font.GothamBlack
+    lblT.TextXAlignment = Enum.TextXAlignment.Left
     lblT.Parent = b
 
     b.MouseButton1Click:Connect(function()
         if activeTab == b then return end
         if activeTab then
-            TweenService:Create(activeTab, TweenInfo.new(0.2), {
-                BackgroundTransparency = 0.5
-            }):Play()
-            local oldStrk = activeTab:FindFirstChildOfClass("UIStroke")
-            if oldStrk then oldStrk.Color = C.ACC end
+            activeTab.BackgroundTransparency = 1
+            local oldInd = activeTab:FindFirstChildOfClass("Frame")
+            if oldInd then
+                TweenService:Create(oldInd, TweenInfo.new(0.2), {
+                    Size = UDim2.new(0, 3, 0, 0)
+                }):Play()
+            end
             for _, c in pairs(activeTab:GetChildren()) do
                 if c:IsA("TextLabel") then
                     TweenService:Create(c, TweenInfo.new(0.2), {
@@ -3486,9 +3446,11 @@ local function makeTab(name, icon, order, cb)
 
         activeTab = b
         TweenService:Create(b, TweenInfo.new(0.2), {
-            BackgroundTransparency = 0.1
+            BackgroundTransparency = 0.7
         }):Play()
-        bStrk.Color = C.ACC2
+        TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0, 3, 0, 18)
+        }):Play()
 
         for _, c in pairs(b:GetChildren()) do
             if c:IsA("TextLabel") then
@@ -3519,7 +3481,6 @@ _G.Roooor_drp = drp
 _G.Roooor_makeTab = makeTab
 _G.Roooor_cs = cs
 
--- Toggle buka/tutup panel
 mainBtn.MouseButton1Click:Connect(function()
     if wasDragged then
         wasDragged = false
@@ -3534,7 +3495,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI NEO (Glassmorphism) loaded")-- =========================================================
+print("✅ [5/8] GUI + Tombol R + Aimlock + Panel loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 local sec = _G.Roooor_sec
@@ -3845,13 +3806,10 @@ makeTab("Killer", "🔪", 5, function()
 end)
 
 -- ============================================================
--- TAB: MISC (SOUND DEFAULT)
+-- TAB: MISC
 -- ============================================================
 makeTab("Misc", "⚙️", 6, function()
 
-    -- ============================
-    -- MOVEMENT
-    -- ============================
     sec("Movement", "🏃")
 
     tog("Walk Speed", false, function(s)
@@ -3882,17 +3840,11 @@ makeTab("Misc", "⚙️", 6, function()
     end)
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
-    -- ============================
-    -- SAFE
-    -- ============================
     sec("Safe", "🔒")
     tog("Anti AFK", false, function(s)
         S.AntiAFK = s
     end)
 
-    -- ============================
-    -- CHARACTER
-    -- ============================
     sec("Character", "🎭")
 
     tog("Korblox Leg", false, function(s)
@@ -4005,7 +3957,7 @@ makeTab("Visual", "✨", 7, function()
 end)
 
 -- ============================================================
--- TAB: PLAYER (AIMLOCK + UNLOAD)
+-- TAB: PLAYER
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
@@ -4040,7 +3992,7 @@ makeTab("Player", "👤", 8, function()
     lbl("Toggle ON = standby (belum lock)", C.DIM)
 
     sec("Keybind", "⌨️")
-    lbl("Toggle Menu: Klik tombol 🔥", C.FIRE_BRIGHT)
+    lbl("Toggle Menu: Klik tombol R", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
     btn("🔥 UNLOAD SCRIPT", function()
@@ -4145,7 +4097,7 @@ end)
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  🔥 ROOORHUB ULTIMATE FIRE v14 🔥       ║")
+print("║  🔥 ROOORHUB 🔥                          ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry                            ║")
@@ -4158,7 +4110,7 @@ print("║  🛡️ God Mode (Full)                      ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
 print("║  🔊 Sound Toggle                         ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol 🔥            ║")
+print("║  🎮 Buka menu: Klik tombol R             ║")
 print("║  🎯 Aimlock: Hold tombol serang          ║")
 print("╚══════════════════════════════════════════╝")
 
@@ -4260,12 +4212,10 @@ UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if not Combat.AimlockEnabled then return end
 
-    -- PC: Mouse kanan (klik kanan)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         Combat.AttackHeld = true
     end
 
-    -- Mobile: Touch (tap attack button)
     if input.UserInputType == Enum.UserInputType.Touch then
         Combat.AttackHeld = true
     end
@@ -4326,10 +4276,7 @@ local lastTrigger = 0
 
 task.spawn(function()
     while task.wait(0.01) do
-        -- Skip kalau aimbot mati
         if not Combat.AimlockEnabled then continue end
-
-        -- Skip kalau tombol serang gak di-hold (KUNCI UTAMA)
         if not Combat.AttackHeld and not Combat.Holding then continue end
 
         local myRoot = getRoot()
@@ -4365,14 +4312,12 @@ task.spawn(function()
                     if hum and hum.Health > 0 and aimPart then
                         local dist3D = (aimPart.Position - myRoot.Position).Magnitude
                         if dist3D < shortest then
-                            -- Visibility check
                             if Combat.VisibilityCheck or Combat.WallCheck then
                                 if not isVisible(aimPart) then
                                     continue
                                 end
                             end
 
-                            -- FOV check
                             local pos2D, onScreen = cam:WorldToViewportPoint(aimPart.Position)
                             if onScreen then
                                 local dist2D = (Vector2.new(pos2D.X, pos2D.Y) - center).Magnitude
@@ -4396,7 +4341,6 @@ task.spawn(function()
             local smooth = math.clamp(Combat.Smoothness, 0.01, 1)
             cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
 
-            -- Trigger bot
             if Combat.TriggerBotEnabled then
                 local now = tick()
                 if now - lastTrigger >= Combat.TriggerDelay then
@@ -4476,13 +4420,55 @@ task.spawn(function()
 end)
 
 -- =========================================================
+-- GOD MODE LOOP
+-- =========================================================
+local GodMode = _G.Roooor_GodMode
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if not GodMode.Enabled then continue end
+        if not LP.Character then continue end
+
+        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+        if not hum then continue end
+
+        if hum.Health > 0 and hum.Health < hum.MaxHealth then
+            pcall(function()
+                hum.Health = hum.MaxHealth
+            end)
+        end
+
+        if hum.PlatformStand then
+            hum.PlatformStand = false
+        end
+        pcall(function()
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Dead
+                or state == Enum.HumanoidStateType.FallingDown
+                or state == Enum.HumanoidStateType.Ragdoll then
+                hum:ChangeState(Enum.HumanoidStateType.Running)
+            end
+        end)
+
+        local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for _, v in pairs(hrp:GetChildren()) do
+                if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
+                    local part1 = v.Part1 or v.Part0
+                    if part1 and not part1:IsDescendantOf(LP.Character) then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
 -- TAB: COMBAT (AIMBOT + HITBOX)
 -- =========================================================
 makeTab("Combat", "⚔️", 9, function()
 
-    -- ============================
-    -- AIMBOT
-    -- ============================
     sec("Aimbot", "🎯")
 
     tog("Enable Aimbot (Hold to Attack)", false, function(s)
@@ -4535,9 +4521,6 @@ makeTab("Combat", "⚔️", 9, function()
     end)
     lbl("Anti-Wall = skip target di balik dinding", C.DIM)
 
-    -- ============================
-    -- TRIGGER BOT
-    -- ============================
     sec("Trigger Bot", "🔫")
     tog("Auto Attack saat lock", false, function(s)
         Combat.TriggerBotEnabled = s
@@ -4547,9 +4530,6 @@ makeTab("Combat", "⚔️", 9, function()
     end)
     lbl("Auto attack saat target di FOV", C.FIRE_BRIGHT)
 
-    -- ============================
-    -- HITBOX
-    -- ============================
     sec("Hitbox (2 Mode)", "📦")
 
     tog("Hitbox Survivor Mode", false, function(s)
@@ -4571,9 +4551,6 @@ makeTab("Combat", "⚔️", 9, function()
     end)
     lbl("Kalau ON, hitbox keliatan transparan", C.GRN)
 
-    -- ============================
-    -- KEYBIND INFO
-    -- ============================
     sec("Keybind", "⌨️")
     lbl("🎯 Tombol Aimlock di kiri layar", C.FIRE_BRIGHT)
     lbl("Klik kanan tombol = ganti mode", C.DIM)
@@ -4585,18 +4562,12 @@ end)
 -- =========================================================
 makeTab("Extra", "✨", 10, function()
 
-    -- ============================
-    -- GOD MODE
-    -- ============================
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
         _G.Roooor_GodMode.Enabled = s
     end)
     lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
 
-    -- ============================
-    -- FULLBRIGHT 200
-    -- ============================
     sec("Fullbright Max", "💡")
     tog("Fullbright (max 200)", false, function(s)
         S.Fullbright = s
@@ -4608,9 +4579,6 @@ makeTab("Extra", "✨", 10, function()
     end)
     lbl("Bisa sampai 200 (super terang)", C.FIRE_BRIGHT)
 
-    -- ============================
-    -- NO FOG FIX
-    -- ============================
     sec("No Fog (Fix)", "🌫️")
     tog("No Fog (Fix)", false, function(s)
         S.NoFog = s
@@ -4618,9 +4586,6 @@ makeTab("Extra", "✨", 10, function()
     end)
     lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
 
-    -- ============================
-    -- TELEPORT
-    -- ============================
     sec("Teleport", "🌀")
     btn("🚪 TP ke Finish Line", function()
         _G.Roooor_teleportToFinishLine()
@@ -4632,62 +4597,11 @@ makeTab("Extra", "✨", 10, function()
         _G.Roooor_teleportInsideGate()
     end)
 
-    -- ============================
-    -- SOUND TEST
-    -- ============================
     sec("Sound", "🔊")
     btn("🔊 Test Sound", function()
         _G.Roooor_playSound()
     end)
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
-end)
-
--- =========================================================
--- GOD MODE LOOP
--- =========================================================
-local GodMode = _G.Roooor_GodMode
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if not GodMode.Enabled then continue end
-        if not LP.Character then continue end
-
-        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-        if not hum then continue end
-
-        -- Anti Down (heal terus)
-        if hum.Health > 0 and hum.Health < hum.MaxHealth then
-            pcall(function()
-                hum.Health = hum.MaxHealth
-            end)
-        end
-
-        -- Anti Stun / Ragdoll
-        if hum.PlatformStand then
-            hum.PlatformStand = false
-        end
-        pcall(function()
-            local state = hum:GetState()
-            if state == Enum.HumanoidStateType.Dead
-                or state == Enum.HumanoidStateType.FallingDown
-                or state == Enum.HumanoidStateType.Ragdoll then
-                hum:ChangeState(Enum.HumanoidStateType.Running)
-            end
-        end)
-
-        -- Anti Grab
-        local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for _, v in pairs(hrp:GetChildren()) do
-                if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
-                    local part1 = v.Part1 or v.Part0
-                    if part1 and not part1:IsDescendantOf(LP.Character) then
-                        v:Destroy()
-                    end
-                end
-            end
-        end
-    end
 end)
 
 print("✅ [9/8] Tab Combat (Aimbot + Hitbox) + Tab Extra loaded")

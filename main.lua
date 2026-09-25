@@ -3803,4 +3803,102 @@ print("   • Auto re-apply saat respawn")
 print("   • 3 in 1 tombol PASANG SEMUA")
 print("=====================================================")
 print("🌙 Moonwalk: DIHAPUS TOTAL")
-print("=====================================================")
+print("=====================================================")-- =========================================================
+-- TAB BARU: 8-BIT SET (KHUSUS)
+-- =========================================================
+
+makeTab("8-Bit", "👑", 13, function()
+    sec("8-Bit Royal Crown", "👑")
+    tog("👑 Enable 8-Bit Crown", false, function(s)
+        X.EightBitCrown = s
+        if _G.Roooor_apply8BitCrown then
+            _G.Roooor_apply8BitCrown(s)
+        else
+            warn("[8Bit] Fungsi apply8BitCrown gak ada!")
+        end
+    end)
+    lbl("Mahkota pixel + efek api warna-warni", C.ACC2)
+    lbl("Biru → Hijau → Kuning → Merah", C.GRN)
+
+    sec("8-Bit HP Bar", "❤️")
+    tog("❤️ Enable 8-Bit HP Bar", false, function(s)
+        X.EightBitHP = s
+        if _G.Roooor_apply8BitHP then
+            _G.Roooor_apply8BitHP(s)
+        else
+            warn("[8Bit] Fungsi apply8BitHP gak ada!")
+        end
+    end)
+    lbl("Bar HP pixel + partikel hati", C.ACC2)
+
+    sec("8-Bit Tabby Cat", "🐱")
+    tog("🐱 Enable 8-Bit Tabby Cat", false, function(s)
+        X.EightBitCat = s
+        if _G.Roooor_apply8BitCat then
+            _G.Roooor_apply8BitCat(s)
+        else
+            warn("[8Bit] Fungsi apply8BitCat gak ada!")
+        end
+    end)
+    lbl("Kucing pixel di bahu", C.ACC2)
+
+    sec("QUICK ACTION", "⚡")
+    btn("🎁 PASANG SEMUA (3 in 1)", function()
+        X.EightBitSet = true
+        X.EightBitCrown = true
+        X.EightBitHP = true
+        X.EightBitCat = true
+        if _G.Roooor_apply8BitSet then
+            _G.Roooor_apply8BitSet(true)
+        end
+        _G.ToggleStates["👑 Enable 8-Bit Crown"] = true
+        _G.ToggleStates["❤️ Enable 8-Bit HP Bar"] = true
+        _G.ToggleStates["🐱 Enable 8-Bit Tabby Cat"] = true
+        print("[8Bit] Semua dipasang!")
+    end)
+    btn("❌ LEPAS SEMUA", function()
+        X.EightBitSet = false
+        X.EightBitCrown = false
+        X.EightBitHP = false
+        X.EightBitCat = false
+        if _G.Roooor_apply8BitSet then
+            _G.Roooor_apply8BitSet(false)
+        end
+        _G.ToggleStates["👑 Enable 8-Bit Crown"] = false
+        _G.ToggleStates["❤️ Enable 8-Bit HP Bar"] = false
+        _G.ToggleStates["🐱 Enable 8-Bit Tabby Cat"] = false
+        print("[8Bit] Semua dilepas!")
+    end)
+    btn("🔄 Refresh / Re-apply", function()
+        if _G.Roooor_apply8BitSet then
+            _G.Roooor_apply8BitSet(false)
+            task.wait(0.2)
+            _G.Roooor_apply8BitSet(X.EightBitSet)
+        end
+    end)
+
+    sec("INFO", "ℹ️")
+    lbl("Tab ini khusus buat 8-Bit Set", C.ACC4)
+    lbl("Kalau Crown/HP blank = mesh limited", C.DIM)
+    lbl("Coba pakai UGC alternatif kalau blank", C.ACC2)
+end)
+
+print("✅ [BONUS] Tab 8-Bit loaded!")-- 8-Bit Tab Baru
+if name == "👑 Enable 8-Bit Crown" then
+    if X.EightBitCrown ~= state then
+        X.EightBitCrown = state
+        if _G.Roooor_apply8BitCrown then _G.Roooor_apply8BitCrown(state) end
+    end
+end
+if name == "❤️ Enable 8-Bit HP Bar" then
+    if X.EightBitHP ~= state then
+        X.EightBitHP = state
+        if _G.Roooor_apply8BitHP then _G.Roooor_apply8BitHP(state) end
+    end
+end
+if name == "🐱 Enable 8-Bit Tabby Cat" then
+    if X.EightBitCat ~= state then
+        X.EightBitCat = state
+        if _G.Roooor_apply8BitCat then _G.Roooor_apply8BitCat(state) end
+    end
+end

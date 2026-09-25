@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB
+-- ROOORHUB GALAXY
 -- BAGIAN 1/8 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
@@ -22,21 +22,21 @@ function getRoot()
 end
 
 C = {
-    BG = Color3.fromRGB(6, 4, 12),
-    BG2 = Color3.fromRGB(10, 7, 20),
-    PANEL = Color3.fromRGB(15, 10, 28),
-    PANEL2 = Color3.fromRGB(22, 15, 40),
-    ACC = Color3.fromRGB(180, 80, 255),
+    BG = Color3.fromRGB(8, 5, 20),
+    BG2 = Color3.fromRGB(15, 8, 35),
+    PANEL = Color3.fromRGB(18, 10, 40),
+    PANEL2 = Color3.fromRGB(28, 15, 55),
+    ACC = Color3.fromRGB(120, 60, 255),
     ACC2 = Color3.fromRGB(0, 230, 255),
-    ACC3 = Color3.fromRGB(255, 50, 180),
-    ACC4 = Color3.fromRGB(255, 200, 50),
+    ACC3 = Color3.fromRGB(255, 80, 200),
+    ACC4 = Color3.fromRGB(255, 200, 80),
     GOLD = Color3.fromRGB(255, 215, 0),
-    FIRE1 = Color3.fromRGB(255, 120, 0),
-    FIRE2 = Color3.fromRGB(255, 220, 80),
-    FIRE3 = Color3.fromRGB(255, 60, 0),
-    FIRE_BRIGHT = Color3.fromRGB(255, 240, 150),
-    TXT = Color3.fromRGB(245, 245, 255),
-    DIM = Color3.fromRGB(120, 120, 160),
+    FIRE1 = Color3.fromRGB(120, 60, 255),
+    FIRE2 = Color3.fromRGB(0, 230, 255),
+    FIRE3 = Color3.fromRGB(255, 80, 200),
+    FIRE_BRIGHT = Color3.fromRGB(220, 180, 255),
+    TXT = Color3.fromRGB(240, 240, 255),
+    DIM = Color3.fromRGB(130, 120, 180),
     GRN = Color3.fromRGB(0, 255, 150),
     RED = Color3.fromRGB(255, 70, 100),
 }
@@ -57,9 +57,7 @@ function strk(o, col, t, tr)
     return s
 end
 
--- =========================================================
--- SOUND SYSTEM (BRUH SOUND - PALING WORK)
--- =========================================================
+-- SOUND BRUH
 local BruhSoundId = "rbxassetid://9120386436"
 
 function playToggleSound()
@@ -79,7 +77,7 @@ end
 _G.Roooor_playSound = playToggleSound
 
 -- =========================================================
--- LOADING 4D FIRE RING
+-- LOADING GALAXY
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "RoooorLoading"
@@ -90,15 +88,15 @@ loadingGui.Parent = PG
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bg.BackgroundColor3 = Color3.fromRGB(5, 3, 15)
 bg.BorderSizePixel = 0
 bg.Parent = loadingGui
 
 local bgGrad = Instance.new("UIGradient")
 bgGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 8, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 15, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 8, 0)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 8, 50)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 5, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 8, 50)),
 })
 bgGrad.Rotation = 0
 bgGrad.Parent = bg
@@ -113,24 +111,25 @@ task.spawn(function()
     end
 end)
 
-for i = 1, 15 do
+-- Bintang jatuh
+for i = 1, 30 do
     local p = Instance.new("Frame")
-    p.Size = UDim2.new(0, math.random(4, 10), 0, math.random(4, 10))
+    p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
     p.Position = UDim2.new(math.random(), 0, 1.1, 0)
-    p.BackgroundColor3 = Color3.fromRGB(255, math.random(100, 220), math.random(0, 100))
+    p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
     p.BorderSizePixel = 0
     p.Parent = bg
     rnd(p, 999)
 
     task.spawn(function()
         while p.Parent do
-            local speed = math.random(8, 18) / 1000
+            local speed = math.random(5, 15) / 1000
             p.Position = UDim2.new(p.Position.X.Scale, p.Position.X.Offset, p.Position.Y.Scale - speed, 0)
-            p.BackgroundTransparency = p.BackgroundTransparency + 0.01
+            p.BackgroundTransparency = p.BackgroundTransparency + 0.008
             if p.BackgroundTransparency >= 1 or p.Position.Y.Scale < -0.1 then
                 p.Position = UDim2.new(math.random(), 0, 1.1, 0)
                 p.BackgroundTransparency = 0
-                p.BackgroundColor3 = Color3.fromRGB(255, math.random(100, 220), math.random(0, 100))
+                p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
             end
             task.wait(0.05)
         end
@@ -154,15 +153,15 @@ for i = 1, 4 do
 
     local rStrk = Instance.new("UIStroke")
     rStrk.Thickness = 4 - (i-1) * 0.5
-    rStrk.Color = C.FIRE2
+    rStrk.Color = C.ACC2
     rStrk.Transparency = 0.05 + (i-1) * 0.12
     rStrk.Parent = ring
 
     local rGrad = Instance.new("UIGradient")
     rGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, C.FIRE3),
-        ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
-        ColorSequenceKeypoint.new(1, C.FIRE1),
+        ColorSequenceKeypoint.new(0, C.ACC),
+        ColorSequenceKeypoint.new(0.5, C.ACC2),
+        ColorSequenceKeypoint.new(1, C.ACC3),
     })
     rGrad.Parent = rStrk
 
@@ -172,19 +171,19 @@ end
 local core = Instance.new("Frame")
 core.Size = UDim2.new(0, 80, 0, 80)
 core.Position = UDim2.new(0.5, -40, 0.5, -40)
-core.BackgroundColor3 = C.FIRE_BRIGHT
+core.BackgroundColor3 = C.ACC2
 core.Parent = ringContainer
 rnd(core, 999)
 
 local coreGrad = Instance.new("UIGradient")
-coreGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
+coreGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
 coreGrad.Rotation = 45
 coreGrad.Parent = core
 
 local coreIcon = Instance.new("TextLabel")
 coreIcon.Size = UDim2.new(1, 0, 1, 0)
 coreIcon.BackgroundTransparency = 1
-coreIcon.Text = "🔥"
+coreIcon.Text = "✨"
 coreIcon.TextSize = 44
 coreIcon.Font = Enum.Font.GothamBlack
 coreIcon.Parent = core
@@ -198,11 +197,11 @@ welcomeTitle.TextColor3 = Color3.new(1, 1, 1)
 welcomeTitle.TextSize = 48
 welcomeTitle.Font = Enum.Font.GothamBlack
 welcomeTitle.TextStrokeTransparency = 0
-welcomeTitle.TextStrokeColor3 = C.FIRE3
+welcomeTitle.TextStrokeColor3 = C.ACC
 welcomeTitle.Parent = bg
 
 local welcomeGrad = Instance.new("UIGradient")
-welcomeGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE1)
+welcomeGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
 welcomeGrad.Parent = welcomeTitle
 
 local subtitle = Instance.new("TextLabel")
@@ -210,44 +209,48 @@ subtitle.Size = UDim2.new(1, 0, 0, 100)
 subtitle.Position = UDim2.new(0, 0, 0.53, 0)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "SC PENGANGGURAN"
-subtitle.TextColor3 = C.FIRE2
+subtitle.TextColor3 = C.ACC2
 subtitle.TextSize = 68
 subtitle.Font = Enum.Font.GothamBlack
 subtitle.TextStrokeTransparency = 0
-subtitle.TextStrokeColor3 = C.FIRE3
+subtitle.TextStrokeColor3 = C.ACC
 subtitle.Parent = bg
 
 local subGrad = Instance.new("UIGradient")
-subGrad.Color = ColorSequence.new(C.FIRE2, Color3.fromRGB(255, 255, 220), C.FIRE1)
+subGrad.Color = ColorSequence.new(C.ACC2, Color3.fromRGB(255, 220, 255), C.ACC3)
 subGrad.Parent = subtitle
 
 local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ROOORHUB 🔥"
-tagline.TextColor3 = C.FIRE2
+tagline.Text = "✨ ROOORHUB GALAXY ✨"
+tagline.TextColor3 = C.ACC2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
 tagline.TextStrokeTransparency = 0.3
-tagline.TextStrokeColor3 = C.FIRE3
+tagline.TextStrokeColor3 = C.ACC
 tagline.Parent = bg
 
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 420, 0, 6)
 progressBar.Position = UDim2.new(0.5, -210, 0.9, 20)
-progressBar.BackgroundColor3 = Color3.fromRGB(40, 15, 5)
+progressBar.BackgroundColor3 = Color3.fromRGB(30, 15, 50)
 progressBar.BorderSizePixel = 0
 progressBar.Parent = bg
 rnd(progressBar, 3)
-strk(progressBar, C.FIRE2, 1.5, 0.3)
+strk(progressBar, C.ACC2, 1.5, 0.3)
 
 local progressFill = Instance.new("Frame")
 progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = C.FIRE_BRIGHT
+progressFill.BackgroundColor3 = C.ACC2
 progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBar
 rnd(progressFill, 3)
+
+local progGrad = Instance.new("UIGradient")
+progGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
+progGrad.Parent = progressFill
 
 task.spawn(function()
     local t = 0
@@ -310,10 +313,10 @@ _G.RoooorS = _G.RoooorS or {
     MaskedPower = "Cobra",
     AutoVault = false, InstantInteract = false,
     EightBitCrown = false, EightBitSize = 1, CrownX = 0, CrownY = 1.2, CrownZ = 0,
-    Trail = false, TrailColor = Color3.fromRGB(255, 120, 0),
-    Aura = false, AuraColor = Color3.fromRGB(255, 120, 0),
+    Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
+    Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
-    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 255, 200), CrosshairSize = 8,
+    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 230, 255), CrosshairSize = 8,
     NoClipCamera = false,
     ZoomOut = false, ZoomOutValue = 500,
     Fullbright = false, FullbrightVal = 50,
@@ -421,7 +424,7 @@ FireList = {
 }
 
 FireConfig = {
-    Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
+    Classic = { c1 = Color3.fromRGB(120, 60, 255), c2 = Color3.fromRGB(0, 230, 255) },
     HellFire = { c1 = Color3.fromRGB(180, 0, 0), c2 = Color3.fromRGB(255, 80, 0), smoke = true },
     IceFire = { c1 = Color3.fromRGB(120, 200, 255), c2 = Color3.fromRGB(220, 240, 255), spark = true },
     ToxicFire = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(180, 255, 0), smoke = true },
@@ -441,7 +444,7 @@ FireConfig = {
     MysteryFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true },
     RainbowFire = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 255, 255), rainbow = true, spark = true },
     LightningFire = { c1 = Color3.fromRGB(120, 220, 255), c2 = Color3.fromRGB(255, 255, 255), spark = true },
-    GalaxyFire = { c1 = Color3.fromRGB(100, 0, 220), c2 = Color3.fromRGB(255, 200, 255), rainbow = true, spark = true },
+    GalaxyFire = { c1 = Color3.fromRGB(120, 60, 255), c2 = Color3.fromRGB(255, 200, 255), rainbow = true, spark = true },
     NebulaFire = { c1 = Color3.fromRGB(220, 80, 255), c2 = Color3.fromRGB(80, 220, 255), rainbow = true, spark = true },
     AuroraFire = { c1 = Color3.fromRGB(0, 255, 200), c2 = Color3.fromRGB(120, 255, 120), rainbow = true, spark = true },
     PhoenixFire = { c1 = Color3.fromRGB(255, 180, 0), c2 = Color3.fromRGB(255, 80, 0), smoke = true },
@@ -497,7 +500,7 @@ FireFeetList = {
 }
 
 FireFeetConfig = {
-    Classic = { c1 = Color3.fromRGB(255, 120, 0), c2 = Color3.fromRGB(255, 220, 80) },
+    Classic = { c1 = Color3.fromRGB(120, 60, 255), c2 = Color3.fromRGB(0, 230, 255) },
     Blue = { c1 = Color3.fromRGB(0, 170, 255), c2 = Color3.fromRGB(0, 255, 255) },
     Green = { c1 = Color3.fromRGB(0, 255, 50), c2 = Color3.fromRGB(180, 255, 0) },
     Purple = { c1 = Color3.fromRGB(180, 0, 255), c2 = Color3.fromRGB(255, 0, 220) },
@@ -511,7 +514,7 @@ FireFeetConfig = {
     Electric = { c1 = Color3.fromRGB(255, 255, 120), c2 = Color3.fromRGB(120, 120, 255) },
     Blood = { c1 = Color3.fromRGB(220, 0, 0), c2 = Color3.fromRGB(120, 0, 0) },
     Ghost = { c1 = Color3.fromRGB(220, 220, 255), c2 = Color3.fromRGB(255, 255, 255) },
-    Cosmic = { c1 = Color3.fromRGB(100, 0, 220), c2 = Color3.fromRGB(255, 220, 255), rainbow = true },
+    Cosmic = { c1 = Color3.fromRGB(120, 60, 255), c2 = Color3.fromRGB(255, 220, 255), rainbow = true },
     Dragon = { c1 = Color3.fromRGB(255, 80, 0), c2 = Color3.fromRGB(255, 220, 0) },
     Divine = { c1 = Color3.fromRGB(255, 255, 255), c2 = Color3.fromRGB(255, 255, 220) },
     Demon = { c1 = Color3.fromRGB(255, 0, 0), c2 = Color3.fromRGB(0, 0, 0) },
@@ -758,12 +761,12 @@ function apply8BitCrown(enable, size, posX, posY, posZ)
         NumberSequenceKeypoint.new(1, 1)
     })
     emitter.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(131, 253, 255)),
-        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(0, 213, 255)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 122, 34)),
-        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 255, 0)),
-        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(198, 42, 11))
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(200, 150, 255)),
+        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(120, 60, 255)),
+        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 230, 255)),
+        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 80, 200)),
+        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(120, 60, 255))
     })
     emitter.Parent = crown
 end
@@ -1577,8 +1580,8 @@ function applyTrail(enable, color)
     local fire = Instance.new("Fire")
     fire.Size = 8
     fire.Heat = 20
-    fire.Color = color or Color3.fromRGB(255, 120, 0)
-    fire.SecondaryColor = Color3.fromRGB(255, 220, 80)
+    fire.Color = color or Color3.fromRGB(120, 60, 255)
+    fire.SecondaryColor = Color3.fromRGB(0, 230, 255)
     fire.Parent = trailFireObj
 
     local smoke = Instance.new("Smoke")
@@ -1589,7 +1592,7 @@ function applyTrail(enable, color)
     smoke.Parent = trailFireObj
 
     local spark = Instance.new("Sparkles")
-    spark.SparkleColor = color or Color3.fromRGB(255, 220, 80)
+    spark.SparkleColor = color or Color3.fromRGB(0, 230, 255)
     spark.SparkleSize = 2
     spark.Parent = trailFireObj
 end
@@ -1609,7 +1612,7 @@ function applyAura(enable, color)
 
     auraObj = Instance.new("ParticleEmitter")
     auraObj.Texture = "rbxassetid://243660364"
-    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(255, 120, 0))
+    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(120, 60, 255))
     auraObj.Size = NumberSequence.new(2)
     auraObj.Lifetime = NumberRange.new(0.5, 1)
     auraObj.Rate = 30
@@ -1626,7 +1629,7 @@ function spawnKillEffect(pos)
     p.Shape = Enum.PartType.Ball
     p.Size = Vector3.new(2, 2, 2)
     p.Position = pos
-    p.Color = Color3.fromRGB(255, 50, 50)
+    p.Color = Color3.fromRGB(120, 60, 255)
     p.Transparency = 0.3
     p.Parent = workspace
 
@@ -1740,9 +1743,6 @@ function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- =========================================================
--- EXPOSE GLOBAL
--- =========================================================
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8BitCrown = apply8BitCrown
@@ -2138,7 +2138,7 @@ task.spawn(function()
                         warn.Name = "RoooorWarn"
                         warn.Size = UDim2.new(1, 0, 0, 6)
                         warn.Position = UDim2.new(0, 0, 0, 0)
-                        warn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                        warn.BackgroundColor3 = Color3.fromRGB(120, 60, 255)
                         warn.BorderSizePixel = 0
                         warn.Parent = PG
                     end
@@ -2170,7 +2170,7 @@ task.spawn(function()
                                 al.Position = UDim2.new(0.5, -150, 0, 100)
                                 al.BackgroundTransparency = 0.3
                                 al.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                                al.TextColor3 = Color3.fromRGB(255, 50, 50)
+                                al.TextColor3 = Color3.fromRGB(255, 80, 200)
                                 al.TextSize = 20
                                 al.Font = Enum.Font.GothamBlack
                                 al.Text = "⚠️ KILLER DEKET! ⚠️"
@@ -2215,19 +2215,19 @@ function addKillFeed(killerName, survivorName)
     if not S.KillFeed then return end
     local entry = Instance.new("Frame")
     entry.Size = UDim2.new(1, 0, 0, 28)
-    entry.BackgroundColor3 = Color3.fromRGB(30, 10, 5)
+    entry.BackgroundColor3 = Color3.fromRGB(30, 10, 45)
     entry.BackgroundTransparency = 0.2
     entry.BorderSizePixel = 0
     entry.Parent = killFeedFrame
     rnd(entry, 6)
-    strk(entry, C.RED, 1, 0.5)
+    strk(entry, C.ACC, 1, 0.5)
 
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(1, -10, 1, 0)
     lbl.Position = UDim2.new(0, 5, 0, 0)
     lbl.BackgroundTransparency = 1
     lbl.Text = "💀 " .. killerName .. " ➜ " .. survivorName
-    lbl.TextColor3 = Color3.fromRGB(255, 100, 100)
+    lbl.TextColor3 = Color3.fromRGB(220, 180, 255)
     lbl.TextSize = 11
     lbl.Font = Enum.Font.GothamBold
     lbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -2287,7 +2287,7 @@ function createStunIcon(killerChar)
     icon.Size = UDim2.new(1, 0, 1, 0)
     icon.BackgroundTransparency = 1
     icon.Text = "💫"
-    icon.TextColor3 = Color3.fromRGB(255, 255, 100)
+    icon.TextColor3 = Color3.fromRGB(220, 180, 255)
     icon.TextSize = 40
     icon.Font = Enum.Font.GothamBlack
     icon.TextStrokeTransparency = 0
@@ -2470,7 +2470,7 @@ function updateParryCircle()
     local yOffset = root.Size.Y / 2 + 1.5
     _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
         * CFrame.Angles(0, 0, math.rad(90))
-    _G.Roooor_ParryCircle.Color = C.FIRE2
+    _G.Roooor_ParryCircle.Color = C.ACC2
     _G.Roooor_ParryCircle.Transparency = 0.5
 end
 
@@ -2566,63 +2566,78 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
+-- BAGIAN 5/8 : GUI GALAXY + TOMBOL KECIL + AIMLOCK + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
-gui.Name = "RoooorHubFire"
+gui.Name = "RoooorHubGalaxy"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU R
+-- TOMBOL MENU GALAXY (KECIL 32×32)
 -- =========================================================
 btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 55, 0, 55)
+btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
-local ring1 = Instance.new("Frame")
-ring1.Size = UDim2.new(1, 10, 1, 10)
-ring1.Position = UDim2.new(0, -5, 0, -5)
-ring1.BackgroundTransparency = 1
-ring1.Parent = btnContainer
+-- Outer glow galaxy
+local outerGlow = Instance.new("Frame")
+outerGlow.Size = UDim2.new(1, 14, 1, 14)
+outerGlow.Position = UDim2.new(0, -7, 0, -7)
+outerGlow.BackgroundColor3 = Color3.fromRGB(120, 60, 255)
+outerGlow.BackgroundTransparency = 0.8
+outerGlow.BorderSizePixel = 0
+outerGlow.ZIndex = -1
+outerGlow.Parent = btnContainer
+rnd(outerGlow, 999)
 
-local ring1Stroke = Instance.new("UIStroke")
-ring1Stroke.Thickness = 3
-ring1Stroke.Color = C.FIRE_BRIGHT
-ring1Stroke.Transparency = 0.1
-ring1Stroke.Parent = ring1
+-- Ring galaxy luar
+local ringOuter = Instance.new("Frame")
+ringOuter.Size = UDim2.new(1, 6, 1, 6)
+ringOuter.Position = UDim2.new(0, -3, 0, -3)
+ringOuter.BackgroundTransparency = 1
+ringOuter.Parent = btnContainer
 
-local ring1Grad = Instance.new("UIGradient")
-ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE1, C.FIRE_BRIGHT, C.FIRE2, C.FIRE3)
-ring1Grad.Parent = ring1Stroke
+local ringOuterStroke = Instance.new("UIStroke")
+ringOuterStroke.Thickness = 2
+ringOuterStroke.Color = Color3.fromRGB(180, 100, 255)
+ringOuterStroke.Transparency = 0.1
+ringOuterStroke.Parent = ringOuter
 
-local ring2 = Instance.new("Frame")
-ring2.Size = UDim2.new(1, 4, 1, 4)
-ring2.Position = UDim2.new(0, -2, 0, -2)
-ring2.BackgroundTransparency = 1
-ring2.Parent = btnContainer
+local ringOuterGrad = Instance.new("UIGradient")
+ringOuterGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
+    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 230, 255)),
+    ColorSequenceKeypoint.new(0.66, Color3.fromRGB(255, 80, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 60, 255)),
+})
+ringOuterGrad.Parent = ringOuterStroke
 
-local ring2Stroke = Instance.new("UIStroke")
-ring2Stroke.Thickness = 1.5
-ring2Stroke.Color = C.FIRE1
-ring2Stroke.Transparency = 0.3
-ring2Stroke.Parent = ring2
+-- Ring galaxy dalam
+local ringInner = Instance.new("Frame")
+ringInner.Size = UDim2.new(1, -2, 1, -2)
+ringInner.Position = UDim2.new(0, 1, 0, 1)
+ringInner.BackgroundTransparency = 1
+ringInner.Parent = btnContainer
 
-local ring2Grad = Instance.new("UIGradient")
-ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
-ring2Grad.Parent = ring2Stroke
+local ringInnerStroke = Instance.new("UIStroke")
+ringInnerStroke.Thickness = 1
+ringInnerStroke.Color = Color3.fromRGB(0, 230, 255)
+ringInnerStroke.Transparency = 0.3
+ringInnerStroke.Parent = ringInner
 
+-- Tombol utama galaxy
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -14, 1, -14)
-mainBtn.Position = UDim2.new(0, 7, 0, 7)
-mainBtn.BackgroundColor3 = Color3.fromRGB(40, 12, 4)
-mainBtn.Text = "R"
-mainBtn.TextColor3 = C.FIRE_BRIGHT
-mainBtn.TextSize = 24
+mainBtn.Size = UDim2.new(1, -10, 1, -10)
+mainBtn.Position = UDim2.new(0, 5, 0, 5)
+mainBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
+mainBtn.Text = "✨"
+mainBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+mainBtn.TextSize = 14
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
@@ -2630,81 +2645,81 @@ mainBtn.Parent = btnContainer
 rnd(mainBtn, 999)
 
 local btnGrad = Instance.new("UIGradient")
-btnGrad.Color = ColorSequence.new(
-    Color3.fromRGB(80, 25, 5),
-    Color3.fromRGB(40, 12, 4),
-    Color3.fromRGB(80, 25, 5)
-)
+btnGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 30, 120)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 15, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 30, 120)),
+})
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
-local glow = Instance.new("Frame")
-glow.Size = UDim2.new(1, 16, 1, 16)
-glow.Position = UDim2.new(0, -8, 0, -8)
-glow.BackgroundColor3 = C.FIRE_BRIGHT
-glow.BackgroundTransparency = 0.5
-glow.BorderSizePixel = 0
-glow.ZIndex = -1
-glow.Parent = mainBtn
-rnd(glow, 999)
-
+-- Inner glow
 local innerGlow = Instance.new("Frame")
-innerGlow.Size = UDim2.new(0.6, 0, 0.6, 0)
-innerGlow.Position = UDim2.new(0.2, 0, 0.2, 0)
-innerGlow.BackgroundColor3 = C.FIRE1
-innerGlow.BackgroundTransparency = 0.4
+innerGlow.Size = UDim2.new(0.5, 0, 0.5, 0)
+innerGlow.Position = UDim2.new(0.25, 0, 0.25, 0)
+innerGlow.BackgroundColor3 = Color3.fromRGB(0, 230, 255)
+innerGlow.BackgroundTransparency = 0.6
 innerGlow.BorderSizePixel = 0
 innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
+-- Animasi tombol
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-        ring1.Rotation = t * 70
-        ring1Grad.Rotation = t * 120
-        ring2.Rotation = -t * 100
-        ring2Grad.Rotation = t * 80
 
-        local pulse = (math.sin(t * 4) + 1) / 2
-        ring1Stroke.Transparency = 0.2 - pulse * 0.15
-        glow.BackgroundTransparency = 0.75 - pulse * 0.4
-        glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
-        glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
-        innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
-        btnGrad.Rotation = t * 40
-        mainBtn.TextSize = 24 + math.sin(t * 5) * 2
-        mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.9, 1)
+        ringOuter.Rotation = t * 30
+        ringOuterGrad.Rotation = t * 60
+        ringInner.Rotation = -t * 50
+
+        local pulse = (math.sin(t * 3) + 1) / 2
+
+        outerGlow.BackgroundTransparency = 0.8 - pulse * 0.3
+        outerGlow.Size = UDim2.new(1, 14 + pulse * 8, 1, 14 + pulse * 8)
+        outerGlow.Position = UDim2.new(0, -7 - pulse * 4, 0, -7 - pulse * 4)
+
+        ringOuterStroke.Transparency = 0.2 - pulse * 0.15
+        ringInnerStroke.Transparency = 0.4 - pulse * 0.3
+
+        btnGrad.Rotation = t * 30
+        mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.5, 1)
+        mainBtn.TextSize = 14 + math.sin(t * 4) * 1
+
+        innerGlow.BackgroundTransparency = 0.6 - pulse * 0.4
+
         task.wait(0.03)
     end
 end)
 
-for i = 1, 10 do
+-- Partikel galaxy orbit
+for i = 1, 8 do
     local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, 3, 0, 3)
-    particle.BackgroundColor3 = C.FIRE_BRIGHT
+    particle.Size = UDim2.new(0, 2, 0, 2)
     particle.BorderSizePixel = 0
+    particle.ZIndex = 4
     particle.Parent = btnContainer
     rnd(particle, 999)
 
-    local angle = (i / 10) * math.pi * 2
-    local orbitSpeed = 2 + math.random() * 2
-    local radius = 32 + math.random() * 6
+    local angle = (i / 8) * math.pi * 2
+    local orbitSpeed = 1.5 + math.random() * 1.5
+    local radius = 20
 
     task.spawn(function()
         while btnContainer.Parent do
             local t = tick()
             local x = math.cos(t * orbitSpeed + angle) * radius
-            local y = math.sin(t * orbitSpeed + angle) * radius * 0.6
-            particle.Position = UDim2.new(0.5, x - 1.5, 0.5, y - 1.5)
-            particle.BackgroundTransparency = 0.1 + math.sin(t * 5 + i) * 0.3
-            particle.BackgroundColor3 = Color3.fromHSV((t * 0.4 + i * 0.07) % 1, 0.9, 1)
+            local y = math.sin(t * orbitSpeed + angle) * radius
+            particle.Position = UDim2.new(0.5, x - 1, 0.5, y - 1)
+            particle.BackgroundColor3 = Color3.fromHSV((t * 0.15 + i * 0.1) % 1, 0.7, 1)
+            particle.BackgroundTransparency = 0.2 + math.sin(t * 4 + i) * 0.3
             task.wait(0.03)
         end
     end)
 end
 
+-- Drag tombol
 dragging = false
 dragStart = nil
 startPos = nil
@@ -2742,7 +2757,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON
+-- AIMLOCK FLOATING BUTTON (GALAXY)
 -- =========================================================
 aimBtnGui = Instance.new("ScreenGui")
 aimBtnGui.Name = "RoooorAimlockBtn"
@@ -2751,7 +2766,7 @@ aimBtnGui.IgnoreGuiInset = true
 aimBtnGui.Parent = PG
 
 aimContainer = Instance.new("Frame")
-aimContainer.Size = UDim2.new(0, 46, 0, 46)
+aimContainer.Size = UDim2.new(0, 40, 0, 40)
 aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
 aimContainer.BackgroundTransparency = 1
 aimContainer.Parent = aimBtnGui
@@ -2775,15 +2790,24 @@ aimOuterGrad.Parent = aimOuterStroke
 local aimBtn = Instance.new("TextButton")
 aimBtn.Size = UDim2.new(1, -8, 1, -8)
 aimBtn.Position = UDim2.new(0, 4, 0, 4)
-aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+aimBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
 aimBtn.Text = "🎯"
 aimBtn.TextColor3 = C.ACC2
-aimBtn.TextSize = 22
+aimBtn.TextSize = 18
 aimBtn.Font = Enum.Font.GothamBlack
 aimBtn.BorderSizePixel = 0
 aimBtn.AutoButtonColor = false
 aimBtn.Parent = aimContainer
 rnd(aimBtn, 999)
+
+local aimBtnGrad = Instance.new("UIGradient")
+aimBtnGrad.Color = ColorSequence.new(
+    Color3.fromRGB(60, 30, 120),
+    Color3.fromRGB(25, 15, 50),
+    Color3.fromRGB(60, 30, 120)
+)
+aimBtnGrad.Rotation = 45
+aimBtnGrad.Parent = aimBtn
 
 local aimModeLbl = Instance.new("TextLabel")
 aimModeLbl.Size = UDim2.new(0, 100, 0, 14)
@@ -2844,7 +2868,7 @@ aimBtn.InputBegan:Connect(function(input)
         or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
         Combat.Holding = true
-        aimBtn.BackgroundColor3 = Color3.fromRGB(30, 60, 120)
+        aimBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 120)
     end
 end)
 
@@ -2852,7 +2876,7 @@ aimBtn.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         Combat.Holding = false
-        aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+        aimBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
     end
 end)
 
@@ -2880,7 +2904,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PANEL MENU UTAMA
+-- PANEL MENU GALAXY
 -- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
@@ -2891,13 +2915,71 @@ panel.BorderSizePixel = 0
 panel.Visible = false
 panel.Parent = gui
 rnd(panel, 18)
-strk(panel, C.FIRE2, 2, 0.2)
+strk(panel, C.ACC, 2, 0.3)
 
 local panelGrad = Instance.new("UIGradient")
 panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
+-- Partikel bintang di background panel
+task.spawn(function()
+    local starsGui = Instance.new("Frame")
+    starsGui.Size = UDim2.new(1, 0, 1, 0)
+    starsGui.BackgroundTransparency = 1
+    starsGui.ZIndex = 0
+    starsGui.ClipsDescendants = true
+    starsGui.Parent = panel
+    rnd(starsGui, 18)
+
+    for i = 1, 50 do
+        local star = Instance.new("Frame")
+        star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
+        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        star.BackgroundColor3 = Color3.fromHSV(math.random(), 0.5, 1)
+        star.BackgroundTransparency = math.random(30, 90) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = 0
+        star.Parent = starsGui
+        rnd(star, 999)
+
+        task.spawn(function()
+            while star.Parent do
+                star.BackgroundTransparency = 0.3 + math.sin(tick() * 2 + i) * 0.5
+                task.wait(0.1)
+            end
+        end)
+    end
+
+    for i = 1, 3 do
+        local nebula = Instance.new("Frame")
+        nebula.Size = UDim2.new(0, math.random(80, 150), 0, math.random(80, 150))
+        nebula.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        nebula.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
+        nebula.BackgroundTransparency = 0.85
+        nebula.BorderSizePixel = 0
+        nebula.ZIndex = 0
+        nebula.Parent = starsGui
+        rnd(nebula, 999)
+
+        task.spawn(function()
+            local startX = nebula.Position.X.Scale
+            local startY = nebula.Position.Y.Scale
+            while nebula.Parent do
+                local t = tick()
+                nebula.Position = UDim2.new(
+                    startX + math.sin(t * 0.3 + i) * 0.05,
+                    0,
+                    startY + math.cos(t * 0.4 + i) * 0.05,
+                    0
+                )
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = C.PANEL
@@ -2917,15 +2999,15 @@ hPatch.Parent = header
 local neonLine = Instance.new("Frame")
 neonLine.Size = UDim2.new(1, -40, 0, 3)
 neonLine.Position = UDim2.new(0, 20, 1, -1.5)
-neonLine.BackgroundColor3 = C.FIRE_BRIGHT
+neonLine.BackgroundColor3 = C.ACC2
 neonLine.BorderSizePixel = 0
 neonLine.Parent = header
 
 local neonGrad = Instance.new("UIGradient")
 neonGrad.Color = ColorSequence.new(
-    C.FIRE3, C.FIRE_BRIGHT,
-    Color3.fromRGB(255, 255, 240),
-    C.FIRE_BRIGHT, C.FIRE3
+    Color3.fromRGB(120, 60, 255),
+    Color3.fromRGB(0, 230, 255),
+    Color3.fromRGB(255, 80, 200)
 )
 neonGrad.Parent = neonLine
 
@@ -2943,13 +3025,13 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB"
+hTitle.Text = "✨ ROOORHUB GALAXY"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
 hTitle.TextXAlignment = Enum.TextXAlignment.Left
 hTitle.TextStrokeTransparency = 0.2
-hTitle.TextStrokeColor3 = C.FIRE3
+hTitle.TextStrokeColor3 = C.ACC
 hTitle.Parent = header
 
 local closeBtn = Instance.new("TextButton")
@@ -2966,15 +3048,16 @@ closeBtn.Parent = header
 rnd(closeBtn, 7)
 strk(closeBtn, C.RED, 1, 0.5)
 
+-- SIDEBAR
 sbFrame = Instance.new("Frame")
 sbFrame.Size = UDim2.new(0, 105, 1, -58)
 sbFrame.Position = UDim2.new(0, 10, 0, 50)
 sbFrame.BackgroundColor3 = C.PANEL
-sbFrame.BackgroundTransparency = 0.2
+sbFrame.BackgroundTransparency = 0.15
 sbFrame.BorderSizePixel = 0
 sbFrame.Parent = panel
 rnd(sbFrame, 12)
-strk(sbFrame, C.FIRE2, 1, 0.6)
+strk(sbFrame, C.ACC, 1, 0.5)
 
 sb = Instance.new("ScrollingFrame")
 sb.Size = UDim2.new(1, -4, 1, -4)
@@ -2982,7 +3065,7 @@ sb.Position = UDim2.new(0, 2, 0, 2)
 sb.BackgroundTransparency = 1
 sb.BorderSizePixel = 0
 sb.ScrollBarThickness = 3
-sb.ScrollBarImageColor3 = C.FIRE2
+sb.ScrollBarImageColor3 = C.ACC2
 sb.CanvasSize = UDim2.new(0, 0, 0, 0)
 sb.AutomaticCanvasSize = Enum.AutomaticSize.Y
 sb.Parent = sbFrame
@@ -2998,15 +3081,16 @@ sbP.PaddingRight = UDim.new(0, 4)
 sbP.PaddingBottom = UDim.new(0, 6)
 sbP.Parent = sb
 
+-- CONTENT
 ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -135, 1, -58)
 ct.Position = UDim2.new(0, 122, 0, 50)
 ct.BackgroundColor3 = C.PANEL
-ct.BackgroundTransparency = 0.2
+ct.BackgroundTransparency = 0.15
 ct.BorderSizePixel = 0
 ct.Parent = panel
 rnd(ct, 12)
-strk(ct, C.FIRE2, 1, 0.6)
+strk(ct, C.ACC, 1, 0.5)
 
 cs = Instance.new("ScrollingFrame")
 cs.Size = UDim2.new(1, -14, 1, -14)
@@ -3014,7 +3098,7 @@ cs.Position = UDim2.new(0, 7, 0, 7)
 cs.BackgroundTransparency = 1
 cs.BorderSizePixel = 0
 cs.ScrollBarThickness = 3
-cs.ScrollBarImageColor3 = C.FIRE2
+cs.ScrollBarImageColor3 = C.ACC2
 cs.CanvasSize = UDim2.new(0, 0, 0, 0)
 cs.AutomaticCanvasSize = Enum.AutomaticSize.Y
 cs.Parent = ct
@@ -3024,7 +3108,7 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI
+-- KOMPONEN UI GALAXY
 -- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
@@ -3035,13 +3119,13 @@ function sec(title, icon)
     local deco = Instance.new("Frame")
     deco.Size = UDim2.new(0, 4, 0, 14)
     deco.Position = UDim2.new(0, 4, 0.5, -7)
-    deco.BackgroundColor3 = C.FIRE2
+    deco.BackgroundColor3 = C.ACC
     deco.BorderSizePixel = 0
     deco.Parent = f
     rnd(deco, 2)
 
     local decoGrad = Instance.new("UIGradient")
-    decoGrad.Color = ColorSequence.new(C.FIRE1, C.FIRE_BRIGHT, C.FIRE3)
+    decoGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
     decoGrad.Parent = deco
 
     local l = Instance.new("TextLabel")
@@ -3076,7 +3160,7 @@ function tog(name, def, cb)
     f.BorderSizePixel = 0
     f.Parent = cs
     rnd(f, 8)
-    local fStrk = strk(f, C.FIRE2, 1, 0.7)
+    local fStrk = strk(f, C.ACC, 1, 0.5)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
@@ -3106,9 +3190,9 @@ function tog(name, def, cb)
     local state = (saved ~= nil) and saved or def
     _G.ToggleStates[name] = state
 
-    t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
+    t.BackgroundColor3 = state and C.ACC or C.PANEL
     k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
-    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+    k.BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
 
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(1, 0, 1, 0)
@@ -3121,12 +3205,12 @@ function tog(name, def, cb)
         _G.ToggleStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
             Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
-            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
+            BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
         }):Play()
         TweenService:Create(t, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.FIRE1 or C.PANEL
+            BackgroundColor3 = state and C.ACC or C.PANEL
         }):Play()
-        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
+        fStrk.Color = state and C.ACC2 or C.ACC
 
         playToggleSound()
 
@@ -3142,7 +3226,7 @@ function sl(name, min, max, def, cb)
     f.BorderSizePixel = 0
     f.Parent = cs
     rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    strk(f, C.ACC, 1, 0.5)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -55, 0, 14)
@@ -3163,7 +3247,7 @@ function sl(name, min, max, def, cb)
     v.Position = UDim2.new(1, -48, 0, 4)
     v.BackgroundTransparency = 1
     v.Text = tostring(curVal)
-    v.TextColor3 = C.FIRE_BRIGHT
+    v.TextColor3 = C.ACC2
     v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -3179,20 +3263,24 @@ function sl(name, min, max, def, cb)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((curVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = C.FIRE_BRIGHT
+    fill.BackgroundColor3 = C.ACC2
     fill.BorderSizePixel = 0
     fill.Parent = bg
     rnd(fill, 3)
 
+    local fillGrad = Instance.new("UIGradient")
+    fillGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
+    fillGrad.Parent = fill
+
     local kn = Instance.new("Frame")
     kn.Size = UDim2.new(0, 11, 0, 11)
     kn.Position = UDim2.new((curVal - min) / (max - min), -5.5, 0.5, -5.5)
-    kn.BackgroundColor3 = C.TXT
+    kn.BackgroundColor3 = Color3.new(1, 1, 1)
     kn.BorderSizePixel = 0
     kn.ZIndex = 2
     kn.Parent = bg
     rnd(kn, 6)
-    strk(kn, C.FIRE_BRIGHT, 2)
+    strk(kn, C.ACC2, 2)
 
     local drag = false
     local function upd(input)
@@ -3239,7 +3327,7 @@ function cpk(name, def, cb)
     f.BorderSizePixel = 0
     f.Parent = cs
     rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    strk(f, C.ACC, 1, 0.5)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
@@ -3260,16 +3348,16 @@ function cpk(name, def, cb)
     cB.BorderSizePixel = 0
     cB.Parent = f
     rnd(cB, 4)
-    strk(cB, C.FIRE_BRIGHT, 1.5)
+    strk(cB, C.ACC2, 1.5)
 
     local presets = {
+        Color3.fromRGB(120, 60, 255),
+        Color3.fromRGB(0, 230, 255),
+        Color3.fromRGB(255, 80, 200),
         Color3.fromRGB(255, 60, 60),
+        Color3.fromRGB(60, 255, 120),
         Color3.fromRGB(255, 170, 0),
         Color3.fromRGB(255, 255, 0),
-        Color3.fromRGB(60, 255, 120),
-        Color3.fromRGB(0, 200, 255),
-        Color3.fromRGB(150, 80, 255),
-        Color3.fromRGB(255, 50, 130),
         Color3.fromRGB(255, 255, 255),
         Color3.fromRGB(20, 20, 20),
     }
@@ -3296,7 +3384,7 @@ function btn(name, cb)
     b.AutoButtonColor = false
     b.Parent = cs
     rnd(b, 8)
-    strk(b, C.FIRE_BRIGHT, 1, 0.7)
+    strk(b, C.ACC2, 1, 0.5)
 
     b.MouseButton1Click:Connect(function()
         playToggleSound()
@@ -3312,7 +3400,7 @@ function drp(name, options, def, cb)
     f.BorderSizePixel = 0
     f.Parent = cs
     rnd(f, 8)
-    strk(f, C.FIRE2, 1, 0.7)
+    strk(f, C.ACC, 1, 0.5)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0.5, 0, 1, 0)
@@ -3336,7 +3424,7 @@ function drp(name, options, def, cb)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
     v.Text = tostring(cur) .. " ▶"
-    v.TextColor3 = C.FIRE_BRIGHT
+    v.TextColor3 = C.ACC2
     v.TextSize = 8
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
@@ -3374,7 +3462,7 @@ function makeTab(name, icon, order, cb)
     ind.Size = UDim2.new(0, 3, 0, 0)
     ind.Position = UDim2.new(0, 0, 0.5, 0)
     ind.AnchorPoint = Vector2.new(0, 0.5)
-    ind.BackgroundColor3 = C.FIRE_BRIGHT
+    ind.BackgroundColor3 = C.ACC2
     ind.BorderSizePixel = 0
     ind.Parent = b
     rnd(ind, 2)
@@ -3469,7 +3557,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI + Tombol R + Aimlock + Panel loaded")-- =========================================================
+print("✅ [5/8] GUI GALAXY + Tombol kecil + Aimlock + Panel loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 sec = _G.Roooor_sec
@@ -3510,7 +3598,7 @@ makeTab("Fire", "🔥", 1, function()
         btn2.LayoutOrder = i + 100
         btn2.Parent = cs
         rnd(btn2, 7)
-        strk(btn2, C.FIRE2, 1, 0.6)
+        strk(btn2, C.ACC, 1, 0.6)
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -3524,9 +3612,9 @@ makeTab("Fire", "🔥", 1, function()
         btnLbl.Parent = btn2
 
         if S.FireType == fireName then
-            btn2.BackgroundColor3 = C.FIRE2
+            btn2.BackgroundColor3 = C.ACC
             btn2.BackgroundTransparency = 0
-            btnLbl.TextColor3 = Color3.new(0.1, 0.1, 0.1)
+            btnLbl.TextColor3 = Color3.new(1, 1, 1)
         end
 
         btn2.MouseButton1Click:Connect(function()
@@ -3540,9 +3628,9 @@ makeTab("Fire", "🔥", 1, function()
                     if l then l.TextColor3 = C.TXT end
                 end
             end
-            btn2.BackgroundColor3 = C.FIRE2
+            btn2.BackgroundColor3 = C.ACC
             btn2.BackgroundTransparency = 0
-            btnLbl.TextColor3 = Color3.new(0.1, 0.1, 0.1)
+            btnLbl.TextColor3 = Color3.new(1, 1, 1)
         end)
     end
 end)
@@ -3571,7 +3659,7 @@ makeTab("Fire Feet", "👟", 2, function()
         btn2.LayoutOrder = i + 200
         btn2.Parent = cs
         rnd(btn2, 7)
-        strk(btn2, C.FIRE2, 1, 0.6)
+        strk(btn2, C.ACC, 1, 0.6)
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
@@ -3585,9 +3673,9 @@ makeTab("Fire Feet", "👟", 2, function()
         btnLbl.Parent = btn2
 
         if S.FireFeetType == fireName then
-            btn2.BackgroundColor3 = C.FIRE2
+            btn2.BackgroundColor3 = C.ACC
             btn2.BackgroundTransparency = 0
-            btnLbl.TextColor3 = Color3.new(0.1, 0.1, 0.1)
+            btnLbl.TextColor3 = Color3.new(1, 1, 1)
         end
 
         btn2.MouseButton1Click:Connect(function()
@@ -3601,9 +3689,9 @@ makeTab("Fire Feet", "👟", 2, function()
                     if l then l.TextColor3 = C.TXT end
                 end
             end
-            btn2.BackgroundColor3 = C.FIRE2
+            btn2.BackgroundColor3 = C.ACC
             btn2.BackgroundTransparency = 0
-            btnLbl.TextColor3 = Color3.new(0.1, 0.1, 0.1)
+            btnLbl.TextColor3 = Color3.new(1, 1, 1)
         end)
     end
 end)
@@ -3882,7 +3970,7 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    sec("Character Effects", "🔥")
+    sec("Character Effects", "✨")
 
     tog("8-Bit Crown", false, function(s)
         S.EightBitCrown = s
@@ -3892,6 +3980,12 @@ makeTab("Visual", "✨", 7, function()
         S.EightBitSize = v
         if S.EightBitCrown then
             apply8BitCrown(true, v, S.CrownX, S.CrownY, S.CrownZ)
+        end
+    end)
+    sl("Crown Up/Down (Y)", -2, 3, 1.2, function(v)
+        S.CrownY = v
+        if S.EightBitCrown then
+            apply8BitCrown(true, S.EightBitSize, S.CrownX, v, S.CrownZ)
         end
     end)
 
@@ -3966,10 +4060,10 @@ makeTab("Player", "👤", 8, function()
     lbl("Toggle ON = standby (belum lock)", C.DIM)
 
     sec("Keybind", "⌨️")
-    lbl("Toggle Menu: Klik tombol R", C.FIRE_BRIGHT)
+    lbl("Toggle Menu: Klik tombol ✨", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
-    btn("🔥 UNLOAD SCRIPT", function()
+    btn("✨ UNLOAD SCRIPT", function()
         pcall(function()
             if gui then gui:Destroy() end
             if aimBtnGui then aimBtnGui:Destroy() end
@@ -4045,7 +4139,7 @@ function createFOVCircle()
 
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 1.5
-    stroke.Color = C.FIRE2
+    stroke.Color = C.ACC2
     stroke.Transparency = 0.3
     stroke.Parent = circle
 
@@ -4493,7 +4587,7 @@ makeTab("Combat", "⚔️", 9, function()
     lbl("Kalau ON, hitbox keliatan transparan", C.GRN)
 
     sec("Keybind", "⌨️")
-    lbl("🎯 Tombol Aimlock di kiri layar", C.FIRE_BRIGHT)
+    lbl("✨ Tombol Aimlock di kiri layar", C.FIRE_BRIGHT)
     lbl("Klik kanan tombol = ganti mode", C.DIM)
     lbl("Hold tombol attack = aimlock ON", C.DIM)
 end)
@@ -4551,7 +4645,7 @@ end)
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  🔥 ROOORHUB 🔥                          ║")
+print("║  ✨ ROOORHUB GALAXY ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry                            ║")
@@ -4562,9 +4656,10 @@ print("║  🛡️ God Mode (Full)                      ║")
 print("║  💡 Fullbright (max 200)                 ║")
 print("║  🌫️ No Fog Fix                           ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
+print("║  👑 Crown Slider (Size + Y)              ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol R             ║")
+print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")
+print("✅ [8/8] FINAL LOADED - Selamat menggunakan! ✨")

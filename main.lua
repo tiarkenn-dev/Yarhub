@@ -16,6 +16,12 @@ local SoundService = game:GetService("SoundService")
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
 
+-- HELPER: getRoot (dipindah ke atas biar gak error)
+function getRoot()
+    local c = LP.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
 local C = {
     BG = Color3.fromRGB(6, 4, 12),
     BG2 = Color3.fromRGB(10, 7, 20),
@@ -53,22 +59,22 @@ local function strk(o, col, t, tr)
 end
 
 -- =========================================================
--- SOUND SYSTEM (1 SOUND ONLY)
+-- SOUND SYSTEM (DISABLED - ANTI ERROR)
 -- =========================================================
-local ToggleSoundId = "rbxassetid://6073491164"
-
 local function playToggleSound()
-    task.spawn(function()
-        pcall(function()
-            local s = Instance.new("Sound")
-            s.SoundId = ToggleSoundId
-            s.Volume = 0.4
-            s.Parent = SoundService
-            s:Play()
-            task.wait(1.5)
-            s:Destroy()
-        end)
-    end)
+    -- Sound disabled untuk mencegah error
+    -- Kalau mau nyalain sound, ganti jadi:
+    -- task.spawn(function()
+    --     pcall(function()
+    --         local s = Instance.new("Sound")
+    --         s.SoundId = "rbxassetid://9120386436"
+    --         s.Volume = 0.4
+    --         s.Parent = SoundService
+    --         s:Play()
+    --         task.wait(2)
+    --         s:Destroy()
+    --     end)
+    -- end)
 end
 
 _G.Roooor_playSound = playToggleSound
@@ -371,7 +377,7 @@ _G.Roooor_GodMode = _G.Roooor_GodMode or {
     Enabled = false,
 }
 
--- COMBAT (AIMBOT + HITBOX)
+-- COMBAT
 _G.Roooor_Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
@@ -570,11 +576,6 @@ for _, id in ipairs({
     "117070354890871","106871536134254","138720291317243"
 }) do
     KillerAnims["rbxassetid://"..id] = true
-end
-
-local function getRoot()
-    local c = LP.Character
-    return c and c:FindFirstChild("HumanoidRootPart")
 end
 
 print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
@@ -1329,7 +1330,6 @@ local origLighting = {
     FogStart = Lighting.FogStart,
 }
 
--- FULLBRIGHT UPGRADE (MAX 200)
 local function applyFullbright(s)
     if s then
         local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 2)
@@ -1359,7 +1359,6 @@ local function applyFullbright(s)
     end
 end
 
--- NO FOG FIX
 local function applyNoFog(s)
     pcall(function()
         if s then
@@ -4016,106 +4015,7 @@ makeTab("Player", "👤", 8, function()
 end)
 
 print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- =========================================================
--- BAGIAN 8/8 : FINAL - AUTO RE-APPLY + RESPAWN HANDLER
--- =========================================================
-
--- =========================================================
--- AUTO RE-APPLY SAAT CHARACTER RESPAWN
--- =========================================================
-LP.CharacterAdded:Connect(function(char)
-    task.wait(1.2)
-
-    if S.FireOn then pcall(applyFire) end
-    if S.FireFeetOn then pcall(applyFireFeet) end
-
-    if S.EightBitCrown then
-        pcall(function()
-            apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
-        end)
-    end
-
-    if S.Trail then
-        pcall(function() applyTrail(true, S.TrailColor) end)
-    end
-
-    if S.Aura then
-        pcall(function() applyAura(true, S.AuraColor) end)
-    end
-
-    if S.Korblox then
-        pcall(function() applyKorblox(true) end)
-    end
-
-    if S.Headless then
-        pcall(function() applyHeadless(true) end)
-    end
-
-    if S.FOVEnabled then pcall(applyFOV) end
-
-    if S.SkyId and S.SkyId ~= "Default" then
-        pcall(function() applySky(S.SkyId) end)
-    end
-
-    if S.NoClip then
-        task.wait(0.3)
-        for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
-        end
-    end
-end)
-
--- =========================================================
--- AUTO SCAN KILLER (KALAU PARRY AKTIF)
--- =========================================================
-task.spawn(function()
-    while task.wait(1) do
-        if AutoParry.Enabled then
-            scanKillers()
-        end
-    end
-end)
-
--- =========================================================
--- AUTO SCAN PLAYER BARU
--- =========================================================
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function(char)
-        task.wait(1)
-        if AutoParry.Enabled then
-            if p.Team and p.Team.Name == "Killer" then
-                hookKiller(char)
-            end
-        end
-    end)
-end)
-
--- =========================================================
--- PRINT FINAL
--- =========================================================
-task.wait(0.5)
-
-print("╔══════════════════════════════════════════╗")
-print("║  🔥 ROOORHUB 🔥                          ║")
-print("║  ✅ SEMUA FITUR LOADED                   ║")
-print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry                            ║")
-print("║  ⚡ Auto Skill Check                     ║")
-print("║  🎯 Aimlock Smooth (Hold to Attack)      ║")
-print("║  💡 Fullbright (max 200)                 ║")
-print("║  🌫️ No Fog Fix                           ║")
-print("║  📦 Hitbox 2 Mode (Survivor + Killer)    ║")
-print("║  🛡️ God Mode (Full)                      ║")
-print("║  🌀 Teleport 3 Opsi                      ║")
-print("║  🔊 Sound Toggle                         ║")
-print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol R             ║")
-print("║  🎯 Aimlock: Hold tombol serang          ║")
-print("╚══════════════════════════════════════════╝")
-
-print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")-- =========================================================
--- BAGIAN 9/8 : TAB COMBAT (AIMBOT + HITBOX) + TAB EXTRA
+-- BAGIAN 8/8 : FINAL - AUTO RE-APPLY + TAB COMBAT + TAB EXTRA
 -- =========================================================
 
 local sec = _G.Roooor_sec
@@ -4362,7 +4262,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- HITBOX 2 MODE (SURVIVOR + KILLER)
+-- HITBOX 2 MODE
 -- =========================================================
 local hitboxCache = {}
 
@@ -4462,6 +4362,78 @@ task.spawn(function()
             end
         end
     end
+end)
+
+-- =========================================================
+-- AUTO RE-APPLY SAAT CHARACTER RESPAWN
+-- =========================================================
+LP.CharacterAdded:Connect(function(char)
+    task.wait(1.2)
+
+    if S.FireOn then pcall(applyFire) end
+    if S.FireFeetOn then pcall(applyFireFeet) end
+
+    if S.EightBitCrown then
+        pcall(function()
+            apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+        end)
+    end
+
+    if S.Trail then
+        pcall(function() applyTrail(true, S.TrailColor) end)
+    end
+
+    if S.Aura then
+        pcall(function() applyAura(true, S.AuraColor) end)
+    end
+
+    if S.Korblox then
+        pcall(function() applyKorblox(true) end)
+    end
+
+    if S.Headless then
+        pcall(function() applyHeadless(true) end)
+    end
+
+    if S.FOVEnabled then pcall(applyFOV) end
+
+    if S.SkyId and S.SkyId ~= "Default" then
+        pcall(function() applySky(S.SkyId) end)
+    end
+
+    if S.NoClip then
+        task.wait(0.3)
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- AUTO SCAN KILLER (KALAU PARRY AKTIF)
+-- =========================================================
+task.spawn(function()
+    while task.wait(1) do
+        if AutoParry.Enabled then
+            scanKillers()
+        end
+    end
+end)
+
+-- =========================================================
+-- AUTO SCAN PLAYER BARU
+-- =========================================================
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        if AutoParry.Enabled then
+            if p.Team and p.Team.Name == "Killer" then
+                hookKiller(char)
+            end
+        end
+    end)
 end)
 
 -- =========================================================
@@ -4604,4 +4576,26 @@ makeTab("Extra", "✨", 10, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
-print("✅ [9/8] Tab Combat (Aimbot + Hitbox) + Tab Extra loaded")
+-- =========================================================
+-- PRINT FINAL
+-- =========================================================
+task.wait(0.5)
+
+print("╔══════════════════════════════════════════╗")
+print("║  🔥 ROOORHUB 🔥                          ║")
+print("║  ✅ SEMUA FITUR LOADED                   ║")
+print("╠══════════════════════════════════════════╣")
+print("║  🛡️ Auto Parry                            ║")
+print("║  ⚡ Auto Skill Check                     ║")
+print("║  🎯 Aimbot (Hold to Attack)              ║")
+print("║  📦 Hitbox 2 Mode                        ║")
+print("║  🛡️ God Mode (Full)                      ║")
+print("║  💡 Fullbright (max 200)                 ║")
+print("║  🌫️ No Fog Fix                           ║")
+print("║  🌀 Teleport 3 Opsi                      ║")
+print("╠══════════════════════════════════════════╣")
+print("║  🎮 Buka menu: Klik tombol R             ║")
+print("║  🎯 Aimbot: Hold tombol serang           ║")
+print("╚══════════════════════════════════════════╝")
+
+print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")

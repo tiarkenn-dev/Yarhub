@@ -1,8 +1,6 @@
 -- =========================================================
--- ROOORHUB ULTIMATE FIRE EDITION v12
+-- ROOORHUB ULTIMATE FIRE EDITION v13
 -- BAGIAN 1/8 : LOADING 4D + CONFIG + STATE
--- PARRY FALLENS-STYLE + SKILL CHECK FALLENS
--- LIGHTWEIGHT
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -13,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Stats = game:GetService("Stats")
 local GuiService = game:GetService("GuiService")
+local SoundService = game:GetService("SoundService")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
@@ -52,6 +51,27 @@ local function strk(o, col, t, tr)
     s.Parent = o
     return s
 end
+
+-- =========================================================
+-- SOUND SYSTEM
+-- =========================================================
+local ToggleSoundId = "rbxassetid://6073491164"
+
+local function playToggleSound()
+    task.spawn(function()
+        pcall(function()
+            local s = Instance.new("Sound")
+            s.SoundId = ToggleSoundId
+            s.Volume = 0.4
+            s.Parent = SoundService
+            s:Play()
+            task.wait(1.5)
+            s:Destroy()
+        end)
+    end)
+end
+
+_G.Roooor_playSound = playToggleSound
 
 -- =========================================================
 -- LOADING 4D FIRE RING
@@ -200,7 +220,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "🔥 ULTIMATE FIRE v12 🔥"
+tagline.Text = "🔥 ULTIMATE FIRE v13 🔥"
 tagline.TextColor3 = C.FIRE2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -329,7 +349,7 @@ _G.Roooor_TeamColors = _G.Roooor_TeamColors or {
 }
 
 -- =========================================================
--- AUTO PARRY (FALLENS-STYLE)
+-- AUTO PARRY
 -- =========================================================
 _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
@@ -343,7 +363,7 @@ _G.Roooor_AutoParry = _G.Roooor_AutoParry or {
 }
 
 -- =========================================================
--- AUTO SKILL CHECK (FALLENS ORIGINAL - 1 MODE)
+-- AUTO SKILL CHECK (1 MODE)
 -- =========================================================
 _G.Roooor_SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
@@ -355,7 +375,27 @@ _G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
     Mode = "Killer", Radius = 500, LockRadius = 50, Strength = 0.4,
 }
 
-print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
+-- GOD MODE
+_G.Roooor_GodMode = _G.Roooor_GodMode or {
+    Enabled = false,
+}
+
+-- HITBOX 2 MODE
+_G.Roooor_Hitbox = _G.Roooor_Hitbox or {
+    SurvivorMode = false,
+    KillerMode = false,
+    Size = 15,
+}
+
+-- AIMLOCK UPGRADE
+_G.Roooor_AimlockUpgrade = _G.Roooor_AimlockUpgrade or {
+    Holding = false,
+    Smoothness = 0.15,
+    Mode = "Killer",
+    LockRadius = 100,
+}
+
+print("✅ [1/8] Loading + Config + State + Sound loaded")-- =========================================================
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 local FireList = {
@@ -539,8 +579,7 @@ local function getRoot()
 end
 
 print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY (FALLENS-STYLE)
---              + AUTO SKILL CHECK (FALLENS ORIGINAL)
+-- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK
 -- =========================================================
 
 -- ============================
@@ -1000,7 +1039,7 @@ local function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (FALLENS-STYLE)
+-- AUTO PARRY
 -- =========================================================
 local AutoParry = _G.Roooor_AutoParry
 local PARRY_DEBOUNCE = 0.2
@@ -1117,7 +1156,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (FALLENS ORIGINAL - 1 MODE)
+-- AUTO SKILL CHECK (1 MODE)
 -- =========================================================
 local SkillCheck = _G.Roooor_SkillCheck
 
@@ -1154,7 +1193,6 @@ local function TriggerMobileButton()
     end
 end
 
--- ✅ FUNGSI START SKILL CHECK (PERSIS FALLENS)
 local function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
 
@@ -1174,7 +1212,6 @@ local function startSkillCheck()
         local lr = line.Rotation % 360
         local gr = goal.Rotation % 360
 
-        -- ✅ ZONA FALLENS ASLI: +102° sampai +116°
         local startRange = (gr + 102) % 360
         local endRange   = (gr + 116) % 360
 
@@ -1198,7 +1235,6 @@ local function startSkillCheck()
     end)
 end
 
--- AUTO-START kalau toggle udah on (dari state sebelumnya)
 task.spawn(function()
     task.wait(1)
     if SkillCheck.Enabled then
@@ -1207,26 +1243,22 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- TELEPORT GATE
+-- TELEPORT
 -- =========================================================
 local function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
     local found = nil
-    local names = {"fininshline", "finishline", "finish", "gate", "exit", "escape"}
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local lname = string.lower(obj.Name)
-            for _, search in ipairs(names) do
-                if string.find(lname, search) then found = obj; break end
-            end
-            if found then break end
+        if obj:IsA("BasePart") and string.lower(obj.Name) == "fininshline" then
+            found = obj
+            break
         end
     end
     if found then
         root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
     else
-        warn("[RoooorHub] Finish gak ketemu")
+        warn("[RoooorHub] Finish line gak ketemu")
     end
 end
 
@@ -1234,42 +1266,40 @@ local function teleportToGate()
     local root = getRoot()
     if not root then return end
     local found = nil
-    local names = {"gate", "exitgate", "escapegate", "exit_gate", "escape_gate", "finish", "finishline"}
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
-            local lname = string.lower(obj.Name)
-            for _, search in ipairs(names) do
-                if string.find(lname, search) then found = obj break end
+            local n = string.lower(obj.Name)
+            if string.find(n, "gate") or string.find(n, "exit") or string.find(n, "escape") then
+                found = obj
+                break
             end
-            if found then break end
         end
     end
-    if not found then
+    if found then
+        root.CFrame = found.CFrame + Vector3.new(0, 5, 0) + found.CFrame.LookVector * 5
+    else
         warn("[RoooorHub] Gate gak ketemu")
-        return
     end
-    root.CFrame = found.CFrame + Vector3.new(0, 5, 0) + found.CFrame.LookVector * 5
 end
 
 local function teleportInsideGate()
     local root = getRoot()
     if not root then return end
     local found = nil
-    local names = {"inside", "room", "chamber", "safe", "gate", "escapegate", "exitgate"}
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
-            local lname = string.lower(obj.Name)
-            for _, search in ipairs(names) do
-                if string.find(lname, search) then found = obj break end
+            local n = string.lower(obj.Name)
+            if string.find(n, "inside") or string.find(n, "safe") or string.find(n, "chamber") then
+                found = obj
+                break
             end
-            if found then break end
         end
     end
-    if not found then
-        warn("[RoooorHub] Inside Gate gak ketemu")
-        return
+    if found then
+        root.CFrame = CFrame.new(found.Position + Vector3.new(0, 3, 0))
+    else
+        warn("[RoooorHub] Inside gate gak ketemu")
     end
-    root.CFrame = CFrame.new(found.Position + Vector3.new(0, 3, 0))
 end
 
 -- =========================================================
@@ -1300,32 +1330,74 @@ local origLighting = {
     FogStart = Lighting.FogStart,
 }
 
+-- FULLBRIGHT UPGRADE (MAX 200)
 local function applyFullbright(s)
     if s then
-        local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 1)
-        Lighting.Brightness = 0.5 + bright * 2
+        local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 2)
+        Lighting.Brightness = 0.5 + bright * 3
         Lighting.ClockTime = 14
-        Lighting.Ambient = Color3.new(bright, bright, bright)
-        Lighting.OutdoorAmbient = Color3.new(bright, bright, bright)
-        Lighting.GlobalShadows = S.FullbrightVal < 80
+        Lighting.Ambient = Color3.new(
+            math.min(bright, 1),
+            math.min(bright, 1),
+            math.min(bright, 1)
+        )
+        Lighting.OutdoorAmbient = Color3.new(
+            math.min(bright, 1),
+            math.min(bright, 1),
+            math.min(bright, 1)
+        )
+        Lighting.GlobalShadows = S.FullbrightVal < 100
+        Lighting.FogEnd = 9e9
+        Lighting.FogStart = 9e9
     else
         Lighting.Brightness = origLighting.Brightness
         Lighting.ClockTime = origLighting.ClockTime
         Lighting.Ambient = origLighting.Ambient
         Lighting.OutdoorAmbient = origLighting.OutdoorAmbient
         Lighting.GlobalShadows = origLighting.GlobalShadows
-    end
-end
-
-local function applyNoFog(s)
-    if s then
-        Lighting.FogEnd = 9e9
-        Lighting.FogStart = 9e9
-    else
         Lighting.FogEnd = origLighting.FogEnd
         Lighting.FogStart = origLighting.FogStart
     end
 end
+
+-- NO FOG FIX
+local function applyNoFog(s)
+    pcall(function()
+        if s then
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("Atmosphere") then
+                    v.Density = 0
+                    v.Haze = 0
+                    v.Glare = 0
+                end
+            end
+            Lighting.FogEnd = 9e9
+            Lighting.FogStart = 9e9
+            Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+        else
+            Lighting.FogEnd = origLighting.FogEnd or 100000
+            Lighting.FogStart = origLighting.FogStart or 0
+        end
+    end)
+end
+
+-- Loop no fog (server kadang reset)
+task.spawn(function()
+    while task.wait(1) do
+        if S.NoFog then
+            pcall(function()
+                Lighting.FogEnd = 9e9
+                Lighting.FogStart = 9e9
+                for _, v in pairs(Lighting:GetChildren()) do
+                    if v:IsA("Atmosphere") then
+                        v.Density = 0
+                        v.Haze = 0
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 local origSky = nil
 for _, v in pairs(Lighting:GetChildren()) do
@@ -1716,7 +1788,7 @@ _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 
-print("✅ [3/8] Fungsi + Parry Fallens + SkillCheck Fallens loaded")-- =========================================================
+print("✅ [3/8] Fungsi + Auto Parry + Auto Skill Check loaded")-- =========================================================
 -- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA (LIGHTWEIGHT)
 -- =========================================================
 
@@ -1990,7 +2062,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- ANTI SYSTEM GABUNGAN (RINGAN - 3 LOOP JADI 1)
+-- ANTI SYSTEM GABUNGAN
 -- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
@@ -1998,7 +2070,6 @@ task.spawn(function()
         local hum = LP.Character:FindFirstChildOfClass("Humanoid")
         if not hum then continue end
 
-        -- Anti Stun
         if S.AntiStun then
             if hum.WalkSpeed == 0 and S.WalkSpeed then
                 hum.WalkSpeed = S.WalkSpeedVal
@@ -2006,7 +2077,6 @@ task.spawn(function()
             if hum.PlatformStand then hum.PlatformStand = false end
         end
 
-        -- Anti Ragdoll
         if S.AntiRagdoll then
             if hum.PlatformStand then hum.PlatformStand = false end
             pcall(function()
@@ -2014,7 +2084,6 @@ task.spawn(function()
             end)
         end
 
-        -- Anti Slow
         if S.AntiSlow then
             if hum.WalkSpeed < 10 then
                 hum.WalkSpeed = S.WalkSpeed and S.WalkSpeedVal or 16
@@ -2063,7 +2132,7 @@ task.spawn(function()
     end
 end)
 
--- SAFE ZONE (FIX: gui → PG)
+-- SAFE ZONE
 task.spawn(function()
     while task.wait(0.5) do
         if S.SafeZone and LP.Character then
@@ -2100,7 +2169,7 @@ task.spawn(function()
     end
 end)
 
--- ESCAPE ALERT (FIX: gui → PG)
+-- ESCAPE ALERT
 task.spawn(function()
     while task.wait(0.5) do
         if S.EscapeAlert and LP.Character then
@@ -2140,7 +2209,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILL FEED KHUSUS KILLER
+-- KILL FEED
 -- =========================================================
 local killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "RoooorKillFeed"
@@ -2328,7 +2397,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- KILLER KILL ALL (ANTI NYANGKUT)
+-- KILLER KILL ALL
 -- =========================================================
 task.spawn(function()
     while task.wait(0.4) do
@@ -2390,54 +2459,8 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- HITBOX (SAFE VERSION)
+-- HITBOX LAMA (KILLER) - dihapus, pindah ke Extra
 -- =========================================================
-local hitboxCache = {}
-task.spawn(function()
-    while task.wait(0.5) do
-        if S.Killer_Hitbox then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health > 0 then
-                        local isCarried = p.Character:GetAttribute("IsCarried")
-                            or p.Character:GetAttribute("Carried")
-                            or p.Character:GetAttribute("Hooked")
-                            or p.Character:FindFirstChild("CarriedBy")
-                        if isCarried then continue end
-                        local part = p.Character:FindFirstChild("HumanoidRootPart")
-                        if part then
-                            if not hitboxCache[part] then
-                                hitboxCache[part] = {
-                                    Size = part.Size,
-                                    Transparency = part.Transparency,
-                                    Material = part.Material,
-                                    Color = part.Color,
-                                    CanCollide = part.CanCollide
-                                }
-                            end
-                            local size = S.Killer_HitboxSize or 15
-                            part.Size = Vector3.new(size, size, size)
-                            part.CanCollide = false
-                            part.Transparency = 1
-                        end
-                    end
-                end
-            end
-        else
-            for part, orig in pairs(hitboxCache) do
-                if part and part.Parent then
-                    part.Size = orig.Size
-                    part.Transparency = orig.Transparency
-                    part.CanCollide = orig.CanCollide
-                    part.Material = orig.Material
-                    part.Color = orig.Color
-                end
-                hitboxCache[part] = nil
-            end
-        end
-    end
-end)
 
 -- PARRY CIRCLE
 _G.Roooor_ParryCircle = nil
@@ -2475,7 +2498,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- MAIN ESP LOOP (HEARTBEAT - LEBIH RINGAN)
+-- MAIN ESP LOOP (HEARTBEAT)
 -- =========================================================
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
@@ -2561,7 +2584,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] Fitur baru + Loop utama loaded (LIGHTWEIGHT)")-- =========================================================
+print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
 -- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
 -- =========================================================
 local gui = Instance.new("ScreenGui")
@@ -2572,30 +2595,38 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU "R" 4D
+-- TOMBOL MENU "R" BARU (BULAT + EMOJI 🔥 + RING API)
 -- =========================================================
 local btnContainer = Instance.new("Frame")
-btnContainer.Size = UDim2.new(0, 42, 0, 42)
+btnContainer.Size = UDim2.new(0, 55, 0, 55)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
+-- Ring luar (api berputar)
 local ring1 = Instance.new("Frame")
-ring1.Size = UDim2.new(1, 8, 1, 8)
-ring1.Position = UDim2.new(0, -4, 0, -4)
+ring1.Size = UDim2.new(1, 10, 1, 10)
+ring1.Position = UDim2.new(0, -5, 0, -5)
 ring1.BackgroundTransparency = 1
 ring1.Parent = btnContainer
 
 local ring1Stroke = Instance.new("UIStroke")
-ring1Stroke.Thickness = 2
+ring1Stroke.Thickness = 3
 ring1Stroke.Color = C.FIRE_BRIGHT
 ring1Stroke.Transparency = 0.1
 ring1Stroke.Parent = ring1
 
 local ring1Grad = Instance.new("UIGradient")
-ring1Grad.Color = ColorSequence.new(C.FIRE3, C.FIRE_BRIGHT, C.FIRE1, C.FIRE2, C.FIRE3)
+ring1Grad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, C.FIRE3),
+    ColorSequenceKeypoint.new(0.25, C.FIRE1),
+    ColorSequenceKeypoint.new(0.5, C.FIRE_BRIGHT),
+    ColorSequenceKeypoint.new(0.75, C.FIRE2),
+    ColorSequenceKeypoint.new(1, C.FIRE3),
+})
 ring1Grad.Parent = ring1Stroke
 
+-- Ring dalam (api kedua)
 local ring2 = Instance.new("Frame")
 ring2.Size = UDim2.new(1, 4, 1, 4)
 ring2.Position = UDim2.new(0, -2, 0, -2)
@@ -2603,30 +2634,23 @@ ring2.BackgroundTransparency = 1
 ring2.Parent = btnContainer
 
 local ring2Stroke = Instance.new("UIStroke")
-ring2Stroke.Thickness = 1.2
-ring2Stroke.Color = C.FIRE2
+ring2Stroke.Thickness = 1.5
+ring2Stroke.Color = C.FIRE1
 ring2Stroke.Transparency = 0.3
 ring2Stroke.Parent = ring2
 
-local ring3 = Instance.new("Frame")
-ring3.Size = UDim2.new(1, -8, 1, -8)
-ring3.Position = UDim2.new(0, 4, 0, 4)
-ring3.BackgroundTransparency = 1
-ring3.Parent = btnContainer
+local ring2Grad = Instance.new("UIGradient")
+ring2Grad.Color = ColorSequence.new(C.FIRE2, C.FIRE_BRIGHT, C.FIRE2)
+ring2Grad.Parent = ring2Stroke
 
-local ring3Stroke = Instance.new("UIStroke")
-ring3Stroke.Thickness = 0.8
-ring3Stroke.Color = C.FIRE1
-ring3Stroke.Transparency = 0.5
-ring3Stroke.Parent = ring3
-
+-- Tombol utama (bulat + emoji api)
 local mainBtn = Instance.new("TextButton")
-mainBtn.Size = UDim2.new(1, -12, 1, -12)
-mainBtn.Position = UDim2.new(0, 6, 0, 6)
+mainBtn.Size = UDim2.new(1, -14, 1, -14)
+mainBtn.Position = UDim2.new(0, 7, 0, 7)
 mainBtn.BackgroundColor3 = Color3.fromRGB(40, 12, 4)
-mainBtn.Text = "R"
+mainBtn.Text = "🔥"
 mainBtn.TextColor3 = C.FIRE_BRIGHT
-mainBtn.TextSize = 22
+mainBtn.TextSize = 28
 mainBtn.Font = Enum.Font.GothamBlack
 mainBtn.BorderSizePixel = 0
 mainBtn.AutoButtonColor = false
@@ -2666,22 +2690,25 @@ task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-        ring1.Rotation = t * 60
+        ring1.Rotation = t * 70
         ring1Grad.Rotation = t * 120
-        ring2.Rotation = -t * 90
-        ring3.Rotation = t * 40
+        ring2.Rotation = -t * 100
+        ring2Grad.Rotation = t * 80
+
         local pulse = (math.sin(t * 4) + 1) / 2
+        ring1Stroke.Transparency = 0.2 - pulse * 0.15
         glow.BackgroundTransparency = 0.75 - pulse * 0.4
         glow.Size = UDim2.new(1, 10 + pulse * 12, 1, 10 + pulse * 12)
         glow.Position = UDim2.new(0, -5 - pulse * 6, 0, -5 - pulse * 6)
         innerGlow.BackgroundTransparency = 0.3 - pulse * 0.2
         btnGrad.Rotation = t * 40
-        mainBtn.TextSize = 22 + math.sin(t * 5) * 2
+        mainBtn.TextSize = 28 + math.sin(t * 5) * 3
         mainBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.9, 1)
         task.wait(0.03)
     end
 end)
 
+-- Partikel orbit api
 for i = 1, 10 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 3, 0, 3)
@@ -2692,7 +2719,7 @@ for i = 1, 10 do
 
     local angle = (i / 10) * math.pi * 2
     local orbitSpeed = 2 + math.random() * 2
-    local radius = 26 + math.random() * 6
+    local radius = 32 + math.random() * 6
 
     task.spawn(function()
         while btnContainer.Parent do
@@ -2708,7 +2735,7 @@ for i = 1, 10 do
 end
 
 -- =========================================================
--- DRAG MENU "R"
+-- DRAG MENU
 -- =========================================================
 local dragging = false
 local dragStart = nil
@@ -2833,6 +2860,7 @@ aimModeLbl.TextStrokeTransparency = 0.3
 aimModeLbl.Parent = aimBtn
 
 local Aimlock = _G.Roooor_AimlockBtn
+local AimlockUp = _G.Roooor_AimlockUpgrade
 
 task.spawn(function()
     local t = 0
@@ -2842,9 +2870,9 @@ task.spawn(function()
         aimOuterGrad.Rotation = t * 100
         aimInnerRing.Rotation = -t * 90
         local pulse = (math.sin(t * 4) + 1) / 2
-        local baseTrans = Aimlock.Holding and 0.3 or 0.7
+        local baseTrans = AimlockUp.Holding and 0.3 or 0.7
         aimGlow.BackgroundTransparency = baseTrans - pulse * 0.25
-        local glowSize = Aimlock.Holding and 20 or 16
+        local glowSize = AimlockUp.Holding and 20 or 16
         aimGlow.Size = UDim2.new(1, glowSize + pulse * 8, 1, glowSize + pulse * 8)
         aimGlow.Position = UDim2.new(0, -(glowSize/2) - pulse * 4, 0, -(glowSize/2) - pulse * 4)
         aimBtnGrad.Rotation = t * 40
@@ -2889,7 +2917,7 @@ aimBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         if aimWasDragged then return end
-        Aimlock.Holding = true
+        AimlockUp.Holding = true
         aimBtn.BackgroundColor3 = Color3.fromRGB(30, 60, 120)
     end
 end)
@@ -2897,18 +2925,18 @@ end)
 aimBtn.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
-        Aimlock.Holding = false
+        AimlockUp.Holding = false
         aimBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
     end
 end)
 
 aimBtn.MouseButton2Click:Connect(function()
-    if Aimlock.Mode == "Killer" then
-        Aimlock.Mode = "Survivor"
+    if AimlockUp.Mode == "Killer" then
+        AimlockUp.Mode = "Survivor"
         aimModeLbl.Text = "SURVIVOR"
         aimModeLbl.TextColor3 = C.GRN
     else
-        Aimlock.Mode = "Killer"
+        AimlockUp.Mode = "Killer"
         aimModeLbl.Text = "KILLER"
         aimModeLbl.TextColor3 = C.ACC4
     end
@@ -2925,28 +2953,32 @@ task.spawn(function()
     end
 end)
 
--- AIMLOCK LOOP
+-- AIMLOCK LOOP (SMOOTH)
 task.spawn(function()
     while aimContainer.Parent do
-        task.wait(0.03)
-        if not Aimlock.Holding then continue end
+        task.wait(0.01)
+        if not AimlockUp.Holding then continue end
         local myRoot = getRoot()
         if not myRoot then continue end
 
-        local closest, shortest = nil, Aimlock.Radius
+        local closest, shortest = nil, AimlockUp.LockRadius
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
                 local valid = false
-                if Aimlock.Mode == "Killer" and p.Team and p.Team.Name == "Killer" then
+                local teamName = p.Team and p.Team.Name or ""
+
+                if AimlockUp.Mode == "Killer" and teamName == "Killer" then
                     valid = true
-                elseif Aimlock.Mode == "Survivor" and p.Team and p.Team.Name == "Survivors" then
+                elseif AimlockUp.Mode == "Survivor" and teamName == "Survivors" then
                     valid = true
                 end
+
                 if valid then
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
                     local hrp = p.Character:FindFirstChild("Head")
                         or p.Character:FindFirstChild("HumanoidRootPart")
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    if hrp and hum and hum.Health > 0 then
+
+                    if hum and hum.Health > 0 and hrp then
                         local dist = (hrp.Position - myRoot.Position).Magnitude
                         if dist < shortest then
                             shortest = dist
@@ -2957,20 +2989,21 @@ task.spawn(function()
             end
         end
 
-        if closest and shortest <= Aimlock.LockRadius then
+        if closest then
             local cam = workspace.CurrentCamera
             local targetCF = CFrame.new(cam.CFrame.Position, closest.Position)
-            cam.CFrame = cam.CFrame:Lerp(targetCF, Aimlock.Strength)
+            local smooth = math.clamp(AimlockUp.Smoothness, 0.01, 1)
+            cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
         end
     end
 end)
 
 -- =========================================================
--- PANEL (MENU UTAMA)
+-- PANEL (MENU UTAMA) - LEBIH KECIL
 -- =========================================================
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 480, 0, 400)
-panel.Position = UDim2.new(0.5, -240, 0.5, -200)
+panel.Size = UDim2.new(0, 420, 0, 340)
+panel.Position = UDim2.new(0.5, -210, 0.5, -170)
 panel.BackgroundColor3 = C.BG
 panel.BackgroundTransparency = 0.05
 panel.BorderSizePixel = 0
@@ -2986,7 +3019,7 @@ panelGrad.Parent = panel
 
 -- HEADER
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 46)
+header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = C.PANEL
 header.BackgroundTransparency = 0.1
 header.BorderSizePixel = 0
@@ -2994,8 +3027,8 @@ header.Parent = panel
 rnd(header, 18)
 
 local hPatch = Instance.new("Frame")
-hPatch.Size = UDim2.new(1, 0, 0, 23)
-hPatch.Position = UDim2.new(0, 0, 1, -23)
+hPatch.Size = UDim2.new(1, 0, 0, 20)
+hPatch.Position = UDim2.new(0, 0, 1, -20)
 hPatch.BackgroundColor3 = C.PANEL
 hPatch.BackgroundTransparency = 0.1
 hPatch.BorderSizePixel = 0
@@ -3027,12 +3060,12 @@ task.spawn(function()
 end)
 
 local hTitle = Instance.new("TextLabel")
-hTitle.Size = UDim2.new(1, -100, 1, 0)
-hTitle.Position = UDim2.new(0, 18, 0, 0)
+hTitle.Size = UDim2.new(1, -80, 1, 0)
+hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "🔥 ROOORHUB ULTIMATE v12"
+hTitle.Text = "🔥 ROOORHUB ULTIMATE v13"
 hTitle.TextColor3 = C.FIRE_BRIGHT
-hTitle.TextSize = 14
+hTitle.TextSize = 12
 hTitle.Font = Enum.Font.GothamBlack
 hTitle.TextXAlignment = Enum.TextXAlignment.Left
 hTitle.TextStrokeTransparency = 0.2
@@ -3040,12 +3073,12 @@ hTitle.TextStrokeColor3 = C.FIRE3
 hTitle.Parent = header
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 26, 0, 26)
-closeBtn.Position = UDim2.new(1, -34, 0.5, -13)
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -30, 0.5, -11)
 closeBtn.BackgroundColor3 = C.PANEL2
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = C.RED
-closeBtn.TextSize = 12
+closeBtn.TextSize = 11
 closeBtn.Font = Enum.Font.GothamBlack
 closeBtn.BorderSizePixel = 0
 closeBtn.AutoButtonColor = false
@@ -3055,8 +3088,8 @@ strk(closeBtn, C.RED, 1, 0.5)
 
 -- SIDEBAR
 local sbFrame = Instance.new("Frame")
-sbFrame.Size = UDim2.new(0, 122, 1, -66)
-sbFrame.Position = UDim2.new(0, 12, 0, 58)
+sbFrame.Size = UDim2.new(0, 105, 1, -58)
+sbFrame.Position = UDim2.new(0, 10, 0, 50)
 sbFrame.BackgroundColor3 = C.PANEL
 sbFrame.BackgroundTransparency = 0.2
 sbFrame.BorderSizePixel = 0
@@ -3088,8 +3121,8 @@ sbP.Parent = sb
 
 -- CONTENT
 local ct = Instance.new("Frame")
-ct.Size = UDim2.new(1, -152, 1, -66)
-ct.Position = UDim2.new(0, 142, 0, 58)
+ct.Size = UDim2.new(1, -135, 1, -58)
+ct.Position = UDim2.new(0, 122, 0, 50)
 ct.BackgroundColor3 = C.PANEL
 ct.BackgroundTransparency = 0.2
 ct.BorderSizePixel = 0
@@ -3098,8 +3131,8 @@ rnd(ct, 12)
 strk(ct, C.FIRE2, 1, 0.6)
 
 local cs = Instance.new("ScrollingFrame")
-cs.Size = UDim2.new(1, -16, 1, -16)
-cs.Position = UDim2.new(0, 8, 0, 8)
+cs.Size = UDim2.new(1, -14, 1, -14)
+cs.Position = UDim2.new(0, 7, 0, 7)
 cs.BackgroundTransparency = 1
 cs.BorderSizePixel = 0
 cs.ScrollBarThickness = 3
@@ -3117,13 +3150,13 @@ csL.Parent = cs
 -- =========================================================
 local function sec(title, icon)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 24)
+    f.Size = UDim2.new(1, -4, 0, 22)
     f.BackgroundTransparency = 1
     f.Parent = cs
 
     local deco = Instance.new("Frame")
-    deco.Size = UDim2.new(0, 4, 0, 16)
-    deco.Position = UDim2.new(0, 4, 0.5, -8)
+    deco.Size = UDim2.new(0, 4, 0, 14)
+    deco.Position = UDim2.new(0, 4, 0.5, -7)
     deco.BackgroundColor3 = C.FIRE2
     deco.BorderSizePixel = 0
     deco.Parent = f
@@ -3135,11 +3168,11 @@ local function sec(title, icon)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -20, 1, 0)
-    l.Position = UDim2.new(0, 16, 0, 0)
+    l.Position = UDim2.new(0, 14, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = icon .. " " .. string.upper(title)
     l.TextColor3 = C.FIRE_BRIGHT
-    l.TextSize = 10
+    l.TextSize = 9
     l.Font = Enum.Font.GothamBlack
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
@@ -3147,11 +3180,11 @@ end
 
 local function lbl(text, color)
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(1, -4, 0, 18)
+    l.Size = UDim2.new(1, -4, 0, 16)
     l.BackgroundTransparency = 1
     l.Text = text
     l.TextColor3 = color or C.DIM
-    l.TextSize = 9
+    l.TextSize = 8
     l.Font = Enum.Font.Gotham
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = cs
@@ -3159,7 +3192,7 @@ end
 
 local function tog(name, def, cb)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 30)
+    f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
@@ -3168,25 +3201,25 @@ local function tog(name, def, cb)
     local fStrk = strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(1, -55, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Size = UDim2.new(1, -50, 1, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
-    l.TextSize = 10
+    l.TextSize = 9
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
 
     local t = Instance.new("Frame")
-    t.Size = UDim2.new(0, 34, 0, 18)
-    t.Position = UDim2.new(1, -44, 0.5, -9)
+    t.Size = UDim2.new(0, 32, 0, 16)
+    t.Position = UDim2.new(1, -40, 0.5, -8)
     t.BorderSizePixel = 0
     t.Parent = f
     rnd(t, 9)
 
     local k = Instance.new("Frame")
-    k.Size = UDim2.new(0, 12, 0, 12)
+    k.Size = UDim2.new(0, 11, 0, 11)
     k.BorderSizePixel = 0
     k.Parent = t
     rnd(k, 6)
@@ -3196,7 +3229,7 @@ local function tog(name, def, cb)
     _G.ToggleStates[name] = state
 
     t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
-    k.Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
+    k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
     k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
 
     local cB = Instance.new("TextButton")
@@ -3209,20 +3242,24 @@ local function tog(name, def, cb)
         state = not state
         _G.ToggleStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
-            Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6),
+            Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
             BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
         }):Play()
         TweenService:Create(t, TweenInfo.new(0.2), {
             BackgroundColor3 = state and C.FIRE1 or C.PANEL
         }):Play()
         fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
+
+        -- Sound
+        playToggleSound()
+
         if cb then pcall(cb, state) end
     end)
 end
 
 local function sl(name, min, max, def, cb)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 40)
+    f.Size = UDim2.new(1, -4, 0, 36)
     f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
@@ -3231,12 +3268,12 @@ local function sl(name, min, max, def, cb)
     strk(f, C.FIRE2, 1, 0.7)
 
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(1, -60, 0, 16)
-    l.Position = UDim2.new(0, 10, 0, 4)
+    l.Size = UDim2.new(1, -55, 0, 14)
+    l.Position = UDim2.new(0, 8, 0, 4)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
-    l.TextSize = 10
+    l.TextSize = 9
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
@@ -3245,19 +3282,19 @@ local function sl(name, min, max, def, cb)
     _G.SliderStates[name] = curVal
 
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0, 40, 0, 16)
-    v.Position = UDim2.new(1, -50, 0, 4)
+    v.Size = UDim2.new(0, 40, 0, 14)
+    v.Position = UDim2.new(1, -48, 0, 4)
     v.BackgroundTransparency = 1
     v.Text = tostring(curVal)
     v.TextColor3 = C.FIRE_BRIGHT
-    v.TextSize = 10
+    v.TextSize = 9
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = f
 
     local bg = Instance.new("Frame")
-    bg.Size = UDim2.new(1, -24, 0, 5)
-    bg.Position = UDim2.new(0, 12, 1, -13)
+    bg.Size = UDim2.new(1, -20, 0, 5)
+    bg.Position = UDim2.new(0, 10, 1, -11)
     bg.BackgroundColor3 = C.PANEL
     bg.BorderSizePixel = 0
     bg.Parent = f
@@ -3271,8 +3308,8 @@ local function sl(name, min, max, def, cb)
     rnd(fill, 3)
 
     local kn = Instance.new("Frame")
-    kn.Size = UDim2.new(0, 12, 0, 12)
-    kn.Position = UDim2.new((curVal - min) / (max - min), -6, 0.5, -6)
+    kn.Size = UDim2.new(0, 11, 0, 11)
+    kn.Position = UDim2.new((curVal - min) / (max - min), -5.5, 0.5, -5.5)
     kn.BackgroundColor3 = C.TXT
     kn.BorderSizePixel = 0
     kn.ZIndex = 2
@@ -3289,7 +3326,7 @@ local function sl(name, min, max, def, cb)
         local val = math.floor((min + (max - min) * pos) * 100 + 0.5) / 100
         _G.SliderStates[name] = val
         fill.Size = UDim2.new(pos, 0, 1, 0)
-        kn.Position = UDim2.new(pos, -6, 0.5, -6)
+        kn.Position = UDim2.new(pos, -5.5, 0.5, -5.5)
         v.Text = tostring(val)
         if cb then pcall(cb, val) end
     end
@@ -3319,7 +3356,7 @@ end
 
 local function cpk(name, def, cb)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 30)
+    f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
@@ -3329,18 +3366,18 @@ local function cpk(name, def, cb)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
-    l.TextSize = 10
+    l.TextSize = 9
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
 
     local cB = Instance.new("TextButton")
-    cB.Size = UDim2.new(0, 32, 0, 16)
-    cB.Position = UDim2.new(1, -42, 0.5, -8)
+    cB.Size = UDim2.new(0, 30, 0, 15)
+    cB.Position = UDim2.new(1, -38, 0.5, -7.5)
     cB.BackgroundColor3 = def
     cB.Text = ""
     cB.BorderSizePixel = 0
@@ -3371,12 +3408,12 @@ end
 
 local function btn(name, cb)
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -4, 0, 30)
+    b.Size = UDim2.new(1, -4, 0, 28)
     b.BackgroundColor3 = C.BG
     b.BackgroundTransparency = 0.4
     b.Text = name
     b.TextColor3 = C.TXT
-    b.TextSize = 10
+    b.TextSize = 9
     b.Font = Enum.Font.GothamMedium
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
@@ -3385,13 +3422,14 @@ local function btn(name, cb)
     strk(b, C.FIRE_BRIGHT, 1, 0.7)
 
     b.MouseButton1Click:Connect(function()
+        playToggleSound()
         if cb then pcall(cb) end
     end)
 end
 
 local function drp(name, options, def, cb)
     local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 30)
+    f.Size = UDim2.new(1, -4, 0, 28)
     f.BackgroundColor3 = C.BG
     f.BackgroundTransparency = 0.4
     f.BorderSizePixel = 0
@@ -3401,11 +3439,11 @@ local function drp(name, options, def, cb)
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0.5, 0, 1, 0)
-    l.Position = UDim2.new(0, 10, 0, 0)
+    l.Position = UDim2.new(0, 8, 0, 0)
     l.BackgroundTransparency = 1
     l.Text = name
     l.TextColor3 = C.TXT
-    l.TextSize = 10
+    l.TextSize = 9
     l.Font = Enum.Font.GothamMedium
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
@@ -3417,12 +3455,12 @@ local function drp(name, options, def, cb)
     local cur = options[idx]
 
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0.5, -26, 1, 0)
+    v.Size = UDim2.new(0.5, -24, 1, 0)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
     v.Text = tostring(cur) .. " ▶"
     v.TextColor3 = C.FIRE_BRIGHT
-    v.TextSize = 9
+    v.TextSize = 8
     v.Font = Enum.Font.GothamBold
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = f
@@ -3445,7 +3483,7 @@ end
 local activeTab = nil
 local function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -8, 0, 30)
+    b.Size = UDim2.new(1, -8, 0, 28)
     b.BackgroundColor3 = C.BG
     b.BackgroundTransparency = 1
     b.Text = ""
@@ -3465,22 +3503,22 @@ local function makeTab(name, icon, order, cb)
     rnd(ind, 2)
 
     local ico = Instance.new("TextLabel")
-    ico.Size = UDim2.new(0, 22, 1, 0)
-    ico.Position = UDim2.new(0, 7, 0, 0)
+    ico.Size = UDim2.new(0, 20, 1, 0)
+    ico.Position = UDim2.new(0, 6, 0, 0)
     ico.BackgroundTransparency = 1
     ico.Text = icon
     ico.TextColor3 = C.DIM
-    ico.TextSize = 14
+    ico.TextSize = 13
     ico.Font = Enum.Font.GothamBold
     ico.Parent = b
 
     local lblT = Instance.new("TextLabel")
-    lblT.Size = UDim2.new(1, -28, 1, 0)
-    lblT.Position = UDim2.new(0, 30, 0, 0)
+    lblT.Size = UDim2.new(1, -26, 1, 0)
+    lblT.Position = UDim2.new(0, 26, 0, 0)
     lblT.BackgroundTransparency = 1
     lblT.Text = string.upper(name)
     lblT.TextColor3 = C.DIM
-    lblT.TextSize = 9
+    lblT.TextSize = 8
     lblT.Font = Enum.Font.GothamBlack
     lblT.TextXAlignment = Enum.TextXAlignment.Left
     lblT.Parent = b
@@ -3509,7 +3547,7 @@ local function makeTab(name, icon, order, cb)
             BackgroundTransparency = 0.7
         }):Play()
         TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-            Size = UDim2.new(0, 3, 0, 20)
+            Size = UDim2.new(0, 3, 0, 18)
         }):Play()
 
         for _, c in pairs(b:GetChildren()) do
@@ -3547,13 +3585,15 @@ mainBtn.MouseButton1Click:Connect(function()
         return
     end
     panel.Visible = not panel.Visible
+    playToggleSound()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
+    playToggleSound()
 end)
 
-print("✅ [5/8] GUI + Komponen + Tombol R + Aimlock loaded")-- =========================================================
+print("✅ [5/8] GUI + Tombol R Baru + Aimlock Smooth + Panel Kecil loaded")-- =========================================================
 -- BAGIAN 6/8 : TAB UI PART 1
 -- =========================================================
 local sec = _G.Roooor_sec
@@ -3585,7 +3625,7 @@ makeTab("Fire", "🔥", 1, function()
 
     for i, fireName in ipairs(FireList) do
         local btn2 = Instance.new("TextButton")
-        btn2.Size = UDim2.new(1, -4, 0, 26)
+        btn2.Size = UDim2.new(1, -4, 0, 24)
         btn2.BackgroundColor3 = C.BG
         btn2.BackgroundTransparency = 0.4
         btn2.BorderSizePixel = 0
@@ -3598,11 +3638,11 @@ makeTab("Fire", "🔥", 1, function()
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
-        btnLbl.Position = UDim2.new(0, 10, 0, 0)
+        btnLbl.Position = UDim2.new(0, 8, 0, 0)
         btnLbl.BackgroundTransparency = 1
         btnLbl.Text = "🔥 " .. fireName
         btnLbl.TextColor3 = C.TXT
-        btnLbl.TextSize = 10
+        btnLbl.TextSize = 9
         btnLbl.Font = Enum.Font.GothamMedium
         btnLbl.TextXAlignment = Enum.TextXAlignment.Left
         btnLbl.Parent = btn2
@@ -3646,7 +3686,7 @@ makeTab("Fire Feet", "👟", 2, function()
 
     for i, fireName in ipairs(FireFeetList) do
         local btn2 = Instance.new("TextButton")
-        btn2.Size = UDim2.new(1, -4, 0, 26)
+        btn2.Size = UDim2.new(1, -4, 0, 24)
         btn2.BackgroundColor3 = C.BG
         btn2.BackgroundTransparency = 0.4
         btn2.BorderSizePixel = 0
@@ -3659,11 +3699,11 @@ makeTab("Fire Feet", "👟", 2, function()
 
         local btnLbl = Instance.new("TextLabel")
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
-        btnLbl.Position = UDim2.new(0, 10, 0, 0)
+        btnLbl.Position = UDim2.new(0, 8, 0, 0)
         btnLbl.BackgroundTransparency = 1
         btnLbl.Text = "👟 " .. fireName
         btnLbl.TextColor3 = C.TXT
-        btnLbl.TextSize = 10
+        btnLbl.TextSize = 9
         btnLbl.Font = Enum.Font.GothamMedium
         btnLbl.TextXAlignment = Enum.TextXAlignment.Left
         btnLbl.Parent = btn2
@@ -3712,7 +3752,7 @@ makeTab("ESP", "👁️", 3, function()
     tog("ESP SCP", false, function(s) ESP.SCP = s end)
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
-    sec("ESP Distance (LIMITED)", "📏")
+    sec("ESP Distance", "📏")
     sl("ESP Radius", 10, 300, 50, function(v) ESP.Distance = v end)
     lbl("Max 300 (limited biar fokus)", C.GRN)
 
@@ -3725,14 +3765,14 @@ makeTab("ESP", "👁️", 3, function()
 end)
 
 -- ============================================================
--- TAB: SURVIVOR (PARRY FALLENS + SKILL CHECK FALLENS)
+-- TAB: SURVIVOR
 -- ============================================================
 makeTab("Survivor", "🏃", 4, function()
 
     -- ============================
-    -- AUTO PARRY (FALLENS-STYLE)
+    -- AUTO PARRY
     -- ============================
-    sec("Auto Parry (Fallens-Style)", "🛡️")
+    sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
@@ -3747,16 +3787,16 @@ makeTab("Survivor", "🏃", 4, function()
         AutoParry.RequireFacing = (v > -1)
     end)
 
-    lbl("Face Sensitivity: -1 = 360° | 0.7 = Fallens", C.GRN)
+    lbl("Face Sens: -1 = 360° | 0.7 = Facing", C.GRN)
 
     sl("Parry Debounce", 0.05, 0.5, 0.2, function(v)
         PARRY_DEBOUNCE = v
     end)
 
     -- ============================
-    -- AUTO SKILL CHECK (FALLENS ORIGINAL)
+    -- AUTO SKILL CHECK
     -- ============================
-    sec("Auto Skill Check (Fallens)", "⚡")
+    sec("Auto Skill Check", "⚡")
 
     tog("Auto Skill Check", false, function(s)
         SkillCheck.Enabled = s
@@ -3765,7 +3805,7 @@ makeTab("Survivor", "🏃", 4, function()
         end
     end)
 
-    lbl("Logic Fallens asli (auto trigger)", C.GRN)
+    lbl("Auto trigger saat masuk zona", C.GRN)
     lbl("Zona: goal + 102° s/d + 116°", C.DIM)
 
     -- ============================
@@ -3835,7 +3875,7 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
 end)
 
-print("✅ [6/8] Tab UI Part 1 loaded")-- =========================================================
+print("✅ [6/8] Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
 -- BAGIAN 7/8 : TAB UI PART 2
 -- =========================================================
 local sec = _G.Roooor_sec
@@ -3860,10 +3900,6 @@ makeTab("Killer", "🔪", 5, function()
     sec("Kill All", "💀")
     tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
     lbl("Auto TP ke survivor + attack", C.DIM)
-
-    sec("Hitbox Expander", "📦")
-    tog("Killer Hitbox", false, function(s) S.Killer_Hitbox = s end)
-    sl("Hitbox Size", 5, 50, 15, function(v) S.Killer_HitboxSize = v end)
 
     sec("Masked Power", "🎭")
     drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
@@ -3937,19 +3973,6 @@ end)
 makeTab("Visual", "✨", 7, function()
 
     sec("Lighting", "💡")
-    tog("Fullbright", false, function(s)
-        S.Fullbright = s
-        applyFullbright(s)
-    end)
-    sl("Fullbright Level", 10, 100, 50, function(v)
-        S.FullbrightVal = v
-        if S.Fullbright then applyFullbright(true) end
-    end)
-
-    tog("No Fog", false, function(s)
-        S.NoFog = s
-        applyNoFog(s)
-    end)
 
     tog("Ultra HD", false, function(s)
         S.UltraHD = s
@@ -4048,7 +4071,9 @@ end)
 makeTab("Player", "👤", 8, function()
 
     sec("Aimlock", "🎯")
-    tog("Enable Aimlock", false, function(s) S.AimlockEnabled = s end)
+    tog("Enable Aimlock", false, function(s)
+        _G.Roooor_AimlockUpgrade.Holding = s
+    end)
 
     tog("Show Aimlock Button", false, function(s)
         _G.Roooor_AimlockBtn.ShowButton = s
@@ -4057,29 +4082,25 @@ makeTab("Player", "👤", 8, function()
         end
     end)
 
-    drp("Aim Mode", {"Killer", "Survivor", "SCP"}, "Killer", function(v)
-        _G.Roooor_AimlockBtn.Mode = v
+    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
+        _G.Roooor_AimlockUpgrade.Mode = v
     end)
 
-    sl("Aim Radius (search)", 100, 1000, 500, function(v)
-        _G.Roooor_AimlockBtn.Radius = v
+    sl("Smoothness", 0.01, 1, 0.15, function(v)
+        _G.Roooor_AimlockUpgrade.Smoothness = v
     end)
+    lbl("0.01 = instan | 1 = smooth", C.GRN)
 
-    sl("Lock Radius (jarak lock)", 10, 200, 50, function(v)
-        _G.Roooor_AimlockBtn.LockRadius = v
-    end)
-
-    sl("Aim Strength", 0.1, 1, 0.4, function(v)
-        _G.Roooor_AimlockBtn.Strength = v
+    sl("Lock Radius", 10, 300, 100, function(v)
+        _G.Roooor_AimlockUpgrade.LockRadius = v
     end)
 
     sec("Info", "ℹ️")
     lbl("🎯 Aimlock = Hold tombol 🎯", C.FIRE_BRIGHT)
     lbl("Klik kanan tombol = ganti mode", C.DIM)
-    lbl("Kanan = Survivor | Kiri = Killer", C.DIM)
 
     sec("Keybind", "⌨️")
-    lbl("Toggle Menu: Klik tombol R", C.FIRE_BRIGHT)
+    lbl("Toggle Menu: Klik tombol 🔥", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
     btn("🔥 UNLOAD SCRIPT", function()
@@ -4097,10 +4118,13 @@ makeTab("Player", "👤", 8, function()
         _G.Roooor_AutoParry = nil
         _G.Roooor_SkillCheck = nil
         _G.Roooor_AimlockBtn = nil
+        _G.Roooor_AimlockUpgrade = nil
+        _G.Roooor_GodMode = nil
+        _G.Roooor_Hitbox = nil
     end)
 end)
 
-print("✅ [7/8] Tab UI Part 2 loaded")-- =========================================================
+print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- =========================================================
 -- BAGIAN 8/8 : FINAL - AUTO RE-APPLY + RESPAWN HANDLER
 -- =========================================================
 
@@ -4209,19 +4233,21 @@ end)
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  🔥 ROOORHUB ULTIMATE FIRE v12 🔥       ║")
+print("║  🔥 ROOORHUB ULTIMATE FIRE v13 🔥       ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry: FALLENS-STYLE            ║")
-print("║     • Default 360° (FaceSens = -1)       ║")
-print("║     • Ubah ke 0.7 = Fallens mode         ║")
-print("║     • ParryDebounce = 0.2 (sama Fallens) ║")
-print("║  ⚡ Skill Check: FALLENS ORIGINAL        ║")
-print("║     • 1 mode (auto trigger)              ║")
-print("║     • Zona: goal + 102° s/d + 116°       ║")
+print("║  🛡️ Auto Parry                            ║")
+print("║  ⚡ Auto Skill Check                     ║")
+print("║  🎯 Aimlock Smooth + 2 Mode              ║")
+print("║  💡 Fullbright (max 200)                 ║")
+print("║  🌫️ No Fog Fix                           ║")
+print("║  📦 Hitbox 2 Mode (Survivor + Killer)    ║")
+print("║  🛡️ God Mode (Full)                      ║")
+print("║  🌀 Teleport 3 Opsi                      ║")
+print("║  🔊 Sound aktif                          ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol R             ║")
-print("║  🎯 Aimlock: Hold tombol 🎯 di kiri      ║")
+print("║  🎮 Buka menu: Klik tombol 🔥            ║")
+print("║  🎯 Aimlock: Hold tombol 🎯              ║")
 print("║  🖱️ Klik kanan tombol 🎯 = ganti mode    ║")
 print("╚══════════════════════════════════════════╝")
 

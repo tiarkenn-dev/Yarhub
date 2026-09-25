@@ -71,22 +71,7 @@ local function playToggleSound()
     end)
 end
 
-local function playMemeSound(soundId, vol)
-    task.spawn(function()
-        pcall(function()
-            local s = Instance.new("Sound")
-            s.SoundId = soundId
-            s.Volume = vol or 0.5
-            s.Parent = SoundService
-            s:Play()
-            task.wait(2)
-            s:Destroy()
-        end)
-    end)
-end
-
 _G.Roooor_playSound = playToggleSound
-_G.Roooor_playMeme = playMemeSound
 
 -- =========================================================
 -- LOADING 4D FIRE RING
@@ -318,9 +303,8 @@ _G.RoooorS = _G.RoooorS or {
     NoClip = false, Korblox = false, Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
-    Killer_Hitbox = false, Killer_HitboxSize = 15, Killer_Hitbox_Visible = false,
     MaskedPower = "Cobra",
-    FastVault = false, FastVaultSpeed = 1.5, AutoVault = false,
+    AutoVault = false,
     InstantInteract = false,
     EightBitCrown = false, EightBitSize = 1, CrownX = 0, CrownY = 1.2, CrownZ = 0,
     Trail = false, TrailColor = Color3.fromRGB(255, 120, 0),
@@ -329,7 +313,6 @@ _G.RoooorS = _G.RoooorS or {
     Crosshair = false, CrosshairColor = Color3.fromRGB(0, 255, 200), CrosshairSize = 8,
     NoClipCamera = false,
     ZoomOut = false, ZoomOutValue = 500,
-    RGBUI = false,
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
@@ -340,9 +323,8 @@ _G.RoooorS = _G.RoooorS or {
     AntiGrab = false, AntiHook = false, AntiBlind = false,
     AntiStun = false, AntiRagdoll = false, AntiSlow = false, AntiAFK = false,
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
-    TPtoPlayer = false,
     Fly = false, FlySpeed = 50,
-    PlayerList = false, KillFeed = false, StunNotify = false,
+    KillFeed = false, StunNotify = false,
 }
 local S = _G.RoooorS
 
@@ -399,7 +381,6 @@ _G.Roooor_GodMode = _G.Roooor_GodMode or {
 -- COMBAT CONFIG (AIMBOT + HITBOX)
 -- =========================================================
 _G.Roooor_Combat = _G.Roooor_Combat or {
-    -- AIMBOT
     AimlockEnabled = false,
     Holding = false,
     AttackHeld = false,
@@ -413,35 +394,15 @@ _G.Roooor_Combat = _G.Roooor_Combat or {
     WallCheck = false,
     FOVCircle = false,
     FOVRadius = 150,
-
-    -- TRIGGER BOT
     TriggerBotEnabled = false,
     TriggerDelay = 0.05,
-
-    -- HITBOX
     HitboxSurvivor = false,
     HitboxKiller = false,
     HitboxSize = 15,
     HitboxVisible = false,
 }
 
--- SOUND MEME LIST
-_G.Roooor_MemeSounds = _G.Roooor_MemeSounds or {
-    Bruh = "rbxassetid://9046486083",
-    VineBoom = "rbxassetid://6042053626",
-    Whoosh = "rbxassetid://9109926130",
-    Suspense = "rbxassetid://131471209766485",
-    AirHorn = "rbxassetid://1837879082",
-    Oof = "rbxassetid://4674389555",
-    MinecraftHurt = "rbxassetid://9114363078",
-    Spooky = "rbxassetid://1835822553",
-    Fart = "rbxassetid://131362590418887",
-    CatLaugh = "rbxassetid://131386564897452",
-    Nope = "rbxassetid://1837684306",
-    Wow = "rbxassetid://131361016931955",
-}
-
-print("✅ [1/8] Loading + Config + State + Sound loaded")-- =========================================================
+print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 local FireList = {
@@ -2628,7 +2589,7 @@ task.spawn(function()
 end)
 
 print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL R + AIMLOCK
+-- BAGIAN 5/8 : GUI + KOMPONEN + TOMBOL 🔥 + AIMLOCK
 -- =========================================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "RoooorHubFire"
@@ -3474,78 +3435,6 @@ local function drp(name, options, def, cb)
     end)
 end
 
--- =========================================================
--- TOGGLE MEME (SOUND BERBEDA PER FITUR)
--- =========================================================
-local MemeSounds = _G.Roooor_MemeSounds
-
-local function togMeme(name, def, soundId, cb)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1, -4, 0, 28)
-    f.BackgroundColor3 = C.BG
-    f.BackgroundTransparency = 0.4
-    f.BorderSizePixel = 0
-    f.Parent = cs
-    rnd(f, 8)
-    local fStrk = strk(f, C.FIRE2, 1, 0.7)
-
-    local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(1, -50, 1, 0)
-    l.Position = UDim2.new(0, 8, 0, 0)
-    l.BackgroundTransparency = 1
-    l.Text = name
-    l.TextColor3 = C.TXT
-    l.TextSize = 9
-    l.Font = Enum.Font.GothamMedium
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.Parent = f
-
-    local t = Instance.new("Frame")
-    t.Size = UDim2.new(0, 32, 0, 16)
-    t.Position = UDim2.new(1, -40, 0.5, -8)
-    t.BorderSizePixel = 0
-    t.Parent = f
-    rnd(t, 9)
-
-    local k = Instance.new("Frame")
-    k.Size = UDim2.new(0, 11, 0, 11)
-    k.BorderSizePixel = 0
-    k.Parent = t
-    rnd(k, 6)
-
-    local saved = _G.ToggleStates[name]
-    local state = (saved ~= nil) and saved or def
-    _G.ToggleStates[name] = state
-
-    t.BackgroundColor3 = state and C.FIRE1 or C.PANEL
-    k.Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5)
-    k.BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
-
-    local cB = Instance.new("TextButton")
-    cB.Size = UDim2.new(1, 0, 1, 0)
-    cB.BackgroundTransparency = 1
-    cB.Text = ""
-    cB.Parent = t
-
-    cB.MouseButton1Click:Connect(function()
-        state = not state
-        _G.ToggleStates[name] = state
-        TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
-            Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
-            BackgroundColor3 = state and C.FIRE_BRIGHT or C.DIM
-        }):Play()
-        TweenService:Create(t, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.FIRE1 or C.PANEL
-        }):Play()
-        fStrk.Color = state and C.FIRE_BRIGHT or C.FIRE3
-
-        playMemeSound(soundId)
-
-        if cb then pcall(cb, state) end
-    end)
-end
-
--- Tab registry
 local activeTab = nil
 local function makeTab(name, icon, order, cb)
     local b = Instance.new("TextButton")
@@ -3644,7 +3533,6 @@ _G.Roooor_btn = btn
 _G.Roooor_drp = drp
 _G.Roooor_makeTab = makeTab
 _G.Roooor_cs = cs
-_G.Roooor_togMeme = togMeme
 
 mainBtn.MouseButton1Click:Connect(function()
     if wasDragged then
@@ -3930,8 +3818,6 @@ local btn = _G.Roooor_btn
 local drp = _G.Roooor_drp
 local makeTab = _G.Roooor_makeTab
 local cs = _G.Roooor_cs
-local togMeme = _G.Roooor_togMeme
-local MemeSounds = _G.Roooor_MemeSounds
 
 -- ============================================================
 -- TAB: KILLER
@@ -3973,34 +3859,34 @@ makeTab("Killer", "🔪", 5, function()
 end)
 
 -- ============================================================
--- TAB: MISC (DENGAN SOUND MEME BERBEDA)
+-- TAB: MISC (SOUND DEFAULT)
 -- ============================================================
 makeTab("Misc", "⚙️", 6, function()
 
     -- ============================
-    -- MOVEMENT (SOUND MEME)
+    -- MOVEMENT
     -- ============================
     sec("Movement", "🏃")
 
-    togMeme("Walk Speed", false, MemeSounds.Bruh, function(s)
+    tog("Walk Speed", false, function(s)
         S.WalkSpeed = s
     end)
     sl("Walk Speed Value", 16, 100, 16, function(v) S.WalkSpeedVal = v end)
 
-    togMeme("Speed Hack", false, MemeSounds.VineBoom, function(s)
+    tog("Speed Hack", false, function(s)
         S.SpeedHack = s
     end)
     sl("Speed Hack Value", 20, 200, 40, function(v) S.SpeedHackVal = v end)
 
-    togMeme("No Clip", false, MemeSounds.Whoosh, function(s)
+    tog("No Clip", false, function(s)
         S.NoClip = s
     end)
 
-    togMeme("No Clip Camera", false, MemeSounds.Suspense, function(s)
+    tog("No Clip Camera", false, function(s)
         S.NoClipCamera = s
     end)
 
-    togMeme("Fly", false, MemeSounds.AirHorn, function(s)
+    tog("Fly", false, function(s)
         S.Fly = s
         if s then
             _G.Roooor_startFly()
@@ -4014,7 +3900,7 @@ makeTab("Misc", "⚙️", 6, function()
     -- SAFE
     -- ============================
     sec("Safe", "🔒")
-    togMeme("Anti AFK", false, MemeSounds.Oof, function(s)
+    tog("Anti AFK", false, function(s)
         S.AntiAFK = s
     end)
 
@@ -4023,65 +3909,15 @@ makeTab("Misc", "⚙️", 6, function()
     -- ============================
     sec("Character", "🎭")
 
-    togMeme("Korblox Leg", false, MemeSounds.MinecraftHurt, function(s)
+    tog("Korblox Leg", false, function(s)
         S.Korblox = s
         applyKorblox(s)
     end)
 
-    togMeme("Headless", false, MemeSounds.Spooky, function(s)
+    tog("Headless", false, function(s)
         S.Headless = s
         applyHeadless(s)
     end)
-
-    -- ============================
-    -- FUN & TROLL (BONUS SOUND)
-    -- ============================
-    sec("Fun & Troll", "😂")
-
-    togMeme("Fart Mode", false, MemeSounds.Fart, function(s)
-        if s then
-            task.spawn(function()
-                while _G.ToggleStates["Fart Mode"] do
-                    _G.Roooor_playMeme(MemeSounds.Fart)
-                    task.wait(3)
-                end
-            end)
-        end
-    end)
-    lbl("Spam suara kentut tiap 3 detik 💨", C.DIM)
-
-    togMeme("Cat Laugh", false, MemeSounds.CatLaugh, function(s)
-        if s then
-            _G.Roooor_playMeme(MemeSounds.CatLaugh)
-        end
-    end)
-
-    togMeme("Nope", false, MemeSounds.Nope, function(s)
-        if s then
-            _G.Roooor_playMeme(MemeSounds.Nope)
-        end
-    end)
-
-    togMeme("Wow", false, MemeSounds.Wow, function(s)
-        if s then
-            _G.Roooor_playMeme(MemeSounds.Wow)
-        end
-    end)
-
-    btn("🔊 Test Semua Sound", function()
-        task.spawn(function()
-            local list = {
-                MemeSounds.Bruh, MemeSounds.VineBoom, MemeSounds.Whoosh,
-                MemeSounds.Suspense, MemeSounds.AirHorn, MemeSounds.Oof,
-                MemeSounds.MinecraftHurt, MemeSounds.Spooky,
-            }
-            for _, sid in ipairs(list) do
-                _G.Roooor_playMeme(sid)
-                task.wait(1.2)
-            end
-        end)
-    end)
-    lbl("Test dulu biar tau sound-nya", C.FIRE_BRIGHT)
 end)
 
 -- ============================================================
@@ -4334,10 +4170,538 @@ print("║  🌫️ No Fog Fix                           ║")
 print("║  📦 Hitbox 2 Mode (Survivor + Killer)    ║")
 print("║  🛡️ God Mode (Full)                      ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
-print("║  🔊 Sound Meme (Bruh, Oof, dll)          ║")
+print("║  🔊 Sound Toggle                         ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol 🔥            ║")
 print("║  🎯 Aimlock: Hold tombol serang          ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")
+print("✅ [8/8] FINAL LOADED - Selamat menggunakan! 🔥")-- =========================================================
+-- BAGIAN 9/8 : TAB COMBAT (AIMBOT + HITBOX) + TAB EXTRA
+-- =========================================================
+
+local sec = _G.Roooor_sec
+local lbl = _G.Roooor_lbl
+local tog = _G.Roooor_tog
+local sl = _G.Roooor_sl
+local cpk = _G.Roooor_cpk
+local btn = _G.Roooor_btn
+local drp = _G.Roooor_drp
+local makeTab = _G.Roooor_makeTab
+local cs = _G.Roooor_cs
+
+local Combat = _G.Roooor_Combat
+
+-- =========================================================
+-- HELPER: RAYCAST VISIBILITY
+-- =========================================================
+local RayParams = RaycastParams.new()
+RayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+local function isVisible(part)
+    if not Combat.VisibilityCheck and not Combat.WallCheck then return true end
+    local cam = workspace.CurrentCamera
+    if not cam then return true end
+
+    RayParams.FilterDescendantsInstances = { LP.Character }
+
+    local origin = cam.CFrame.Position
+    local direction = (part.Position - origin)
+
+    local result = workspace:Raycast(origin, direction, RayParams)
+    if not result then return true end
+    return result.Instance:IsDescendantOf(part.Parent)
+end
+
+-- =========================================================
+-- FOV CIRCLE VISUAL
+-- =========================================================
+local fovGui = nil
+local function createFOVCircle()
+    if fovGui then fovGui:Destroy(); fovGui = nil end
+
+    fovGui = Instance.new("ScreenGui")
+    fovGui.Name = "RoooorFOV"
+    fovGui.ResetOnSpawn = false
+    fovGui.IgnoreGuiInset = true
+    fovGui.Parent = PG
+
+    local circle = Instance.new("Frame")
+    circle.Size = UDim2.new(0, 0, 0, 0)
+    circle.Position = UDim2.new(0.5, 0, 0.5, 0)
+    circle.AnchorPoint = Vector2.new(0.5, 0.5)
+    circle.BackgroundTransparency = 1
+    circle.Parent = fovGui
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 1.5
+    stroke.Color = C.FIRE2
+    stroke.Transparency = 0.3
+    stroke.Parent = circle
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = circle
+
+    return circle
+end
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if Combat.FOVCircle then
+            if not fovGui then
+                createFOVCircle()
+            end
+            local circle = fovGui:FindFirstChildOfClass("Frame")
+            if circle then
+                local r = Combat.FOVRadius * 2
+                circle.Size = UDim2.new(0, r, 0, r)
+                circle.Visible = true
+            end
+        else
+            if fovGui then
+                local circle = fovGui:FindFirstChildOfClass("Frame")
+                if circle then circle.Visible = false end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- AUTO-DETECT HOLD ATTACK (PC + HP)
+-- =========================================================
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if not Combat.AimlockEnabled then return end
+
+    -- PC: Mouse kanan (klik kanan)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Combat.AttackHeld = true
+    end
+
+    -- Mobile: Touch (tap attack button)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        Combat.AttackHeld = true
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Combat.AttackHeld = false
+    end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        Combat.AttackHeld = false
+    end
+end)
+
+-- Auto-detect tombol attack HP
+task.spawn(function()
+    local function getAttackBtn()
+        local paths = {
+            "Survivor-mob.Controls.Gui-mob",
+            "Slasher-mob.Controls.attack",
+            "Masked-mob.Controls.attack",
+            "Killer-mob.Controls.attack",
+        }
+        for _, path in ipairs(paths) do
+            local cur = PG
+            for seg in string.gmatch(path, "[^%.]+") do
+                cur = cur and cur:FindFirstChild(seg)
+            end
+            if cur and cur:IsA("GuiObject") then
+                return cur
+            end
+        end
+    end
+
+    local lastBtn = nil
+    while task.wait(1) do
+        local btn = getAttackBtn()
+        if btn and btn ~= lastBtn then
+            lastBtn = btn
+            btn.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    Combat.AttackHeld = true
+                end
+            end)
+            btn.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    Combat.AttackHeld = false
+                end
+            end)
+        end
+    end
+end)
+
+-- =========================================================
+-- AIMBOT LOOP (HOLD-TO-ATTACK)
+-- =========================================================
+local lastTrigger = 0
+
+task.spawn(function()
+    while task.wait(0.01) do
+        -- Skip kalau aimbot mati
+        if not Combat.AimlockEnabled then continue end
+
+        -- Skip kalau tombol serang gak di-hold (KUNCI UTAMA)
+        if not Combat.AttackHeld and not Combat.Holding then continue end
+
+        local myRoot = getRoot()
+        if not myRoot then continue end
+
+        local cam = workspace.CurrentCamera
+        if not cam then continue end
+
+        local center = Vector2.new(
+            cam.ViewportSize.X / 2,
+            cam.ViewportSize.Y / 2
+        )
+
+        local closest, shortest = nil, Combat.LockRadius
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character then
+                local teamName = p.Team and p.Team.Name or ""
+                local valid = false
+
+                if Combat.Mode == "Killer" and teamName == "Killer" then
+                    valid = true
+                elseif Combat.Mode == "Survivor" and teamName == "Survivors" then
+                    valid = true
+                end
+
+                if valid then
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                    local aimPart = p.Character:FindFirstChild(Combat.AimPart)
+                        or p.Character:FindFirstChild("Head")
+                        or p.Character:FindFirstChild("HumanoidRootPart")
+
+                    if hum and hum.Health > 0 and aimPart then
+                        local dist3D = (aimPart.Position - myRoot.Position).Magnitude
+                        if dist3D < shortest then
+                            -- Visibility check
+                            if Combat.VisibilityCheck or Combat.WallCheck then
+                                if not isVisible(aimPart) then
+                                    continue
+                                end
+                            end
+
+                            -- FOV check
+                            local pos2D, onScreen = cam:WorldToViewportPoint(aimPart.Position)
+                            if onScreen then
+                                local dist2D = (Vector2.new(pos2D.X, pos2D.Y) - center).Magnitude
+                                if dist2D <= Combat.FOVRadius then
+                                    shortest = dist3D
+                                    closest = aimPart
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if closest then
+            local pos = closest.Position
+            if Combat.Predict then
+                pos = pos + (closest.AssemblyLinearVelocity * Combat.PredictStrength)
+            end
+            local targetCF = CFrame.new(cam.CFrame.Position, pos)
+            local smooth = math.clamp(Combat.Smoothness, 0.01, 1)
+            cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
+
+            -- Trigger bot
+            if Combat.TriggerBotEnabled then
+                local now = tick()
+                if now - lastTrigger >= Combat.TriggerDelay then
+                    lastTrigger = now
+                    pcall(function()
+                        local r = ReplicatedStorage:FindFirstChild("Remotes")
+                        if r then
+                            local a = r:FindFirstChild("Attacks")
+                            if a then
+                                local atk = a:FindFirstChild("BasicAttack")
+                                if atk then atk:FireServer(false) end
+                            end
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- HITBOX 2 MODE (SURVIVOR + KILLER)
+-- =========================================================
+local hitboxCache = {}
+
+task.spawn(function()
+    while task.wait(0.5) do
+        local myTeam = LP.Team and LP.Team.Name or ""
+
+        local enabled = false
+        if Combat.HitboxSurvivor and myTeam == "Survivors" then
+            enabled = true
+        end
+        if Combat.HitboxKiller and myTeam == "Killer" then
+            enabled = true
+        end
+
+        if enabled then
+            local targetTeam = (myTeam == "Survivors") and "Killer" or "Survivors"
+
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LP and p.Character and p.Team and p.Team.Name == targetTeam then
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health > 0 then
+                        local part = p.Character:FindFirstChild("HumanoidRootPart")
+                        if part then
+                            if not hitboxCache[part] then
+                                hitboxCache[part] = {
+                                    Size = part.Size,
+                                    Transparency = part.Transparency,
+                                    CanCollide = part.CanCollide,
+                                    Material = part.Material,
+                                }
+                            end
+
+                            local size = Combat.HitboxSize or 15
+                            part.Size = Vector3.new(size, size, size)
+                            part.CanCollide = false
+                            part.Transparency = Combat.HitboxVisible and 0.5 or 1
+                            part.Material = Enum.Material.ForceField
+                        end
+                    end
+                end
+            end
+        else
+            for part, orig in pairs(hitboxCache) do
+                if part and part.Parent then
+                    part.Size = orig.Size
+                    part.Transparency = orig.Transparency
+                    part.CanCollide = orig.CanCollide
+                    part.Material = orig.Material
+                end
+                hitboxCache[part] = nil
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- TAB: COMBAT (AIMBOT + HITBOX)
+-- =========================================================
+makeTab("Combat", "⚔️", 9, function()
+
+    -- ============================
+    -- AIMBOT
+    -- ============================
+    sec("Aimbot", "🎯")
+
+    tog("Enable Aimbot (Hold to Attack)", false, function(s)
+        Combat.AimlockEnabled = s
+        if not s then
+            Combat.AttackHeld = false
+            Combat.Holding = false
+        end
+    end)
+
+    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
+        Combat.Mode = v
+    end)
+
+    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v)
+        Combat.AimPart = v
+    end)
+
+    sl("Smoothness", 0.01, 1, 0.15, function(v)
+        Combat.Smoothness = v
+    end)
+    lbl("0.01 = instan | 1 = smooth", C.GRN)
+
+    sl("Lock Radius (studs)", 10, 500, 100, function(v)
+        Combat.LockRadius = v
+    end)
+
+    sl("FOV Radius (layar)", 50, 500, 150, function(v)
+        Combat.FOVRadius = v
+    end)
+
+    tog("Show FOV Circle", false, function(s)
+        Combat.FOVCircle = s
+    end)
+
+    sec("Prediction", "📈")
+    tog("Predict Movement", true, function(s)
+        Combat.Predict = s
+    end)
+    sl("Predict Strength", 0, 1, 0.12, function(v)
+        Combat.PredictStrength = v
+    end)
+
+    sec("Visibility Check", "👁️")
+    tog("Anti-Wall (Silent)", false, function(s)
+        Combat.VisibilityCheck = s
+    end)
+    tog("Anti-Wall (Strict)", false, function(s)
+        Combat.WallCheck = s
+    end)
+    lbl("Anti-Wall = skip target di balik dinding", C.DIM)
+
+    -- ============================
+    -- TRIGGER BOT
+    -- ============================
+    sec("Trigger Bot", "🔫")
+    tog("Auto Attack saat lock", false, function(s)
+        Combat.TriggerBotEnabled = s
+    end)
+    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v)
+        Combat.TriggerDelay = v
+    end)
+    lbl("Auto attack saat target di FOV", C.FIRE_BRIGHT)
+
+    -- ============================
+    -- HITBOX
+    -- ============================
+    sec("Hitbox (2 Mode)", "📦")
+
+    tog("Hitbox Survivor Mode", false, function(s)
+        Combat.HitboxSurvivor = s
+    end)
+    lbl("Aktif saat kamu Survivor — hitbox Killer", C.DIM)
+
+    tog("Hitbox Killer Mode", false, function(s)
+        Combat.HitboxKiller = s
+    end)
+    lbl("Aktif saat kamu Killer — hitbox Survivor", C.DIM)
+
+    sl("Hitbox Size", 5, 50, 15, function(v)
+        Combat.HitboxSize = v
+    end)
+
+    tog("Show Hitbox (Visible)", false, function(s)
+        Combat.HitboxVisible = s
+    end)
+    lbl("Kalau ON, hitbox keliatan transparan", C.GRN)
+
+    -- ============================
+    -- KEYBIND INFO
+    -- ============================
+    sec("Keybind", "⌨️")
+    lbl("🎯 Tombol Aimlock di kiri layar", C.FIRE_BRIGHT)
+    lbl("Klik kanan tombol = ganti mode", C.DIM)
+    lbl("Hold tombol attack = aimlock ON", C.DIM)
+end)
+
+-- =========================================================
+-- TAB: EXTRA (FITUR TAMBAHAN)
+-- =========================================================
+makeTab("Extra", "✨", 10, function()
+
+    -- ============================
+    -- GOD MODE
+    -- ============================
+    sec("God Mode", "🛡️")
+    tog("God Mode (Full)", false, function(s)
+        _G.Roooor_GodMode.Enabled = s
+    end)
+    lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
+
+    -- ============================
+    -- FULLBRIGHT 200
+    -- ============================
+    sec("Fullbright Max", "💡")
+    tog("Fullbright (max 200)", false, function(s)
+        S.Fullbright = s
+        _G.Roooor_applyFullbright(s)
+    end)
+    sl("Brightness Level", 10, 200, 100, function(v)
+        S.FullbrightVal = v
+        if S.Fullbright then _G.Roooor_applyFullbright(true) end
+    end)
+    lbl("Bisa sampai 200 (super terang)", C.FIRE_BRIGHT)
+
+    -- ============================
+    -- NO FOG FIX
+    -- ============================
+    sec("No Fog (Fix)", "🌫️")
+    tog("No Fog (Fix)", false, function(s)
+        S.NoFog = s
+        _G.Roooor_applyNoFog(s)
+    end)
+    lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
+
+    -- ============================
+    -- TELEPORT
+    -- ============================
+    sec("Teleport", "🌀")
+    btn("🚪 TP ke Finish Line", function()
+        _G.Roooor_teleportToFinishLine()
+    end)
+    btn("🚪 TP ke Gate", function()
+        _G.Roooor_teleportToGate()
+    end)
+    btn("🚪 TP ke Dalam Gate", function()
+        _G.Roooor_teleportInsideGate()
+    end)
+
+    -- ============================
+    -- SOUND TEST
+    -- ============================
+    sec("Sound", "🔊")
+    btn("🔊 Test Sound", function()
+        _G.Roooor_playSound()
+    end)
+    lbl("Sound aktif saat toggle ON/OFF", C.DIM)
+end)
+
+-- =========================================================
+-- GOD MODE LOOP
+-- =========================================================
+local GodMode = _G.Roooor_GodMode
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if not GodMode.Enabled then continue end
+        if not LP.Character then continue end
+
+        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+        if not hum then continue end
+
+        -- Anti Down (heal terus)
+        if hum.Health > 0 and hum.Health < hum.MaxHealth then
+            pcall(function()
+                hum.Health = hum.MaxHealth
+            end)
+        end
+
+        -- Anti Stun / Ragdoll
+        if hum.PlatformStand then
+            hum.PlatformStand = false
+        end
+        pcall(function()
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Dead
+                or state == Enum.HumanoidStateType.FallingDown
+                or state == Enum.HumanoidStateType.Ragdoll then
+                hum:ChangeState(Enum.HumanoidStateType.Running)
+            end
+        end)
+
+        -- Anti Grab
+        local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for _, v in pairs(hrp:GetChildren()) do
+                if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
+                    local part1 = v.Part1 or v.Part0
+                    if part1 and not part1:IsDescendantOf(LP.Character) then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+print("✅ [9/8] Tab Combat (Aimbot + Hitbox) + Tab Extra loaded")

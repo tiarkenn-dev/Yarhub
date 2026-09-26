@@ -1,5 +1,6 @@
 -- =========================================================
--- SECTION 1/11 : LOADING + CONFIG + STATE
+-- SECTION 1/11 : LOADING + CONFIG + STATE (UPDATED)
+-- Auto Parry Custom Include
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -357,21 +358,34 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
--- 🆕 AUTO PARRY (PREDICTION SYSTEM)
+-- 🆕 AUTO PARRY CUSTOM (PENGGANTI COSMIC)
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = true,
-    ParryDistance = 14,
+    Enabled = false,
+    ParryDistance = 14.3,
     ParryDelay = 0,
-    Cooldown = 1,
+    Cooldown = 0.5,
     FaceSensitivity = -1,
     RequireFacing = false,
     Wiggle = false,
     WiggleSpam = 5,
-    AggressiveMode = false,
 }
 _G.Roooor_AutoParry = AutoParry
 
--- 🆕 PREDICTION CONFIG
+-- AP CUSTOM CONFIG
+AP_CameraFix = { Enabled = true }
+
+AP_ESPCircle = {
+    Enabled = true,
+    ColorNormal = Color3.fromRGB(0, 255, 100),
+    ColorDanger = Color3.fromRGB(255, 50, 50),
+    Thickness = 0.4,
+    Segments = 36,
+    YOffset = -2.5
+}
+
+AP_PARRY_DEBOUNCE = 0.5
+
+-- PREDICTION CONFIG (masih dipake fitur lain)
 PredictionConfig = _G.Roooor_Prediction or {
     LatencyOffset = 0,
     Accuracy = 85,
@@ -396,7 +410,6 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- MOONWALK (TOMBOL MW + LOCK BUTTON)
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
     Locked = false,
@@ -442,7 +455,7 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-print("✅ [1/11] COSMIC HUB v3.6 - Base + State + Prediction loaded")-- =========================================================
+print("✅ [1/11] COSMIC HUB v3.6 - Base + State + Auto Parry Custom loaded")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -649,6 +662,8 @@ task.spawn(function()
         _G.RoooorSavedStates.GodMode = GodMode
         _G.RoooorSavedStates.AutoFlee = AutoFlee
         _G.RoooorSavedStates.FastVault = FastVault
+        _G.RoooorSavedStates.AP_ESPCircle = AP_ESPCircle
+        _G.RoooorSavedStates.AP_CameraFix = AP_CameraFix
     end
 end)
 
@@ -1274,7 +1289,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/11] COSMIC HUB - Fungsi utama loaded")-- =========================================================
--- SECTION 4/11 : ESP + PARRY PREDICTION + MOONWALK + HITBOX + CAMERA FIX + CROSSHAIR
+-- SECTION 4/11 : ESP + AUTO PARRY CUSTOM + MOONWALK + HITBOX + CAMERA FIX + CROSSHAIR
 -- =========================================================
 
 ESPObjects = {}
@@ -1569,20 +1584,15 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY - PREDICTION SYSTEM (OP)
+-- 🛡️ AUTO PARRY CUSTOM (DEBOUNCE 0.5 | RADIUS 14.3 | CIRCLE TANAH)
 -- =========================================================
-lastParry = 0
-hookedKillers = _G.HookedKillers or {}
-_G.HookedKillers = hookedKillers
-ParryActive = false
+AP_lastParry = 0
+AP_parryCount = 0
+AP_hookedKillers = _G.AP_HookedKillers or {}
+_G.AP_HookedKillers = AP_hookedKillers
+AP_wasLocked = false
 
-function pressRightClick()
-    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
-    task.wait()
-    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
-end
-
-function GetParryButton()
+function AP_GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
         current = current and current:FindFirstChild(segment)
@@ -1590,112 +1600,54 @@ function GetParryButton()
     return current
 end
 
-function pressParryButton()
+function AP_PressRightClick()
+    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
+    task.wait()
+    VirtualInputManager:SendMouseButtonEvent(0, 0, 1, false, game, 0)
+end
+
+function AP_PressParryButton()
     if UIS.TouchEnabled then
-        local btn = GetParryButton()
+        local btn = AP_GetParryButton()
         if btn and btn:IsA("GuiObject") then
             local pos = btn.AbsolutePosition
             local size = btn.AbsoluteSize
             local inset = GuiService:GetGuiInset()
-            local x = pos.X + size.X/2 + inset.X
-            local y = pos.Y + size.Y/2 + inset.Y
+            local x = pos.X + size.X / 2 + inset.X
+            local y = pos.Y + size.Y / 2 + inset.Y
             VirtualInputManager:SendTouchEvent(8823, 0, x, y)
             task.wait(0.01)
             VirtualInputManager:SendTouchEvent(8823, 2, x, y)
         end
     else
-        pressRightClick()
+        AP_PressRightClick()
     end
 end
 
-function shouldBlockParry()
-    local char = LP.Character
-    if not char then return true end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return true end
-
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if animator then
-        for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
-            local anim = track.Animation
-            if anim and anim.AnimationId then
-                if anim.AnimationId == "rbxassetid://127096285501517" then return true end
-                if anim.AnimationId == "rbxassetid://112166042383605" then return true end
-                if anim.AnimationId == "http://www.roblox.com/asset/?id=126965695851149" then return true end
-                if anim.AnimationId == "http://www.roblox.com/asset/?id=135084204086504" then return true end
-                if anim.AnimationId == "rbxassetid://123047897844134" then return true end
-            end
-        end
-    end
-
-    if hum.Health <= 0 or hum.Health < 2 then return true end
-    if char:GetAttribute("Downed") == true then return true end
-    if char:GetAttribute("IsDown") == true then return true end
-    if char:GetAttribute("Knocked") == true then return true end
-
-    return false
-end
-
-function doParry()
-    if shouldBlockParry() then return end
-    local now = tick()
-    if now - lastParry < (PredictionConfig.Cooldown or 0.1) then return end
-    lastParry = now
-    ParryActive = true
-    pressParryButton()
-    task.delay(0.3, function()
-        ParryActive = false
-    end)
-end
-
-function calculatePrediction(killerChar)
+function AP_IsInRange(killerChar)
     local myRoot = getRoot()
-    if not myRoot or not killerChar then return nil end
-    local eRoot = killerChar:FindFirstChild("HumanoidRootPart")
-    if not eRoot then return nil end
-
-    local distance = (eRoot.Position - myRoot.Position).Magnitude
-    if distance > (PredictionConfig.MaxDistance or 50) then return nil end
-
-    local killerHum = killerChar:FindFirstChildOfClass("Humanoid")
-    if not killerHum then return nil end
-
-    local killerVelocity = eRoot.AssemblyLinearVelocity.Magnitude
-    local myVelocity = myRoot.AssemblyLinearVelocity.Magnitude
-    local relativeSpeed = math.max(killerVelocity - myVelocity, 1)
-
-    local timeToReach = distance / relativeSpeed
-
-    local latencyCompensation = 0
-    if PredictionConfig.LatencyOffset ~= 0 then
-        latencyCompensation = PredictionConfig.LatencyOffset * 0.1
-    end
-
-    local accuracyFactor = (PredictionConfig.Accuracy or 85) / 100
-    local adaptiveThreshold = 0.25 * accuracyFactor
-
-    if PredictionConfig.AdaptiveReaction then
-        adaptiveThreshold = adaptiveThreshold + math.clamp(relativeSpeed / 500, 0, 0.05)
-    end
-
-    local predictedTime = timeToReach + latencyCompensation
-
-    return {
-        distance = distance,
-        timeToReach = timeToReach,
-        predictedTime = predictedTime,
-        threshold = adaptiveThreshold,
-        shouldParry = predictedTime <= adaptiveThreshold and predictedTime >= (PredictionConfig.MinTimeToImpact or 0.02),
-        relativeSpeed = relativeSpeed,
-    }
+    if not myRoot or not killerChar then return false end
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= AutoParry.ParryDistance
 end
 
-function hookKiller(char)
-    if hookedKillers[char] then return end
-    hookedKillers[char] = true
+function AP_DoParry()
+    local now = tick()
+    if now - AP_lastParry < AP_PARRY_DEBOUNCE then return end
+    AP_lastParry = now
+    AP_parryCount = AP_parryCount + 1
+    print("[AP] 🔥 PARRY #" .. AP_parryCount)
+    AP_PressParryButton()
+end
+
+function AP_HookKiller(char)
+    if AP_hookedKillers[char] then return end
+    AP_hookedKillers[char] = true
 
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
+
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
@@ -1705,48 +1657,209 @@ function hookKiller(char)
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-        local fullId = "rbxassetid://" .. id
-        if KillerAnims[fullId] then
-            local prediction = calculatePrediction(char)
-            if prediction and prediction.shouldParry then
-                doParry()
+        if KillerAnims["rbxassetid://" .. id] then
+            if AP_IsInRange(char) then
+                AP_DoParry()
             end
         end
     end)
 end
 
-function scanKillers()
+function AP_ScanKillers()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-            hookKiller(p.Character)
+            AP_HookKiller(p.Character)
         end
     end
 end
 
+for _, p in pairs(Players:GetPlayers()) do
+    p.CharacterAdded:Connect(function(c)
+        AP_hookedKillers[c] = nil
+        task.wait(1)
+        AP_ScanKillers()
+    end)
+end
+
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function(c)
+        AP_hookedKillers[c] = nil
+        task.wait(1)
+        AP_ScanKillers()
+    end)
+end)
+
 task.spawn(function()
-    while task.wait(0.5) do
-        if AutoParry.Enabled then scanKillers() end
+    while true do
+        task.wait(0.5)
+        if AutoParry.Enabled then AP_ScanKillers() end
     end
 end)
 
--- 🆕 PREDICTION LOOP (AGGRESSIVE - setiap 0.02s)
+-- ═══════════════════════════════════════════════════════
+-- 🎥 AP CAMERA UNLOCK
+-- ═══════════════════════════════════════════════════════
 task.spawn(function()
-    while task.wait(0.02) do
-        if not AutoParry.Enabled then continue end
-        if shouldBlockParry() then continue end
+    while task.wait(0.05) do
+        if not AP_CameraFix.Enabled then continue end
 
-        local myRoot = getRoot()
-        if not myRoot then continue end
+        local cam = workspace.CurrentCamera
+        local char = LP.Character
 
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-                local prediction = calculatePrediction(p.Character)
-                if prediction and prediction.shouldParry then
-                    doParry()
+        if cam and char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local isLocked = false
+
+                if cam.CameraType ~= Enum.CameraType.Custom then
+                    isLocked = true
+                end
+                if cam.CameraSubject ~= hum then
+                    isLocked = true
+                end
+
+                local state = hum:GetState()
+                if state == Enum.HumanoidStateType.FallingDown
+                    or state == Enum.HumanoidStateType.Ragdoll
+                    or state == Enum.HumanoidStateType.Dead
+                    or state == Enum.HumanoidStateType.PlatformStanding then
+                    isLocked = true
+                end
+
+                if isLocked then
+                    pcall(function()
+                        cam.CameraType = Enum.CameraType.Custom
+                        cam.CameraSubject = hum
+                    end)
+                    AP_wasLocked = true
+                else
+                    AP_wasLocked = false
+                end
+            end
+        end
+    end
+end)
+
+LP.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    local cam = workspace.CurrentCamera
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if cam and hum then
+        pcall(function()
+            cam.CameraType = Enum.CameraType.Custom
+            cam.CameraSubject = hum
+        end)
+    end
+end)
+
+-- ═══════════════════════════════════════════════════════
+-- ⭕ AP CIRCLE RATA TANAH
+-- ═══════════════════════════════════════════════════════
+AP_parryCirclePart = nil
+AP_parryCircleAttachments = {}
+AP_parryCircleBeams = {}
+
+function AP_ClearCircle()
+    if AP_parryCirclePart then
+        AP_parryCirclePart:Destroy()
+        AP_parryCirclePart = nil
+    end
+    AP_parryCircleAttachments = {}
+    AP_parryCircleBeams = {}
+end
+
+function AP_CreateCircle()
+    AP_ClearCircle()
+
+    AP_parryCirclePart = Instance.new("Part")
+    AP_parryCirclePart.Name = "AP_ParryRingBeam"
+    AP_parryCirclePart.Anchored = true
+    AP_parryCirclePart.CanCollide = false
+    AP_parryCirclePart.CanQuery = false
+    AP_parryCirclePart.CanTouch = false
+    AP_parryCirclePart.Transparency = 1
+    AP_parryCirclePart.Size = Vector3.new(1, 0.1, 1)
+    AP_parryCirclePart.Parent = workspace
+
+    local segments = AP_ESPCircle.Segments
+    for i = 1, segments do
+        local angle = (i / segments) * math.pi * 2
+        local att = Instance.new("Attachment")
+        att.Position = Vector3.new(math.cos(angle), 0, math.sin(angle))
+        att.Parent = AP_parryCirclePart
+        table.insert(AP_parryCircleAttachments, att)
+    end
+
+    for i = 1, segments do
+        local attA = AP_parryCircleAttachments[i]
+        local attB = AP_parryCircleAttachments[(i % segments) + 1]
+        local beam = Instance.new("Beam")
+        beam.Attachment0 = attA
+        beam.Attachment1 = attB
+        beam.Width0 = AP_ESPCircle.Thickness
+        beam.Width1 = AP_ESPCircle.Thickness
+        beam.FaceCamera = true
+        beam.LightEmission = 1
+        beam.LightInfluence = 0
+        beam.Segments = 1
+        beam.Transparency = NumberSequence.new(0)
+        beam.Color = ColorSequence.new(AP_ESPCircle.ColorNormal)
+        beam.Parent = AP_parryCirclePart
+        table.insert(AP_parryCircleBeams, beam)
+    end
+
+    print("[AP] ⭕ Circle created")
+end
+
+function AP_UpdateCircle()
+    local root = getRoot()
+    if not AP_ESPCircle.Enabled or not root then
+        if AP_parryCirclePart then AP_ClearCircle() end
+        return
+    end
+
+    if not AP_parryCirclePart or not AP_parryCirclePart.Parent then
+        AP_CreateCircle()
+    end
+
+    local radius = AutoParry.ParryDistance
+    local myPos = root.Position
+    local yOffset = AP_ESPCircle.YOffset
+
+    local killerInside = false
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+            local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
+            if eRoot then
+                local dist = (eRoot.Position - myPos).Magnitude
+                if dist <= radius then
+                    killerInside = true
                     break
                 end
             end
         end
+    end
+
+    local ringColor = killerInside and AP_ESPCircle.ColorDanger or AP_ESPCircle.ColorNormal
+
+    AP_parryCirclePart.Position = Vector3.new(myPos.X, myPos.Y + yOffset, myPos.Z)
+
+    for i, att in ipairs(AP_parryCircleAttachments) do
+        local angle = (i / AP_ESPCircle.Segments) * math.pi * 2
+        att.Position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+    end
+
+    for _, beam in ipairs(AP_parryCircleBeams) do
+        beam.Width0 = AP_ESPCircle.Thickness
+        beam.Width1 = AP_ESPCircle.Thickness
+        beam.Color = ColorSequence.new(ringColor)
+        beam.Transparency = NumberSequence.new(0)
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if AutoParry.Enabled then
+        AP_UpdateCircle()
     end
 end)
 
@@ -1845,7 +1958,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK (TOMBOL MW + LOCK BUTTON)
+-- MOONWALK
 -- =========================================================
 function mwIsDowned()
     local char = LP.Character
@@ -1993,7 +2106,7 @@ end)
 mwBtnUpdateUI()
 
 -- =========================================================
--- HITBOX (RADIUS 70 + ESP HIDE)
+-- HITBOX
 -- =========================================================
 function hitboxCreateESP(targetPart, color)
     if not targetPart then return end
@@ -2184,105 +2297,6 @@ end)
 if LP.Character then
     hookVault(LP.Character)
 end
-
--- =========================================================
--- PARRY CIRCLE
--- =========================================================
-parryCirclePart = nil
-parryCircleAttachments = {}
-parryCircleBeams = {}
-
-function clearParryCircle()
-    if parryCirclePart then
-        parryCirclePart:Destroy()
-        parryCirclePart = nil
-    end
-    parryCircleAttachments = {}
-    parryCircleBeams = {}
-end
-
-function createParryCircle()
-    clearParryCircle()
-    parryCirclePart = Instance.new("Part")
-    parryCirclePart.Name = "CosmicParryRing"
-    parryCirclePart.Anchored = true
-    parryCirclePart.CanCollide = false
-    parryCirclePart.Transparency = 1
-    parryCirclePart.Size = Vector3.new(1, 0.1, 1)
-    parryCirclePart.Parent = workspace
-
-    local segments = 36
-    for i = 1, segments do
-        local angle = (i / segments) * math.pi * 2
-        local att = Instance.new("Attachment")
-        att.Position = Vector3.new(math.cos(angle), 0, math.sin(angle))
-        att.Parent = parryCirclePart
-        table.insert(parryCircleAttachments, att)
-    end
-
-    for i = 1, segments do
-        local attA = parryCircleAttachments[i]
-        local attB = parryCircleAttachments[i % segments + 1]
-        local beam = Instance.new("Beam")
-        beam.Attachment0 = attA
-        beam.Attachment1 = attB
-        beam.Width0 = 0.4
-        beam.Width1 = 0.4
-        beam.FaceCamera = true
-        beam.LightEmission = 1
-        beam.LightInfluence = 0
-        beam.Segments = 1
-        beam.Transparency = NumberSequence.new(0.3)
-        beam.Color = ColorSequence.new(Color3.fromRGB(0, 255, 100))
-        beam.Parent = parryCirclePart
-        table.insert(parryCircleBeams, beam)
-    end
-end
-
-function updateParryCircle()
-    local root = getRoot()
-    if not S.ParryCircle or not root then
-        clearParryCircle()
-        return
-    end
-    if not parryCirclePart or not parryCirclePart.Parent then
-        createParryCircle()
-    end
-    local radius = S.ParryCircleSize or 12
-    local myPos = root.Position
-    local yOffset = root.Size.Y / 2 + 1.5
-
-    local killerInside = false
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-            local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
-            if eRoot then
-                local dist = (eRoot.Position - myPos).Magnitude
-                if dist <= radius then
-                    killerInside = true
-                    break
-                end
-            end
-        end
-    end
-
-    local ringColor = killerInside and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(0, 255, 100)
-    local ringTrans = killerInside and 0.2 or 0.4
-
-    parryCirclePart.Position = Vector3.new(myPos.X, myPos.Y - yOffset, myPos.Z)
-    for i, att in ipairs(parryCircleAttachments) do
-        local angle = (i / 36) * math.pi * 2
-        att.Position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-    end
-    for _, beam in ipairs(parryCircleBeams) do
-        beam.Color = ColorSequence.new(ringColor)
-        beam.Transparency = NumberSequence.new(ringTrans)
-    end
-end
-
-RunService.RenderStepped:Connect(function()
-    if S.ParryCircle then updateParryCircle() end
-end)
 
 -- =========================================================
 -- TELEPORT FINISH LINE
@@ -2613,7 +2627,7 @@ function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
--- CROSSHAIR 8 MODE
+-- CROSSHAIR
 crosshairGui = nil
 crosshairParts = {}
 crosshairGalaxyConn = nil
@@ -2815,45 +2829,6 @@ function applyZoomOut(enable, value)
     end
 end
 
--- 🆕 CAMERA FIX (ABIS DOWNED / DAGGER)
-task.spawn(function()
-    local wasDowned = false
-    while task.wait(0.2) do
-        local isDown = false
-        if LP.Character then
-            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                isDown = hum.Health <= 0 or hum.Health < 2
-                    or LP.Character:GetAttribute("Downed") == true
-                    or LP.Character:GetAttribute("IsDown") == true
-                    or LP.Character:GetAttribute("Knocked") == true
-                    or hum.PlatformStand == true
-            end
-        end
-
-        if wasDowned and not isDown then
-            task.wait(0.5)
-            local cam = workspace.CurrentCamera
-            if cam then
-                local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    cam.CameraType = Enum.CameraType.Custom
-                    cam.CameraSubject = hum
-                end
-            end
-        end
-
-        if isDown then
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.CameraType = Enum.CameraType.Custom
-            end
-        end
-
-        wasDowned = isDown
-    end
-end)
-
 -- EXPORT
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
@@ -2874,7 +2849,7 @@ _G.Roooor_createStatusESP = createStatusESP
 _G.Roooor_UpdateGenerator = UpdateGenerator
 _G.Roooor_UpdateMapESP = UpdateMapESP
 _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
-_G.Roooor_scanKillers = scanKillers
+_G.Roooor_scanKillers = AP_ScanKillers
 _G.Roooor_startSkillCheck = startSkillCheck
 _G.Roooor_setMoonwalk = setMoonwalk
 _G.Roooor_mwBtnUpdateUI = mwBtnUpdateUI
@@ -2905,7 +2880,12 @@ _G.Roooor_hookVault = hookVault
 _G.Roooor_hitboxClearAll = hitboxClearAll
 _G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
 
-print("✅ [4/11] COSMIC HUB v3.6 - ESP + Parry PREDICTION + Moonwalk + Hitbox + Camera Fix loaded")-- =========================================================
+-- AP EXPORT
+_G.AP_ScanKillers = AP_ScanKillers
+_G.AP_ClearCircle = AP_ClearCircle
+_G.AP_GetCount = function() return AP_parryCount end
+
+print("✅ [4/11] COSMIC HUB - ESP + AUTO PARRY CUSTOM + Moonwalk + Hitbox + Camera Fix loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4412,41 +4392,32 @@ cs = _G.Roooor_cs
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry (PREDICTION)", "🛡️")
-    tog("Enable Auto Parry", true, function(s)
+    sec("Auto Parry (CUSTOM)", "🛡️")
+    tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
-        if s then scanKillers() end
+        if s then AP_ScanKillers() end
     end)
-    lbl("🎯 ETA-Based Prediction System", C.FIRE_BRIGHT)
+    lbl("Debounce 0.5 | Radius 14.3 ✅", C.GRN)
 
-    sl("Prediction Accuracy", 50, 100, 85, function(v)
-        PredictionConfig.Accuracy = v
-    end)
-    lbl("Higher = lebih akurat", C.GRN)
-
-    sl("Latency Offset", -1, 1, 0, function(v)
-        PredictionConfig.LatencyOffset = v
-    end)
-    lbl("-1 = past | 0 = normal | +1 = predicted", C.DIM)
-
-    sl("Max Parry Distance", 5, 100, 50, function(v)
-        PredictionConfig.MaxDistance = v
-    end)
-    lbl("Radius deteksi killer", C.FIRE_BRIGHT)
-
-    sl("Parry Cooldown", 0.05, 0.5, 0.1, function(v)
-        PredictionConfig.Cooldown = v
+    sl("Parry Distance", 5, 40, 14.3, function(v)
+        AutoParry.ParryDistance = v
     end)
 
-    tog("Adaptive Reaction", true, function(s)
-        PredictionConfig.AdaptiveReaction = s
+    sl("Debounce", 0.05, 1, 0.5, function(v)
+        AP_PARRY_DEBOUNCE = v
     end)
-    lbl("Makin cepet = makin cepet parry", C.GRN)
+    lbl("0.5 = settingan lo", C.GRN)
 
-    sec("Parry Circle (Hijau/Merah)", "⭕")
-    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
-    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
-    lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
+    sl("Circle Height", -5, 15, -2.5, function(v)
+        AP_ESPCircle.YOffset = v
+    end)
+    lbl("-2.5 = rata tanah", C.GRN)
+
+    tog("Show Circle", true, function(s)
+        AP_ESPCircle.Enabled = s
+        if not s then AP_ClearCircle() end
+    end)
+    lbl("🟢 Aman | 🔴 Killer masuk", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check (2 MODE)", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
@@ -4888,7 +4859,7 @@ makeTab("Misc", "⚙️", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: PLAYER (FPS Boost Only - Auto Parry udah di Survivor)
+-- TAB 8: PLAYER (FPS Boost)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
@@ -4913,7 +4884,7 @@ makeTab("Player", "👤", 8, function()
 
     sec("Info", "ℹ️")
     lbl("🕺 Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
-    lbl("🛡️ Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
+    lbl("🛡️ Auto Parry Custom: Tab Survivor", C.FIRE_BRIGHT)
     lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
@@ -4928,7 +4899,7 @@ makeTab("Player", "👤", 8, function()
             clear8Bit()
             clearKorblox()
             clearFireBeam()
-            clearParryCircle()
+            AP_ClearCircle()
             hitboxClearAll()
             stopFly()
         end)
@@ -5177,7 +5148,7 @@ makeTab("Visual", "✨", 9, function()
 end)
 
 -- ============================================================
--- TAB 10: HITBOX (RADIUS 70 + ESP HIDE)
+-- TAB 10: HITBOX
 -- ============================================================
 makeTab("Hitbox", "📦", 10, function()
 
@@ -5270,7 +5241,7 @@ end)
 
 task.spawn(function()
     while task.wait(1) do
-        if AutoParry.Enabled then scanKillers() end
+        if AutoParry.Enabled then AP_ScanKillers() end
     end
 end)
 
@@ -5279,7 +5250,7 @@ Players.PlayerAdded:Connect(function(p)
         task.wait(1)
         if AutoParry.Enabled then
             if p.Team and p.Team.Name == "Killer" then
-                hookKiller(char)
+                AP_HookKiller(char)
             end
         end
     end)
@@ -5329,7 +5300,7 @@ task.spawn(function()
         if S.EightBitOn then
             pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
         end
-        if AutoParry.Enabled then pcall(scanKillers) end
+        if AutoParry.Enabled then pcall(AP_ScanKillers) end
         if SkillCheck.Enabled then pcall(startSkillCheck) end
         if FastVault.Enabled then
             pcall(function() hookVault(LP.Character) end)
@@ -5509,7 +5480,11 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB v3.6 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry (PREDICTION SYSTEM)       ║")
+print("║  🛡️ Auto Parry CUSTOM                    ║")
+print("║     → Debounce 0.5                       ║")
+print("║     → Radius 14.3                        ║")
+print("║     → Circle Rata Tanah                  ║")
+print("║     → Camera Auto Unlock                 ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
 print("║  🕺 Moonwalk (Tombol MW + LOCK BUTTON)   ║")
 print("║  ⚡ Fast Vault                            ║")
@@ -5520,7 +5495,6 @@ print("║  🎒 Auto Carry + Hook                    ║")
 print("║  🚀 FPS Boost (3 Mode)                   ║")
 print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
 print("║  📦 Hitbox (Radius 70 + ESP Hide)        ║")
-print("║  🎥 Camera Fix (Abis Downed)             ║")
 print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
@@ -5532,14 +5506,18 @@ print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter (PUTIH)           ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
-print("║  🛡️ Auto Parry: Prediction System        ║")
+print("║  🛡️ Auto Parry Custom: Tab Survivor      ║")
 print("║  🕺 Moonwalk: Tombol MW / Tekan V        ║")
 print("║  🔒 Lock MW: Klik tombol LOCK            ║")
 print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
-print("║  🎯 Prediction = Anti Miss!              ║")
+print("║  🎯 Auto Parry: Debounce 0.5 Default     ║")
 print("╚══════════════════════════════════════════╝")
 
 print("✅ [11/11] COSMIC HUB v3.6 - FINAL LOADED! ✨")
-print("🎯 Auto Parry Prediction System ACTIVE")
-print("❌ Aimlock REMOVED")
-print("❌ Duplicate Auto Parry REMOVED")
+print("🎯 Auto Parry CUSTOM ACTIVE - Debounce 0.5 | Radius 14.3")
+print("🟢 Circle Rata Tanah (YOffset -2.5)")
+print("🎥 Camera Auto Unlock")
+print("❌ Auto Parry Cosmic REMOVED")
+print("❌ Parry Circle Cosmic REMOVED")
+print("❌ Camera Fix Cosmic REMOVED")
+print("✅ Auto Parry CUSTOM INSTALLED")

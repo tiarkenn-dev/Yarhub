@@ -1,5 +1,5 @@
 -- =========================================================
--- ROOORHUB GALAXY
+-- COSMIC HUB
 -- BAGIAN 1/8 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
@@ -57,7 +57,6 @@ function strk(o, col, t, tr)
     return s
 end
 
--- SOUND BRUH
 local BruhSoundId = "rbxassetid://9120386436"
 
 function playToggleSound()
@@ -80,7 +79,7 @@ _G.Roooor_playSound = playToggleSound
 -- LOADING GALAXY
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
-loadingGui.Name = "RoooorLoading"
+loadingGui.Name = "CosmicLoading"
 loadingGui.ResetOnSpawn = false
 loadingGui.IgnoreGuiInset = true
 loadingGui.DisplayOrder = 999999
@@ -111,7 +110,6 @@ task.spawn(function()
     end
 end)
 
--- Bintang jatuh
 for i = 1, 30 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
@@ -183,7 +181,7 @@ coreGrad.Parent = core
 local coreIcon = Instance.new("TextLabel")
 coreIcon.Size = UDim2.new(1, 0, 1, 0)
 coreIcon.BackgroundTransparency = 1
-coreIcon.Text = "✨"
+coreIcon.Text = "🌌"
 coreIcon.TextSize = 44
 coreIcon.Font = Enum.Font.GothamBlack
 coreIcon.Parent = core
@@ -208,7 +206,7 @@ local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(1, 0, 0, 100)
 subtitle.Position = UDim2.new(0, 0, 0.53, 0)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "SC PENGANGGURAN"
+subtitle.Text = "COSMIC HUB"
 subtitle.TextColor3 = C.ACC2
 subtitle.TextSize = 68
 subtitle.Font = Enum.Font.GothamBlack
@@ -224,7 +222,7 @@ local tagline = Instance.new("TextLabel")
 tagline.Size = UDim2.new(1, 0, 0, 30)
 tagline.Position = UDim2.new(0, 0, 0.73, 20)
 tagline.BackgroundTransparency = 1
-tagline.Text = "✨ ROOORHUB GALAXY ✨"
+tagline.Text = "✨ COSMIC HUB ✨"
 tagline.TextColor3 = C.ACC2
 tagline.TextSize = 16
 tagline.Font = Enum.Font.GothamBold
@@ -298,13 +296,13 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE (12 FITUR DIHAPUS + FITUR BARU)
 -- =========================================================
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-    Parry = false, DodgeRange = 15,
-    AbyssDodge = false, ParryCircle = false, ParryCircleSize = 15,
+    Parry = false,
+    ParryCircle = false, ParryCircleSize = 15, ParryCircleMode = "Normal",
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false, Korblox = false, Headless = false,
@@ -324,13 +322,11 @@ _G.RoooorS = _G.RoooorS or {
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     FOV = 70, FOVEnabled = false,
     SkyId = "Default",
-    AutoHeal = false, AutoHealThreshold = 40,
-    AutoRepair = false, AutoRevive = false, AutoDodge = false,
-    AntiGrab = false, AntiHook = false, AntiBlind = false,
-    AntiStun = false, AntiRagdoll = false, AntiSlow = false, AntiAFK = false,
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     Fly = false, FlySpeed = 50,
     KillFeed = false, StunNotify = false,
+    HDBoost = false, HDShader = false, HDSky = false,
+    ESPNameMode = "Text", ESPNameSize = 12,
 }
 S = _G.RoooorS
 
@@ -355,13 +351,14 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
+-- AUTO PARRY (VERSI FALLENS)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = -1,
-    RequireFacing = false,
+    FaceSensitivity = 0.7,
+    RequireFacing = true,
     Wiggle = false,
     WiggleSpam = 5,
 }
@@ -405,7 +402,8 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/8] Loading + Config + State loaded")-- =========================================================
+print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")-- =========================================================
+-- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 FireList = {
@@ -583,8 +581,9 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/8] Fire + Sky + KillerAnims loaded")-- =========================================================
--- BAGIAN 3/8 : SEMUA FUNGSI + AUTO PARRY + AUTO SKILL CHECK
+print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 3/8 : FUNGSI + AUTO PARRY (FALLENS) + AUTO SKILL CHECK
 -- =========================================================
 
 -- ============================
@@ -851,6 +850,7 @@ function removeStatusESP(char)
     end
 end
 
+-- ESP STATUS 2 MODE (TEXT / GALAXY)
 function createStatusESP(player, char, root)
     if not ESPStatus.Enabled then
         removeStatusESP(char)
@@ -894,6 +894,9 @@ function createStatusESP(player, char, root)
     end
     if isDown then teamColor = Color3.fromRGB(255, 0, 0) end
 
+    local mode = S.ESPNameMode or "Text"
+    local size = S.ESPNameSize or 12
+
     if not billboard then
         billboard = Instance.new("BillboardGui")
         billboard.Size = UDim2.new(0, 120, 0, 50)
@@ -904,7 +907,7 @@ function createStatusESP(player, char, root)
         label.TextColor3 = teamColor
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
-        label.TextSize = 12
+        label.TextSize = size
         label.Text = text
         label.Parent = billboard
         billboard.Adornee = head
@@ -916,6 +919,29 @@ function createStatusESP(player, char, root)
         if label then
             label.Text = text
             label.TextColor3 = teamColor
+            label.TextSize = size
+        end
+    end
+
+    -- MODE GALAXY
+    local label = billboard:FindFirstChildOfClass("TextLabel")
+    if label then
+        if mode == "Galaxy" then
+            local grad = label:FindFirstChildOfClass("UIGradient")
+            if not grad then
+                grad = Instance.new("UIGradient")
+                grad.Parent = label
+            end
+            local t = tick()
+            grad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromHSV((t * 0.3) % 1, 0.8, 1)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromHSV((t * 0.3 + 0.33) % 1, 0.8, 1)),
+                ColorSequenceKeypoint.new(1, Color3.fromHSV((t * 0.3 + 0.66) % 1, 0.8, 1)),
+            })
+            grad.Rotation = (t * 60) % 360
+        else
+            local grad = label:FindFirstChildOfClass("UIGradient")
+            if grad then grad:Destroy() end
         end
     end
 end
@@ -1041,9 +1067,9 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY
+-- AUTO PARRY (VERSI FALLENS - GACOR)
 -- =========================================================
-PARRY_DEBOUNCE = 0.2
+PARRY_DEBOUNCE = 0.5
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
@@ -1081,9 +1107,42 @@ function pressParryButton()
     end
 end
 
+-- CEK KONDISI: kapan TIDAK boleh parry
+function shouldBlockParry()
+    local char = LP.Character
+    if not char then return true end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return true end
+
+    -- Downed / down
+    if hum.Health <= 0 or hum.Health < 2 then return true end
+    if char:GetAttribute("Downed") == true then return true end
+    if char:GetAttribute("IsDown") == true then return true end
+    if char:GetAttribute("Knocked") == true then return true end
+
+    -- Cek animasi sendiri
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if animator then
+        for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+            local anim = track.Animation
+            if anim and anim.AnimationId then
+                if anim.AnimationId == "rbxassetid://127096285501517" then return true end
+                if anim.AnimationId == "rbxassetid://112166042383605" then return true end
+                if anim.AnimationId == "rbxassetid://123047897844134" then return true end
+            end
+        end
+    end
+
+    return false
+end
+
 function doParry()
+    if shouldBlockParry() then return end
+
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
+    if ParryActive then return end
     lastParry = now
 
     ParryActive = true
@@ -1219,7 +1278,6 @@ function startSkillCheck()
 
         if success then
             busy = true
-
             task.spawn(function()
                 if UIS.TouchEnabled then
                     TriggerMobileButton()
@@ -1256,7 +1314,7 @@ function teleportToFinishLine()
     if found then
         root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
     else
-        warn("[RoooorHub] Finish line gak ketemu")
+        warn("[COSMIC HUB] Finish line gak ketemu")
     end
 end
 
@@ -1276,7 +1334,7 @@ function teleportToGate()
     if found then
         root.CFrame = found.CFrame + Vector3.new(0, 5, 0) + found.CFrame.LookVector * 5
     else
-        warn("[RoooorHub] Gate gak ketemu")
+        warn("[COSMIC HUB] Gate gak ketemu")
     end
 end
 
@@ -1296,7 +1354,7 @@ function teleportInsideGate()
     if found then
         root.CFrame = CFrame.new(found.Position + Vector3.new(0, 3, 0))
     else
-        warn("[RoooorHub] Inside gate gak ketemu")
+        warn("[COSMIC HUB] Inside gate gak ketemu")
     end
 end
 
@@ -1333,16 +1391,8 @@ function applyFullbright(s)
         local bright = math.clamp((S.FullbrightVal or 50) / 100, 0, 2)
         Lighting.Brightness = 0.5 + bright * 3
         Lighting.ClockTime = 14
-        Lighting.Ambient = Color3.new(
-            math.min(bright, 1),
-            math.min(bright, 1),
-            math.min(bright, 1)
-        )
-        Lighting.OutdoorAmbient = Color3.new(
-            math.min(bright, 1),
-            math.min(bright, 1),
-            math.min(bright, 1)
-        )
+        Lighting.Ambient = Color3.new(math.min(bright, 1), math.min(bright, 1), math.min(bright, 1))
+        Lighting.OutdoorAmbient = Color3.new(math.min(bright, 1), math.min(bright, 1), math.min(bright, 1))
         Lighting.GlobalShadows = S.FullbrightVal < 100
         Lighting.FogEnd = 9e9
         Lighting.FogStart = 9e9
@@ -1462,6 +1512,93 @@ function applyContrast()
         if _G.ContrastFx then
             _G.ContrastFx:Destroy()
             _G.ContrastFx = nil
+        end
+    end
+end
+
+-- =========================================================
+-- FITUR HD BARU (RINGAN)
+-- =========================================================
+hdBoostOrig = nil
+hdShaderObj = nil
+hdSkyOrig = nil
+
+function applyHDBoost(s)
+    if s then
+        if not hdBoostOrig then
+            hdBoostOrig = {
+                QualityLevel = settings().Rendering.QualityLevel,
+                GlobalShadows = Lighting.GlobalShadows,
+            }
+        end
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
+        end)
+        Lighting.GlobalShadows = true
+    else
+        if hdBoostOrig then
+            pcall(function()
+                settings().Rendering.QualityLevel = hdBoostOrig.QualityLevel
+            end)
+            Lighting.GlobalShadows = hdBoostOrig.GlobalShadows
+        end
+    end
+end
+
+function applyHDShader(s)
+    if s then
+        if not hdShaderObj then
+            hdShaderObj = Instance.new("ColorCorrectionEffect")
+            hdShaderObj.Name = "CosmicHDShader"
+            hdShaderObj.Parent = Lighting
+        end
+        hdShaderObj.Contrast = 0.15
+        hdShaderObj.Saturation = 0.12
+        hdShaderObj.Brightness = 0.02
+
+        if not _G.CosmicHDBloom then
+            _G.CosmicHDBloom = Instance.new("BloomEffect")
+            _G.CosmicHDBloom.Name = "CosmicHDBloom"
+            _G.CosmicHDBloom.Intensity = 0.4
+            _G.CosmicHDBloom.Size = 20
+            _G.CosmicHDBloom.Threshold = 1.2
+            _G.CosmicHDBloom.Parent = Lighting
+        end
+    else
+        if hdShaderObj then hdShaderObj:Destroy(); hdShaderObj = nil end
+        if _G.CosmicHDBloom then _G.CosmicHDBloom:Destroy(); _G.CosmicHDBloom = nil end
+    end
+end
+
+function applyHDSky(s)
+    if s then
+        if not hdSkyOrig then
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("Sky") then
+                    hdSkyOrig = v:Clone()
+                    break
+                end
+            end
+        end
+        for _, v in pairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") then v:Destroy() end
+        end
+
+        if not _G.CosmicHDAtmosphere then
+            _G.CosmicHDAtmosphere = Instance.new("Atmosphere")
+            _G.CosmicHDAtmosphere.Name = "CosmicHDAtmosphere"
+            _G.CosmicHDAtmosphere.Density = 0.3
+            _G.CosmicHDAtmosphere.Offset = 0.25
+            _G.CosmicHDAtmosphere.Color = Color3.fromRGB(199, 199, 199)
+            _G.CosmicHDAtmosphere.Decay = Color3.fromRGB(106, 112, 125)
+            _G.CosmicHDAtmosphere.Glare = 0.2
+            _G.CosmicHDAtmosphere.Haze = 1.5
+            _G.CosmicHDAtmosphere.Parent = Lighting
+        end
+    else
+        if _G.CosmicHDAtmosphere then
+            _G.CosmicHDAtmosphere:Destroy()
+            _G.CosmicHDAtmosphere = nil
         end
     end
 end
@@ -1650,7 +1787,7 @@ function applyCrosshair(enable, color, size)
     if not enable then return end
 
     crosshairGui = Instance.new("ScreenGui")
-    crosshairGui.Name = "RoooorCrosshair"
+    crosshairGui.Name = "CosmicCrosshair"
     crosshairGui.ResetOnSpawn = false
     crosshairGui.IgnoreGuiInset = true
     crosshairGui.Parent = PG
@@ -1729,7 +1866,7 @@ function startFly()
             moveDir = moveDir + Vector3.new(0, 1, 0)
         end
         if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveDir = moveDir + Vector3.new(0, -1, 0)
+            moveDir = moveDir - Vector3.new(0, 1, 0)
         end
 
         flyBV.Velocity = moveDir * S.FlySpeed
@@ -1772,174 +1909,14 @@ _G.Roooor_teleportInsideGate = teleportInsideGate
 _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
+_G.Roooor_applyHDBoost = applyHDBoost
+_G.Roooor_applyHDShader = applyHDShader
+_G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] Fungsi + Auto Parry + Auto Skill Check loaded")-- =========================================================
--- BAGIAN 4/8 : FITUR BARU + LOOP UTAMA
+print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry (Fallens) + Auto Skill Check loaded")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA (12 FITUR DIHAPUS)
 -- =========================================================
-
--- AUTO HEAL
-task.spawn(function()
-    while task.wait(0.5) do
-        if S.AutoHeal and LP.Character then
-            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 and hum.Health < S.AutoHealThreshold then
-                pcall(function()
-                    local backpack = LP:FindFirstChild("Backpack")
-                    if backpack then
-                        for _, item in pairs(backpack:GetChildren()) do
-                            if item:IsA("Tool") and (
-                                string.find(string.lower(item.Name), "medkit")
-                                or string.find(string.lower(item.Name), "bandage")
-                                or string.find(string.lower(item.Name), "heal")
-                            ) then
-                                local hum2 = LP.Character:FindFirstChildOfClass("Humanoid")
-                                if hum2 then
-                                    hum2:EquipTool(item)
-                                    task.wait(0.1)
-                                    item:Activate()
-                                    task.wait(0.3)
-                                    if item.Parent == LP.Character then
-                                        hum2:UnequipTools()
-                                    end
-                                end
-                                break
-                            end
-                        end
-                    end
-                end)
-            end
-        end
-    end
-end)
-
--- AUTO REPAIR
-task.spawn(function()
-    while task.wait(0.5) do
-        if S.AutoRepair and LP.Character then
-            local myRoot = getRoot()
-            if myRoot then
-                for _, obj in pairs(Cached.Generators) do
-                    if obj and obj.Parent then
-                        local pos = obj:IsA("Model") and obj:GetPivot().Position
-                            or (obj:IsA("BasePart") and obj.Position)
-                        if pos and (pos - myRoot.Position).Magnitude <= 15 then
-                            pcall(function()
-                                local prompt = obj:FindFirstChildOfClass("ProximityPrompt", true)
-                                if prompt then prompt:InputHoldBegin() end
-                            end)
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- AUTO REVIVE
-task.spawn(function()
-    while task.wait(1) do
-        if S.AutoRevive and LP.Character then
-            local myRoot = getRoot()
-            if myRoot then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
-                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                        if hum and hum.Health <= 0 then
-                            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                            if hrp and (hrp.Position - myRoot.Position).Magnitude <= 10 then
-                                pcall(function()
-                                    local prompt = p.Character:FindFirstChildOfClass("ProximityPrompt", true)
-                                    if prompt then
-                                        prompt:InputHoldBegin()
-                                        task.wait(0.1)
-                                        prompt:InputHoldEnd()
-                                    end
-                                end)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- AUTO DODGE
-task.spawn(function()
-    while task.wait(0.2) do
-        if S.AutoDodge and LP.Character then
-            local myRoot = getRoot()
-            if myRoot then
-                local closest, shortest = nil, S.DodgeRange or 30
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-                        local krp = p.Character:FindFirstChild("HumanoidRootPart")
-                        if krp then
-                            local d = (krp.Position - myRoot.Position).Magnitude
-                            if d < shortest then shortest = d; closest = krp end
-                        end
-                    end
-                end
-                if closest then
-                    local dir = (myRoot.Position - closest.Position).Unit
-                    local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then hum:Move(dir * 5, false) end
-                end
-            end
-        end
-    end
-end)
-
--- AUTO DODGE KILLER ABYSS
-task.spawn(function()
-    while task.wait(0.1) do
-        if S.AbyssDodge and LP.Character then
-            local myRoot = getRoot()
-            if myRoot then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Character then
-                        local killerName = string.lower(p.Name)
-                        local charName = string.lower(p.Character.Name)
-                        local teamName = p.Team and string.lower(p.Team.Name) or ""
-                        local isAbyss = string.find(killerName, "abyss")
-                            or string.find(charName, "abyss")
-                            or string.find(teamName, "abyss")
-                        if isAbyss then
-                            local krp = p.Character:FindFirstChild("HumanoidRootPart")
-                            local khum = p.Character:FindFirstChildOfClass("Humanoid")
-                            if krp and khum then
-                                local kanim = khum:FindFirstChildOfClass("Animator")
-                                if kanim then
-                                    for _, track in ipairs(kanim:GetPlayingAnimationTracks()) do
-                                        local a = track.Animation
-                                        if a and a.AnimationId then
-                                            local id = a.AnimationId:match("%d+")
-                                            if id and KillerAnims["rbxassetid://"..id] then
-                                                local dist = (krp.Position - myRoot.Position).Magnitude
-                                                if dist <= 20 then
-                                                    local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-                                                    if hum then
-                                                        pcall(function()
-                                                            hum:ChangeState(Enum.HumanoidStateType.PlatformStanding)
-                                                            task.wait(0.05)
-                                                            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-                                                        end)
-                                                    end
-                                                end
-                                                break
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
 
 -- INSTANT INTERACT
 task.spawn(function()
@@ -1994,96 +1971,6 @@ task.spawn(function()
                     end
                 end
             end
-        end
-    end
-end)
-
--- ANTI GRAB
-task.spawn(function()
-    while task.wait(0.2) do
-        if S.AntiGrab and LP.Character then
-            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                for _, v in pairs(hrp:GetChildren()) do
-                    if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
-                        local part1 = v.Part1 or v.Part0
-                        if part1 and not part1:IsDescendantOf(LP.Character) then
-                            v:Destroy()
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- ANTI HOOK
-task.spawn(function()
-    while task.wait(0.2) do
-        if S.AntiHook and LP.Character then
-            local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp.AssemblyLinearVelocity.Magnitude > 200 then
-                hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-            end
-        end
-    end
-end)
-
--- ANTI BLIND
-task.spawn(function()
-    while task.wait(0.4) do
-        if S.AntiBlind then
-            for _, v in pairs(Lighting:GetChildren()) do
-                if v:IsA("BlurEffect") then v.Size = 0 end
-            end
-            local cam = workspace.CurrentCamera
-            if cam then
-                for _, v in pairs(cam:GetChildren()) do
-                    if v:IsA("BlurEffect") then v:Destroy() end
-                end
-            end
-        end
-    end
-end)
-
--- ANTI SYSTEM GABUNGAN
-task.spawn(function()
-    while task.wait(0.2) do
-        if not LP.Character then continue end
-        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-        if not hum then continue end
-
-        if S.AntiStun then
-            if hum.WalkSpeed == 0 and S.WalkSpeed then
-                hum.WalkSpeed = S.WalkSpeedVal
-            end
-            if hum.PlatformStand then hum.PlatformStand = false end
-        end
-
-        if S.AntiRagdoll then
-            if hum.PlatformStand then hum.PlatformStand = false end
-            pcall(function()
-                hum:ChangeState(Enum.HumanoidStateType.Running)
-            end)
-        end
-
-        if S.AntiSlow then
-            if hum.WalkSpeed < 10 then
-                hum.WalkSpeed = S.WalkSpeed and S.WalkSpeedVal or 16
-            end
-        end
-    end
-end)
-
--- ANTI AFK
-task.spawn(function()
-    while task.wait(60) do
-        if S.AntiAFK then
-            pcall(function()
-                local vu = game:GetService("VirtualUser")
-                vu:CaptureController()
-                vu:ClickButton2(Vector2.new())
-            end)
         end
     end
 end)
@@ -2162,10 +2049,10 @@ task.spawn(function()
                     if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                         local krp = p.Character:FindFirstChild("HumanoidRootPart")
                         if krp and (krp.Position - myRoot.Position).Magnitude <= S.EscapeAlertRange then
-                            local al = PG:FindFirstChild("RoooorAlert")
+                            local al = PG:FindFirstChild("CosmicAlert")
                             if not al then
                                 al = Instance.new("TextLabel")
-                                al.Name = "RoooorAlert"
+                                al.Name = "CosmicAlert"
                                 al.Size = UDim2.new(0, 300, 0, 40)
                                 al.Position = UDim2.new(0.5, -150, 0, 100)
                                 al.BackgroundTransparency = 0.3
@@ -2195,7 +2082,7 @@ end)
 -- KILL FEED
 -- =========================================================
 killFeedGui = Instance.new("ScreenGui")
-killFeedGui.Name = "RoooorKillFeed"
+killFeedGui.Name = "CosmicKillFeed"
 killFeedGui.ResetOnSpawn = false
 killFeedGui.IgnoreGuiInset = true
 killFeedGui.Parent = PG
@@ -2276,7 +2163,7 @@ function createStunIcon(killerChar)
     if not head then return end
 
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "RoooorStunIcon"
+    billboard.Name = "CosmicStunIcon"
     billboard.Size = UDim2.new(0, 60, 0, 60)
     billboard.AlwaysOnTop = true
     billboard.StudsOffset = Vector3.new(0, 4, 0)
@@ -2442,9 +2329,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE
+-- PARRY CIRCLE (2 MODE: NORMAL / GALAXY)
 -- =========================================================
 _G.Roooor_ParryCircle = nil
+
 function updateParryCircle()
     local root = getRoot()
     if not S.ParryCircle or not root then
@@ -2461,7 +2349,7 @@ function updateParryCircle()
         _G.Roooor_ParryCircle.Anchored = true
         _G.Roooor_ParryCircle.CanCollide = false
         _G.Roooor_ParryCircle.Material = Enum.Material.Neon
-        _G.Roooor_ParryCircle.Name = "RoooorParryCircle"
+        _G.Roooor_ParryCircle.Name = "CosmicParryCircle"
         _G.Roooor_ParryCircle.Parent = workspace
     end
 
@@ -2470,8 +2358,17 @@ function updateParryCircle()
     local yOffset = root.Size.Y / 2 + 1.5
     _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
         * CFrame.Angles(0, 0, math.rad(90))
-    _G.Roooor_ParryCircle.Color = C.ACC2
-    _G.Roooor_ParryCircle.Transparency = 0.5
+
+    local mode = S.ParryCircleMode or "Normal"
+    local t = tick()
+
+    if mode == "Galaxy" then
+        _G.Roooor_ParryCircle.Color = Color3.fromHSV((t * 0.5) % 1, 0.9, 1)
+        _G.Roooor_ParryCircle.Transparency = 0.3 + math.sin(t * 4) * 0.15
+    else
+        _G.Roooor_ParryCircle.Color = C.ACC2
+        _G.Roooor_ParryCircle.Transparency = 0.5
+    end
 end
 
 RunService.RenderStepped:Connect(function()
@@ -2540,13 +2437,13 @@ task.spawn(function()
                     local hum = p.Character:FindFirstChildOfClass("Humanoid")
                     if hum and hum.Health <= 0 then
                         local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                        if hrp and not p.Character:GetAttribute("RoooorKillEffect") then
-                            p.Character:SetAttribute("RoooorKillEffect", true)
+                        if hrp and not p.Character:GetAttribute("CosmicKillEffect") then
+                            p.Character:SetAttribute("CosmicKillEffect", true)
                             spawnKillEffect(hrp.Position)
                         end
                     else
-                        if p.Character:GetAttribute("RoooorKillEffect") then
-                            p.Character:SetAttribute("RoooorKillEffect", false)
+                        if p.Character:GetAttribute("CosmicKillEffect") then
+                            p.Character:SetAttribute("CosmicKillEffect", false)
                         end
                     end
                 end
@@ -2565,18 +2462,19 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] Fitur baru + Loop utama loaded")-- =========================================================
--- BAGIAN 5/8 : GUI GALAXY + TOMBOL KECIL + AIMLOCK + PANEL
+print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama loaded (12 fitur dihapus)")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + AIMLOCK + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
-gui.Name = "RoooorHubGalaxy"
+gui.Name = "CosmicHub"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU GALAXY (KECIL 32×32)
+-- TOMBOL MENU COSMIC (KECIL 32×32)
 -- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
@@ -2584,7 +2482,7 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- Outer glow galaxy
+-- Outer glow
 local outerGlow = Instance.new("Frame")
 outerGlow.Size = UDim2.new(1, 14, 1, 14)
 outerGlow.Position = UDim2.new(0, -7, 0, -7)
@@ -2595,7 +2493,7 @@ outerGlow.ZIndex = -1
 outerGlow.Parent = btnContainer
 rnd(outerGlow, 999)
 
--- Ring galaxy luar
+-- Ring luar
 local ringOuter = Instance.new("Frame")
 ringOuter.Size = UDim2.new(1, 6, 1, 6)
 ringOuter.Position = UDim2.new(0, -3, 0, -3)
@@ -2617,7 +2515,7 @@ ringOuterGrad.Color = ColorSequence.new({
 })
 ringOuterGrad.Parent = ringOuterStroke
 
--- Ring galaxy dalam
+-- Ring dalam
 local ringInner = Instance.new("Frame")
 ringInner.Size = UDim2.new(1, -2, 1, -2)
 ringInner.Position = UDim2.new(0, 1, 0, 1)
@@ -2630,7 +2528,7 @@ ringInnerStroke.Color = Color3.fromRGB(0, 230, 255)
 ringInnerStroke.Transparency = 0.3
 ringInnerStroke.Parent = ringInner
 
--- Tombol utama galaxy
+-- Tombol utama
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -10, 1, -10)
 mainBtn.Position = UDim2.new(0, 5, 0, 5)
@@ -2653,7 +2551,6 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- Inner glow
 local innerGlow = Instance.new("Frame")
 innerGlow.Size = UDim2.new(0.5, 0, 0.5, 0)
 innerGlow.Position = UDim2.new(0.25, 0, 0.25, 0)
@@ -2669,7 +2566,6 @@ task.spawn(function()
     local t = 0
     while btnContainer.Parent do
         t = t + 0.03
-
         ringOuter.Rotation = t * 30
         ringOuterGrad.Rotation = t * 60
         ringInner.Rotation = -t * 50
@@ -2688,12 +2584,11 @@ task.spawn(function()
         mainBtn.TextSize = 14 + math.sin(t * 4) * 1
 
         innerGlow.BackgroundTransparency = 0.6 - pulse * 0.4
-
         task.wait(0.03)
     end
 end)
 
--- Partikel galaxy orbit
+-- Partikel orbit
 for i = 1, 8 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 2, 0, 2)
@@ -2757,10 +2652,10 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- AIMLOCK FLOATING BUTTON (GALAXY)
+-- AIMLOCK FLOATING BUTTON
 -- =========================================================
 aimBtnGui = Instance.new("ScreenGui")
-aimBtnGui.Name = "RoooorAimlockBtn"
+aimBtnGui.Name = "CosmicAimlockBtn"
 aimBtnGui.ResetOnSpawn = false
 aimBtnGui.IgnoreGuiInset = true
 aimBtnGui.Parent = PG
@@ -2904,7 +2799,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PANEL MENU GALAXY
+-- PANEL MENU COSMIC
 -- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
@@ -2922,60 +2817,72 @@ panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
--- Partikel bintang di background panel
+-- Background bintang + nebula
+local starsGui = Instance.new("Frame")
+starsGui.Name = "CosmicStars"
+starsGui.Size = UDim2.new(1, 0, 1, 0)
+starsGui.BackgroundTransparency = 1
+starsGui.ZIndex = 0
+starsGui.ClipsDescendants = true
+starsGui.Parent = panel
+rnd(starsGui, 18)
+
+local starsList = {}
+
+for i = 1, 50 do
+    local star = Instance.new("Frame")
+    star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
+    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    star.BackgroundColor3 = Color3.fromHSV(math.random(), 0.5, 1)
+    star.BackgroundTransparency = math.random(30, 90) / 100
+    star.BorderSizePixel = 0
+    star.ZIndex = 0
+    star.Parent = starsGui
+    rnd(star, 999)
+    table.insert(starsList, star)
+end
+
+for i = 1, 3 do
+    local nebula = Instance.new("Frame")
+    nebula.Size = UDim2.new(0, math.random(80, 150), 0, math.random(80, 150))
+    nebula.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    nebula.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
+    nebula.BackgroundTransparency = 0.85
+    nebula.BorderSizePixel = 0
+    nebula.ZIndex = 0
+    nebula.Parent = starsGui
+    rnd(nebula, 999)
+
+    task.spawn(function()
+        local startX = nebula.Position.X.Scale
+        local startY = nebula.Position.Y.Scale
+        while nebula.Parent do
+            local t = tick()
+            nebula.Position = UDim2.new(
+                startX + math.sin(t * 0.3 + i) * 0.05,
+                0,
+                startY + math.cos(t * 0.4 + i) * 0.05,
+                0
+            )
+            task.wait(0.1)
+        end
+    end)
+end
+
+-- ===== BINTANG KELAP-KELIP GALAXY =====
 task.spawn(function()
-    local starsGui = Instance.new("Frame")
-    starsGui.Size = UDim2.new(1, 0, 1, 0)
-    starsGui.BackgroundTransparency = 1
-    starsGui.ZIndex = 0
-    starsGui.ClipsDescendants = true
-    starsGui.Parent = panel
-    rnd(starsGui, 18)
-
-    for i = 1, 50 do
-        local star = Instance.new("Frame")
-        star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        star.BackgroundColor3 = Color3.fromHSV(math.random(), 0.5, 1)
-        star.BackgroundTransparency = math.random(30, 90) / 100
-        star.BorderSizePixel = 0
-        star.ZIndex = 0
-        star.Parent = starsGui
-        rnd(star, 999)
-
-        task.spawn(function()
-            while star.Parent do
-                star.BackgroundTransparency = 0.3 + math.sin(tick() * 2 + i) * 0.5
-                task.wait(0.1)
+    while starsGui.Parent do
+        local t = tick()
+        for i, star in ipairs(starsList) do
+            if star.Parent then
+                local twinkle = (math.sin(t * (2 + i * 0.3) + i) + 1) / 2
+                star.BackgroundTransparency = 0.2 + (1 - twinkle) * 0.7
+                star.BackgroundColor3 = Color3.fromHSV((t * 0.1 + i * 0.07) % 1, 0.6, 1)
+                local sz = 2 + twinkle * 3
+                star.Size = UDim2.new(0, sz, 0, sz)
             end
-        end)
-    end
-
-    for i = 1, 3 do
-        local nebula = Instance.new("Frame")
-        nebula.Size = UDim2.new(0, math.random(80, 150), 0, math.random(80, 150))
-        nebula.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        nebula.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
-        nebula.BackgroundTransparency = 0.85
-        nebula.BorderSizePixel = 0
-        nebula.ZIndex = 0
-        nebula.Parent = starsGui
-        rnd(nebula, 999)
-
-        task.spawn(function()
-            local startX = nebula.Position.X.Scale
-            local startY = nebula.Position.Y.Scale
-            while nebula.Parent do
-                local t = tick()
-                nebula.Position = UDim2.new(
-                    startX + math.sin(t * 0.3 + i) * 0.05,
-                    0,
-                    startY + math.cos(t * 0.4 + i) * 0.05,
-                    0
-                )
-                task.wait(0.1)
-            end
-        end)
+        end
+        task.wait(0.05)
     end
 end)
 
@@ -3025,7 +2932,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "✨ ROOORHUB GALAXY"
+hTitle.Text = "✨ COSMIC HUB"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
@@ -3108,7 +3015,7 @@ csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
 -- =========================================================
--- KOMPONEN UI GALAXY
+-- KOMPONEN UI COSMIC
 -- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
@@ -3211,9 +3118,7 @@ function tog(name, def, cb)
             BackgroundColor3 = state and C.ACC or C.PANEL
         }):Play()
         fStrk.Color = state and C.ACC2 or C.ACC
-
         playToggleSound()
-
         if cb then pcall(cb, state) end
     end)
 end
@@ -3500,26 +3405,20 @@ function makeTab(name, icon, order, cb)
             end
             for _, c in pairs(activeTab:GetChildren()) do
                 if c:IsA("TextLabel") then
-                    TweenService:Create(c, TweenInfo.new(0.2), {
-                        TextColor3 = C.DIM
-                    }):Play()
+                    TweenService:Create(c, TweenInfo.new(0.2), {TextColor3 = C.DIM}):Play()
                 end
             end
         end
 
         activeTab = b
-        TweenService:Create(b, TweenInfo.new(0.2), {
-            BackgroundTransparency = 0.7
-        }):Play()
+        TweenService:Create(b, TweenInfo.new(0.2), {BackgroundTransparency = 0.7}):Play()
         TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
             Size = UDim2.new(0, 3, 0, 18)
         }):Play()
 
         for _, c in pairs(b:GetChildren()) do
             if c:IsA("TextLabel") then
-                TweenService:Create(c, TweenInfo.new(0.2), {
-                    TextColor3 = C.TXT
-                }):Play()
+                TweenService:Create(c, TweenInfo.new(0.2), {TextColor3 = C.TXT}):Play()
             end
         end
 
@@ -3557,8 +3456,9 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] GUI GALAXY + Tombol kecil + Aimlock + Panel loaded")-- =========================================================
--- BAGIAN 6/8 : TAB UI PART 1
+print("✅ [5/8] COSMIC HUB - GUI + Tombol + Aimlock + Panel + Bintang kelap-kelip loaded")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 6/8 : TAB UI PART 1 (FIRE + FIRE FEET + ESP + SURVIVOR)
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3716,16 +3616,25 @@ makeTab("ESP", "👁️", 3, function()
     tog("ESP SCP", false, function(s) ESP.SCP = s end)
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
-    sec("ESP Distance", "📏")
-    sl("ESP Radius", 10, 300, 50, function(v) ESP.Distance = v end)
-    lbl("Max 300 (limited biar fokus)", C.GRN)
+    sec("ESP Distance (Unlimited)", "📏")
+    sl("ESP Radius", 10, 999999, 50, function(v) ESP.Distance = v end)
+    lbl("Unlimited - bebas set berapa aja", C.GRN)
 
     sec("Status ESP", "🟢")
     tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
     tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
     tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
     tog("Show Health", false, function(s) ESPStatus.ShowHealth = s end)
-    sl("Status Radius", 20, 200, 50, function(v) ESPStatus.Radius = v end)
+    sl("Status Radius", 20, 999999, 50, function(v) ESPStatus.Radius = v end)
+
+    sec("Nama Mode", "✨")
+    drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
+        S.ESPNameMode = v
+    end)
+    sl("Name Size", 8, 30, 12, function(v)
+        S.ESPNameSize = v
+    end)
+    lbl("Text = biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
 end)
 
 -- ============================================================
@@ -3743,46 +3652,27 @@ makeTab("Survivor", "🏃", 4, function()
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, -1, function(v)
+    sl("Face Sensitivity", -1, 1, 0.7, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
+    lbl("Face Sens: -1 = 360° | 0.7 = Facing (recommended)", C.GRN)
 
-    lbl("Face Sens: -1 = 360° | 0.7 = Facing", C.GRN)
-
-    sl("Parry Debounce", 0.05, 0.5, 0.2, function(v)
+    sl("Parry Debounce", 0.05, 1, 0.5, function(v)
         PARRY_DEBOUNCE = v
     end)
+    lbl("Rekomendasi 0.5 (sweet spot)", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check", "⚡")
-
     tog("Auto Skill Check", false, function(s)
         SkillCheck.Enabled = s
         if s then
             startSkillCheck()
         end
     end)
-
     lbl("Auto trigger saat masuk zona", C.GRN)
-    lbl("Zona: goal + 102° s/d + 116°", C.DIM)
-
-    sec("Dodge & Defense", "🛡️")
-
-    tog("Auto Dodge", false, function(s) S.AutoDodge = s end)
-    sl("Dodge Range", 5, 30, 15, function(v) S.DodgeRange = v end)
-
-    tog("Abyss Dodge", false, function(s) S.AbyssDodge = s end)
-
-    tog("Anti Grab", false, function(s) S.AntiGrab = s end)
-    tog("Anti Hook", false, function(s) S.AntiHook = s end)
-    tog("Anti Blind", false, function(s) S.AntiBlind = s end)
 
     sec("Support", "💊")
-    tog("Auto Heal", false, function(s) S.AutoHeal = s end)
-    sl("Heal Threshold", 10, 90, 40, function(v) S.AutoHealThreshold = v end)
-
-    tog("Auto Repair", false, function(s) S.AutoRepair = s end)
-    tog("Auto Revive", false, function(s) S.AutoRevive = s end)
     tog("Instant Interact", false, function(s) S.InstantInteract = s end)
     tog("Auto Vault", false, function(s) S.AutoVault = s end)
 
@@ -3797,15 +3687,13 @@ makeTab("Survivor", "🏃", 4, function()
         teleportInsideGate()
     end)
 
-    sec("Anti System", "🔒")
-    tog("Anti Stun", false, function(s) S.AntiStun = s end)
-    tog("Anti Ragdoll", false, function(s) S.AntiRagdoll = s end)
-    tog("Anti Slow", false, function(s) S.AntiSlow = s end)
-    tog("Anti AFK", false, function(s) S.AntiAFK = s end)
-
     sec("Parry Circle Visual", "⭕")
     tog("Show Parry Circle", false, function(s) S.ParryCircle = s end)
     sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
+    drp("Circle Mode", {"Normal", "Galaxy"}, "Normal", function(v)
+        S.ParryCircleMode = v
+    end)
+    lbl("Normal = warna solid | Galaxy = gradient muter", C.FIRE_BRIGHT)
 
     sec("Alert", "⚠️")
     tog("Safe Zone", false, function(s) S.SafeZone = s end)
@@ -3815,8 +3703,9 @@ makeTab("Survivor", "🏃", 4, function()
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
 end)
 
-print("✅ [6/8] Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
--- BAGIAN 7/8 : TAB UI PART 2
+print("✅ [6/8] COSMIC HUB - Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 7/8 : TAB UI PART 2 (KILLER + MISC + VISUAL + PLAYER)
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3902,11 +3791,6 @@ makeTab("Misc", "⚙️", 6, function()
     end)
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
-    sec("Safe", "🔒")
-    tog("Anti AFK", false, function(s)
-        S.AntiAFK = s
-    end)
-
     sec("Character", "🎭")
 
     tog("Korblox Leg", false, function(s)
@@ -3925,6 +3809,28 @@ end)
 -- ============================================================
 makeTab("Visual", "✨", 7, function()
 
+    -- ===== HD VISUAL (RINGAN) =====
+    sec("HD Visual (Ringan)", "💎")
+
+    tog("HD Graphics Boost", false, function(s)
+        S.HDBoost = s
+        applyHDBoost(s)
+    end)
+    lbl("QualityLevel ke Level 10 + Shadow ON", C.GRN)
+
+    tog("HD Character Shader", false, function(s)
+        S.HDShader = s
+        applyHDShader(s)
+    end)
+    lbl("ColorCorrection + Bloom (cinematic)", C.GRN)
+
+    tog("HD Sky Atmosphere", false, function(s)
+        S.HDSky = s
+        applyHDSky(s)
+    end)
+    lbl("Atmosphere HD + Haze + Glare", C.GRN)
+
+    -- ===== LIGHTING =====
     sec("Lighting", "💡")
 
     tog("Ultra HD", false, function(s)
@@ -3945,12 +3851,14 @@ makeTab("Visual", "✨", 7, function()
         applyContrast()
     end)
 
+    -- ===== SKY =====
     sec("Sky", "🌌")
     drp("Sky Preset", SkyList, "Default", function(v)
         S.SkyId = v
         applySky(v)
     end)
 
+    -- ===== CAMERA =====
     sec("Camera", "🎥")
     tog("FOV Override", false, function(s)
         S.FOVEnabled = s
@@ -3970,6 +3878,7 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
+    -- ===== CHARACTER EFFECTS =====
     sec("Character Effects", "✨")
 
     tog("8-Bit Crown", false, function(s)
@@ -4009,6 +3918,7 @@ makeTab("Visual", "✨", 7, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
+    -- ===== CROSSHAIR =====
     sec("Crosshair", "🎯")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
@@ -4063,7 +3973,7 @@ makeTab("Player", "👤", 8, function()
     lbl("Toggle Menu: Klik tombol ✨", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
-    btn("✨ UNLOAD SCRIPT", function()
+    btn("✨ UNLOAD COSMIC HUB", function()
         pcall(function()
             if gui then gui:Destroy() end
             if aimBtnGui then aimBtnGui:Destroy() end
@@ -4083,7 +3993,8 @@ makeTab("Player", "👤", 8, function()
     end)
 end)
 
-print("✅ [7/8] Tab Killer + Misc + Visual + Player loaded")-- =========================================================
+print("✅ [7/8] COSMIC HUB - Tab Killer + Misc + Visual + Player loaded")-- =========================================================
+-- COSMIC HUB
 -- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
@@ -4125,7 +4036,7 @@ function createFOVCircle()
     if fovGui then fovGui:Destroy(); fovGui = nil end
 
     fovGui = Instance.new("ScreenGui")
-    fovGui.Name = "RoooorFOV"
+    fovGui.Name = "CosmicFOV"
     fovGui.ResetOnSpawn = false
     fovGui.IgnoreGuiInset = true
     fovGui.Parent = PG
@@ -4464,6 +4375,11 @@ LP.CharacterAdded:Connect(function(char)
         pcall(function() applySky(S.SkyId) end)
     end
 
+    -- HD AUTO RE-APPLY
+    if S.HDBoost then pcall(function() applyHDBoost(true) end) end
+    if S.HDShader then pcall(function() applyHDShader(true) end) end
+    if S.HDSky then pcall(function() applyHDSky(true) end) end
+
     if S.NoClip then
         task.wait(0.3)
         for _, v in pairs(char:GetDescendants()) do
@@ -4645,21 +4561,22 @@ end)
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ ROOORHUB GALAXY ✨                   ║")
+print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry                            ║")
+print("║  🛡️ Auto Parry (Fallens Style)           ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  🎯 Aimbot (Hold to Attack)              ║")
 print("║  📦 Hitbox 2 Mode                        ║")
 print("║  🛡️ God Mode (Full)                      ║")
-print("║  💡 Fullbright (max 200)                 ║")
-print("║  🌫️ No Fog Fix                           ║")
+print("║  💎 HD Visual (Ringan)                   ║")
+print("║  🌌 ESP Nama 2 Mode (Text / Galaxy)      ║")
+print("║  ⭕ Parry Circle 2 Mode                  ║")
+print("║  ✨ Menu Bintang Kelap-kelip             ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
-print("║  👑 Crown Slider (Size + Y)              ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [8/8] FINAL LOADED - Selamat menggunakan! ✨")
+print("✅ [8/8] COSMIC HUB - FINAL LOADED! ✨")

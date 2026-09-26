@@ -340,27 +340,6 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- 🆕 AIMLOCK (HOLD-TO-LOCK)
-Aimlock = _G.Roooor_Aimlock or {
-    Enabled = false,
-    Mode = "Auto",
-    AimPart = "Head",
-    MaxDistance = 500,
-    Locked = false,
-    AutoFire = false,
-    AutoFireDelay = 0.15,
-    FaceTarget = true,
-    Notify = true,
-    CurrentTarget = nil,
-    RequireAttack = true,
-}
-_G.Roooor_Aimlock = Aimlock
-
-AimlockLocked = false
-AimlockTarget = nil
-AimlockLastFire = 0
-AimlockAttackHeld = false
-
 -- 🆕 HITBOX (RADIUS 70 + ESP HIDE)
 Hitbox = _G.Roooor_Hitbox or {
     Enabled = false,
@@ -378,7 +357,7 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
--- AUTO PARRY + AGGRESSIVE MODE (DEFAULT ON)
+-- 🆕 AUTO PARRY (PREDICTION SYSTEM)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
     ParryDistance = 14,
@@ -388,9 +367,22 @@ AutoParry = _G.Roooor_AutoParry or {
     RequireFacing = false,
     Wiggle = false,
     WiggleSpam = 5,
-    AggressiveMode = true,
+    AggressiveMode = false,
 }
 _G.Roooor_AutoParry = AutoParry
+
+-- 🆕 PREDICTION CONFIG
+PredictionConfig = _G.Roooor_Prediction or {
+    LatencyOffset = 0,
+    Accuracy = 85,
+    MaxDistance = 50,
+    AdaptiveReaction = true,
+    MinTimeToImpact = 0.02,
+    Cooldown = 0.1,
+    UseAnimationCheck = true,
+    UseVelocityPrediction = true,
+}
+_G.Roooor_Prediction = PredictionConfig
 
 PARRY_DEBOUNCE = 0.1
 ParryActive = false
@@ -450,7 +442,7 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-print("✅ [1/11] COSMIC HUB v3.5 - Base + State loaded")-- =========================================================
+print("✅ [1/11] COSMIC HUB v3.6 - Base + State + Prediction loaded")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -617,6 +609,7 @@ SkyIds = {
     },
 }
 
+-- KILLER ANIMS
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -649,9 +642,9 @@ task.spawn(function()
         _G.RoooorSavedStates.S = S
         _G.RoooorSavedStates.ESP = ESP
         _G.RoooorSavedStates.AutoParry = AutoParry
+        _G.RoooorSavedStates.PredictionConfig = PredictionConfig
         _G.RoooorSavedStates.SkillCheck = SkillCheck
         _G.RoooorSavedStates.Moonwalk = Moonwalk
-        _G.RoooorSavedStates.Aimlock = Aimlock
         _G.RoooorSavedStates.Hitbox = Hitbox
         _G.RoooorSavedStates.GodMode = GodMode
         _G.RoooorSavedStates.AutoFlee = AutoFlee
@@ -1281,7 +1274,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/11] COSMIC HUB - Fungsi utama loaded")-- =========================================================
--- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK + AIMLOCK + HITBOX + CROSSHAIR
+-- SECTION 4/11 : ESP + PARRY PREDICTION + MOONWALK + HITBOX + CAMERA FIX + CROSSHAIR
 -- =========================================================
 
 ESPObjects = {}
@@ -1576,7 +1569,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY + AGGRESSIVE
+-- AUTO PARRY - PREDICTION SYSTEM (OP)
 -- =========================================================
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
@@ -1646,8 +1639,7 @@ end
 function doParry()
     if shouldBlockParry() then return end
     local now = tick()
-    local debounce = AutoParry.AggressiveMode and 0.03 or PARRY_DEBOUNCE
-    if now - lastParry < debounce then return end
+    if now - lastParry < (PredictionConfig.Cooldown or 0.1) then return end
     lastParry = now
     ParryActive = true
     pressParryButton()
@@ -1656,32 +1648,52 @@ function doParry()
     end)
 end
 
-function isInParryRange(killerChar)
+function calculatePrediction(killerChar)
     local myRoot = getRoot()
-    if not myRoot or not killerChar then return false end
+    if not myRoot or not killerChar then return nil end
     local eRoot = killerChar:FindFirstChild("HumanoidRootPart")
-    if not eRoot then return false end
-    local dist = (eRoot.Position - myRoot.Position).Magnitude
-    return dist <= AutoParry.ParryDistance
-end
+    if not eRoot then return nil end
 
-function isFacingTarget(targetChar)
-    if not AutoParry.RequireFacing then return true end
-    if AutoParry.FaceSensitivity <= -1 then return true end
-    local myChar = LP.Character
-    if not myChar then return false end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    local eRoot = targetChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot or not eRoot then return false end
-    local enemyForward = eRoot.CFrame.LookVector
-    local directionToMe = (myRoot.Position - eRoot.Position).Unit
-    local dot = enemyForward:Dot(directionToMe)
-    return dot >= AutoParry.FaceSensitivity
+    local distance = (eRoot.Position - myRoot.Position).Magnitude
+    if distance > (PredictionConfig.MaxDistance or 50) then return nil end
+
+    local killerHum = killerChar:FindFirstChildOfClass("Humanoid")
+    if not killerHum then return nil end
+
+    local killerVelocity = eRoot.AssemblyLinearVelocity.Magnitude
+    local myVelocity = myRoot.AssemblyLinearVelocity.Magnitude
+    local relativeSpeed = math.max(killerVelocity - myVelocity, 1)
+
+    local timeToReach = distance / relativeSpeed
+
+    local latencyCompensation = 0
+    if PredictionConfig.LatencyOffset ~= 0 then
+        latencyCompensation = PredictionConfig.LatencyOffset * 0.1
+    end
+
+    local accuracyFactor = (PredictionConfig.Accuracy or 85) / 100
+    local adaptiveThreshold = 0.25 * accuracyFactor
+
+    if PredictionConfig.AdaptiveReaction then
+        adaptiveThreshold = adaptiveThreshold + math.clamp(relativeSpeed / 500, 0, 0.05)
+    end
+
+    local predictedTime = timeToReach + latencyCompensation
+
+    return {
+        distance = distance,
+        timeToReach = timeToReach,
+        predictedTime = predictedTime,
+        threshold = adaptiveThreshold,
+        shouldParry = predictedTime <= adaptiveThreshold and predictedTime >= (PredictionConfig.MinTimeToImpact or 0.02),
+        relativeSpeed = relativeSpeed,
+    }
 end
 
 function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
+
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
@@ -1695,9 +1707,10 @@ function hookKiller(char)
         if not id then return end
         local fullId = "rbxassetid://" .. id
         if KillerAnims[fullId] then
-            if not isInParryRange(char) then return end
-            if not isFacingTarget(char) then return end
-            doParry()
+            local prediction = calculatePrediction(char)
+            if prediction and prediction.shouldParry then
+                doParry()
+            end
         end
     end)
 end
@@ -1716,11 +1729,10 @@ task.spawn(function()
     end
 end)
 
--- 🆕 AGGRESSIVE PARRY LOOP (ANTI MISS)
+-- 🆕 PREDICTION LOOP (AGGRESSIVE - setiap 0.02s)
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.02) do
         if not AutoParry.Enabled then continue end
-        if not AutoParry.AggressiveMode then continue end
         if shouldBlockParry() then continue end
 
         local myRoot = getRoot()
@@ -1728,12 +1740,10 @@ task.spawn(function()
 
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-                local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
-                if eRoot then
-                    local dist = (eRoot.Position - myRoot.Position).Magnitude
-                    if dist <= AutoParry.ParryDistance then
-                        doParry()
-                    end
+                local prediction = calculatePrediction(p.Character)
+                if prediction and prediction.shouldParry then
+                    doParry()
+                    break
                 end
             end
         end
@@ -1835,7 +1845,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK (TOMBOL MW ONLY + LOCK BUTTON)
+-- MOONWALK (TOMBOL MW + LOCK BUTTON)
 -- =========================================================
 function mwIsDowned()
     local char = LP.Character
@@ -1901,7 +1911,6 @@ mwBtnGui.ResetOnSpawn = false
 mwBtnGui.IgnoreGuiInset = true
 mwBtnGui.Parent = PG
 
--- TOMBOL MW
 mwBtn = Instance.new("TextButton")
 mwBtn.Size = UDim2.fromOffset(60, 60)
 mwBtn.Position = UDim2.new(0, 20, 1, -100)
@@ -1925,7 +1934,6 @@ mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
 mwBtnStroke.Transparency = 0.5
 mwBtnStroke.Parent = mwBtn
 
--- 🆕 TOMBOL LOCK MW (di atas tombol MW)
 mwLockBtn = Instance.new("TextButton")
 mwLockBtn.Size = UDim2.fromOffset(60, 22)
 mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
@@ -1967,7 +1975,6 @@ function mwBtnUpdateUI()
     end
 end
 
--- Klik tombol MW = toggle ON/OFF
 mwBtn.MouseButton1Click:Connect(function()
     if Moonwalk.Locked then
         mwBtn.Text = "🔒"
@@ -1978,178 +1985,12 @@ mwBtn.MouseButton1Click:Connect(function()
     mwBtnUpdateUI()
 end)
 
--- 🆕 Klik tombol LOCK = toggle lock
 mwLockBtn.MouseButton1Click:Connect(function()
     Moonwalk.Locked = not Moonwalk.Locked
     mwBtnUpdateUI()
 end)
 
 mwBtnUpdateUI()
-
--- =========================================================
--- AIMLOCK NEW (HOLD-TO-LOCK)
--- =========================================================
-function aimlockFindTarget()
-    local myRoot = getRoot()
-    if not myRoot then return nil end
-    local myTeam = LP.Team and LP.Team.Name or ""
-    local targetTeam = ""
-    if Aimlock.Mode == "Auto" then
-        if myTeam == "Killer" then targetTeam = "Survivors"
-        elseif myTeam == "Survivors" then targetTeam = "Killer" end
-    elseif Aimlock.Mode == "Killer" then targetTeam = "Killer"
-    elseif Aimlock.Mode == "Survivor" then targetTeam = "Survivors" end
-
-    local closest, shortest = nil, Aimlock.MaxDistance
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character then
-            local pTeam = p.Team and p.Team.Name or ""
-            if pTeam == targetTeam then
-                local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                local aimPart = p.Character:FindFirstChild(Aimlock.AimPart)
-                    or p.Character:FindFirstChild("Head")
-                    or p.Character:FindFirstChild("HumanoidRootPart")
-                if hum and hum.Health > 0 and aimPart then
-                    local dist = (aimPart.Position - myRoot.Position).Magnitude
-                    if dist < shortest then
-                        shortest = dist
-                        closest = { part = aimPart, char = p.Character, player = p }
-                    end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-function aimlockFireAttack()
-    local now = tick()
-    if now - AimlockLastFire < Aimlock.AutoFireDelay then return end
-    AimlockLastFire = now
-    pcall(function()
-        local r = ReplicatedStorage:FindFirstChild("Remotes")
-        if r then
-            local a = r:FindFirstChild("Attacks")
-            if a then
-                local atk = a:FindFirstChild("BasicAttack")
-                if atk then atk:FireServer(false) end
-            end
-        end
-    end)
-end
-
--- 🆕 CEK APAKAH TOMBOL ATTACK LAGI DI-HOLD
-function isAttackButtonHeld()
-    if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-        return true
-    end
-
-    local attackPaths = {
-        "Survivor-mob.Controls.Gui-mob",
-        "Slasher-mob.Controls.attack",
-        "Masked-mob.Controls.attack",
-        "Killer-mob.Controls.attack",
-    }
-    for _, path in ipairs(attackPaths) do
-        local cur = PG
-        local valid = true
-        for seg in string.gmatch(path, "[^%.]+") do
-            cur = cur and cur:FindFirstChild(seg)
-            if not cur then valid = false; break end
-        end
-        if valid and cur and cur:IsA("GuiObject") then
-            if cur:GetAttribute("CosmicPressed") == true then
-                return true
-            end
-        end
-    end
-
-    return false
-end
-
--- 🆕 HOOK TOMBOL ATTACK
-task.spawn(function()
-    while task.wait(1) do
-        local attackPaths = {
-            "Survivor-mob.Controls.Gui-mob",
-            "Slasher-mob.Controls.attack",
-            "Masked-mob.Controls.attack",
-            "Killer-mob.Controls.attack",
-        }
-        for _, path in ipairs(attackPaths) do
-            local cur = PG
-            local valid = true
-            for seg in string.gmatch(path, "[^%.]+") do
-                cur = cur and cur:FindFirstChild(seg)
-                if not cur then valid = false; break end
-            end
-            if valid and cur and cur:IsA("GuiObject") then
-                if not cur:GetAttribute("CosmicHooked") then
-                    cur:SetAttribute("CosmicHooked", true)
-                    cur.InputBegan:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1
-                        or input.UserInputType == Enum.UserInputType.Touch then
-                            cur:SetAttribute("CosmicPressed", true)
-                        end
-                    end)
-                    cur.InputEnded:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1
-                        or input.UserInputType == Enum.UserInputType.Touch then
-                            cur:SetAttribute("CosmicPressed", false)
-                        end
-                    end)
-                end
-            end
-        end
-    end
-end)
-
--- 🆕 AIMLOCK LOOP: HOLD-TO-LOCK
-task.spawn(function()
-    while task.wait() do
-        if not Aimlock.Enabled then
-            AimlockLocked = false
-            AimlockAttackHeld = false
-            AimlockTarget = nil
-            continue
-        end
-
-        local held = isAttackButtonHeld()
-
-        if held then
-            AimlockAttackHeld = true
-            AimlockLocked = true
-        else
-            AimlockLocked = false
-            AimlockAttackHeld = false
-            AimlockTarget = nil
-            continue
-        end
-
-        local target = aimlockFindTarget()
-        if target then
-            AimlockTarget = target
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.CFrame = CFrame.new(cam.CFrame.Position, target.part.Position)
-                if Aimlock.FaceTarget then
-                    local myRoot = getRoot()
-                    if myRoot then
-                        local lookPos = Vector3.new(
-                            target.part.Position.X,
-                            myRoot.Position.Y,
-                            target.part.Position.Z
-                        )
-                        myRoot.CFrame = CFrame.new(myRoot.Position, lookPos)
-                    end
-                end
-                if Aimlock.AutoFire then
-                    aimlockFireAttack()
-                end
-            end
-        end
-    end
-end)
 
 -- =========================================================
 -- HITBOX (RADIUS 70 + ESP HIDE)
@@ -2974,9 +2815,7 @@ function applyZoomOut(enable, value)
     end
 end
 
--- =========================================================
 -- 🆕 CAMERA FIX (ABIS DOWNED / DAGGER)
--- =========================================================
 task.spawn(function()
     local wasDowned = false
     while task.wait(0.2) do
@@ -3066,7 +2905,7 @@ _G.Roooor_hookVault = hookVault
 _G.Roooor_hitboxClearAll = hitboxClearAll
 _G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
 
-print("✅ [4/11] COSMIC HUB v3.5 - ESP + Parry + Moonwalk + Aimlock + Hitbox + Camera Fix loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB v3.6 - ESP + Parry PREDICTION + Moonwalk + Hitbox + Camera Fix loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4573,31 +4412,36 @@ cs = _G.Roooor_cs
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry (AGGRESSIVE)", "🛡️")
+    sec("Auto Parry (PREDICTION)", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
     end)
-    lbl("🆕 Agresif: parry tiap 0.03s", C.FIRE_BRIGHT)
+    lbl("🎯 ETA-Based Prediction System", C.FIRE_BRIGHT)
 
-    tog("⚡ Aggressive Mode", true, function(s)
-        AutoParry.AggressiveMode = s
+    sl("Prediction Accuracy", 50, 100, 85, function(v)
+        PredictionConfig.Accuracy = v
     end)
-    lbl("ON = gak pernah miss", C.GRN)
+    lbl("Higher = lebih akurat", C.GRN)
 
-    sl("Parry Distance", 5, 20, 14, function(v)
-        AutoParry.ParryDistance = v
+    sl("Latency Offset", -1, 1, 0, function(v)
+        PredictionConfig.LatencyOffset = v
+    end)
+    lbl("-1 = past | 0 = normal | +1 = predicted", C.DIM)
+
+    sl("Max Parry Distance", 5, 100, 50, function(v)
+        PredictionConfig.MaxDistance = v
+    end)
+    lbl("Radius deteksi killer", C.FIRE_BRIGHT)
+
+    sl("Parry Cooldown", 0.05, 0.5, 0.1, function(v)
+        PredictionConfig.Cooldown = v
     end)
 
-    sl("Face Sensitivity", -1, 1, -1, function(v)
-        AutoParry.FaceSensitivity = v
-        AutoParry.RequireFacing = (v > -1)
+    tog("Adaptive Reaction", true, function(s)
+        PredictionConfig.AdaptiveReaction = s
     end)
-    lbl("-1 = Gak cek arah (recommended)", C.GRN)
-
-    sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
-        PARRY_DEBOUNCE = v
-    end)
+    lbl("Makin cepet = makin cepet parry", C.GRN)
 
     sec("Parry Circle (Hijau/Merah)", "⭕")
     tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
@@ -5044,41 +4888,9 @@ makeTab("Misc", "⚙️", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: PLAYER (Auto Parry Agresif + FPS Boost)
+-- TAB 8: PLAYER (FPS Boost Only - Auto Parry udah di Survivor)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
-
-    sec("Auto Parry (AGGRESSIVE MODE)", "🛡️")
-    tog("Enable Auto Parry", true, function(s)
-        AutoParry.Enabled = s
-        if s then scanKillers() end
-    end)
-    lbl("🆕 Mode Agresif: anti miss", C.FIRE_BRIGHT)
-
-    tog("⚡ Aggressive Mode", true, function(s)
-        AutoParry.AggressiveMode = s
-    end)
-    lbl("ON = parry tiap 0.03s (anti miss)", C.GRN)
-    lbl("OFF = normal (via animasi)", C.DIM)
-
-    sl("Parry Distance", 5, 20, 14, function(v)
-        AutoParry.ParryDistance = v
-    end)
-
-    sl("Face Sensitivity", -1, 1, -1, function(v)
-        AutoParry.FaceSensitivity = v
-        AutoParry.RequireFacing = (v > -1)
-    end)
-    lbl("-1 = gak cek arah (recommended)", C.GRN)
-
-    sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
-        PARRY_DEBOUNCE = v
-    end)
-
-    sec("Parry Circle", "⭕")
-    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
-    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
-    lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
 
     sec("FPS Boost", "🚀")
     tog("No Screen Effects", false, function(s)
@@ -5100,8 +4912,8 @@ makeTab("Player", "👤", 8, function()
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
     sec("Info", "ℹ️")
-    lbl("🕺 Moonwalk: Tekan V atau tombol MW", C.FIRE_BRIGHT)
-    lbl("🎯 Aimlock: Hold attack (klik/HP)", C.FIRE_BRIGHT)
+    lbl("🕺 Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
+    lbl("🛡️ Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
     lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
@@ -5124,9 +4936,9 @@ makeTab("Player", "👤", 8, function()
         _G.Roooor_ESP = nil
         _G.Roooor_ESPStatus = nil
         _G.Roooor_AutoParry = nil
+        _G.Roooor_Prediction = nil
         _G.Roooor_SkillCheck = nil
         _G.Roooor_Moonwalk = nil
-        _G.Roooor_Aimlock = nil
         _G.Roooor_Hitbox = nil
         _G.Roooor_GodMode = nil
     end)
@@ -5416,81 +5228,10 @@ makeTab("Hitbox", "📦", 10, function()
 end)
 
 print("✅ [8/11] COSMIC HUB - Fire Feet + Misc + Player + Visual + Hitbox loaded")-- =========================================================
--- SECTION 9/11 : FINAL - AIMLOCK + AUTO RE-APPLY + KEYBIND
+-- SECTION 9/11 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
-sec = _G.Roooor_sec
-lbl = _G.Roooor_lbl
-tog = _G.Roooor_tog
-sl = _G.Roooor_sl
-cpk = _G.Roooor_cpk
-btn = _G.Roooor_btn
-drp = _G.Roooor_drp
-makeTab = _G.Roooor_makeTab
-cs = _G.Roooor_cs
 
--- ============================================================
--- TAB 11: AIMLOCK (HARD LOCK - HOLD TO LOCK)
--- ============================================================
-makeTab("Aimlock", "🎯", 11, function()
-
-    sec("Aimlock (HOLD TO LOCK)", "🎯")
-    tog("Enable Aimlock", false, function(s)
-        Aimlock.Enabled = s
-        if not s then
-            AimlockLocked = false
-            AimlockAttackHeld = false
-            AimlockTarget = nil
-        end
-    end)
-    lbl("🖱️ PC: Hold klik kiri", C.FIRE_BRIGHT)
-    lbl("📱 HP: Hold tombol attack", C.FIRE_BRIGHT)
-    lbl("⚡ Lock INSTANT saat attack di-hold", C.GRN)
-    lbl("❌ Lepas attack = stop lock", C.RED)
-
-    sec("Target Mode", "🎯")
-    drp("Mode", {"Auto", "Killer", "Survivor"}, "Auto", function(v)
-        Aimlock.Mode = v
-    end)
-    lbl("Auto = deteksi tim kita", C.DIM)
-    lbl("Killer = lock ke killer", C.DIM)
-    lbl("Survivor = lock ke survivor", C.DIM)
-
-    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v)
-        Aimlock.AimPart = v
-    end)
-    lbl("Head = paling akurat", C.GRN)
-
-    sl("Max Distance", 50, 1000, 500, function(v)
-        Aimlock.MaxDistance = v
-    end)
-    lbl("Radius lock dari karakter lu", C.DIM)
-
-    sec("Auto Fire", "🔫")
-    tog("Auto Fire saat Lock", false, function(s)
-        Aimlock.AutoFire = s
-    end)
-    lbl("Auto attack saat lock ke target", C.FIRE_BRIGHT)
-
-    sl("Auto Fire Delay", 0.05, 1, 0.15, function(v)
-        Aimlock.AutoFireDelay = v
-    end)
-
-    sec("Auto Face Target", "👤")
-    tog("Auto Face Character", true, function(s)
-        Aimlock.FaceTarget = s
-    end)
-    lbl("Character auto nengok ke target", C.GRN)
-    lbl("Biar animasi attack kena", C.DIM)
-
-    sec("Info", "ℹ️")
-    lbl("🎯 Hold attack = lock instan", C.FIRE_BRIGHT)
-    lbl("⚡ Snap instant, bukan smooth", C.GRN)
-    lbl("🔄 Auto ganti target kalau mati", C.ACC2)
-end)
-
--- =========================================================
 -- AUTO RE-APPLY SAAT RESPAWN
--- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
@@ -5596,7 +5337,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/11] COSMIC HUB v3.5 - Aimlock + Auto Re-Apply + Keybind V loaded")-- =========================================================
+print("✅ [9/11] COSMIC HUB v3.6 - Auto Re-Apply + Keybind V loaded")-- =========================================================
 -- SECTION 10/11 : LOGIC FITUR BARU
 -- =========================================================
 
@@ -5765,12 +5506,12 @@ print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- ====================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.5 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.6 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry + Aggressive Mode         ║")
+print("║  🛡️ Auto Parry (PREDICTION SYSTEM)       ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Tombol MW + Lock Button)   ║")
+print("║  🕺 Moonwalk (Tombol MW + LOCK BUTTON)   ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -5778,7 +5519,6 @@ print("║  🚪 Auto Escape Gate                     ║")
 print("║  🎒 Auto Carry + Hook                    ║")
 print("║  🚀 FPS Boost (3 Mode)                   ║")
 print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
-print("║  🎯 Aimlock (HOLD TO LOCK)               ║")
 print("║  📦 Hitbox (Radius 70 + ESP Hide)        ║")
 print("║  🎥 Camera Fix (Abis Downed)             ║")
 print("║  🛡️ God Mode                             ║")
@@ -5792,11 +5532,14 @@ print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter (PUTIH)           ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
-print("║  🎯 Aimlock: Hold attack (klik/HP)       ║")
+print("║  🛡️ Auto Parry: Prediction System        ║")
 print("║  🕺 Moonwalk: Tombol MW / Tekan V        ║")
 print("║  🔒 Lock MW: Klik tombol LOCK            ║")
 print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
-print("║  🛡️ Auto Parry ON = GACOR!               ║")
+print("║  🎯 Prediction = Anti Miss!              ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.5 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.6 - FINAL LOADED! ✨")
+print("🎯 Auto Parry Prediction System ACTIVE")
+print("❌ Aimlock REMOVED")
+print("❌ Duplicate Auto Parry REMOVED")

@@ -1,7 +1,7 @@
 --[[
     ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v3.2                  ║
-    ║   Moonwalk + Fast Vault (Michael Jackson)    ║
+    ║           COSMIC HUB - v3.3                  ║
+    ║   Auto Parry ON + ESP Full + Moonwalk Fix    ║
     ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
     ╚══════════════════════════════════════════════╝
 ]]
@@ -343,15 +343,21 @@ _G.Roooor_FPSPing = FPSPingConfig
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
+-- ESP STATE (Default ON pas execute)
 ESP = _G.Roooor_ESP or {
     Survivor = true, Killer = true, Generator = true,
-    Pallet = false, Window = false, SCP = false, Distance = 500,
+    Pallet = true, Window = true, SCP = true,
+    Distance = 1000,       -- 🆕 Radius MAX
 }
 _G.Roooor_ESP = ESP
 
+-- ESP STATUS STATE (Default ON FULL)
 ESPStatus = _G.Roooor_ESPStatus or {
-    Enabled = false, ShowName = true, ShowDistance = true,
-    ShowHealth = false, Radius = 50,
+    Enabled = true,        -- 🆕 ON
+    ShowName = true,       -- 🆕 ON
+    ShowDistance = true,   -- 🆕 ON
+    ShowHealth = true,     -- 🆕 ON
+    Radius = 1000,         -- 🆕 Radius MAX
 }
 _G.Roooor_ESPStatus = ESPStatus
 
@@ -361,20 +367,20 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY
+-- AUTO PARRY (Default ON pas execute)
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = true,
-    ParryDistance = 15,
+    Enabled = true,          -- 🆕 ON
+    ParryDistance = 14,       -- 🆕 14
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.7,
-    RequireFacing = true,
+    FaceSensitivity = -1,     -- 🆕 -1
+    RequireFacing = false,    -- 🆕 auto (karena -1)
     Wiggle = false,
     WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
-PARRY_DEBOUNCE = 0.2
+PARRY_DEBOUNCE = 0.1           -- 🆕 0.1
 ParryActive = false
 
 -- AUTO SKILL CHECK
@@ -388,7 +394,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 _G.Roooor_SkillCheck = SkillCheck
 
 -- =========================================================
--- MOONWALK (LOGIC SAMA PERSIS, GAMBAR GANTI MICHAEL JACKSON)
+-- MOONWALK (FIXED - FALLENS LOGIC)
 -- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
@@ -399,14 +405,14 @@ Moonwalk = _G.Roooor_Moonwalk or {
     UseSlow = true,
     ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
     GuiInstance = nil,
-    ImageId = "rbxassetid://111776278275092",  -- 🖼️ Michael Jackson Decal
 }
 _G.Roooor_Moonwalk = Moonwalk
 
+MoonwalkActive = false
 MoonwalkConnection = nil
 
 -- =========================================================
--- FAST VAULT (LOGIC SAMA PERSIS)
+-- FAST VAULT
 -- =========================================================
 FastVault = _G.Roooor_FastVault or {
     Enabled = false,
@@ -482,10 +488,10 @@ pcall(function()
     end
 end)
 
-print("✅ [1/11] COSMIC HUB v3.2 - Base + State loaded")
-print("   Moonwalk  : Michael Jackson Image")
-print("   Fast Vault: Ready")
-print("   Auto Parry: Distance 5-20, Debounce 0.1-0.5")
+print("✅ [1/11] COSMIC HUB v3.3 - Base + State loaded")
+print("   Auto Parry: ON (Distance 14, Face -1, Debounce 0.1)")
+print("   ESP Full  : ON (Radius 1000)")
+print("   Moonwalk  : FIXED")
 print("   Crosshair : 8 MODE + 2 WARNA")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -1211,9 +1217,7 @@ function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
--- =========================================================
 -- FPS + PING COUNTER (PUTIH SOLID)
--- =========================================================
 fpsPingGui = nil
 fpsCounter = 0
 fpsLastTime = tick()
@@ -1243,7 +1247,6 @@ function createFPSPingGui()
     rnd(frame, 8)
     strk(frame, C.ACC, 1.5, 0.3)
 
-    -- FPS LABEL - PUTIH SOLID
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
     fpsLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
@@ -1256,7 +1259,6 @@ function createFPSPingGui()
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
 
-    -- PING LABEL - PUTIH SOLID
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
     pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
@@ -1869,7 +1871,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK LOGIC (MICHAEL JACKSON)
+-- MOONWALK (FIXED - FALLENS LOGIC)
 -- =========================================================
 function isDowned()
     local char = LP.Character
@@ -1885,9 +1887,11 @@ function isDowned()
 end
 
 function startMoonwalk()
+    MoonwalkActive = true
     if MoonwalkConnection then return end
 
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
+        -- Cek flag Moonwalk.Enabled + MoonwalkActive
         if not Moonwalk.Enabled then return end
         if ParryActive then return end
         if isDowned() then return end
@@ -1901,8 +1905,11 @@ function startMoonwalk()
 
         if not humanoid or not hrp or not cam then return end
 
-        if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
-            humanoid.WalkSpeed = Moonwalk.SlowSpeed
+        -- Force WalkSpeed (biar gak ke-reset game)
+        if Moonwalk.UseSlow then
+            pcall(function()
+                humanoid.WalkSpeed = Moonwalk.SlowSpeed
+            end)
         end
 
         local look = cam.CFrame.LookVector
@@ -1919,6 +1926,7 @@ function startMoonwalk()
 end
 
 function stopMoonwalk()
+    MoonwalkActive = false
     if MoonwalkConnection then
         MoonwalkConnection:Disconnect()
         MoonwalkConnection = nil
@@ -3439,9 +3447,7 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- =========================================================
 -- TOMBOL MENU COSMIC
--- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -3610,9 +3616,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- =========================================================
 -- PANEL MENU COSMIC
--- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -3758,9 +3762,7 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- =========================================================
 -- KOMPONEN UI
--- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -4233,20 +4235,20 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 20, 15, function(v)
+    sl("Parry Distance", 5, 20, 14, function(v)
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, 0.7, function(v)
+    sl("Face Sensitivity", -1, 1, -1, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
-    lbl("0.7 = Facing (recommended)", C.GRN)
+    lbl("-1 = Gak cek arah (recommended)", C.GRN)
 
-    sl("Parry Debounce", 0.1, 0.5, 0.2, function(v)
+    sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
         PARRY_DEBOUNCE = v
     end)
-    lbl("0.2 = Responsif", C.FIRE_BRIGHT)
+    lbl("0.1 = Responsif", C.FIRE_BRIGHT)
 
     sec("Parry Circle (Hijau/Merah)", "⭕")
     tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
@@ -4403,23 +4405,23 @@ makeTab("ESP", "👁️", 3, function()
     sec("Object ESP", "⚡")
     tog("ESP Generator", true, function(s) ESP.Generator = s end)
     cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
-    tog("ESP Pallet", false, function(s) ESP.Pallet = s end)
+    tog("ESP Pallet", true, function(s) ESP.Pallet = s end)
     cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
-    tog("ESP Window", false, function(s) ESP.Window = s end)
+    tog("ESP Window", true, function(s) ESP.Window = s end)
     cpk("Window Color", WindowColor, function(c) WindowColor = c end)
-    tog("ESP SCP", false, function(s) ESP.SCP = s end)
+    tog("ESP SCP", true, function(s) ESP.SCP = s end)
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
     sec("ESP Distance", "📏")
-    sl("ESP Radius", 10, 500, 500, function(v) ESP.Distance = v end)
-    lbl("Max 500 (default 500)", C.GRN)
+    sl("ESP Radius", 10, 1000, 1000, function(v) ESP.Distance = v end)
+    lbl("Max 1000 (default 1000)", C.GRN)
 
     sec("Status ESP", "🟢")
-    tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
+    tog("Enable Status ESP", true, function(s) ESPStatus.Enabled = s end)
     tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
     tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
-    tog("Show Health", false, function(s) ESPStatus.ShowHealth = s end)
-    sl("Status Radius", 20, 500, 50, function(v) ESPStatus.Radius = v end)
+    tog("Show Health", true, function(s) ESPStatus.ShowHealth = s end)
+    sl("Status Radius", 20, 1000, 1000, function(v) ESPStatus.Radius = v end)
 
     sec("Nama Mode", "✨")
     drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
@@ -4497,7 +4499,7 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK (Michael Jackson)
+-- TAB 5: MOONWALK
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
@@ -4523,7 +4525,7 @@ makeTab("Moonwalk", "🕺", 5, function()
     lbl("Tekan V juga bisa toggle", C.GRN)
 
     sec("Button", "🎯")
-    tog("Show Moonwalk Button", false, function(s)
+    tog("Show Moonwalk Button (MW)", false, function(s)
         Moonwalk.ShowButton = s
         if s then
             createMoonwalkButton()
@@ -4531,7 +4533,7 @@ makeTab("Moonwalk", "🕺", 5, function()
             removeMoonwalkButton()
         end
     end)
-    lbl("Image: Michael Jackson", C.FIRE_BRIGHT)
+    lbl("Button tulisan MW", C.FIRE_BRIGHT)
 
     sec("Sensitivitas", "⚙️")
     sl("Spam Speed", 1, 50, 30, function(v)
@@ -4568,7 +4570,7 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- =========================================================
--- MOONWALK BUTTON (MICHAEL JACKSON IMAGE)
+-- MOONWALK BUTTON (TULISAN "MW")
 -- =========================================================
 function createMoonwalkButton()
     if not PG or not PG.Parent then return end
@@ -4579,14 +4581,16 @@ function createMoonwalkButton()
     gui.ResetOnSpawn = false
     gui.Parent = PG
 
-    local btn = Instance.new("ImageButton")
+    local btn = Instance.new("TextButton")   -- 🆕 TextButton (bukan ImageButton)
     btn.Name = "ToggleButton"
     btn.Size = UDim2.new(0, 50, 0, 50)
     btn.Position = Moonwalk.ButtonPos
-    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BackgroundTransparency = 0.9
-    btn.Image = "rbxassetid://111776278275092"  -- 🖼️ Michael Jackson
-    btn.ImageTransparency = 0.1
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    btn.BackgroundTransparency = 0.2
+    btn.Text = "MW"                          -- 🆕 Tulisan MW
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 16
+    btn.Font = Enum.Font.GothamBlack
     btn.AutoButtonColor = false
     btn.Parent = gui
 
@@ -4596,9 +4600,9 @@ function createMoonwalkButton()
 
     local stroke = Instance.new("UIStroke")
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Thickness = 1.2
+    stroke.Thickness = 1.5
     stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.8
+    stroke.Transparency = 0.5
     stroke.Parent = btn
 
     btn.MouseButton1Click:Connect(function()
@@ -4609,11 +4613,12 @@ function createMoonwalkButton()
 
         if Moonwalk.Enabled then
             stroke.Color = Color3.fromRGB(170, 0, 255)
-            if not MoonwalkConnection then
-                startMoonwalk()
-            end
+            btn.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
+            startMoonwalk()
         else
             stroke.Color = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+            stopMoonwalk()
             if hum then
                 if S.WalkSpeed then
                     hum.WalkSpeed = S.WalkSpeedVal
@@ -5112,7 +5117,7 @@ makeTab("Extra", "✨", 11, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
-print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
+print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button MW loaded")-- =========================================================
 -- SECTION 9/11 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
@@ -5681,12 +5686,12 @@ print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- ====================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.2 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.3 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry (5-20)                    ║")
+print("║  🛡️ Auto Parry ON (Distance 14)          ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Michael Jackson)           ║")
+print("║  🕺 Moonwalk (Button MW)                 ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -5712,4 +5717,4 @@ print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.2 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.3 - FINAL LOADED! ✨")

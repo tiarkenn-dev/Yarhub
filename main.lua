@@ -1,7 +1,7 @@
 --[[
     ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v3.3                  ║
-    ║   Auto Parry ON + ESP Full + Moonwalk Fix    ║
+    ║           COSMIC HUB - v4.0                  ║
+    ║   Moonwalk FIXED + Global State Lock         ║
     ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
     ╚══════════════════════════════════════════════╝
 ]]
@@ -343,21 +343,21 @@ _G.Roooor_FPSPing = FPSPingConfig
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- ESP STATE (Default ON pas execute)
+-- ESP STATE
 ESP = _G.Roooor_ESP or {
     Survivor = true, Killer = true, Generator = true,
     Pallet = true, Window = true, SCP = true,
-    Distance = 1000,       -- 🆕 Radius MAX
+    Distance = 1000,
 }
 _G.Roooor_ESP = ESP
 
--- ESP STATUS STATE (Default ON FULL)
+-- ESP STATUS STATE
 ESPStatus = _G.Roooor_ESPStatus or {
-    Enabled = true,        -- 🆕 ON
-    ShowName = true,       -- 🆕 ON
-    ShowDistance = true,   -- 🆕 ON
-    ShowHealth = true,     -- 🆕 ON
-    Radius = 1000,         -- 🆕 Radius MAX
+    Enabled = true,
+    ShowName = true,
+    ShowDistance = true,
+    ShowHealth = true,
+    Radius = 1000,
 }
 _G.Roooor_ESPStatus = ESPStatus
 
@@ -367,20 +367,20 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (Default ON pas execute)
+-- AUTO PARRY (Default ON)
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = true,          -- 🆕 ON
-    ParryDistance = 14,       -- 🆕 14
+    Enabled = true,
+    ParryDistance = 14,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = -1,     -- 🆕 -1
-    RequireFacing = false,    -- 🆕 auto (karena -1)
+    FaceSensitivity = -1,
+    RequireFacing = false,
     Wiggle = false,
     WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
-PARRY_DEBOUNCE = 0.1           -- 🆕 0.1
+PARRY_DEBOUNCE = 0.1
 ParryActive = false
 
 -- AUTO SKILL CHECK
@@ -394,7 +394,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 _G.Roooor_SkillCheck = SkillCheck
 
 -- =========================================================
--- MOONWALK (FIXED - FALLENS LOGIC)
+-- MOONWALK (FIXED)
 -- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
@@ -405,11 +405,13 @@ Moonwalk = _G.Roooor_Moonwalk or {
     UseSlow = true,
     ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
     GuiInstance = nil,
+    ImageId = "rbxassetid://93349170559446",  -- 🖼️ Image (dari script lain)
 }
 _G.Roooor_Moonwalk = Moonwalk
 
 MoonwalkActive = false
 MoonwalkConnection = nil
+MoonwalkForceLoop = nil
 
 -- =========================================================
 -- FAST VAULT
@@ -418,7 +420,7 @@ FastVault = _G.Roooor_FastVault or {
     Enabled = false,
     Speed = 1.2,
     ReplaceMap = {
-        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779", -- Running → Finesse
+        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
     },
 }
 _G.Roooor_FastVault = FastVault
@@ -488,10 +490,10 @@ pcall(function()
     end
 end)
 
-print("✅ [1/11] COSMIC HUB v3.3 - Base + State loaded")
+print("✅ [1/11] COSMIC HUB v4.0 - Base + State loaded")
 print("   Auto Parry: ON (Distance 14, Face -1, Debounce 0.1)")
 print("   ESP Full  : ON (Radius 1000)")
-print("   Moonwalk  : FIXED")
+print("   Moonwalk  : FIXED (Image + MW)")
 print("   Crosshair : 8 MODE + 2 WARNA")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -1817,9 +1819,10 @@ function startSkillCheck()
         if not line or not goal then return end
 
         local gr = goal.Rotation % 360
+        local currentMode = SkillCheck.Mode or "Perfect"
 
         -- MODE INSTANT
-        if SkillCheck.Mode == "Instant" then
+        if currentMode == "Instant" then
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
 
@@ -1871,30 +1874,51 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK (FIXED - FALLENS LOGIC)
+-- MOONWALK (FIXED v4.0)
 -- =========================================================
 function isDowned()
     local char = LP.Character
     if not char then return false end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
-
+    -- Cuma cek Health == 0 (bener-bener mati)
     return hum.Health <= 0
-        or hum.Health < 2
-        or char:GetAttribute("Downed") == true
-        or char:GetAttribute("IsDown") == true
-        or char:GetAttribute("Knocked") == true
 end
 
 function startMoonwalk()
+    if MoonwalkActive then return end
     MoonwalkActive = true
-    if MoonwalkConnection then return end
+    Moonwalk.Enabled = true
+
+    -- FORCE WALKSPEED LOOP
+    if MoonwalkForceLoop then
+        pcall(function() task.cancel(MoonwalkForceLoop) end)
+        MoonwalkForceLoop = nil
+    end
+
+    MoonwalkForceLoop = task.spawn(function()
+        while MoonwalkActive and Moonwalk.Enabled do
+            pcall(function()
+                local char = LP.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum and Moonwalk.UseSlow then
+                        hum.WalkSpeed = Moonwalk.SlowSpeed
+                    end
+                end
+            end)
+            task.wait(0.05)
+        end
+    end)
+
+    -- MAIN LOOP
+    if MoonwalkConnection then
+        pcall(function() MoonwalkConnection:Disconnect() end)
+        MoonwalkConnection = nil
+    end
 
     MoonwalkConnection = RunService.RenderStepped:Connect(function()
-        -- Cek flag Moonwalk.Enabled + MoonwalkActive
-        if not Moonwalk.Enabled then return end
-        if ParryActive then return end
-        if isDowned() then return end
+        if not Moonwalk.Enabled or not MoonwalkActive then return end
 
         local char = LP.Character
         if not char or not char.Parent then return end
@@ -1904,8 +1928,8 @@ function startMoonwalk()
         local cam = workspace.CurrentCamera
 
         if not humanoid or not hrp or not cam then return end
+        if humanoid.Health <= 0 then return end
 
-        -- Force WalkSpeed (biar gak ke-reset game)
         if Moonwalk.UseSlow then
             pcall(function()
                 humanoid.WalkSpeed = Moonwalk.SlowSpeed
@@ -1919,16 +1943,29 @@ function startMoonwalk()
             flatLook = flatLook.Unit
             local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
             local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
-            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
-            humanoid:Move(Vector3.new(0, 0, 1), true)
+            
+            pcall(function()
+                hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+            end)
+            
+            pcall(function()
+                humanoid:Move(Vector3.new(0, 0, 1), true)
+            end)
         end
     end)
 end
 
 function stopMoonwalk()
     MoonwalkActive = false
+    Moonwalk.Enabled = false
+    
+    if MoonwalkForceLoop then
+        pcall(function() task.cancel(MoonwalkForceLoop) end)
+        MoonwalkForceLoop = nil
+    end
+    
     if MoonwalkConnection then
-        MoonwalkConnection:Disconnect()
+        pcall(function() MoonwalkConnection:Disconnect() end)
         MoonwalkConnection = nil
     end
 end
@@ -2684,7 +2721,8 @@ _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
 _G.Roooor_isDowned = isDowned
 
-print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + FastVault + Crosshair loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk FIXED + FastVault + Crosshair loaded")
+print("   Moonwalk: FIXED (Force WalkSpeed + Anti Reset)")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4231,22 +4269,26 @@ makeTab("Survivor", "🏃", 1, function()
     sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
+        _G.CosmicLock.AutoParryEnabled = s
         if s then scanKillers() end
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
     sl("Parry Distance", 5, 20, 14, function(v)
         AutoParry.ParryDistance = v
+        _G.CosmicLock.AutoParryDistance = v
     end)
 
     sl("Face Sensitivity", -1, 1, -1, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
+        _G.CosmicLock.AutoParryFace = v
     end)
     lbl("-1 = Gak cek arah (recommended)", C.GRN)
 
     sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
         PARRY_DEBOUNCE = v
+        _G.CosmicLock.AutoParryDebounce = v
     end)
     lbl("0.1 = Responsif", C.FIRE_BRIGHT)
 
@@ -4263,6 +4305,7 @@ makeTab("Survivor", "🏃", 1, function()
 
     drp("Mode", {"Perfect", "Instant"}, "Perfect", function(v)
         SkillCheck.Mode = v
+        _G.CosmicLock.SkillCheckMode = v
     end)
     lbl("Perfect = tunggu zona | Instant = paksa jarum", C.FIRE_BRIGHT)
 
@@ -4413,22 +4456,42 @@ makeTab("ESP", "👁️", 3, function()
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
     sec("ESP Distance", "📏")
-    sl("ESP Radius", 10, 1000, 1000, function(v) ESP.Distance = v end)
+    sl("ESP Radius", 10, 1000, 1000, function(v)
+        ESP.Distance = v
+        _G.CosmicLock.ESPDistance = v
+    end)
     lbl("Max 1000 (default 1000)", C.GRN)
 
     sec("Status ESP", "🟢")
-    tog("Enable Status ESP", true, function(s) ESPStatus.Enabled = s end)
-    tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
-    tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
-    tog("Show Health", true, function(s) ESPStatus.ShowHealth = s end)
-    sl("Status Radius", 20, 1000, 1000, function(v) ESPStatus.Radius = v end)
+    tog("Enable Status ESP", true, function(s)
+        ESPStatus.Enabled = s
+        _G.CosmicLock.ESPStatusEnabled = s
+    end)
+    tog("Show Name", true, function(s)
+        ESPStatus.ShowName = s
+        _G.CosmicLock.ESPName = s
+    end)
+    tog("Show Distance", true, function(s)
+        ESPStatus.ShowDistance = s
+        _G.CosmicLock.ESPDistanceShow = s
+    end)
+    tog("Show Health", true, function(s)
+        ESPStatus.ShowHealth = s
+        _G.CosmicLock.ESPHealth = s
+    end)
+    sl("Status Radius", 20, 1000, 1000, function(v)
+        ESPStatus.Radius = v
+        _G.CosmicLock.ESPStatusRadius = v
+    end)
 
     sec("Nama Mode", "✨")
     drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
         S.ESPNameMode = v
+        _G.CosmicLock.ESPNameMode = v
     end)
     sl("Name Size", 8, 30, 12, function(v)
         S.ESPNameSize = v
+        _G.CosmicLock.ESPNameSize = v
     end)
     lbl("Text = biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
 end)
@@ -4533,21 +4596,24 @@ makeTab("Moonwalk", "🕺", 5, function()
             removeMoonwalkButton()
         end
     end)
-    lbl("Button tulisan MW", C.FIRE_BRIGHT)
+    lbl("Button Image + Tulisan MW", C.FIRE_BRIGHT)
 
     sec("Sensitivitas", "⚙️")
     sl("Spam Speed", 1, 50, 30, function(v)
         Moonwalk.SpamSpeed = v
+        _G.CosmicLock.MoonwalkSpamSpeed = v
     end)
     lbl("Kecepatan goyang", C.DIM)
 
     sl("Intensity", 1, 50, 35, function(v)
         Moonwalk.Intensity = v
+        _G.CosmicLock.MoonwalkIntensity = v
     end)
     lbl("Besarnya goyangan (derajat)", C.DIM)
 
     sl("Walk Speed (Moonwalk)", 5, 20, 13, function(v)
         Moonwalk.SlowSpeed = v
+        _G.CosmicLock.MoonwalkSlowSpeed = v
     end)
     lbl("Kecepatan jalan pas moonwalk", C.DIM)
 
@@ -4570,27 +4636,27 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- =========================================================
--- MOONWALK BUTTON (TULISAN "MW")
+-- MOONWALK BUTTON (IMAGE + TULISAN "MW")
 -- =========================================================
 function createMoonwalkButton()
     if not PG or not PG.Parent then return end
     if Moonwalk.GuiInstance then Moonwalk.GuiInstance:Destroy() end
 
     local gui = Instance.new("ScreenGui")
-    gui.Name = "MoonwalkGui"
+    gui.Name = "CosmicMoonwalkMW"
     gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     gui.Parent = PG
 
-    local btn = Instance.new("TextButton")   -- 🆕 TextButton (bukan ImageButton)
+    -- ImageButton (dari ID)
+    local btn = Instance.new("ImageButton")
     btn.Name = "ToggleButton"
-    btn.Size = UDim2.new(0, 50, 0, 50)
+    btn.Size = UDim2.new(0, 55, 0, 55)
     btn.Position = Moonwalk.ButtonPos
     btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    btn.BackgroundTransparency = 0.2
-    btn.Text = "MW"                          -- 🆕 Tulisan MW
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
-    btn.Font = Enum.Font.GothamBlack
+    btn.BackgroundTransparency = 0.3
+    btn.Image = "rbxassetid://93349170559446"
+    btn.ImageTransparency = 0.2
     btn.AutoButtonColor = false
     btn.Parent = gui
 
@@ -4605,8 +4671,29 @@ function createMoonwalkButton()
     stroke.Transparency = 0.5
     stroke.Parent = btn
 
+    -- Tulisan "MW" overlay
+    local mwLabel = Instance.new("TextLabel")
+    mwLabel.Name = "MWLabel"
+    mwLabel.Size = UDim2.new(1, 0, 0, 14)
+    mwLabel.Position = UDim2.new(0, 0, 1, -14)
+    mwLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    mwLabel.BackgroundTransparency = 0.4
+    mwLabel.Text = "MW"
+    mwLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    mwLabel.TextSize = 10
+    mwLabel.Font = Enum.Font.GothamBlack
+    mwLabel.TextStrokeTransparency = 0
+    mwLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    mwLabel.ZIndex = 2
+    mwLabel.Parent = btn
+
+    local mwCorner = Instance.new("UICorner")
+    mwCorner.CornerRadius = UDim.new(0, 4)
+    mwCorner.Parent = mwLabel
+
     btn.MouseButton1Click:Connect(function()
         Moonwalk.Enabled = not Moonwalk.Enabled
+        _G.CosmicLock.MoonwalkEnabled = Moonwalk.Enabled
 
         local char = LP.Character
         local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -4614,10 +4701,12 @@ function createMoonwalkButton()
         if Moonwalk.Enabled then
             stroke.Color = Color3.fromRGB(170, 0, 255)
             btn.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
+            mwLabel.TextColor3 = Color3.fromRGB(170, 0, 255)
             startMoonwalk()
         else
             stroke.Color = Color3.fromRGB(255, 255, 255)
             btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+            mwLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             stopMoonwalk()
             if hum then
                 if S.WalkSpeed then
@@ -4628,6 +4717,38 @@ function createMoonwalkButton()
                     hum.WalkSpeed = 16
                 end
             end
+        end
+    end)
+
+    -- Drag system
+    local dragging = false
+    local dragStart, startPos
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = btn.Position
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            local newPos = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+            btn.Position = newPos
+            Moonwalk.ButtonPos = newPos
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
     end)
 
@@ -4773,6 +4894,7 @@ makeTab("Player", "👤", 8, function()
     sec("Aimlock Mode", "🎯")
     drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
         Combat.Mode = v
+        _G.CosmicLock.CombatMode = v
     end)
 
     sec("FPS Boost", "🚀")
@@ -4931,6 +5053,7 @@ makeTab("Visual", "✨", 9, function()
         "Square", "Diamond", "TShape", "CrossDot"
     }, "Plus", function(v)
         S.CrosshairStyle = v
+        _G.CosmicLock.CrosshairStyle = v
         if S.Crosshair then
             applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
         end
@@ -4938,6 +5061,7 @@ makeTab("Visual", "✨", 9, function()
 
     drp("Color Mode", {"Solid", "Galaxy"}, "Solid", function(v)
         S.CrosshairColorMode = v
+        _G.CosmicLock.CrosshairColorMode = v
         if S.Crosshair then
             applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
         end
@@ -4953,6 +5077,7 @@ makeTab("Visual", "✨", 9, function()
 
     sl("Crosshair Size", 4, 30, 8, function(v)
         S.CrosshairSize = v
+        _G.CosmicLock.CrosshairSize = v
         if S.Crosshair then
             applyCrosshair(true, S.CrosshairColor, v)
         end
@@ -5462,6 +5587,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
         Moonwalk.Enabled = not Moonwalk.Enabled
+        _G.CosmicLock.MoonwalkEnabled = Moonwalk.Enabled
 
         local char = LP.Character
         local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -5518,10 +5644,152 @@ task.spawn(function()
 end)
 
 print("✅ [9/11] COSMIC HUB - Final Combat + Auto Re-Apply + Keybind V loaded")-- =========================================================
--- SECTION 10/11 : LOGIC FITUR BARU (RAPIH)
+-- SECTION 10/11 : LOGIC FITUR BARU + GLOBAL STATE LOCK
 -- =========================================================
 
+print("🔒 [10/11] Global State Lock — semua fitur gak balik default...")
+
+-- =========================================================
+-- GLOBAL STATE LOCK
+-- =========================================================
+_G.CosmicLock = _G.CosmicLock or {}
+
+-- Init dari state yang ada
+task.spawn(function()
+    task.wait(1)
+    
+    if SkillCheck then
+        _G.CosmicLock.SkillCheckMode = SkillCheck.Mode or "Perfect"
+        _G.CosmicLock.SkillCheckEnabled = SkillCheck.Enabled or false
+        _G.CosmicLock.SkillCheckHideNeedle = SkillCheck.HideNeedle or false
+    end
+    
+    if AutoParry then
+        _G.CosmicLock.AutoParryEnabled = AutoParry.Enabled or false
+        _G.CosmicLock.AutoParryDistance = AutoParry.ParryDistance or 14
+        _G.CosmicLock.AutoParryFace = AutoParry.FaceSensitivity or -1
+        _G.CosmicLock.AutoParryDebounce = PARRY_DEBOUNCE or 0.1
+    end
+    
+    if ESP then
+        _G.CosmicLock.ESPDistance = ESP.Distance or 1000
+    end
+    if ESPStatus then
+        _G.CosmicLock.ESPStatusEnabled = ESPStatus.Enabled or true
+    end
+    if S then
+        _G.CosmicLock.ESPNameMode = S.ESPNameMode or "Text"
+        _G.CosmicLock.ESPNameSize = S.ESPNameSize or 12
+        _G.CosmicLock.CrosshairStyle = S.CrosshairStyle or "Plus"
+        _G.CosmicLock.CrosshairColorMode = S.CrosshairColorMode or "Solid"
+        _G.CosmicLock.CrosshairSize = S.CrosshairSize or 8
+    end
+    
+    if Moonwalk then
+        _G.CosmicLock.MoonwalkEnabled = Moonwalk.Enabled or false
+        _G.CosmicLock.MoonwalkSpamSpeed = Moonwalk.SpamSpeed or 30
+        _G.CosmicLock.MoonwalkIntensity = Moonwalk.Intensity or 35
+        _G.CosmicLock.MoonwalkSlowSpeed = Moonwalk.SlowSpeed or 13
+    end
+    
+    if Combat then
+        _G.CosmicLock.AimlockEnabled = Combat.AimlockEnabled or false
+        _G.CosmicLock.CombatMode = Combat.Mode or "Killer"
+        _G.CosmicLock.AimPart = Combat.AimPart or "Head"
+        _G.CosmicLock.Smoothness = Combat.Smoothness or 0.01
+        _G.CosmicLock.LockRadius = Combat.LockRadius or 150
+        _G.CosmicLock.FOVRadius = Combat.FOVRadius or 200
+    end
+    
+    print("   ✅ Lock di-init dari state yang ada")
+end)
+
+-- =========================================================
+-- ANTI-RESET LOOP (Paksa Semua Fitur Sesuai Lock)
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.5) do
+        if SkillCheck and SkillCheck.Mode ~= _G.CosmicLock.SkillCheckMode then
+            SkillCheck.Mode = _G.CosmicLock.SkillCheckMode
+        end
+        
+        if AutoParry then
+            if AutoParry.ParryDistance ~= _G.CosmicLock.AutoParryDistance then
+                AutoParry.ParryDistance = _G.CosmicLock.AutoParryDistance
+            end
+            if AutoParry.FaceSensitivity ~= _G.CosmicLock.AutoParryFace then
+                AutoParry.FaceSensitivity = _G.CosmicLock.AutoParryFace
+            end
+        end
+        if PARRY_DEBOUNCE ~= _G.CosmicLock.AutoParryDebounce then
+            PARRY_DEBOUNCE = _G.CosmicLock.AutoParryDebounce
+        end
+        
+        if ESP and ESP.Distance ~= _G.CosmicLock.ESPDistance then
+            ESP.Distance = _G.CosmicLock.ESPDistance
+        end
+        if ESPStatus then
+            if ESPStatus.Enabled ~= _G.CosmicLock.ESPStatusEnabled then
+                ESPStatus.Enabled = _G.CosmicLock.ESPStatusEnabled
+            end
+            if ESPStatus.Radius ~= _G.CosmicLock.ESPStatusRadius then
+                ESPStatus.Radius = _G.CosmicLock.ESPStatusRadius
+            end
+        end
+        
+        if S then
+            if S.ESPNameMode ~= _G.CosmicLock.ESPNameMode then
+                S.ESPNameMode = _G.CosmicLock.ESPNameMode
+            end
+            if S.ESPNameSize ~= _G.CosmicLock.ESPNameSize then
+                S.ESPNameSize = _G.CosmicLock.ESPNameSize
+            end
+            if S.CrosshairStyle ~= _G.CosmicLock.CrosshairStyle then
+                S.CrosshairStyle = _G.CosmicLock.CrosshairStyle
+            end
+            if S.CrosshairColorMode ~= _G.CosmicLock.CrosshairColorMode then
+                S.CrosshairColorMode = _G.CosmicLock.CrosshairColorMode
+            end
+            if S.CrosshairSize ~= _G.CosmicLock.CrosshairSize then
+                S.CrosshairSize = _G.CosmicLock.CrosshairSize
+            end
+        end
+        
+        if Moonwalk then
+            if Moonwalk.SpamSpeed ~= _G.CosmicLock.MoonwalkSpamSpeed then
+                Moonwalk.SpamSpeed = _G.CosmicLock.MoonwalkSpamSpeed
+            end
+            if Moonwalk.Intensity ~= _G.CosmicLock.MoonwalkIntensity then
+                Moonwalk.Intensity = _G.CosmicLock.MoonwalkIntensity
+            end
+            if Moonwalk.SlowSpeed ~= _G.CosmicLock.MoonwalkSlowSpeed then
+                Moonwalk.SlowSpeed = _G.CosmicLock.MoonwalkSlowSpeed
+            end
+        end
+        
+        if Combat then
+            if Combat.Mode ~= _G.CosmicLock.CombatMode then
+                Combat.Mode = _G.CosmicLock.CombatMode
+            end
+            if Combat.AimPart ~= _G.CosmicLock.AimPart then
+                Combat.AimPart = _G.CosmicLock.AimPart
+            end
+            if Combat.Smoothness ~= _G.CosmicLock.Smoothness then
+                Combat.Smoothness = _G.CosmicLock.Smoothness
+            end
+        end
+        
+        -- Paksa auto-save sinkron
+        if _G.RoooorSavedStates then
+            _G.RoooorSavedStates["Mode"] = _G.CosmicLock.SkillCheckMode
+            _G.RoooorSavedStates.SkillCheckMode = _G.CosmicLock.SkillCheckMode
+        end
+    end
+end)
+
+-- =========================================================
 -- AUTO WIGGLE LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
@@ -5542,7 +5810,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO FLEE LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not AutoFlee.Enabled then continue end
@@ -5562,7 +5832,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO ESCAPE LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if not S.AutoEscapeGate then continue end
@@ -5613,7 +5885,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- FAST VAULT HOOK
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
     if FastVault.Enabled then
@@ -5625,7 +5899,9 @@ if LP.Character then
     pcall(function() hookVault(LP.Character) end)
 end
 
+-- =========================================================
 -- AUTO CARRY LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not S.AutoCarry or KillerBusy then continue end
@@ -5671,7 +5947,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- FPS BOOST LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if S.NoScreenEffects then applyNoScreenEffects() end
@@ -5680,18 +5958,31 @@ task.spawn(function()
     end
 end)
 
-print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- =========================================================
+-- =========================================================
+-- MOONWALK RE-HOOK ON RESPAWN
+-- =========================================================
+LP.CharacterAdded:Connect(function(char)
+    task.wait(2)
+    if Moonwalk.Enabled then
+        print("🔄 [Moonwalk] Re-starting di character baru...")
+        MoonwalkActive = false
+        task.wait(0.5)
+        startMoonwalk()
+    end
+end)
+
+print("   ✅ [10/11] Global State Lock + Logic fitur baru loaded")-- =========================================================
 -- SECTION 11/11 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.3 ✨                   ║")
+print("║  ✨ COSMIC HUB v4.0 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry ON (Distance 14)          ║")
-print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Button MW)                 ║")
+print("║  ⚡ Auto Skill Check (2 MODE) LOCK       ║")
+print("║  🕺 Moonwalk FIXED (Image + MW)          ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -5706,10 +5997,13 @@ print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
 print("║  🔥 Fire Beam 10 efek                    ║")
 print("║  💎 HD Visual + 8 HD Extra               ║")
-print("║  🌌 ESP Nama 2 Mode                      ║")
+print("║  🌌 ESP Nama 2 Mode (Radius 1000)        ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter (PUTIH)           ║")
+print("╠══════════════════════════════════════════╣")
+print("║  🔒 GLOBAL STATE LOCK AKTIF              ║")
+print("║     → Semua fitur GAK BALIK DEFAULT      ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
@@ -5717,4 +6011,6 @@ print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.3 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v4.0 - FINAL LOADED! ✨")
+print("🔒 Mode Instant GAK BISA balik ke Perfect!")
+print("🕺 Moonwalk FIXED di in-game!")

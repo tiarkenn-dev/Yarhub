@@ -613,7 +613,7 @@ end
 
 print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + PARRY RING + 8BIT + KORBLOX + FIRE BEAM + HD
+-- BAGIAN 3/8 : FUNGSI + PARRY RING BEAM + 8BIT + KORBLOX + FIRE BEAM + HD
 -- =========================================================
 
 -- FIRE (KEPALA)
@@ -717,14 +717,14 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 8-BIT ROYAL CROWN (ID: 6975483508)
+-- 8-BIT ROYAL CROWN - PAKAI SPECIALMESH (MUNCUL!)
 -- =========================================================
-eightBitAccessory = nil
+eightBitPart = nil
 
 function clear8Bit()
-    if eightBitAccessory then
-        eightBitAccessory:Destroy()
-        eightBitAccessory = nil
+    if eightBitPart then
+        eightBitPart:Destroy()
+        eightBitPart = nil
     end
 end
 
@@ -744,38 +744,25 @@ function apply8Bit(enable, itemName, size, height)
     local id = EightBitIds[itemName]
     if not id then return end
 
-    local accessory = Instance.new("Accessory")
-    accessory.Name = "Cosmic8Bit"
-
-    local handle = Instance.new("Part")
-    handle.Name = "Handle"
-    handle.Size = Vector3.new(1, 1, 1)
-    handle.CanCollide = false
-    handle.Massless = true
-    handle.Transparency = 1
-    handle.Parent = accessory
+    eightBitPart = Instance.new("Part")
+    eightBitPart.Name = "Cosmic8Bit"
+    eightBitPart.Size = Vector3.new(2, 2, 2) * size
+    eightBitPart.CanCollide = false
+    eightBitPart.Massless = true
+    eightBitPart.Transparency = 0
+    eightBitPart.Parent = head
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
     mesh.MeshId = "rbxassetid://" .. id
-    mesh.Scale = Vector3.new(size, size, size)
-    mesh.Parent = handle
+    mesh.Scale = Vector3.new(1.5, 1.5, 1.5) * size
+    mesh.Parent = eightBitPart
 
-    local attachment = Instance.new("Attachment")
-    attachment.Name = "HatAttachment"
-    attachment.Position = Vector3.new(0, height, 0)
-    attachment.Parent = handle
-
-    accessory.Parent = char
-
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        pcall(function()
-            hum:AddAccessory(accessory)
-        end)
-    end
-
-    eightBitAccessory = accessory
+    local weld = Instance.new("Weld")
+    weld.Part0 = head
+    weld.Part1 = eightBitPart
+    weld.C0 = CFrame.new(0, height * size, 0)
+    weld.Parent = eightBitPart
 end
 
 -- =========================================================
@@ -995,9 +982,7 @@ function applyFireBeam(enable, beamType, color)
     end
 end
 
--- =========================================================
 -- HD VISUAL (8 EXTRA)
--- =========================================================
 hdExtras = {}
 
 function applyHDTexture(s)
@@ -1092,9 +1077,7 @@ function applyHDAntiAliasing(s)
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
         end)
     end
-end
-
--- =========================================================
+end-- =========================================================
 -- ESP SYSTEM
 -- =========================================================
 ESPObjects = {}
@@ -1389,7 +1372,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR (Distance 20, Face 0.3)
+-- AUTO PARRY GACOR
 -- =========================================================
 PARRY_DEBOUNCE = 0.4
 lastParry = 0
@@ -1618,18 +1601,58 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE - GARIS BULAT BOLONG (KARET GELANG)
+-- PARRY CIRCLE - BEAM RING (GARIS BULAT BOLONG)
 -- =========================================================
-parryCircleParts = {}
-PARRY_SEGMENTS = 36  -- Lebih banyak buat garis lebih halus
+parryCirclePart = nil
+parryCircleAttachments = {}
+parryCircleBeams = {}
 
 function clearParryCircle()
-    for _, part in pairs(parryCircleParts) do
-        if part and part.Parent then
-            part:Destroy()
-        end
+    if parryCirclePart then
+        parryCirclePart:Destroy()
+        parryCirclePart = nil
     end
-    parryCircleParts = {}
+    parryCircleAttachments = {}
+    parryCircleBeams = {}
+end
+
+function createParryCircle()
+    clearParryCircle()
+    parryCirclePart = Instance.new("Part")
+    parryCirclePart.Name = "CosmicParryRing"
+    parryCirclePart.Anchored = true
+    parryCirclePart.CanCollide = false
+    parryCirclePart.Transparency = 1
+    parryCirclePart.Size = Vector3.new(1, 0.1, 1)
+    parryCirclePart.Parent = workspace
+
+    local segments = 36
+    for i = 1, segments do
+        local angle = (i / segments) * math.pi * 2
+        local att = Instance.new("Attachment")
+        att.Position = Vector3.new(math.cos(angle), 0, math.sin(angle))
+        att.Parent = parryCirclePart
+        table.insert(parryCircleAttachments, att)
+    end
+
+    for i = 1, segments do
+        local attA = parryCircleAttachments[i]
+        local attB = parryCircleAttachments[i % segments + 1]
+
+        local beam = Instance.new("Beam")
+        beam.Attachment0 = attA
+        beam.Attachment1 = attB
+        beam.Width0 = 0.4
+        beam.Width1 = 0.4
+        beam.FaceCamera = true
+        beam.LightEmission = 1
+        beam.LightInfluence = 0
+        beam.Segments = 1
+        beam.Transparency = NumberSequence.new(0.3)
+        beam.Color = ColorSequence.new(Color3.fromRGB(0, 255, 100))
+        beam.Parent = parryCirclePart
+        table.insert(parryCircleBeams, beam)
+    end
 end
 
 function updateParryCircle()
@@ -1637,6 +1660,10 @@ function updateParryCircle()
     if not S.ParryCircle or not root then
         clearParryCircle()
         return
+    end
+
+    if not parryCirclePart or not parryCirclePart.Parent then
+        createParryCircle()
     end
 
     local radius = S.ParryCircleSize or 15
@@ -1658,31 +1685,18 @@ function updateParryCircle()
     end
 
     local ringColor = killerInside and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(0, 255, 100)
-    local ringTrans = killerInside and 0.2 or 0.3
+    local ringTrans = killerInside and 0.2 or 0.4
 
-    for i = 1, PARRY_SEGMENTS do
-        local angle = (i / PARRY_SEGMENTS) * math.pi * 2
-        local x = math.cos(angle) * radius
-        local z = math.sin(angle) * radius
+    parryCirclePart.Position = Vector3.new(myPos.X, myPos.Y - yOffset, myPos.Z)
 
-        local part = parryCircleParts[i]
-        if not part or not part.Parent then
-            part = Instance.new("Part")
-            part.Name = "CosmicParryRing"
-            part.Anchored = true
-            part.CanCollide = false
-            part.Material = Enum.Material.Neon
-            part.Size = Vector3.new(0.5, 0.1, 0.5)
-            part.Shape = Enum.PartType.Block
-            part.Parent = workspace
-            parryCircleParts[i] = part
-        end
+    for i, att in ipairs(parryCircleAttachments) do
+        local angle = (i / 36) * math.pi * 2
+        att.Position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+    end
 
-        part.Size = Vector3.new(0.6, 0.1, 0.6)
-        part.Position = Vector3.new(myPos.X + x, myPos.Y - yOffset, myPos.Z + z)
-        part.CFrame = CFrame.new(part.Position) * CFrame.Angles(0, -angle, 0)
-        part.Color = ringColor
-        part.Transparency = ringTrans
+    for _, beam in ipairs(parryCircleBeams) do
+        beam.Color = ColorSequence.new(ringColor)
+        beam.Transparency = NumberSequence.new(ringTrans)
     end
 end
 
@@ -2214,7 +2228,7 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Parry Ring + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Parry Ring Beam + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================

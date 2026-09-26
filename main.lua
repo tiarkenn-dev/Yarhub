@@ -73,7 +73,7 @@ end
 _G.Roooor_playSound = playToggleSound
 
 -- =========================================================
--- LOADING GALAXY (RINGAN)
+-- LOADING GALAXY
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
@@ -106,7 +106,6 @@ task.spawn(function()
     end
 end)
 
--- Bintang jatuh (kurangi 30 -> 15, biar ringan)
 for i = 1, 15 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
@@ -300,6 +299,7 @@ _G.RoooorS = _G.RoooorS or {
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false,
     Korblox = false, KorbloxType = "Pencil",
+    KorbloxYOffset = 0, KorbloxScale = 1,
     Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
@@ -352,14 +352,14 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY GACOR
+-- AUTO PARRY (GACOR SETTING)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
-    ParryDistance = 20,
+    ParryDistance = 20,        -- ← ATAS: 10 (max distance 20)
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.3,
-    RequireFacing = true,
+    FaceSensitivity = -1,      -- ← TENGAH: -1 (semua arah)
+    RequireFacing = false,     -- ← Karena FaceSensitivity -1
     Wiggle = false,
     WiggleSpam = 5,
 }
@@ -370,22 +370,20 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- 8-BIT ROYAL CROWN (ID dari aku)
 EightBitList = {
     "Royal Crown",
 }
 
 EightBitIds = {
-    ["Royal Crown"] = 6975483508,
+    ["Royal Crown"] = 10138606900,
 }
 
--- KORBLOX PENCIL (ID dari aku)
 KorbloxList = {
     "Pencil",
 }
 
 KorbloxIds = {
-    ["Pencil"] = 74103327,
+    ["Pencil"] = 902942093,
 }
 
 FireBeamList = {
@@ -430,9 +428,9 @@ Combat = _G.Roooor_Combat or {
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   8-Bit Crown : ID dari aku (6975483508)")
-print("   Korblox     : ID dari aku (74103327)")
-print("   Auto Parry  : GACOR (Distance 20, Face 0.3)")-- =========================================================
+print("   Auto Parry  : GACOR (Distance 20, Face -1)")
+print("   8-Bit Crown : ID 10138606900 (client-only)")
+print("   Korblox     : ID 902942093 (client-only)")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -613,7 +611,7 @@ end
 
 print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + PARRY RING BEAM + 8BIT + KORBLOX + FIRE BEAM + HD
+-- BAGIAN 3/8 : FUNGSI + KORBLOX CLIENT + 8BIT CLIENT + PARRY RING
 -- =========================================================
 
 -- FIRE (KEPALA)
@@ -717,7 +715,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 8-BIT ROYAL CROWN - PAKAI SPECIALMESH (MUNCUL!)
+-- 8-BIT ROYAL CROWN (CLIENT-ONLY, WORKS)
 -- =========================================================
 eightBitPart = nil
 
@@ -737,15 +735,11 @@ function apply8Bit(enable, itemName, size, height)
     local head = char:FindFirstChild("Head")
     if not head then return end
 
-    itemName = itemName or S.EightBitType or "Royal Crown"
     size = size or S.EightBitSize or 1
     height = height or S.EightBitHeight or 1.5
 
-    local id = EightBitIds[itemName]
-    if not id then return end
-
     eightBitPart = Instance.new("Part")
-    eightBitPart.Name = "Cosmic8Bit"
+    eightBitPart.Name = "Client8Bit"
     eightBitPart.Size = Vector3.new(2, 2, 2) * size
     eightBitPart.CanCollide = false
     eightBitPart.Massless = true
@@ -754,7 +748,8 @@ function apply8Bit(enable, itemName, size, height)
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = "rbxassetid://" .. id
+    mesh.MeshId = "rbxassetid://10138606900"
+    mesh.TextureId = "rbxassetid://10138606949"
     mesh.Scale = Vector3.new(1.5, 1.5, 1.5) * size
     mesh.Parent = eightBitPart
 
@@ -766,68 +761,94 @@ function apply8Bit(enable, itemName, size, height)
 end
 
 -- =========================================================
--- KORBLOX PENCIL (ID: 74103327) - KAKI ASLI DIHAPUS
+-- KORBLOX PENCIL (CLIENT-ONLY, AUTO-SCALE + Y OFFSET)
 -- =========================================================
-korbloxMesh = nil
-korbloxOriginalTrans = nil
+korbloxParts = {}
+korbloxOrigData = {}
 
 function clearKorblox()
-    if korbloxMesh then
-        korbloxMesh:Destroy()
-        korbloxMesh = nil
-    end
-    local char = LP.Character
-    if char then
-        local rightLeg = char:FindFirstChild("Right Leg")
-            or char:FindFirstChild("RightUpperLeg")
-            or char:FindFirstChild("RightLowerLeg")
-        if rightLeg and korbloxOriginalTrans ~= nil then
-            rightLeg.Transparency = korbloxOriginalTrans
-            korbloxOriginalTrans = nil
+    for _, part in pairs(korbloxParts) do
+        if part and part.Parent then
+            part:Destroy()
         end
     end
+    korbloxParts = {}
+
+    local char = LP.Character
+    if char then
+        for legName, data in pairs(korbloxOrigData) do
+            local leg = char:FindFirstChild(legName)
+            if leg then
+                leg.Transparency = data.trans
+                leg.CanCollide = data.collide
+            end
+        end
+    end
+    korbloxOrigData = {}
 end
 
-function applyKorblox(enable, mode)
+function applyKorblox(enable, mode, yOffset, scale)
     clearKorblox()
     if not enable then return end
 
+    yOffset = yOffset or S.KorbloxYOffset or 0
+    scale = scale or S.KorbloxScale or 1
+
     local char = LP.Character
     if not char then return end
-    local rightLeg = char:FindFirstChild("Right Leg")
-        or char:FindFirstChild("RightUpperLeg")
-        or char:FindFirstChild("RightLowerLeg")
-    if not rightLeg then return end
 
-    mode = mode or S.KorbloxType or "Pencil"
-    local id = KorbloxIds[mode]
-    if not id then return end
-
-    if korbloxOriginalTrans == nil then
-        korbloxOriginalTrans = rightLeg.Transparency
+    local legParts = {}
+    for _, name in ipairs({
+        "Right Leg", "RightUpperLeg", "RightLowerLeg", "RightFoot",
+        "Right Knee", "Right Hip"
+    }) do
+        local leg = char:FindFirstChild(name)
+        if leg then
+            table.insert(legParts, leg)
+        end
     end
 
-    rightLeg.Transparency = 1
+    if #legParts == 0 then return end
 
-    korbloxMesh = Instance.new("Part")
-    korbloxMesh.Name = "CosmicKorblox"
-    korbloxMesh.Size = rightLeg.Size
-    korbloxMesh.CanCollide = false
-    korbloxMesh.Massless = true
-    korbloxMesh.Transparency = 0
-    korbloxMesh.Parent = char
+    for _, leg in ipairs(legParts) do
+        korbloxOrigData[leg.Name] = {
+            trans = leg.Transparency,
+            collide = leg.CanCollide,
+        }
+        leg.Transparency = 1
+        leg.CanCollide = false
+    end
+
+    local mainPart = legParts[1]
+
+    local korbloxPart = Instance.new("Part")
+    korbloxPart.Name = "ClientKorblox"
+    korbloxPart.Size = mainPart.Size
+    korbloxPart.CanCollide = false
+    korbloxPart.Massless = true
+    korbloxPart.Transparency = 0
+    korbloxPart.Parent = char
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = "rbxassetid://" .. id
-    mesh.Scale = Vector3.new(1, 1, 1)
-    mesh.Parent = korbloxMesh
+    mesh.MeshId = "rbxassetid://902942093"
+    mesh.TextureId = "rbxassetid://902843398"
+
+    local legSize = mainPart.Size
+    mesh.Scale = Vector3.new(
+        legSize.X * scale,
+        legSize.Y * scale,
+        legSize.Z * scale
+    )
+    mesh.Parent = korbloxPart
 
     local weld = Instance.new("Weld")
-    weld.Part0 = rightLeg
-    weld.Part1 = korbloxMesh
-    weld.C0 = CFrame.new(0, 0, 0)
-    weld.Parent = korbloxMesh
+    weld.Part0 = mainPart
+    weld.Part1 = korbloxPart
+    weld.C0 = CFrame.new(0, yOffset, 0)
+    weld.Parent = korbloxPart
+
+    table.insert(korbloxParts, korbloxPart)
 end
 
 -- =========================================================
@@ -982,7 +1003,9 @@ function applyFireBeam(enable, beamType, color)
     end
 end
 
+-- =========================================================
 -- HD VISUAL (8 EXTRA)
+-- =========================================================
 hdExtras = {}
 
 function applyHDTexture(s)
@@ -1372,9 +1395,9 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR
+-- AUTO PARRY GACOR (Distance 20, Face -1)
 -- =========================================================
-PARRY_DEBOUNCE = 0.4
+PARRY_DEBOUNCE = 0.5
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
@@ -2228,7 +2251,7 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Parry Ring Beam + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Korblox Client + 8Bit Client + Parry Ring loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -3526,16 +3549,16 @@ makeTab("Survivor", "🏃", 1, function()
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, 0.3, function(v)
+    sl("Face Sensitivity", -1, 1, -1, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
-    lbl("0.3 = GACOR (recommended)", C.GRN)
+    lbl("-1 = GACOR (semua arah)", C.GRN)
 
-    sl("Parry Debounce", 0.05, 1, 0.4, function(v)
+    sl("Parry Debounce", 0.05, 1, 0.5, function(v)
         PARRY_DEBOUNCE = v
     end)
-    lbl("0.4 = GACOR (sweet spot)", C.FIRE_BRIGHT)
+    lbl("0.5 = sweet spot", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check", "⚡")
     tog("Enable Auto Skill Check", false, function(s)
@@ -3941,8 +3964,8 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    -- 8-BIT ROYAL CROWN
-    sec("8-Bit Royal Crown", "👑")
+    -- 8-BIT ROYAL CROWN (CLIENT-ONLY)
+    sec("8-Bit Royal Crown (Client)", "👑")
     tog("Enable 8-Bit Crown", false, function(s)
         S.EightBitOn = s
         apply8Bit(s, "Royal Crown", S.EightBitSize, S.EightBitHeight)
@@ -3959,17 +3982,29 @@ makeTab("Visual", "✨", 7, function()
             apply8Bit(true, "Royal Crown", S.EightBitSize, v)
         end
     end)
-    lbl("ID dari script (works)", C.GRN)
+    lbl("Cuma KAMU yang bisa lihat", C.GRN)
 
-    -- KORBLOX
-    sec("Korblox Pencil (Right Leg)", "🦴")
+    -- KORBLOX (CLIENT-ONLY)
+    sec("Korblox Pencil (Client)", "🦴")
     tog("Enable Korblox", false, function(s)
         S.Korblox = s
-        applyKorblox(s, "Pencil")
+        applyKorblox(s, "Pencil", S.KorbloxYOffset, S.KorbloxScale)
     end)
-    lbl("Kaki asli dihapus + ganti Korblox", C.FIRE_BRIGHT)
+    sl("Korblox Y (Atas/Bawah)", -2, 2, 0, function(v)
+        S.KorbloxYOffset = v
+        if S.Korblox then
+            applyKorblox(true, "Pencil", v, S.KorbloxScale)
+        end
+    end)
+    sl("Korblox Scale (Besar/Kecil)", 0.3, 3, 1, function(v)
+        S.KorbloxScale = v
+        if S.Korblox then
+            applyKorblox(true, "Pencil", S.KorbloxYOffset, v)
+        end
+    end)
+    lbl("Cuma KAMU yang bisa lihat", C.GRN)
 
-    -- FIRE BEAM
+    -- FIRE BEAM (10 EFEK)
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -4395,14 +4430,17 @@ task.spawn(function()
     end
 end)
 
+-- AUTO RE-APPLY SAAT RESPAWN
 LP.CharacterAdded:Connect(function(char)
-    task.wait(1.2)
+    task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
     if S.FireFeetOn then pcall(applyFireFeet) end
     if S.EightBitOn then
         pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
     end
-    if S.Korblox then pcall(function() applyKorblox(true, "Pencil") end) end
+    if S.Korblox then
+        pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
+    end
     if S.FireBeamOn then pcall(function() applyFireBeam(true, S.FireBeamType, S.FireBeamColor) end) end
     if S.Trail then pcall(function() applyTrail(true, S.TrailColor) end) end
     if S.Aura then pcall(function() applyAura(true, S.AuraColor) end) end
@@ -4445,6 +4483,9 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 
+-- =========================================================
+-- TAB 9: COMBAT
+-- =========================================================
 makeTab("Combat", "⚔️", 9, function()
     sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
     tog("Enable Aimbot", false, function(s)
@@ -4485,6 +4526,9 @@ makeTab("Combat", "⚔️", 9, function()
     lbl("Hold tombol attack = aimbot ON", C.FIRE_BRIGHT)
 end)
 
+-- =========================================================
+-- TAB 10: EXTRA
+-- =========================================================
 makeTab("Extra", "✨", 10, function()
     sec("Teleport", "🌀")
     btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
@@ -4496,20 +4540,21 @@ makeTab("Extra", "✨", 10, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
+-- PRINT FINAL
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry GACOR                     ║")
+print("║  🛡️ Auto Parry GACOR (Distance 20)       ║")
 print("║  ⚡ Auto Skill Check                     ║")
-print("║  ⭕ Parry Circle GARIS BULAT BOLONG       ║")
+print("║  ⭕ Parry Circle BEAM RING                ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
 print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
 print("║  🛡️ God Mode                             ║")
-print("║  👑 8-Bit Royal Crown (ID dari aku)      ║")
-print("║  🦴 Korblox Pencil (ID dari aku)         ║")
+print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
+print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
 print("║  🔥 Fire Beam 10 efek                    ║")
 print("║  💎 HD Visual + 8 HD Extra               ║")
 print("║  👤 Headless (di Misc)                   ║")

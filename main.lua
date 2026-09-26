@@ -301,12 +301,16 @@ _G.RoooorS = _G.RoooorS or {
     ParryCircle = false, ParryCircleSize = 15,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
-    NoClip = false, Korblox = false, Headless = false,
+    NoClip = false,
+    Korblox = false, KorbloxType = "Deathspeaker",
+    Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
-    EightBitCrown = false, EightBitSize = 1, CrownX = 0, CrownY = 1.2, CrownZ = 0,
+    -- 8-BIT ITEM
+    EightBitOn = false, EightBitType = "Royal Crown",
+    EightBitSize = 1, EightBitHeight = 1.5,
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
@@ -360,25 +364,40 @@ AutoParry = _G.Roooor_AutoParry or {
 }
 _G.Roooor_AutoParry = AutoParry
 
--- FAST VAULT (BYPASS SKILL)
-FastVault = _G.Roooor_FastVault or {
-    Enabled = false,
-    Speed = 1.5,
-    ReplaceMap = {
-        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
-        ["rbxassetid://126081405469607"] = "rbxassetid://136962284480779",
-    },
-}
-_G.Roooor_FastVault = FastVault
-
+-- AUTO SKILL CHECK
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
-_G.Roooor_AimlockBtn = _G.Roooor_AimlockBtn or {
-    Enabled = true, ShowButton = false, Holding = false,
-    Mode = "Killer", Radius = 500, LockRadius = 50, Strength = 0.4,
+-- 8-BIT ITEM LIST
+EightBitList = {
+    "Royal Crown",
+    "Big Bertha Sword",
+    "Diamond Axe",
+    "Enchanted Diamond Sword",
+    "Skull",
+}
+
+EightBitIds = {
+    ["Royal Crown"] = "rbxassetid://10159600649",
+    ["Big Bertha Sword"] = "rbxassetid://89787109276629",
+    ["Diamond Axe"] = "rbxassetid://128213278917461",
+    ["Enchanted Diamond Sword"] = "rbxassetid://79607595516051",
+    ["Skull"] = "rbxassetid://14535450117",
+}
+
+-- KORBLOX LIST
+KorbloxList = {
+    "Deathspeaker",
+    "Pencil",
+    "Pirate",
+}
+
+KorbloxIds = {
+    ["Deathspeaker"] = "rbxassetid://139607718",
+    ["Pencil"] = "rbxassetid://129701348614901",
+    ["Pirate"] = "rbxassetid://111464125231349",
 }
 
 GodMode = _G.Roooor_GodMode or {
@@ -386,7 +405,7 @@ GodMode = _G.Roooor_GodMode or {
 }
 _G.Roooor_GodMode = GodMode
 
--- AIMBOT - LANGSUNG NEMPEL (INSTAN)
+-- AIMBOT (INSTAN NEMPEL)
 Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
@@ -405,16 +424,18 @@ Combat = _G.Roooor_Combat or {
     TriggerDelay = 0.05,
     HitboxSurvivor = false,
     HitboxKiller = false,
-    HitboxSize = 15,
+    HitboxSize = 25,
     HitboxVisible = false,
 }
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
 print("   Auto Parry : FALLENS Style")
-print("   Fast Vault : BYPASS SKILL (semua objek)")
-print("   Parry Circle: HIJAU/MERAH (auto)")
-print("   Aimbot     : INSTAN + Hold to Aim")-- =========================================================
+print("   Auto Skill : ON")
+print("   8-Bit Item : 5 pilihan (size + height)")
+print("   Korblox    : 3 pilihan")
+print("   Aimbot     : INSTAN + Hold to Aim")
+print("   Hitbox     : 25 (besar)")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -593,19 +614,9 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
--- =========================================================
--- VAULT ANIMS (BUAT FAST VAULT)
--- =========================================================
-VaultAnims = {
-    -- Running Vault (yang diganti)
-    ["rbxassetid://83873880822918"] = true,
-    -- Walking Vault (yang diganti)
-    ["rbxassetid://126081405469607"] = true,
-}
-
-print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims + VaultAnims loaded")-- =========================================================
+print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + AUTO PARRY FALLENS + FAST VAULT + PARRY CIRCLE
+-- BAGIAN 3/8 : FUNGSI + AUTO PARRY + 8BIT + KORBLOX + PARRY CIRCLE
 -- =========================================================
 
 -- ============================
@@ -709,7 +720,6 @@ task.spawn(function()
                 end
             end
         end
-
         if S.FireFeetOn and LP.Character then
             local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
             if cfg.rainbow then
@@ -731,45 +741,64 @@ task.spawn(function()
     end
 end)
 
--- ============================
--- 8-BIT CROWN
--- ============================
-function apply8BitCrown(enable, size, posX, posY, posZ)
+-- =========================================================
+-- 8-BIT ITEM (DROPDOWN + SIZE + HEIGHT + EFEK)
+-- =========================================================
+eightBitPart = nil
+eightBitSparkles = nil
+eightBitTrail = nil
+
+function clear8Bit()
+    if eightBitPart then eightBitPart:Destroy(); eightBitPart = nil end
+    if eightBitSparkles then eightBitSparkles:Destroy(); eightBitSparkles = nil end
+    if eightBitTrail then eightBitTrail:Destroy(); eightBitTrail = nil end
+end
+
+function apply8Bit(enable, itemName, size, height)
+    clear8Bit()
+    if not enable then return end
+
     local char = LP.Character
     if not char then return end
     local head = char:FindFirstChild("Head")
     if not head then return end
 
-    local old = head:FindFirstChild("Roooor8BitCrown")
-    if old then old:Destroy() end
-    if not enable then return end
+    itemName = itemName or S.EightBitType or "Royal Crown"
+    size = size or S.EightBitSize or 1
+    height = height or S.EightBitHeight or 1.5
 
-    size = size or 1
-    posX = posX or 0
-    posY = posY or 1.2
-    posZ = posZ or 0
+    local id = EightBitIds[itemName]
+    if not id then return end
 
-    local crown = Instance.new("Part")
-    crown.Name = "Roooor8BitCrown"
-    crown.Size = Vector3.new(2, 1.5, 2) * size
-    crown.CanCollide = false
-    crown.Massless = true
-    crown.Transparency = 0
-    crown.Parent = head
+    -- Base part
+    eightBitPart = Instance.new("Part")
+    eightBitPart.Name = "Cosmic8Bit"
+    eightBitPart.Size = Vector3.new(2, 2, 2) * size
+    eightBitPart.CanCollide = false
+    eightBitPart.Massless = true
+    eightBitPart.Transparency = 0
+    eightBitPart.Parent = head
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = "rbxassetid://10138606900"
-    mesh.TextureId = "rbxassetid://10138606949"
+    mesh.MeshId = id
     mesh.Scale = Vector3.new(1.5, 1.5, 1.5) * size
-    mesh.Parent = crown
+    mesh.Parent = eightBitPart
 
     local weld = Instance.new("Weld")
     weld.Part0 = head
-    weld.Part1 = crown
-    weld.C0 = CFrame.new(posX * size, posY * size, posZ * size)
-    weld.Parent = crown
+    weld.Part1 = eightBitPart
+    weld.C0 = CFrame.new(0, height * size, 0)
+    weld.Parent = eightBitPart
 
+    -- Efek Sparkles
+    eightBitSparkles = Instance.new("Sparkles")
+    eightBitSparkles.Name = "Cosmic8BitSparkle"
+    eightBitSparkles.SparkleColor = Color3.fromRGB(0, 230, 255)
+    eightBitSparkles.SparkleSize = 2 * size
+    eightBitSparkles.Parent = eightBitPart
+
+    -- Efek Particle
     local emitter = Instance.new("ParticleEmitter")
     emitter.Texture = "rbxassetid://243660364"
     emitter.Rate = 15
@@ -789,7 +818,92 @@ function apply8BitCrown(enable, size, posX, posY, posZ)
         ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 255, 255)),
         ColorSequenceKeypoint.new(1.0, Color3.fromRGB(120, 60, 255))
     })
-    emitter.Parent = crown
+    emitter.Parent = eightBitPart
+
+    -- Efek Trail (glow ungu)
+    local attachment0 = Instance.new("Attachment")
+    attachment0.Position = Vector3.new(0, 1 * size, 0)
+    attachment0.Parent = eightBitPart
+
+    local attachment1 = Instance.new("Attachment")
+    attachment1.Position = Vector3.new(0, -1 * size, 0)
+    attachment1.Parent = eightBitPart
+
+    eightBitTrail = Instance.new("Trail")
+    eightBitTrail.Attachment0 = attachment0
+    eightBitTrail.Attachment1 = attachment1
+    eightBitTrail.Lifetime = 0.5
+    eightBitTrail.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 200)),
+    })
+    eightBitTrail.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.3),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    eightBitTrail.Parent = eightBitPart
+end
+
+-- =========================================================
+-- KORBLOX (3 PILIHAN)
+-- =========================================================
+korbloxPart = nil
+
+function clearKorblox()
+    if korbloxPart then korbloxPart:Destroy(); korbloxPart = nil end
+    -- Restore kaki asli
+    local char = LP.Character
+    if char then
+        local rightLeg = char:FindFirstChild("Right Leg")
+            or char:FindFirstChild("RightUpperLeg")
+            or char:FindFirstChild("RightLowerLeg")
+        if rightLeg then
+            rightLeg.Transparency = 0
+            rightLeg.CanCollide = true
+        end
+    end
+end
+
+function applyKorblox(enable, mode)
+    clearKorblox()
+    if not enable then return end
+
+    local char = LP.Character
+    if not char then return end
+    local rightLeg = char:FindFirstChild("Right Leg")
+        or char:FindFirstChild("RightUpperLeg")
+        or char:FindFirstChild("RightLowerLeg")
+    if not rightLeg then return end
+
+    mode = mode or S.KorbloxType or "Deathspeaker"
+    local id = KorbloxIds[mode]
+    if not id then return end
+
+    -- Sembunyiin kaki asli
+    rightLeg.Transparency = 1
+    rightLeg.CanCollide = false
+
+    -- Bikin mesh Korblox
+    korbloxPart = Instance.new("Part")
+    korbloxPart.Name = "CosmicKorblox"
+    korbloxPart.Size = rightLeg.Size
+    korbloxPart.CanCollide = false
+    korbloxPart.Massless = true
+    korbloxPart.Transparency = 0
+    korbloxPart.Parent = char
+
+    local mesh = Instance.new("SpecialMesh")
+    mesh.MeshType = Enum.MeshType.FileMesh
+    mesh.MeshId = id
+    mesh.Scale = Vector3.new(1, 1, 1) * (rightLeg.Size.Y / 2)
+    mesh.Parent = korbloxPart
+
+    local weld = Instance.new("Weld")
+    weld.Part0 = rightLeg
+    weld.Part1 = korbloxPart
+    weld.C0 = CFrame.new(0, 0, 0)
+    weld.Parent = korbloxPart
 end
 
 -- =========================================================
@@ -1087,7 +1201,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY FALLENS STYLE
+-- AUTO PARRY FALLENS
 -- =========================================================
 PARRY_DEBOUNCE = 0.5
 lastParry = 0
@@ -1235,125 +1349,6 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- FAST VAULT (BYPASS SKILL - GANTI SLOW VAULT JADI FAST)
--- =========================================================
-VaultTracks = {}
-
-local function normalizeId(id)
-    local num = tostring(id):match("%d+")
-    return num and ("rbxassetid://" .. num)
-end
-
-local function hookVault(char)
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then return end
-
-    animator.AnimationPlayed:Connect(function(track)
-        if not FastVault.Enabled then return end
-
-        local anim = track.Animation
-        if not anim or not anim.AnimationId then return end
-
-        local id = normalizeId(anim.AnimationId)
-        if not id then return end
-
-        local replaceId = FastVault.ReplaceMap[id]
-        if not replaceId then return end
-
-        if VaultTracks[track] then return end
-        VaultTracks[track] = true
-
-        track:Stop()
-
-        local newAnim = Instance.new("Animation")
-        newAnim.AnimationId = replaceId
-
-        local newTrack = animator:LoadAnimation(newAnim)
-        newTrack.Priority = Enum.AnimationPriority.Action
-        newTrack:Play()
-        newTrack:AdjustSpeed(FastVault.Speed)
-
-        newTrack.Stopped:Connect(function()
-            VaultTracks[track] = nil
-        end)
-    end)
-end
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if FastVault.Enabled and LP.Character then
-            hookVault(LP.Character)
-        end
-    end
-end)
-
--- =========================================================
--- PARRY CIRCLE HIJAU/MERAH (AUTO)
--- =========================================================
-_G.Roooor_ParryCircle = nil
-
-function updateParryCircle()
-    local root = getRoot()
-    if not S.ParryCircle or not root then
-        if _G.Roooor_ParryCircle then
-            _G.Roooor_ParryCircle:Destroy()
-            _G.Roooor_ParryCircle = nil
-        end
-        return
-    end
-
-    if not _G.Roooor_ParryCircle then
-        _G.Roooor_ParryCircle = Instance.new("Part")
-        _G.Roooor_ParryCircle.Shape = Enum.PartType.Cylinder
-        _G.Roooor_ParryCircle.Anchored = true
-        _G.Roooor_ParryCircle.CanCollide = false
-        _G.Roooor_ParryCircle.Material = Enum.Material.Neon
-        _G.Roooor_ParryCircle.Name = "CosmicParryCircle"
-        _G.Roooor_ParryCircle.Parent = workspace
-    end
-
-    local size = (S.ParryCircleSize or 15) * 2
-    _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
-    local yOffset = root.Size.Y / 2 + 1.5
-    _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
-        * CFrame.Angles(0, 0, math.rad(90))
-
-    -- Cek ada killer dalam radius?
-    local myPos = root.Position
-    local radius = S.ParryCircleSize or 15
-    local killerInside = false
-
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
-            local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
-            if eRoot then
-                local dist = (eRoot.Position - myPos).Magnitude
-                if dist <= radius then
-                    killerInside = true
-                    break
-                end
-            end
-        end
-    end
-
-    -- Hijau (aman) / Merah (bahaya)
-    if killerInside then
-        _G.Roooor_ParryCircle.Color = Color3.fromRGB(255, 40, 40)  -- MERAH
-        _G.Roooor_ParryCircle.Transparency = 0.3
-    else
-        _G.Roooor_ParryCircle.Color = Color3.fromRGB(0, 255, 100)  -- HIJAU
-        _G.Roooor_ParryCircle.Transparency = 0.5
-    end
-end
-
-RunService.RenderStepped:Connect(function()
-    if S.ParryCircle then updateParryCircle() end
-end)
-
--- =========================================================
 -- AUTO SKILL CHECK
 -- =========================================================
 function pressSpace()
@@ -1434,6 +1429,67 @@ task.spawn(function()
     if SkillCheck.Enabled then
         startSkillCheck()
     end
+end)
+
+-- =========================================================
+-- PARRY CIRCLE HIJAU/MERAH
+-- =========================================================
+_G.Roooor_ParryCircle = nil
+
+function updateParryCircle()
+    local root = getRoot()
+    if not S.ParryCircle or not root then
+        if _G.Roooor_ParryCircle then
+            _G.Roooor_ParryCircle:Destroy()
+            _G.Roooor_ParryCircle = nil
+        end
+        return
+    end
+
+    if not _G.Roooor_ParryCircle then
+        _G.Roooor_ParryCircle = Instance.new("Part")
+        _G.Roooor_ParryCircle.Shape = Enum.PartType.Cylinder
+        _G.Roooor_ParryCircle.Anchored = true
+        _G.Roooor_ParryCircle.CanCollide = false
+        _G.Roooor_ParryCircle.Material = Enum.Material.Neon
+        _G.Roooor_ParryCircle.Name = "CosmicParryCircle"
+        _G.Roooor_ParryCircle.Parent = workspace
+    end
+
+    local size = (S.ParryCircleSize or 15) * 2
+    _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
+    local yOffset = root.Size.Y / 2 + 1.5
+    _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
+        * CFrame.Angles(0, 0, math.rad(90))
+
+    local myPos = root.Position
+    local radius = S.ParryCircleSize or 15
+    local killerInside = false
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+            local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
+            if eRoot then
+                local dist = (eRoot.Position - myPos).Magnitude
+                if dist <= radius then
+                    killerInside = true
+                    break
+                end
+            end
+        end
+    end
+
+    if killerInside then
+        _G.Roooor_ParryCircle.Color = Color3.fromRGB(255, 40, 40)
+        _G.Roooor_ParryCircle.Transparency = 0.3
+    else
+        _G.Roooor_ParryCircle.Color = Color3.fromRGB(0, 255, 100)
+        _G.Roooor_ParryCircle.Transparency = 0.5
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if S.ParryCircle then updateParryCircle() end
 end)
 
 -- =========================================================
@@ -1654,9 +1710,7 @@ function applyContrast()
     end
 end
 
--- =========================================================
 -- HD RINGAN
--- =========================================================
 hdBoostOrig = nil
 hdShaderObj = nil
 hdSkyOrig = nil
@@ -1741,47 +1795,7 @@ function applyHDSky(s)
     end
 end
 
-KorbloxOrig = nil
-function applyKorblox(s)
-    local char = LP.Character
-    if not char then return end
-    local rightLeg = char:FindFirstChild("Right Leg")
-        or char:FindFirstChild("RightUpperLeg")
-        or char:FindFirstChild("RightLowerLeg")
-    if not rightLeg then return end
-
-    if s then
-        if not KorbloxOrig then
-            KorbloxOrig = { Transparency = rightLeg.Transparency, CanCollide = rightLeg.CanCollide }
-        end
-        rightLeg.Transparency = 1
-        rightLeg.CanCollide = false
-    else
-        if KorbloxOrig then
-            rightLeg.Transparency = KorbloxOrig.Transparency
-            rightLeg.CanCollide = KorbloxOrig.CanCollide
-            KorbloxOrig = nil
-        else
-            rightLeg.Transparency = 0
-            rightLeg.CanCollide = true
-        end
-    end
-end
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if S.Korblox and LP.Character then
-            local rightLeg = LP.Character:FindFirstChild("Right Leg")
-                or LP.Character:FindFirstChild("RightUpperLeg")
-                or LP.Character:FindFirstChild("RightLowerLeg")
-            if rightLeg and rightLeg.Transparency ~= 1 then
-                rightLeg.Transparency = 1
-                rightLeg.CanCollide = false
-            end
-        end
-    end
-end)
-
+-- HEADLESS
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -1822,6 +1836,7 @@ task.spawn(function()
     end
 end)
 
+-- TRAIL / AURA / KILL EFFECT / CROSSHAIR / ZOOM / FLY
 trailFireObj = nil
 function applyTrail(enable, color)
     local char = LP.Character
@@ -1855,13 +1870,6 @@ function applyTrail(enable, color)
     fire.Color = color or Color3.fromRGB(120, 60, 255)
     fire.SecondaryColor = Color3.fromRGB(0, 230, 255)
     fire.Parent = trailFireObj
-
-    local smoke = Instance.new("Smoke")
-    smoke.Size = 6
-    smoke.RiseVelocity = 5
-    smoke.Opacity = 0.5
-    smoke.Color = Color3.fromRGB(50, 50, 50)
-    smoke.Parent = trailFireObj
 
     local spark = Instance.new("Sparkles")
     spark.SparkleColor = color or Color3.fromRGB(0, 230, 255)
@@ -2017,7 +2025,8 @@ end
 
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
-_G.Roooor_apply8BitCrown = apply8BitCrown
+_G.Roooor_apply8Bit = apply8Bit
+_G.Roooor_applyKorblox = applyKorblox
 _G.Roooor_createESP = createESP
 _G.Roooor_removeESP = removeESP
 _G.Roooor_createStatusESP = createStatusESP
@@ -2032,7 +2041,6 @@ _G.Roooor_applySky = applySky
 _G.Roooor_applyFOV = applyFOV
 _G.Roooor_applyUltraHD = applyUltraHD
 _G.Roooor_applyContrast = applyContrast
-_G.Roooor_applyKorblox = applyKorblox
 _G.Roooor_applyHeadless = applyHeadless
 _G.Roooor_applyTrail = applyTrail
 _G.Roooor_applyAura = applyAura
@@ -2047,9 +2055,8 @@ _G.Roooor_stopFly = stopFly
 _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
-_G.Roooor_hookVault = hookVault
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry Fallens + Fast Vault + Parry Circle Hijau/Merah loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry + 8Bit + Korblox + Parry Circle loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -2186,9 +2193,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- KILL FEED
--- =========================================================
 killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "CosmicKillFeed"
 killFeedGui.ResetOnSpawn = false
@@ -2260,9 +2265,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- NOTIFIKASI KILLER STUN
--- =========================================================
 stunIcons = {}
 
 function createStunIcon(killerChar)
@@ -2374,9 +2377,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- KILLER KILL ALL
--- =========================================================
 task.spawn(function()
     while task.wait(0.4) do
         if S.Killer_KillAll and LP.Character then
@@ -2436,9 +2437,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- MAIN ESP LOOP (HEARTBEAT)
--- =========================================================
+-- MAIN ESP LOOP
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
@@ -2525,7 +2524,7 @@ end)
 
 print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + AIMLOCK + PANEL
+-- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
 gui.Name = "CosmicHub"
@@ -2702,153 +2701,6 @@ UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
-    end
-end)
-
--- =========================================================
--- AIMLOCK FLOATING BUTTON
--- =========================================================
-aimBtnGui = Instance.new("ScreenGui")
-aimBtnGui.Name = "CosmicAimlockBtn"
-aimBtnGui.ResetOnSpawn = false
-aimBtnGui.IgnoreGuiInset = true
-aimBtnGui.Parent = PG
-
-aimContainer = Instance.new("Frame")
-aimContainer.Size = UDim2.new(0, 40, 0, 40)
-aimContainer.Position = UDim2.new(0, 15, 0.4, 0)
-aimContainer.BackgroundTransparency = 1
-aimContainer.Parent = aimBtnGui
-
-local aimOuterRing = Instance.new("Frame")
-aimOuterRing.Size = UDim2.new(1, 6, 1, 6)
-aimOuterRing.Position = UDim2.new(0, -3, 0, -3)
-aimOuterRing.BackgroundTransparency = 1
-aimOuterRing.Parent = aimContainer
-
-local aimOuterStroke = Instance.new("UIStroke")
-aimOuterStroke.Thickness = 2
-aimOuterStroke.Color = C.ACC2
-aimOuterStroke.Transparency = 0.1
-aimOuterStroke.Parent = aimOuterRing
-
-local aimOuterGrad = Instance.new("UIGradient")
-aimOuterGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-aimOuterGrad.Parent = aimOuterStroke
-
-local aimBtn = Instance.new("TextButton")
-aimBtn.Size = UDim2.new(1, -8, 1, -8)
-aimBtn.Position = UDim2.new(0, 4, 0, 4)
-aimBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
-aimBtn.Text = "🎯"
-aimBtn.TextColor3 = C.ACC2
-aimBtn.TextSize = 18
-aimBtn.Font = Enum.Font.GothamBlack
-aimBtn.BorderSizePixel = 0
-aimBtn.AutoButtonColor = false
-aimBtn.Parent = aimContainer
-rnd(aimBtn, 999)
-
-local aimBtnGrad = Instance.new("UIGradient")
-aimBtnGrad.Color = ColorSequence.new(
-    Color3.fromRGB(60, 30, 120),
-    Color3.fromRGB(25, 15, 50),
-    Color3.fromRGB(60, 30, 120)
-)
-aimBtnGrad.Rotation = 45
-aimBtnGrad.Parent = aimBtn
-
-local aimModeLbl = Instance.new("TextLabel")
-aimModeLbl.Size = UDim2.new(0, 100, 0, 14)
-aimModeLbl.Position = UDim2.new(0.5, -50, 1, 2)
-aimModeLbl.BackgroundTransparency = 1
-aimModeLbl.Text = "KILLER"
-aimModeLbl.TextColor3 = C.ACC4
-aimModeLbl.TextSize = 9
-aimModeLbl.Font = Enum.Font.GothamBlack
-aimModeLbl.TextStrokeTransparency = 0.3
-aimModeLbl.Parent = aimBtn
-
-task.spawn(function()
-    local t = 0
-    while aimContainer.Parent do
-        t = t + 0.03
-        aimOuterRing.Rotation = t * 60
-        aimOuterGrad.Rotation = t * 100
-        local pulse = (math.sin(t * 4) + 1) / 2
-        aimOuterStroke.Transparency = Combat.Holding and (0.1 - pulse * 0.1) or (0.5 - pulse * 0.3)
-        task.wait(0.03)
-    end
-end)
-
-aimDragging, aimDS, aimDP, aimWasDragged = false, nil, nil, false
-
-aimContainer.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        aimDragging = true
-        aimWasDragged = false
-        aimDS = input.Position
-        aimDP = aimContainer.Position
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if aimDragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
-        local d = input.Position - aimDS
-        if math.abs(d.X) > 3 or math.abs(d.Y) > 3 then aimWasDragged = true end
-        aimContainer.Position = UDim2.new(
-            aimDP.X.Scale, aimDP.X.Offset + d.X,
-            aimDP.Y.Scale, aimDP.Y.Offset + d.Y
-        )
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        aimDragging = false
-    end
-end)
-
-aimBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        if aimWasDragged then return end
-        Combat.Holding = true
-        aimBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 120)
-    end
-end)
-
-aimBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        Combat.Holding = false
-        aimBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
-    end
-end)
-
-aimBtn.MouseButton2Click:Connect(function()
-    if Combat.Mode == "Killer" then
-        Combat.Mode = "Survivor"
-        aimModeLbl.Text = "SURVIVOR"
-        aimModeLbl.TextColor3 = C.GRN
-    else
-        Combat.Mode = "Killer"
-        aimModeLbl.Text = "KILLER"
-        aimModeLbl.TextColor3 = C.ACC4
-    end
-end)
-
-_G.Roooor_setAimlockVisible = function(visible)
-    if aimBtnGui then aimBtnGui.Enabled = visible end
-end
-
-task.spawn(function()
-    task.wait(0.5)
-    if _G.Roooor_setAimlockVisible then
-        _G.Roooor_setAimlockVisible(_G.Roooor_AimlockBtn.ShowButton)
     end
 end)
 
@@ -3505,7 +3357,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] COSMIC HUB - GUI + Tombol + Aimlock + Panel loaded")-- =========================================================
+print("✅ [5/8] COSMIC HUB - GUI + Tombol + Panel loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 6/8 : TAB UI PART 1 (SURVIVOR + KILLER + ESP + FIRE)
 -- =========================================================
@@ -3546,24 +3398,12 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("0.5 = sweet spot", C.FIRE_BRIGHT)
 
-    sec("Bypass Skill", "⚡")
-
-    tog("Fast Vault", false, function(s)
-        FastVault.Enabled = s
-        if s then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character then
-                    pcall(hookVault, p.Character)
-                end
-            end
-        end
+    sec("Auto Skill Check", "⚡")
+    tog("Enable Auto Skill Check", false, function(s)
+        SkillCheck.Enabled = s
+        if s then startSkillCheck() end
     end)
-    lbl("Vault slow → Fast otomatis", C.GRN)
-
-    sl("Vault Speed", 1, 5, 1.5, function(v)
-        FastVault.Speed = v
-    end)
-    lbl("Makin tinggi makin cepat", C.DIM)
+    lbl("Auto trigger saat masuk zona", C.GRN)
 
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
@@ -3743,7 +3583,7 @@ makeTab("Fire", "🔥", 4, function()
     end
 end)
 
-print("✅ [6/8] COSMIC HUB - Survivor(1) + Killer(2) + ESP(3) + Fire(4) loaded")-- =========================================================
+print("✅ [6/8] COSMIC HUB - Survivor + Killer + ESP + Fire loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 7/8 : TAB UI PART 2 (FIRE FEET + MISC + VISUAL + PLAYER)
 -- =========================================================
@@ -3844,11 +3684,6 @@ makeTab("Misc", "⚙️", 6, function()
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
     sec("Character", "🎭")
-    tog("Korblox Leg", false, function(s)
-        S.Korblox = s
-        applyKorblox(s)
-    end)
-
     tog("Headless", false, function(s)
         S.Headless = s
         applyHeadless(s)
@@ -3940,24 +3775,47 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    sec("Character Effects", "✨")
-    tog("8-Bit Crown", false, function(s)
-        S.EightBitCrown = s
-        apply8BitCrown(s, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+    -- 8-BIT ITEM
+    sec("8-Bit Item", "👑")
+    tog("Enable 8-Bit Item", false, function(s)
+        S.EightBitOn = s
+        apply8Bit(s, S.EightBitType, S.EightBitSize, S.EightBitHeight)
     end)
-    sl("Crown Size", 0.5, 3, 1, function(v)
-        S.EightBitSize = v
-        if S.EightBitCrown then
-            apply8BitCrown(true, v, S.CrownX, S.CrownY, S.CrownZ)
+    drp("Pilih Item", EightBitList, "Royal Crown", function(v)
+        S.EightBitType = v
+        if S.EightBitOn then
+            apply8Bit(true, v, S.EightBitSize, S.EightBitHeight)
         end
     end)
-    sl("Crown Up/Down (Y)", -2, 3, 1.2, function(v)
-        S.CrownY = v
-        if S.EightBitCrown then
-            apply8BitCrown(true, S.EightBitSize, S.CrownX, v, S.CrownZ)
+    sl("Size (Besar/Kecil)", 0.3, 3, 1, function(v)
+        S.EightBitSize = v
+        if S.EightBitOn then
+            apply8Bit(true, S.EightBitType, v, S.EightBitHeight)
+        end
+    end)
+    sl("Height (Tinggi/Rendah)", -1, 4, 1.5, function(v)
+        S.EightBitHeight = v
+        if S.EightBitOn then
+            apply8Bit(true, S.EightBitType, S.EightBitSize, v)
+        end
+    end)
+    lbl("Ada efek Sparkle + Particle + Trail", C.GRN)
+
+    -- KORBLOX
+    sec("Korblox (Right Leg)", "🦴")
+    tog("Enable Korblox", false, function(s)
+        S.Korblox = s
+        applyKorblox(s, S.KorbloxType)
+    end)
+    drp("Pilih Korblox", KorbloxList, "Deathspeaker", function(v)
+        S.KorbloxType = v
+        if S.Korblox then
+            applyKorblox(true, v)
         end
     end)
 
+    -- TRAIL / AURA / KILL EFFECT
+    sec("Character Effects", "✨")
     tog("Fire Trail", false, function(s)
         S.Trail = s
         applyTrail(s, S.TrailColor)
@@ -3998,14 +3856,7 @@ end)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
-    sec("Aimlock Button", "🎯")
-    tog("Show Aimlock Button", false, function(s)
-        _G.Roooor_AimlockBtn.ShowButton = s
-        if _G.Roooor_setAimlockVisible then
-            _G.Roooor_setAimlockVisible(s)
-        end
-    end)
-
+    sec("Aimlock Mode", "🎯")
     drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
         Combat.Mode = v
     end)
@@ -4021,25 +3872,24 @@ makeTab("Player", "👤", 8, function()
     btn("✨ UNLOAD COSMIC HUB", function()
         pcall(function()
             if gui then gui:Destroy() end
-            if aimBtnGui then aimBtnGui:Destroy() end
             if killFeedGui then killFeedGui:Destroy() end
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
             if _G.Roooor_ParryCircle then _G.Roooor_ParryCircle:Destroy() end
+            clear8Bit()
+            clearKorblox()
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
         _G.Roooor_ESPStatus = nil
         _G.Roooor_AutoParry = nil
         _G.Roooor_SkillCheck = nil
-        _G.Roooor_AimlockBtn = nil
         _G.Roooor_Combat = nil
         _G.Roooor_GodMode = nil
-        _G.Roooor_FastVault = nil
     end)
 end)
 
-print("✅ [7/8] COSMIC HUB - Fire Feet(5) + Misc(6) + Visual(7) + Player(8) loaded")-- =========================================================
+print("✅ [7/8] COSMIC HUB - Fire Feet + Misc + Visual + Player loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
@@ -4192,7 +4042,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AIMBOT LOOP (HOLD-TO-AIM - INSTAN NEMPEL)
+-- AIMBOT LOOP (HOLD-TO-AIM - INSTAN)
 -- =========================================================
 lastTrigger = 0
 
@@ -4284,7 +4134,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- HITBOX 2 MODE
+-- HITBOX (BESAR - 2 MODE)
 -- =========================================================
 hitboxCache = {}
 
@@ -4318,7 +4168,7 @@ task.spawn(function()
                                 }
                             end
 
-                            local size = Combat.HitboxSize or 15
+                            local size = Combat.HitboxSize or 25
                             part.Size = Vector3.new(size, size, size)
                             part.CanCollide = false
                             part.Transparency = Combat.HitboxVisible and 0.5 or 1
@@ -4393,10 +4243,14 @@ LP.CharacterAdded:Connect(function(char)
     if S.FireOn then pcall(applyFire) end
     if S.FireFeetOn then pcall(applyFireFeet) end
 
-    if S.EightBitCrown then
+    if S.EightBitOn then
         pcall(function()
-            apply8BitCrown(true, S.EightBitSize, S.CrownX, S.CrownY, S.CrownZ)
+            apply8Bit(true, S.EightBitType, S.EightBitSize, S.EightBitHeight)
         end)
+    end
+
+    if S.Korblox then
+        pcall(function() applyKorblox(true, S.KorbloxType) end)
     end
 
     if S.Trail then
@@ -4405,10 +4259,6 @@ LP.CharacterAdded:Connect(function(char)
 
     if S.Aura then
         pcall(function() applyAura(true, S.AuraColor) end)
-    end
-
-    if S.Korblox then
-        pcall(function() applyKorblox(true) end)
     end
 
     if S.Headless then
@@ -4432,11 +4282,6 @@ LP.CharacterAdded:Connect(function(char)
                 v.CanCollide = false
             end
         end
-    end
-
-    if FastVault.Enabled then
-        task.wait(0.5)
-        pcall(hookVault, char)
     end
 end)
 
@@ -4462,9 +4307,6 @@ Players.PlayerAdded:Connect(function(p)
                 hookKiller(char)
             end
         end
-        if FastVault.Enabled and p == LP then
-            pcall(hookVault, char)
-        end
     end)
 end)
 
@@ -4473,7 +4315,7 @@ end)
 -- =========================================================
 makeTab("Combat", "⚔️", 9, function()
 
-    sec("Aimbot (Hold to Aim)", "🎯")
+    sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
 
     tog("Enable Aimbot", false, function(s)
         Combat.AimlockEnabled = s
@@ -4533,22 +4375,24 @@ makeTab("Combat", "⚔️", 9, function()
         Combat.TriggerDelay = v
     end)
 
-    sec("Hitbox (2 Mode)", "📦")
+    sec("Hitbox (BESAR - 2 Mode)", "📦")
     tog("Hitbox Survivor Mode", false, function(s)
         Combat.HitboxSurvivor = s
     end)
+    lbl("Aktif saat kamu Survivor", C.DIM)
     tog("Hitbox Killer Mode", false, function(s)
         Combat.HitboxKiller = s
     end)
-    sl("Hitbox Size", 5, 50, 15, function(v)
+    lbl("Aktif saat kamu Killer", C.DIM)
+    sl("Hitbox Size", 10, 50, 25, function(v)
         Combat.HitboxSize = v
     end)
+    lbl("Default 25 (besar)", C.GRN)
     tog("Show Hitbox (Visible)", false, function(s)
         Combat.HitboxVisible = s
     end)
 
     sec("Keybind", "⌨️")
-    lbl("✨ Tombol Aimlock di kiri layar", C.FIRE_BRIGHT)
     lbl("Hold tombol attack = aimbot ON", C.FIRE_BRIGHT)
 end)
 
@@ -4585,10 +4429,13 @@ print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry FALLENS Style             ║")
-print("║  ⚡ Fast Vault (Bypass Skill)            ║")
+print("║  ⚡ Auto Skill Check                     ║")
 print("║  ⭕ Parry Circle HIJAU/MERAH              ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
-print("║  🛡️ God Mode (Survivor Tab)              ║")
+print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
+print("║  🛡️ God Mode                             ║")
+print("║  👑 8-Bit Item (5 pilihan + size/height) ║")
+print("║  🦴 Korblox 3 pilihan                    ║")
 print("║  💎 HD Visual + Fullbright + No Fog      ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  ✨ Menu Bintang Kelap-kelip             ║")

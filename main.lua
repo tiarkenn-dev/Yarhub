@@ -54,13 +54,14 @@ function strk(o, col, t, tr)
     return s
 end
 
-local BruhSoundId = "rbxassetid://9120386436"
+-- SOUND BARU (ANDROID NOTIF)
+local ToggleSoundId = "rbxassetid://6073491164"
 
 function playToggleSound()
     task.spawn(function()
         pcall(function()
             local s = Instance.new("Sound")
-            s.SoundId = BruhSoundId
+            s.SoundId = ToggleSoundId
             s.Volume = 0.5
             s.Parent = SoundService
             s:Play()
@@ -325,11 +326,9 @@ _G.RoooorS = _G.RoooorS or {
     Fly = false, FlySpeed = 50,
     KillFeed = false, StunNotify = false,
     HDBoost = false, HDShader = false, HDSky = false,
-    -- HD BARU
     HDTexture = false, HDReflection = false, HDBloom = false,
     HDShadow = false, HDWater = false, HDSunRays = false,
     HDDepthField = false, HDAntiAliasing = false,
-    -- FIRE BEAM (10)
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
     ESPNameMode = "Text", ESPNameSize = 12,
@@ -374,37 +373,25 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- 8-BIT ITEM LIST (5)
+-- 8-BIT ITEM (1 SAJA)
 EightBitList = {
     "Royal Crown",
-    "Big Bertha Sword",
-    "Diamond Axe",
-    "Enchanted Diamond Sword",
-    "Skull",
 }
 
 EightBitIds = {
     ["Royal Crown"] = 10159600649,
-    ["Big Bertha Sword"] = 89787109276629,
-    ["Diamond Axe"] = 128213278917461,
-    ["Enchanted Diamond Sword"] = 79607595516051,
-    ["Skull"] = 14535450117,
 }
 
--- KORBLOX (3)
+-- KORBLOX (1 SAJA - PENCIL)
 KorbloxList = {
-    "Deathspeaker",
     "Pencil",
-    "Pirate",
 }
 
 KorbloxIds = {
-    ["Deathspeaker"] = 139607718,
     ["Pencil"] = 129701348614901,
-    ["Pirate"] = 111464125231349,
 }
 
--- FIRE BEAM LIST (10)
+-- FIRE BEAM (10)
 FireBeamList = {
     "Classic Beam",
     "Laser Beam",
@@ -447,13 +434,10 @@ Combat = _G.Roooor_Combat or {
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   Auto Parry : FALLENS Style")
-print("   Auto Skill : ON")
-print("   8-Bit Item : 5 pilihan (Accessory)")
-print("   Korblox    : 3 pilihan (kaki asli tetap)")
-print("   Fire Beam  : 10 efek")
-print("   HD Visual  : 8 fitur tambahan")
-print("   Headless   : balik di Misc")-- =========================================================
+print("   Sound Toggle : Android Notif (6073491164)")
+print("   8-Bit Item   : Royal Crown (1 pilihan)")
+print("   Korblox      : Pencil (kaki asli dihapus)")
+print("   Parry Circle : Ring Bolong (karet gelang)")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -634,7 +618,7 @@ end
 
 print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + PARRY + 8BIT + KORBLOX + FIRE BEAM + HD
+-- BAGIAN 3/8 : FUNGSI + PARRY RING + 8BIT + KORBLOX + FIRE BEAM + HD
 -- =========================================================
 
 -- FIRE (KEPALA)
@@ -734,11 +718,29 @@ task.spawn(function()
                 end
             end
         end
+        if S.FireFeetOn and LP.Character then
+            local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
+            if cfg.rainbow then
+                local char = LP.Character
+                local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
+                local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
+                local t = tick()
+                for _, leg in pairs({lLeg, rLeg}) do
+                    if leg then
+                        local fire = leg:FindFirstChild("RoooorFootFire")
+                        if fire then
+                            fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
+                            fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
+                        end
+                    end
+                end
+            end
+        end
     end
 end)
 
 -- =========================================================
--- 8-BIT ITEM (PAKAI ACCESSORY - YANG WORKS)
+-- 8-BIT ITEM (PAKAI ACCESSORY - WORKS)
 -- =========================================================
 eightBitAccessory = nil
 
@@ -765,13 +767,12 @@ function apply8Bit(enable, itemName, size, height)
     local id = EightBitIds[itemName]
     if not id then return end
 
-    -- PAKAI ACCESSORY (sistem resmi Roblox)
     local accessory = Instance.new("Accessory")
     accessory.Name = "Cosmic8Bit"
 
     local handle = Instance.new("Part")
     handle.Name = "Handle"
-    handle.Size = Vector3.new(1, 1, 1) * size
+    handle.Size = Vector3.new(1, 1, 1)
     handle.CanCollide = false
     handle.Massless = true
     handle.Transparency = 1
@@ -781,33 +782,46 @@ function apply8Bit(enable, itemName, size, height)
     mesh.MeshType = Enum.MeshType.FileMesh
     mesh.MeshId = "rbxassetid://" .. id
     mesh.TextureId = ""
-    mesh.Scale = Vector3.new(1, 1, 1) * size
+    mesh.Scale = Vector3.new(size, size, size)
     mesh.Parent = handle
 
     local attachment = Instance.new("Attachment")
     attachment.Name = "HatAttachment"
-    attachment.Position = Vector3.new(0, height * size, 0)
+    attachment.Position = Vector3.new(0, height, 0)
     attachment.Parent = handle
 
     accessory.Parent = char
 
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then
-        hum:AddAccessory(accessory)
+        pcall(function()
+            hum:AddAccessory(accessory)
+        end)
     end
 
     eightBitAccessory = accessory
 end
 
 -- =========================================================
--- KORBLOX (KAKI ASLI TETAP - CUMA TIMPA MESH)
+-- KORBLOX (KAKI ASLI DIHAPUS - DIGANTI MESH)
 -- =========================================================
 korbloxMesh = nil
+korbloxOriginalTrans = nil
 
 function clearKorblox()
     if korbloxMesh then
         korbloxMesh:Destroy()
         korbloxMesh = nil
+    end
+    local char = LP.Character
+    if char then
+        local rightLeg = char:FindFirstChild("Right Leg")
+            or char:FindFirstChild("RightUpperLeg")
+            or char:FindFirstChild("RightLowerLeg")
+        if rightLeg and korbloxOriginalTrans then
+            rightLeg.Transparency = korbloxOriginalTrans
+            korbloxOriginalTrans = nil
+        end
     end
 end
 
@@ -826,12 +840,18 @@ function applyKorblox(enable, mode)
     local id = KorbloxIds[mode]
     if not id then return end
 
-    -- Kaki asli TETAP (jangan dihilangin)
-    -- Cuma timpa mesh Korblox di atasnya
+    -- Simpan transparency asli
+    if not korbloxOriginalTrans then
+        korbloxOriginalTrans = rightLeg.Transparency
+    end
 
+    -- Hide kaki asli
+    rightLeg.Transparency = 1
+
+    -- Bikin mesh Korblox
     korbloxMesh = Instance.new("Part")
-    korbloxMesh.Name = "CosmicKorbloxMesh"
-    korbloxMesh.Size = Vector3.new(1, 2, 1)
+    korbloxMesh.Name = "CosmicKorblox"
+    korbloxMesh.Size = rightLeg.Size
     korbloxMesh.CanCollide = false
     korbloxMesh.Massless = true
     korbloxMesh.Transparency = 0
@@ -846,7 +866,7 @@ function applyKorblox(enable, mode)
     local weld = Instance.new("Weld")
     weld.Part0 = rightLeg
     weld.Part1 = korbloxMesh
-    weld.C0 = CFrame.new(0, -0.5, 0)
+    weld.C0 = CFrame.new(0, 0, 0)
     weld.Parent = korbloxMesh
 end
 
@@ -923,6 +943,7 @@ function applyFireBeam(enable, beamType, color)
     color = color or S.FireBeamColor or Color3.fromRGB(120, 60, 255)
 
     local function createBeamAttachment(parentPart, offset, lightColor)
+        if not parentPart then return end
         local att = Instance.new("Attachment")
         att.Position = offset
         att.Parent = parentPart
@@ -948,16 +969,14 @@ function applyFireBeam(enable, beamType, color)
     end
 
     if beamType == "Classic Beam" then
-        local leftEye = head:FindFirstChild("LeftEye") or head
-        local rightEye = head:FindFirstChild("RightEye") or head
         createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
         createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
     elseif beamType == "Laser Beam" then
         createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
         createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
     elseif beamType == "Rainbow Beam" then
-        local att1 = createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
-        local att2 = createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
+        createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
+        createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
         table.insert(fireBeamConns, RunService.RenderStepped:Connect(function()
             local t = tick()
             for _, beam in pairs(head:GetChildren()) do
@@ -1004,7 +1023,7 @@ function applyFireBeam(enable, beamType, color)
 end
 
 -- =========================================================
--- HD VISUAL BARU (8 FITUR)
+-- HD VISUAL (8 EXTRA)
 -- =========================================================
 hdExtras = {
     Texture = nil,
@@ -1057,11 +1076,6 @@ end
 function applyHDShadow(s)
     if s then
         Lighting.GlobalShadows = true
-        pcall(function()
-            settings().Rendering.ShadowSoftness = 0.2
-        end)
-    else
-        Lighting.GlobalShadows = origLighting.GlobalShadows
     end
 end
 
@@ -1112,7 +1126,6 @@ function applyHDAntiAliasing(s)
     if s then
         pcall(function()
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
-            settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level10
         end)
     end
 end
@@ -1641,40 +1654,33 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE HIJAU/MERAH
+-- PARRY CIRCLE - RING BOLONG (KARET GELANG)
 -- =========================================================
-_G.Roooor_ParryCircle = nil
+parryCircleParts = {}
+PARRY_SEGMENTS = 24
+
+function clearParryCircle()
+    for _, part in pairs(parryCircleParts) do
+        if part and part.Parent then
+            part:Destroy()
+        end
+    end
+    parryCircleParts = {}
+end
 
 function updateParryCircle()
     local root = getRoot()
     if not S.ParryCircle or not root then
-        if _G.Roooor_ParryCircle then
-            _G.Roooor_ParryCircle:Destroy()
-            _G.Roooor_ParryCircle = nil
-        end
+        clearParryCircle()
         return
     end
 
-    if not _G.Roooor_ParryCircle then
-        _G.Roooor_ParryCircle = Instance.new("Part")
-        _G.Roooor_ParryCircle.Shape = Enum.PartType.Cylinder
-        _G.Roooor_ParryCircle.Anchored = true
-        _G.Roooor_ParryCircle.CanCollide = false
-        _G.Roooor_ParryCircle.Material = Enum.Material.Neon
-        _G.Roooor_ParryCircle.Name = "CosmicParryCircle"
-        _G.Roooor_ParryCircle.Parent = workspace
-    end
-
-    local size = (S.ParryCircleSize or 15) * 2
-    _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
-    local yOffset = root.Size.Y / 2 + 1.5
-    _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
-        * CFrame.Angles(0, 0, math.rad(90))
-
-    local myPos = root.Position
     local radius = S.ParryCircleSize or 15
-    local killerInside = false
+    local myPos = root.Position
+    local yOffset = root.Size.Y / 2 + 1.5
 
+    -- Cek killer dalam radius
+    local killerInside = false
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
             local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
@@ -1688,12 +1694,32 @@ function updateParryCircle()
         end
     end
 
-    if killerInside then
-        _G.Roooor_ParryCircle.Color = Color3.fromRGB(255, 40, 40)
-        _G.Roooor_ParryCircle.Transparency = 0.3
-    else
-        _G.Roooor_ParryCircle.Color = Color3.fromRGB(0, 255, 100)
-        _G.Roooor_ParryCircle.Transparency = 0.5
+    local ringColor = killerInside and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(0, 255, 100)
+    local ringTrans = killerInside and 0.2 or 0.4
+
+    -- Bikin ring dari 24 part
+    for i = 1, PARRY_SEGMENTS do
+        local angle = (i / PARRY_SEGMENTS) * math.pi * 2
+        local x = math.cos(angle) * radius
+        local z = math.sin(angle) * radius
+
+        local part = parryCircleParts[i]
+        if not part or not part.Parent then
+            part = Instance.new("Part")
+            part.Name = "CosmicParryRing"
+            part.Anchored = true
+            part.CanCollide = false
+            part.Material = Enum.Material.Neon
+            part.Size = Vector3.new(0.8, 0.1, 0.8)
+            part.Shape = Enum.PartType.Ball
+            part.Parent = workspace
+            parryCircleParts[i] = part
+        end
+
+        part.Size = Vector3.new(0.8, 0.1, 0.8)
+        part.Position = Vector3.new(myPos.X + x, myPos.Y - yOffset, myPos.Z + z)
+        part.Color = ringColor
+        part.Transparency = ringTrans
     end
 end
 
@@ -2233,7 +2259,7 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] COSMIC HUB - Fungsi + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Parry Ring + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -2710,6 +2736,9 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
+-- =========================================================
+-- TOMBOL MENU COSMIC
+-- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -2878,6 +2907,9 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
+-- =========================================================
+-- PANEL MENU COSMIC
+-- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -3086,6 +3118,9 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
+-- =========================================================
+-- KOMPONEN UI
+-- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3880,83 +3915,59 @@ makeTab("Visual", "✨", 7, function()
     end)
     lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
 
-    -- HD VISUAL RINGAN
     sec("HD Visual (Ringan)", "💎")
     tog("HD Graphics Boost", false, function(s)
         S.HDBoost = s
         applyHDBoost(s)
     end)
-    lbl("QualityLevel ke Level 10 + Shadow ON", C.GRN)
-
     tog("HD Character Shader", false, function(s)
         S.HDShader = s
         applyHDShader(s)
     end)
-    lbl("ColorCorrection + Bloom (cinematic)", C.GRN)
-
     tog("HD Sky Atmosphere", false, function(s)
         S.HDSky = s
         applyHDSky(s)
     end)
-    lbl("Atmosphere HD + Haze + Glare", C.GRN)
 
-    -- HD VISUAL BARU (8 FITUR)
     sec("HD Visual (Extra)", "🌟")
     tog("HD Texture", false, function(s)
         S.HDTexture = s
         applyHDTexture(s)
     end)
-    lbl("Texture quality max", C.GRN)
-
     tog("HD Reflection", false, function(s)
         S.HDReflection = s
         applyHDReflection(s)
     end)
-    lbl("Karakter glossy/mengkilap", C.GRN)
-
     tog("HD Bloom", false, function(s)
         S.HDBloom = s
         applyHDBloom(s)
     end)
-    lbl("Bloom effect kuat", C.GRN)
-
     tog("HD Shadow", false, function(s)
         S.HDShadow = s
         applyHDShadow(s)
     end)
-    lbl("Shadow detail tinggi", C.GRN)
-
     tog("HD Water", false, function(s)
         S.HDWater = s
         applyHDWater(s)
     end)
-    lbl("Air keliatan HD (biru)", C.GRN)
-
     tog("HD Sun Rays", false, function(s)
         S.HDSunRays = s
         applyHDSunRays(s)
     end)
-    lbl("Sinar matahari HD", C.GRN)
-
     tog("HD Depth of Field", false, function(s)
         S.HDDepthField = s
         applyHDDepthField(s)
     end)
-    lbl("Blur background (cinematic)", C.GRN)
-
     tog("HD Anti-Aliasing", false, function(s)
         S.HDAntiAliasing = s
         applyHDAntiAliasing(s)
     end)
-    lbl("Pinggiran objek halus", C.GRN)
 
-    -- LIGHTING
     sec("Lighting", "💡")
     tog("Ultra HD", false, function(s)
         S.UltraHD = s
         applyUltraHD()
     end)
-
     tog("Contrast Boost", false, function(s)
         S.Contrast = s
         applyContrast()
@@ -3970,14 +3981,12 @@ makeTab("Visual", "✨", 7, function()
         applyContrast()
     end)
 
-    -- SKY
     sec("Sky", "🌌")
     drp("Sky Preset", SkyList, "Default", function(v)
         S.SkyId = v
         applySky(v)
     end)
 
-    -- CAMERA
     sec("Camera", "🎥")
     tog("FOV Override", false, function(s)
         S.FOVEnabled = s
@@ -3987,7 +3996,6 @@ makeTab("Visual", "✨", 7, function()
         S.FOV = v
         if S.FOVEnabled then applyFOV() end
     end)
-
     tog("Zoom Out", false, function(s)
         S.ZoomOut = s
         applyZoomOut(s, S.ZoomOutValue)
@@ -3997,7 +4005,35 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    -- FIRE BEAM (10)
+    -- 8-BIT ROYAL CROWN
+    sec("8-Bit Royal Crown", "👑")
+    tog("Enable 8-Bit Crown", false, function(s)
+        S.EightBitOn = s
+        apply8Bit(s, "Royal Crown", S.EightBitSize, S.EightBitHeight)
+    end)
+    sl("Size (Besar/Kecil)", 0.3, 3, 1, function(v)
+        S.EightBitSize = v
+        if S.EightBitOn then
+            apply8Bit(true, "Royal Crown", v, S.EightBitHeight)
+        end
+    end)
+    sl("Height (Tinggi/Rendah)", -1, 4, 1.5, function(v)
+        S.EightBitHeight = v
+        if S.EightBitOn then
+            apply8Bit(true, "Royal Crown", S.EightBitSize, v)
+        end
+    end)
+    lbl("Ada efek sparkle + particle + trail", C.GRN)
+
+    -- KORBLOX
+    sec("Korblox Pencil (Right Leg)", "🦴")
+    tog("Enable Korblox", false, function(s)
+        S.Korblox = s
+        applyKorblox(s, "Pencil")
+    end)
+    lbl("Kaki asli dihapus + ganti Korblox", C.FIRE_BRIGHT)
+
+    -- FIRE BEAM
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -4036,24 +4072,6 @@ makeTab("Visual", "✨", 7, function()
         btn3.MouseButton1Click:Connect(function()
             S.FireBeamType = beamName
             applyFireBeam(S.FireBeamOn, beamName, S.FireBeamColor)
-            for _, c in pairs(cs:GetChildren()) do
-                if c:IsA("TextButton") and c:FindFirstChildOfClass("TextLabel") then
-                    local lblx = c:FindFirstChildOfClass("TextLabel")
-                    if lblx and string.sub(lblx.Text, 1, 4) == "🔥 " and lblx.Text ~= "🔥 " .. beamName then
-                        if string.find(lblx.Text, "Beam") or string.find(lblx.Text, "Wings") 
-                            or string.find(lblx.Text, "Halo") or string.find(lblx.Text, "Hands")
-                            or string.find(lblx.Text, "Foot") or string.find(lblx.Text, "Body")
-                            or string.find(lblx.Text, "Mouth") or string.find(lblx.Text, "Eyes") then
-                            c.BackgroundColor3 = C.BG
-                            c.BackgroundTransparency = 0.4
-                            lblx.TextColor3 = C.TXT
-                        end
-                    end
-                end
-            end
-            btn3.BackgroundColor3 = C.ACC
-            btn3.BackgroundTransparency = 0
-            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
         end)
     end
 
@@ -4063,46 +4081,6 @@ makeTab("Visual", "✨", 7, function()
             applyFireBeam(true, S.FireBeamType, c)
         end
     end)
-
-    -- 8-BIT ITEM
-    sec("8-Bit Item (Accessory)", "👑")
-    tog("Enable 8-Bit Item", false, function(s)
-        S.EightBitOn = s
-        apply8Bit(s, S.EightBitType, S.EightBitSize, S.EightBitHeight)
-    end)
-    drp("Pilih Item", EightBitList, "Royal Crown", function(v)
-        S.EightBitType = v
-        if S.EightBitOn then
-            apply8Bit(true, v, S.EightBitSize, S.EightBitHeight)
-        end
-    end)
-    sl("Size (Besar/Kecil)", 0.3, 3, 1, function(v)
-        S.EightBitSize = v
-        if S.EightBitOn then
-            apply8Bit(true, S.EightBitType, v, S.EightBitHeight)
-        end
-    end)
-    sl("Height (Tinggi/Rendah)", -1, 4, 1.5, function(v)
-        S.EightBitHeight = v
-        if S.EightBitOn then
-            apply8Bit(true, S.EightBitType, S.EightBitSize, v)
-        end
-    end)
-    lbl("Pakai Accessory (works)", C.GRN)
-
-    -- KORBLOX
-    sec("Korblox (Right Leg)", "🦴")
-    tog("Enable Korblox", false, function(s)
-        S.Korblox = s
-        applyKorblox(s, S.KorbloxType)
-    end)
-    drp("Pilih Korblox", KorbloxList, "Pencil", function(v)
-        S.KorbloxType = v
-        if S.Korblox then
-            applyKorblox(true, v)
-        end
-    end)
-    lbl("Kaki asli tetap (cuma ditimpa mesh)", C.FIRE_BRIGHT)
 
     -- CHARACTER EFFECTS
     sec("Character Effects", "✨")
@@ -4166,10 +4144,10 @@ makeTab("Player", "👤", 8, function()
             if killFeedGui then killFeedGui:Destroy() end
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
-            if _G.Roooor_ParryCircle then _G.Roooor_ParryCircle:Destroy() end
             clear8Bit()
             clearKorblox()
             clearFireBeam()
+            clearParryCircle()
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
@@ -4195,9 +4173,6 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- =========================================================
--- HELPER: RAYCAST VISIBILITY
--- =========================================================
 RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -4205,56 +4180,43 @@ function isVisible(part)
     if not Combat.VisibilityCheck and not Combat.WallCheck then return true end
     local cam = workspace.CurrentCamera
     if not cam then return true end
-
     RayParams.FilterDescendantsInstances = { LP.Character }
-
     local origin = cam.CFrame.Position
     local direction = (part.Position - origin)
-
     local result = workspace:Raycast(origin, direction, RayParams)
     if not result then return true end
     return result.Instance:IsDescendantOf(part.Parent)
 end
 
--- =========================================================
--- FOV CIRCLE VISUAL
--- =========================================================
 fovGui = nil
 function createFOVCircle()
     if fovGui then fovGui:Destroy(); fovGui = nil end
-
     fovGui = Instance.new("ScreenGui")
     fovGui.Name = "CosmicFOV"
     fovGui.ResetOnSpawn = false
     fovGui.IgnoreGuiInset = true
     fovGui.Parent = PG
-
     local circle = Instance.new("Frame")
     circle.Size = UDim2.new(0, 0, 0, 0)
     circle.Position = UDim2.new(0.5, 0, 0.5, 0)
     circle.AnchorPoint = Vector2.new(0.5, 0.5)
     circle.BackgroundTransparency = 1
     circle.Parent = fovGui
-
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 1.5
     stroke.Color = C.ACC2
     stroke.Transparency = 0.3
     stroke.Parent = circle
-
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = circle
-
     return circle
 end
 
 task.spawn(function()
     while task.wait(0.1) do
         if Combat.FOVCircle then
-            if not fovGui then
-                createFOVCircle()
-            end
+            if not fovGui then createFOVCircle() end
             local circle = fovGui:FindFirstChildOfClass("Frame")
             if circle then
                 local r = Combat.FOVRadius * 2
@@ -4270,17 +4232,12 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- AUTO-DETECT HOLD ATTACK
--- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if not Combat.AimlockEnabled then return end
-
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         Combat.AttackHeld = true
     end
-
     if input.UserInputType == Enum.UserInputType.Touch then
         Combat.AttackHeld = true
     end
@@ -4313,7 +4270,6 @@ task.spawn(function()
             end
         end
     end
-
     local lastBtn = nil
     while task.wait(1) do
         local btn = getAttackBtn()
@@ -4333,55 +4289,38 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- AIMBOT LOOP (HOLD-TO-AIM INSTAN)
--- =========================================================
 lastTrigger = 0
 
 task.spawn(function()
     while task.wait(0.01) do
         if not Combat.AimlockEnabled then continue end
         if not Combat.AttackHeld and not Combat.Holding then continue end
-
         local myRoot = getRoot()
         if not myRoot then continue end
-
         local cam = workspace.CurrentCamera
         if not cam then continue end
-
-        local center = Vector2.new(
-            cam.ViewportSize.X / 2,
-            cam.ViewportSize.Y / 2
-        )
-
+        local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
         local closest, shortest = nil, Combat.LockRadius
-
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
                 local teamName = p.Team and p.Team.Name or ""
                 local valid = false
-
                 if Combat.Mode == "Killer" and teamName == "Killer" then
                     valid = true
                 elseif Combat.Mode == "Survivor" and teamName == "Survivors" then
                     valid = true
                 end
-
                 if valid then
                     local hum = p.Character:FindFirstChildOfClass("Humanoid")
                     local aimPart = p.Character:FindFirstChild(Combat.AimPart)
                         or p.Character:FindFirstChild("Head")
                         or p.Character:FindFirstChild("HumanoidRootPart")
-
                     if hum and hum.Health > 0 and aimPart then
                         local dist3D = (aimPart.Position - myRoot.Position).Magnitude
                         if dist3D < shortest then
                             if Combat.VisibilityCheck or Combat.WallCheck then
-                                if not isVisible(aimPart) then
-                                    continue
-                                end
+                                if not isVisible(aimPart) then continue end
                             end
-
                             local pos2D, onScreen = cam:WorldToViewportPoint(aimPart.Position)
                             if onScreen then
                                 local dist2D = (Vector2.new(pos2D.X, pos2D.Y) - center).Magnitude
@@ -4395,7 +4334,6 @@ task.spawn(function()
                 end
             end
         end
-
         if closest then
             local pos = closest.Position
             if Combat.Predict then
@@ -4404,7 +4342,6 @@ task.spawn(function()
             local targetCF = CFrame.new(cam.CFrame.Position, pos)
             local smooth = math.clamp(Combat.Smoothness, 0.01, 1)
             cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
-
             if Combat.TriggerBotEnabled then
                 local now = tick()
                 if now - lastTrigger >= Combat.TriggerDelay then
@@ -4425,26 +4362,16 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- HITBOX (BESAR - 2 MODE)
--- =========================================================
 hitboxCache = {}
 
 task.spawn(function()
     while task.wait(0.5) do
         local myTeam = LP.Team and LP.Team.Name or ""
-
         local enabled = false
-        if Combat.HitboxSurvivor and myTeam == "Survivors" then
-            enabled = true
-        end
-        if Combat.HitboxKiller and myTeam == "Killer" then
-            enabled = true
-        end
-
+        if Combat.HitboxSurvivor and myTeam == "Survivors" then enabled = true end
+        if Combat.HitboxKiller and myTeam == "Killer" then enabled = true end
         if enabled then
             local targetTeam = (myTeam == "Survivors") and "Killer" or "Survivors"
-
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LP and p.Character and p.Team and p.Team.Name == targetTeam then
                     local hum = p.Character:FindFirstChildOfClass("Humanoid")
@@ -4459,7 +4386,6 @@ task.spawn(function()
                                     Material = part.Material,
                                 }
                             end
-
                             local size = Combat.HitboxSize or 25
                             part.Size = Vector3.new(size, size, size)
                             part.CanCollide = false
@@ -4483,26 +4409,16 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- GOD MODE LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(0.1) do
         if not GodMode.Enabled then continue end
         if not LP.Character then continue end
-
         local hum = LP.Character:FindFirstChildOfClass("Humanoid")
         if not hum then continue end
-
         if hum.Health > 0 and hum.Health < hum.MaxHealth then
-            pcall(function()
-                hum.Health = hum.MaxHealth
-            end)
+            pcall(function() hum.Health = hum.MaxHealth end)
         end
-
-        if hum.PlatformStand then
-            hum.PlatformStand = false
-        end
+        if hum.PlatformStand then hum.PlatformStand = false end
         pcall(function()
             local state = hum:GetState()
             if state == Enum.HumanoidStateType.Dead
@@ -4511,7 +4427,6 @@ task.spawn(function()
                 hum:ChangeState(Enum.HumanoidStateType.Running)
             end
         end)
-
         local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
             for _, v in pairs(hrp:GetChildren()) do
@@ -4526,47 +4441,20 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- AUTO RE-APPLY SAAT RESPAWN
--- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.2)
-
     if S.FireOn then pcall(applyFire) end
     if S.FireFeetOn then pcall(applyFireFeet) end
-
     if S.EightBitOn then
-        pcall(function()
-            apply8Bit(true, S.EightBitType, S.EightBitSize, S.EightBitHeight)
-        end)
+        pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
     end
-
-    if S.Korblox then
-        pcall(function() applyKorblox(true, S.KorbloxType) end)
-    end
-
-    if S.FireBeamOn then
-        pcall(function() applyFireBeam(true, S.FireBeamType, S.FireBeamColor) end)
-    end
-
-    if S.Trail then
-        pcall(function() applyTrail(true, S.TrailColor) end)
-    end
-
-    if S.Aura then
-        pcall(function() applyAura(true, S.AuraColor) end)
-    end
-
-    if S.Headless then
-        pcall(function() applyHeadless(true) end)
-    end
-
+    if S.Korblox then pcall(function() applyKorblox(true, "Pencil") end) end
+    if S.FireBeamOn then pcall(function() applyFireBeam(true, S.FireBeamType, S.FireBeamColor) end) end
+    if S.Trail then pcall(function() applyTrail(true, S.TrailColor) end) end
+    if S.Aura then pcall(function() applyAura(true, S.AuraColor) end) end
+    if S.Headless then pcall(function() applyHeadless(true) end) end
     if S.FOVEnabled then pcall(applyFOV) end
-
-    if S.SkyId and S.SkyId ~= "Default" then
-        pcall(function() applySky(S.SkyId) end)
-    end
-
+    if S.SkyId and S.SkyId ~= "Default" then pcall(function() applySky(S.SkyId) end) end
     if S.HDBoost then pcall(function() applyHDBoost(true) end) end
     if S.HDShader then pcall(function() applyHDShader(true) end) end
     if S.HDSky then pcall(function() applyHDSky(true) end) end
@@ -4578,31 +4466,20 @@ LP.CharacterAdded:Connect(function(char)
     if S.HDSunRays then pcall(function() applyHDSunRays(true) end) end
     if S.HDDepthField then pcall(function() applyHDDepthField(true) end) end
     if S.HDAntiAliasing then pcall(function() applyHDAntiAliasing(true) end) end
-
     if S.NoClip then
         task.wait(0.3)
         for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
+            if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
 end)
 
--- =========================================================
--- AUTO SCAN KILLER
--- =========================================================
 task.spawn(function()
     while task.wait(1) do
-        if AutoParry.Enabled then
-            scanKillers()
-        end
+        if AutoParry.Enabled then scanKillers() end
     end
 end)
 
--- =========================================================
--- AUTO SCAN PLAYER BARU
--- =========================================================
 Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function(char)
         task.wait(1)
@@ -4614,13 +4491,8 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 
--- =========================================================
--- TAB 9: COMBAT
--- =========================================================
 makeTab("Combat", "⚔️", 9, function()
-
     sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
-
     tog("Enable Aimbot", false, function(s)
         Combat.AimlockEnabled = s
         if not s then
@@ -4629,103 +4501,47 @@ makeTab("Combat", "⚔️", 9, function()
         end
     end)
     lbl("Tahan tombol attack = auto nempel", C.FIRE_BRIGHT)
-
-    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
-        Combat.Mode = v
-    end)
-
-    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v)
-        Combat.AimPart = v
-    end)
-
-    sl("Smoothness", 0.01, 1, 0.01, function(v)
-        Combat.Smoothness = v
-    end)
+    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v) Combat.Mode = v end)
+    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v) Combat.AimPart = v end)
+    sl("Smoothness", 0.01, 1, 0.01, function(v) Combat.Smoothness = v end)
     lbl("0.01 = INSTAN nempel", C.GRN)
-
-    sl("Lock Radius (studs)", 10, 500, 150, function(v)
-        Combat.LockRadius = v
-    end)
-
-    sl("FOV Radius (layar)", 50, 500, 200, function(v)
-        Combat.FOVRadius = v
-    end)
-
-    tog("Show FOV Circle", false, function(s)
-        Combat.FOVCircle = s
-    end)
+    sl("Lock Radius (studs)", 10, 500, 150, function(v) Combat.LockRadius = v end)
+    sl("FOV Radius (layar)", 50, 500, 200, function(v) Combat.FOVRadius = v end)
+    tog("Show FOV Circle", false, function(s) Combat.FOVCircle = s end)
 
     sec("Prediction", "📈")
-    tog("Predict Movement", true, function(s)
-        Combat.Predict = s
-    end)
-    sl("Predict Strength", 0, 1, 0.15, function(v)
-        Combat.PredictStrength = v
-    end)
+    tog("Predict Movement", true, function(s) Combat.Predict = s end)
+    sl("Predict Strength", 0, 1, 0.15, function(v) Combat.PredictStrength = v end)
 
     sec("Visibility Check", "👁️")
-    tog("Anti-Wall (Silent)", false, function(s)
-        Combat.VisibilityCheck = s
-    end)
-    tog("Anti-Wall (Strict)", false, function(s)
-        Combat.WallCheck = s
-    end)
+    tog("Anti-Wall (Silent)", false, function(s) Combat.VisibilityCheck = s end)
+    tog("Anti-Wall (Strict)", false, function(s) Combat.WallCheck = s end)
 
     sec("Trigger Bot", "🔫")
-    tog("Auto Attack saat lock", false, function(s)
-        Combat.TriggerBotEnabled = s
-    end)
-    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v)
-        Combat.TriggerDelay = v
-    end)
+    tog("Auto Attack saat lock", false, function(s) Combat.TriggerBotEnabled = s end)
+    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v) Combat.TriggerDelay = v end)
 
     sec("Hitbox (BESAR - 2 Mode)", "📦")
-    tog("Hitbox Survivor Mode", false, function(s)
-        Combat.HitboxSurvivor = s
-    end)
-    lbl("Aktif saat kamu Survivor", C.DIM)
-    tog("Hitbox Killer Mode", false, function(s)
-        Combat.HitboxKiller = s
-    end)
-    lbl("Aktif saat kamu Killer", C.DIM)
-    sl("Hitbox Size", 10, 50, 25, function(v)
-        Combat.HitboxSize = v
-    end)
-    lbl("Default 25 (besar)", C.GRN)
-    tog("Show Hitbox (Visible)", false, function(s)
-        Combat.HitboxVisible = s
-    end)
+    tog("Hitbox Survivor Mode", false, function(s) Combat.HitboxSurvivor = s end)
+    tog("Hitbox Killer Mode", false, function(s) Combat.HitboxKiller = s end)
+    sl("Hitbox Size", 10, 50, 25, function(v) Combat.HitboxSize = v end)
+    tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
 
     sec("Keybind", "⌨️")
     lbl("Hold tombol attack = aimbot ON", C.FIRE_BRIGHT)
 end)
 
--- =========================================================
--- TAB 10: EXTRA
--- =========================================================
 makeTab("Extra", "✨", 10, function()
-
     sec("Teleport", "🌀")
-    btn("🚪 TP ke Finish Line", function()
-        teleportToFinishLine()
-    end)
-    btn("🚪 TP ke Gate", function()
-        teleportToGate()
-    end)
-    btn("🚪 TP ke Dalam Gate", function()
-        teleportInsideGate()
-    end)
+    btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
+    btn("🚪 TP ke Gate", function() teleportToGate() end)
+    btn("🚪 TP ke Dalam Gate", function() teleportInsideGate() end)
 
     sec("Sound", "🔊")
-    btn("🔊 Test Sound", function()
-        playToggleSound()
-    end)
+    btn("🔊 Test Sound", function() playToggleSound() end)
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
--- =========================================================
--- PRINT FINAL
--- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
@@ -4734,17 +4550,17 @@ print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry FALLENS Style             ║")
 print("║  ⚡ Auto Skill Check                     ║")
-print("║  ⭕ Parry Circle HIJAU/MERAH              ║")
+print("║  ⭕ Parry Circle RING BOLONG              ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
 print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
 print("║  🛡️ God Mode                             ║")
-print("║  👑 8-Bit Item (Accessory - works)       ║")
-print("║  🦴 Korblox 3 pilihan (kaki asli tetap)  ║")
+print("║  👑 8-Bit Royal Crown (Accessory)        ║")
+print("║  🦴 Korblox Pencil (kaki asli ganti)     ║")
 print("║  🔥 Fire Beam 10 efek                    ║")
 print("║  💎 HD Visual + 8 HD Extra               ║")
 print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
-print("║  ✨ Menu Bintang Kelap-kelip             ║")
+print("║  🎵 Sound: Android Notif                 ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")

@@ -290,7 +290,7 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE (AUTO-ON SETTING)
+-- STATE
 -- =========================================================
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
@@ -337,6 +337,13 @@ _G.RoooorS = _G.RoooorS or {
 }
 S = _G.RoooorS
 
+FPSPingConfig = _G.Roooor_FPSPing or {
+    Size = 1,
+    X = 0,
+    Y = 0,
+}
+_G.Roooor_FPSPing = FPSPingConfig
+
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
@@ -358,14 +365,14 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY GACOR
+-- AUTO PARRY (SAMA PERSIS FALLENS)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
-    ParryDistance = 12,
+    ParryDistance = 15,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = -1,
-    RequireFacing = false,
+    FaceSensitivity = 0.7,
+    RequireFacing = true,
     Wiggle = false,
     WiggleSpam = 5,
 }
@@ -434,7 +441,7 @@ Combat = _G.Roooor_Combat or {
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   Auto Parry  : ON (Distance 12, Face -1, Debounce 0.5)")
+print("   Auto Parry  : ON (Distance 15, Face 0.7, Debounce 0.2)")
 print("   Skill Check : ON")
 print("   Parry Circle: ON (Size 12)")
 print("   Headless    : ON")
@@ -612,6 +619,7 @@ SkyIds = {
     },
 }
 
+-- KILLER ANIMS (SAMA PERSIS FALLENS - 23 ID)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -624,7 +632,7 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
+print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims (23 ID) loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 3/8 : FUNGSI + KORBLOX CLIENT + 8BIT CLIENT + PARRY RING
 -- =========================================================
@@ -1143,7 +1151,7 @@ function applyHDAntiAliasing(s)
 end
 
 -- =========================================================
--- MISC UTILITY (Anti-AFK + Rejoin + Server Hop + FPS + Ping)
+-- MISC UTILITY (Anti-AFK + Rejoin + Server Hop)
 -- =========================================================
 function applyAntiAFK(enable)
     S.AntiAFK = enable
@@ -1181,7 +1189,11 @@ function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
+-- =========================================================
+-- FPS + PING COUNTER (RESIZE + DRAG)
+-- =========================================================
 fpsPingGui = nil
+
 function createFPSPingGui()
     if fpsPingGui then fpsPingGui:Destroy() end
     fpsPingGui = Instance.new("ScreenGui")
@@ -1190,25 +1202,29 @@ function createFPSPingGui()
     fpsPingGui.IgnoreGuiInset = true
     fpsPingGui.Parent = PG
 
+    local sizeScale = FPSPingConfig.Size or 1
+
     local frame = Instance.new("Frame")
     frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, 110, 0, 42)
-    frame.Position = UDim2.new(1, -120, 0, 5)
+    frame.Size = UDim2.new(0, math.floor(110 * sizeScale), 0, math.floor(42 * sizeScale))
+    frame.Position = UDim2.new(1, -math.floor(120 * sizeScale) + (FPSPingConfig.X or 0), 0, 5 + (FPSPingConfig.Y or 0))
     frame.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
     frame.BackgroundTransparency = 0.3
     frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
     frame.Parent = fpsPingGui
     rnd(frame, 8)
     strk(frame, C.ACC, 1.5, 0.3)
 
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
-    fpsLabel.Size = UDim2.new(1, -8, 0, 18)
+    fpsLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
     fpsLabel.Position = UDim2.new(0, 4, 0, 3)
     fpsLabel.BackgroundTransparency = 1
     fpsLabel.Text = "FPS: 0"
     fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
-    fpsLabel.TextSize = 11
+    fpsLabel.TextSize = math.floor(11 * sizeScale)
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
@@ -1235,12 +1251,12 @@ function createFPSPingGui()
 
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
-    pingLabel.Size = UDim2.new(1, -8, 0, 18)
-    pingLabel.Position = UDim2.new(0, 4, 0, 21)
+    pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
+    pingLabel.Position = UDim2.new(0, 4, 0, 21 * sizeScale)
     pingLabel.BackgroundTransparency = 1
     pingLabel.Text = "Ping: 0 ms"
     pingLabel.TextColor3 = Color3.fromRGB(0, 230, 255)
-    pingLabel.TextSize = 11
+    pingLabel.TextSize = math.floor(11 * sizeScale)
     pingLabel.Font = Enum.Font.GothamBold
     pingLabel.TextXAlignment = Enum.TextXAlignment.Left
     pingLabel.Parent = frame
@@ -1299,24 +1315,15 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- AUTO APPLY ON EXECUTE
--- =========================================================
-task.spawn(function()
-    task.wait(3)
-    pcall(createFPSPingGui)
-    if LP.Character then
-        if S.Headless then pcall(function() applyHeadless(true) end) end
-        if S.Korblox then
-            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
-        end
-        if S.EightBitOn then
-            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
-        end
-        if AutoParry.Enabled then pcall(scanKillers) end
-        if SkillCheck.Enabled then pcall(startSkillCheck) end
+function updateFPSPing()
+    if fpsPingGui then
+        fpsPingGui:Destroy()
+        fpsPingGui = nil
     end
-end)-- =========================================================
+    createFPSPingGui()
+end
+
+_G.Roooor_updateFPSPing = updateFPSPing-- =========================================================
 -- ESP SYSTEM
 -- =========================================================
 ESPObjects = {}
@@ -1611,9 +1618,9 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR (Distance 12, Face -1)
+-- AUTO PARRY (SAMA PERSIS FALLENS)
 -- =========================================================
-PARRY_DEBOUNCE = 0.5
+PARRY_DEBOUNCE = 0.2
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
@@ -1657,38 +1664,39 @@ function shouldBlockParry()
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return true end
 
-    if hum.Health <= 0 or hum.Health < 2 then return true end
-    if char:GetAttribute("Downed") == true then return true end
-    if char:GetAttribute("IsDown") == true then return true end
-    if char:GetAttribute("Knocked") == true then return true end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if animator then
         for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
             local anim = track.Animation
             if anim and anim.AnimationId then
-                local aid = anim.AnimationId
-                if aid == "rbxassetid://127096285501517" then return true end
-                if aid == "rbxassetid://112166042383605" then return true end
-                if aid == "rbxassetid://123047897844134" then return true end
-                if aid == "http://www.roblox.com/asset/?id=126965695851149" then return true end
-                if aid == "http://www.roblox.com/asset/?id=135084204086504" then return true end
+                if anim.AnimationId == "rbxassetid://127096285501517" then return true end
+                if anim.AnimationId == "rbxassetid://112166042383605" then return true end
+                if anim.AnimationId == "http://www.roblox.com/asset/?id=126965695851149" then return true end
+                if anim.AnimationId == "http://www.roblox.com/asset/?id=135084204086504" then return true end
+                if anim.AnimationId == "rbxassetid://123047897844134" then return true end
             end
         end
     end
+
+    if hum.Health <= 0 or hum.Health < 2 then return true end
+    if char:GetAttribute("Downed") == true then return true end
+    if char:GetAttribute("IsDown") == true then return true end
+    if char:GetAttribute("Knocked") == true then return true end
+
     return false
 end
 
 function doParry()
     if shouldBlockParry() then return end
+
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
-    if ParryActive then return end
     lastParry = now
 
     ParryActive = true
     pressParryButton()
-    task.delay(0.25, function()
+
+    task.delay(0.3, function()
         ParryActive = false
     end)
 end
@@ -2428,8 +2436,9 @@ _G.Roooor_applyHDSky = applyHDSky
 _G.Roooor_applyAntiAFK = applyAntiAFK
 _G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
+_G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Korblox Client + 8Bit Client + Parry Ring + Misc Utility loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry + Parry Ring + Misc Utility loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -2919,7 +2928,9 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
+-- =========================================================
 -- TOMBOL MENU COSMIC
+-- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -3088,7 +3099,9 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
+-- =========================================================
 -- PANEL MENU COSMIC
+-- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -3270,7 +3283,9 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
+-- =========================================================
 -- KOMPONEN UI
+-- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3744,20 +3759,20 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 30, 12, function(v)
+    sl("Parry Distance", 5, 30, 15, function(v)
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, -1, function(v)
+    sl("Face Sensitivity", -1, 1, 0.7, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
-    lbl("-1 = GACOR (semua arah)", C.GRN)
+    lbl("0.7 = Facing (recommended)", C.GRN)
 
-    sl("Parry Debounce", 0.05, 1, 0.5, function(v)
+    sl("Parry Debounce", 0.05, 1, 0.2, function(v)
         PARRY_DEBOUNCE = v
     end)
-    lbl("0.5 = sweet spot", C.FIRE_BRIGHT)
+    lbl("0.2 = Responsif", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
@@ -4060,6 +4075,30 @@ makeTab("Misc", "⚙️", 6, function()
         S.ShowPing = s
     end)
     lbl("Pojok kanan atas", C.GRN)
+
+    sl("FPS/Ping Size", 0.5, 3, 1, function(v)
+        FPSPingConfig.Size = v
+        if _G.Roooor_updateFPSPing then
+            _G.Roooor_updateFPSPing()
+        end
+    end)
+    lbl("Besar/kecil FPS + Ping", C.FIRE_BRIGHT)
+
+    sl("FPS/Ping X", -1000, 200, 0, function(v)
+        FPSPingConfig.X = v
+        if _G.Roooor_updateFPSPing then
+            _G.Roooor_updateFPSPing()
+        end
+    end)
+    lbl("Geser kiri/kanan", C.GRN)
+
+    sl("FPS/Ping Y", -200, 500, 0, function(v)
+        FPSPingConfig.Y = v
+        if _G.Roooor_updateFPSPing then
+            _G.Roooor_updateFPSPing()
+        end
+    end)
+    lbl("Geser atas/bawah", C.GRN)
 
     btn("🔄 Rejoin Server", function()
         rejoinServer()
@@ -4761,6 +4800,25 @@ makeTab("Extra", "✨", 10, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
+-- =========================================================
+-- AUTO APPLY ON EXECUTE
+-- =========================================================
+task.spawn(function()
+    task.wait(3)
+    pcall(createFPSPingGui)
+    if LP.Character then
+        if S.Headless then pcall(function() applyHeadless(true) end) end
+        if S.Korblox then
+            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
+        end
+        if S.EightBitOn then
+            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
+        end
+        if AutoParry.Enabled then pcall(scanKillers) end
+        if SkillCheck.Enabled then pcall(startSkillCheck) end
+    end
+end)
+
 -- PRINT FINAL
 task.wait(0.5)
 
@@ -4768,7 +4826,7 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry GACOR (Distance 12)       ║")
+print("║  🛡️ Auto Parry (sama persis Fallens)     ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  ⭕ Parry Circle BEAM RING                ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
@@ -4782,7 +4840,7 @@ print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
-print("║  📊 FPS + Ping Counter (rainbow galaxy)  ║")
+print("║  📊 FPS + Ping Counter (resize + drag)   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")

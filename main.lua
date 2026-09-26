@@ -456,7 +456,7 @@ GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
 print("✅ [1/11] COSMIC HUB v3.6 - Base + State + Auto Parry Custom loaded")-- =========================================================
--- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
+-- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS (FIXED)
 -- =========================================================
 
 FireList = {
@@ -622,20 +622,22 @@ SkyIds = {
     },
 }
 
--- KILLER ANIMS
+-- KILLER ANIMS (FIXED - 23 ID)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
     "117042998468241","122812055447896","78935059863801","74968262036854",
     "78432063483146","132817836308238","133963973694098","111920872708571",
     "80411309607666","98163597193511","82666958311998","110355011987939",
-    "139369275981133","135002183282873","121216847022485","130593238885843",
+    "139369275981139","135002183282873","121216847022485","130593238885843",
     "117070354890871","106871536134254","138720291317243"
 }) do
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
+print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded (FIXED)")
+print("🎯 Total KillerAnims:", 23)
+print("✅ ID 139369275981139 (BENER)")-- =========================================================
 -- SECTION 3/11 : FUNGSI UTAMA
 -- =========================================================
 
@@ -4375,7 +4377,7 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 print("✅ [6/11] COSMIC HUB - GUI + Tombol + Panel loaded")-- =========================================================
--- SECTION 7/11 : TAB UI PART 1
+-- SECTION 7/11 : TAB UI PART 1 (FIXED DEBOUNCE LIMIT 0.1)
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4397,16 +4399,16 @@ makeTab("Survivor", "🏃", 1, function()
         AutoParry.Enabled = s
         if s then AP_ScanKillers() end
     end)
-    lbl("Debounce 0.5 | Radius 14.3 ✅", C.GRN)
+    lbl("Debounce 0.1-0.5 | Radius 14.3 ✅", C.GRN)
 
     sl("Parry Distance", 5, 40, 14.3, function(v)
         AutoParry.ParryDistance = v
     end)
 
-    sl("Debounce", 0.05, 1, 0.5, function(v)
+    sl("Debounce", 0.1, 0.5, 0.5, function(v)
         AP_PARRY_DEBOUNCE = v
     end)
-    lbl("0.5 = settingan lo", C.GRN)
+    lbl("0.1 = cepet | 0.5 = settingan lo", C.GRN)
 
     sl("Circle Height", -5, 15, -2.5, function(v)
         AP_ESPCircle.YOffset = v
@@ -4724,7 +4726,7 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 end)
 
-print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
+print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded (Debounce limit 0.1-0.5)")-- =========================================================
 -- SECTION 8/11 : TAB UI PART 2
 -- =========================================================
 sec = _G.Roooor_sec

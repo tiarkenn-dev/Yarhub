@@ -73,7 +73,7 @@ end
 _G.Roooor_playSound = playToggleSound
 
 -- =========================================================
--- LOADING GALAXY
+-- LOADING GALAXY (RINGAN)
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
@@ -94,22 +94,22 @@ bgGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 5, 30)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 8, 50)),
 })
-bgGrad.Rotation = 0
 bgGrad.Parent = bg
 
 task.spawn(function()
     while bg.Parent do
-        for i = 0, 360, 4 do
+        for i = 0, 360, 6 do
             if not bg.Parent then break end
             bgGrad.Rotation = i
-            task.wait(0.03)
+            task.wait(0.04)
         end
     end
 end)
 
-for i = 1, 30 do
+-- Bintang jatuh (kurangi 30 -> 15, biar ringan)
+for i = 1, 15 do
     local p = Instance.new("Frame")
-    p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
+    p.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
     p.Position = UDim2.new(math.random(), 0, 1.1, 0)
     p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
     p.BorderSizePixel = 0
@@ -120,13 +120,12 @@ for i = 1, 30 do
         while p.Parent do
             local speed = math.random(5, 15) / 1000
             p.Position = UDim2.new(p.Position.X.Scale, p.Position.X.Offset, p.Position.Y.Scale - speed, 0)
-            p.BackgroundTransparency = p.BackgroundTransparency + 0.008
+            p.BackgroundTransparency = p.BackgroundTransparency + 0.01
             if p.BackgroundTransparency >= 1 or p.Position.Y.Scale < -0.1 then
                 p.Position = UDim2.new(math.random(), 0, 1.1, 0)
                 p.BackgroundTransparency = 0
-                p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
             end
-            task.wait(0.05)
+            task.wait(0.08)
         end
     end)
 end
@@ -138,9 +137,9 @@ ringContainer.BackgroundTransparency = 1
 ringContainer.Parent = bg
 
 local rings = {}
-for i = 1, 4 do
+for i = 1, 3 do
     local ring = Instance.new("Frame")
-    local ringSize = 200 - (i-1) * 40
+    local ringSize = 200 - (i-1) * 50
     ring.Size = UDim2.new(0, ringSize, 0, ringSize)
     ring.Position = UDim2.new(0.5, -ringSize/2, 0.5, -ringSize/2)
     ring.BackgroundTransparency = 1
@@ -149,7 +148,7 @@ for i = 1, 4 do
     local rStrk = Instance.new("UIStroke")
     rStrk.Thickness = 4 - (i-1) * 0.5
     rStrk.Color = C.ACC2
-    rStrk.Transparency = 0.05 + (i-1) * 0.12
+    rStrk.Transparency = 0.05 + (i-1) * 0.15
     rStrk.Parent = ring
 
     local rGrad = Instance.new("UIGradient")
@@ -250,7 +249,7 @@ progGrad.Parent = progressFill
 task.spawn(function()
     local t = 0
     while bg.Parent do
-        t = t + 0.025
+        t = t + 0.03
         for _, data in ipairs(rings) do
             data.ring.Rotation = t * data.speed * data.dir
             data.grad.Rotation = t * 90 * data.dir
@@ -261,9 +260,7 @@ task.spawn(function()
         core.Rotation = t * 50
         welcomeTitle.TextSize = 48 + math.sin(t * 3) * 3
         subtitle.TextSize = 68 + math.sin(t * 3 + 0.5) * 4
-        welcomeGrad.Rotation = math.sin(t) * 45
-        subGrad.Rotation = math.sin(t * 1.5) * 45
-        task.wait(0.025)
+        task.wait(0.03)
     end
 end)
 
@@ -355,12 +352,13 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
+-- AUTO PARRY GACOR
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
-    ParryDistance = 15,
+    ParryDistance = 20,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.7,
+    FaceSensitivity = 0.3,
     RequireFacing = true,
     Wiggle = false,
     WiggleSpam = 5,
@@ -372,20 +370,22 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
+-- 8-BIT ROYAL CROWN (ID dari aku)
 EightBitList = {
     "Royal Crown",
 }
 
 EightBitIds = {
-    ["Royal Crown"] = 10159600649,
+    ["Royal Crown"] = 6975483508,
 }
 
+-- KORBLOX PENCIL (ID dari aku)
 KorbloxList = {
     "Pencil",
 }
 
 KorbloxIds = {
-    ["Pencil"] = 129701348614901,
+    ["Pencil"] = 74103327,
 }
 
 FireBeamList = {
@@ -429,7 +429,10 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")-- =========================================================
+print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
+print("   8-Bit Crown : ID dari aku (6975483508)")
+print("   Korblox     : ID dari aku (74103327)")
+print("   Auto Parry  : GACOR (Distance 20, Face 0.3)")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -697,7 +700,7 @@ function applyFireFeet()
 end
 
 task.spawn(function()
-    while task.wait(0.3) do
+    while task.wait(0.4) do
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             local fire = head and head:FindFirstChild("RoooorFire")
@@ -710,29 +713,11 @@ task.spawn(function()
                 end
             end
         end
-        if S.FireFeetOn and LP.Character then
-            local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
-            if cfg.rainbow then
-                local char = LP.Character
-                local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
-                local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
-                local t = tick()
-                for _, leg in pairs({lLeg, rLeg}) do
-                    if leg then
-                        local fire = leg:FindFirstChild("RoooorFootFire")
-                        if fire then
-                            fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
-                            fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
-                        end
-                    end
-                end
-            end
-        end
     end
 end)
 
 -- =========================================================
--- 8-BIT ROYAL CROWN (ACCESSORY)
+-- 8-BIT ROYAL CROWN (ID: 6975483508)
 -- =========================================================
 eightBitAccessory = nil
 
@@ -794,7 +779,7 @@ function apply8Bit(enable, itemName, size, height)
 end
 
 -- =========================================================
--- KORBLOX PENCIL (KAKI ASLI DIHAPUS)
+-- KORBLOX PENCIL (ID: 74103327) - KAKI ASLI DIHAPUS
 -- =========================================================
 korbloxMesh = nil
 korbloxOriginalTrans = nil
@@ -1013,16 +998,7 @@ end
 -- =========================================================
 -- HD VISUAL (8 EXTRA)
 -- =========================================================
-hdExtras = {
-    Texture = nil,
-    Reflection = nil,
-    Bloom = nil,
-    Shadow = nil,
-    Water = nil,
-    SunRays = nil,
-    DepthField = nil,
-    AntiAliasing = nil,
-}
+hdExtras = {}
 
 function applyHDTexture(s)
     if s then
@@ -1413,9 +1389,9 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY
+-- AUTO PARRY GACOR (Distance 20, Face 0.3)
 -- =========================================================
-PARRY_DEBOUNCE = 0.5
+PARRY_DEBOUNCE = 0.4
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
@@ -1490,7 +1466,7 @@ function doParry()
 
     ParryActive = true
     pressParryButton()
-    task.delay(0.3, function()
+    task.delay(0.25, function()
         ParryActive = false
     end)
 end
@@ -1642,10 +1618,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE - RING BOLONG (KARET GELANG)
+-- PARRY CIRCLE - GARIS BULAT BOLONG (KARET GELANG)
 -- =========================================================
 parryCircleParts = {}
-PARRY_SEGMENTS = 24
+PARRY_SEGMENTS = 36  -- Lebih banyak buat garis lebih halus
 
 function clearParryCircle()
     for _, part in pairs(parryCircleParts) do
@@ -1682,7 +1658,7 @@ function updateParryCircle()
     end
 
     local ringColor = killerInside and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(0, 255, 100)
-    local ringTrans = killerInside and 0.2 or 0.4
+    local ringTrans = killerInside and 0.2 or 0.3
 
     for i = 1, PARRY_SEGMENTS do
         local angle = (i / PARRY_SEGMENTS) * math.pi * 2
@@ -1696,14 +1672,15 @@ function updateParryCircle()
             part.Anchored = true
             part.CanCollide = false
             part.Material = Enum.Material.Neon
-            part.Size = Vector3.new(0.8, 0.1, 0.8)
-            part.Shape = Enum.PartType.Ball
+            part.Size = Vector3.new(0.5, 0.1, 0.5)
+            part.Shape = Enum.PartType.Block
             part.Parent = workspace
             parryCircleParts[i] = part
         end
 
-        part.Size = Vector3.new(0.8, 0.1, 0.8)
+        part.Size = Vector3.new(0.6, 0.1, 0.6)
         part.Position = Vector3.new(myPos.X + x, myPos.Y - yOffset, myPos.Z + z)
+        part.CFrame = CFrame.new(part.Position) * CFrame.Angles(0, -angle, 0)
         part.Color = ringColor
         part.Transparency = ringTrans
     end
@@ -1848,12 +1825,6 @@ task.spawn(function()
             pcall(function()
                 Lighting.FogEnd = 9e9
                 Lighting.FogStart = 9e9
-                for _, v in pairs(Lighting:GetChildren()) do
-                    if v:IsA("Atmosphere") then
-                        v.Density = 0
-                        v.Haze = 0
-                    end
-                end
             end)
         end
     end
@@ -2631,7 +2602,7 @@ RunService.Heartbeat:Connect(function()
     if not root then return end
 
     local now = tick()
-    if now - lastESPUpdate >= 0.08 then
+    if now - lastESPUpdate >= 0.1 then
         lastESPUpdate = now
 
         for _, p in pairs(Players:GetPlayers()) do
@@ -2720,9 +2691,7 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- =========================================================
 -- TOMBOL MENU COSMIC
--- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -2830,7 +2799,7 @@ task.spawn(function()
     end
 end)
 
-for i = 1, 8 do
+for i = 1, 6 do
     local particle = Instance.new("Frame")
     particle.Size = UDim2.new(0, 2, 0, 2)
     particle.BorderSizePixel = 0
@@ -2838,7 +2807,7 @@ for i = 1, 8 do
     particle.Parent = btnContainer
     rnd(particle, 999)
 
-    local angle = (i / 8) * math.pi * 2
+    local angle = (i / 6) * math.pi * 2
     local orbitSpeed = 1.5 + math.random() * 1.5
     local radius = 20
 
@@ -2850,7 +2819,7 @@ for i = 1, 8 do
             particle.Position = UDim2.new(0.5, x - 1, 0.5, y - 1)
             particle.BackgroundColor3 = Color3.fromHSV((t * 0.15 + i * 0.1) % 1, 0.7, 1)
             particle.BackgroundTransparency = 0.2 + math.sin(t * 4 + i) * 0.3
-            task.wait(0.03)
+            task.wait(0.04)
         end
     end)
 end
@@ -2891,9 +2860,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- =========================================================
 -- PANEL MENU COSMIC
--- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -2921,7 +2888,7 @@ rnd(starsGui, 18)
 
 local starsList = {}
 
-for i = 1, 50 do
+for i = 1, 30 do
     local star = Instance.new("Frame")
     star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
     star.Position = UDim2.new(math.random(), 0, math.random(), 0)
@@ -2932,33 +2899,6 @@ for i = 1, 50 do
     star.Parent = starsGui
     rnd(star, 999)
     table.insert(starsList, star)
-end
-
-for i = 1, 3 do
-    local nebula = Instance.new("Frame")
-    nebula.Size = UDim2.new(0, math.random(80, 150), 0, math.random(80, 150))
-    nebula.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    nebula.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
-    nebula.BackgroundTransparency = 0.85
-    nebula.BorderSizePixel = 0
-    nebula.ZIndex = 0
-    nebula.Parent = starsGui
-    rnd(nebula, 999)
-
-    task.spawn(function()
-        local startX = nebula.Position.X.Scale
-        local startY = nebula.Position.Y.Scale
-        while nebula.Parent do
-            local t = tick()
-            nebula.Position = UDim2.new(
-                startX + math.sin(t * 0.3 + i) * 0.05,
-                0,
-                startY + math.cos(t * 0.4 + i) * 0.05,
-                0
-            )
-            task.wait(0.1)
-        end
-    end)
 end
 
 task.spawn(function()
@@ -2973,7 +2913,7 @@ task.spawn(function()
                 star.Size = UDim2.new(0, sz, 0, sz)
             end
         end
-        task.wait(0.05)
+        task.wait(0.08)
     end
 end)
 
@@ -3010,10 +2950,10 @@ neonGrad.Parent = neonLine
 
 task.spawn(function()
     while neonLine.Parent do
-        for i = 0, 1, 0.03 do
+        for i = 0, 1, 0.04 do
             if not neonLine.Parent then break end
             neonGrad.Rotation = i * 360
-            task.wait(0.06)
+            task.wait(0.08)
         end
     end
 end)
@@ -3102,9 +3042,7 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- =========================================================
 -- KOMPONEN UI
--- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3570,20 +3508,20 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 30, 15, function(v)
+    sl("Parry Distance", 5, 30, 20, function(v)
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, 0.7, function(v)
+    sl("Face Sensitivity", -1, 1, 0.3, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
-    lbl("0.7 = Facing (recommended)", C.GRN)
+    lbl("0.3 = GACOR (recommended)", C.GRN)
 
-    sl("Parry Debounce", 0.05, 1, 0.5, function(v)
+    sl("Parry Debounce", 0.05, 1, 0.4, function(v)
         PARRY_DEBOUNCE = v
     end)
-    lbl("0.5 = sweet spot", C.FIRE_BRIGHT)
+    lbl("0.4 = GACOR (sweet spot)", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check", "⚡")
     tog("Enable Auto Skill Check", false, function(s)
@@ -4007,7 +3945,7 @@ makeTab("Visual", "✨", 7, function()
             apply8Bit(true, "Royal Crown", S.EightBitSize, v)
         end
     end)
-    lbl("Ada efek sparkle + particle + trail", C.GRN)
+    lbl("ID dari script (works)", C.GRN)
 
     -- KORBLOX
     sec("Korblox Pencil (Right Leg)", "🦴")
@@ -4550,14 +4488,14 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry                            ║")
+print("║  🛡️ Auto Parry GACOR                     ║")
 print("║  ⚡ Auto Skill Check                     ║")
-print("║  ⭕ Parry Circle RING BOLONG              ║")
+print("║  ⭕ Parry Circle GARIS BULAT BOLONG       ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
 print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
 print("║  🛡️ God Mode                             ║")
-print("║  👑 8-Bit Royal Crown (Accessory)        ║")
-print("║  🦴 Korblox Pencil (kaki asli ganti)     ║")
+print("║  👑 8-Bit Royal Crown (ID dari aku)      ║")
+print("║  🦴 Korblox Pencil (ID dari aku)         ║")
 print("║  🔥 Fire Beam 10 efek                    ║")
 print("║  💎 HD Visual + 8 HD Extra               ║")
 print("║  👤 Headless (di Misc)                   ║")

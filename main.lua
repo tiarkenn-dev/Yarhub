@@ -1,11 +1,3 @@
---[[
-    ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v3.3                  ║
-    ║   Auto Parry ON + ESP Full + Moonwalk Fix    ║
-    ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
-    ╚══════════════════════════════════════════════╝
-]]
-
 -- =========================================================
 -- SECTION 1/11 : LOADING + CONFIG + STATE
 -- =========================================================
@@ -29,7 +21,6 @@ function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
--- WARNA TEMA
 C = {
     BG = Color3.fromRGB(10, 5, 25),
     BG2 = Color3.fromRGB(20, 10, 45),
@@ -262,30 +253,24 @@ task.delay(1.5, function()
     loadingGui:Destroy()
 end)
 
--- STATE UTAMA
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-
     ParryCircle = true, ParryCircleSize = 12,
-
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false, NoClipCamera = false,
     Fly = false, FlySpeed = 50,
-
     Korblox = true, KorbloxType = "Pencil",
     KorbloxYOffset = 0.6, KorbloxScale = 1,
     Headless = true,
     EightBitOn = true, EightBitType = "Royal Crown",
     EightBitSize = 1.24, EightBitHeight = 0.88,
-
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
-
     Crosshair = false,
     CrosshairColor = Color3.fromRGB(0, 200, 255),
     CrosshairSize = 8,
@@ -294,42 +279,32 @@ _G.RoooorS = _G.RoooorS or {
     CrosshairColorMode = "Solid",
     CrosshairOffsetX = 0,
     CrosshairOffsetY = 0,
-
     ZoomOut = false, ZoomOutValue = 500,
     FOV = 70, FOVEnabled = false,
-
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     SkyId = "Default",
-
     NoScreenEffects = false,
     LowGraphics = false,
     CleanSky = false,
-
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     KillFeed = false, StunNotify = false,
     AntiAFK = false, ShowFPS = true, ShowPing = true,
-
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
-
     AutoCarry = false,
     AutoHook = false,
     CarryRange = 60,
-
     HDBoost = false, HDShader = false, HDSky = false,
     HDTexture = false, HDReflection = false, HDBloom = false,
     HDShadow = false, HDWater = false, HDSunRays = false,
     HDDepthField = false, HDAntiAliasing = false,
-
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
-
     ESPNameMode = "Text", ESPNameSize = 12,
-
     AutoEscapeGate = false,
     AutoEscapeRange = 50,
     AutoEscapeUseKillerCheck = true,
@@ -343,21 +318,19 @@ _G.Roooor_FPSPing = FPSPingConfig
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
--- ESP STATE (Default ON pas execute)
 ESP = _G.Roooor_ESP or {
     Survivor = true, Killer = true, Generator = true,
     Pallet = true, Window = true, SCP = true,
-    Distance = 1000,       -- 🆕 Radius MAX
+    Distance = 1000,
 }
 _G.Roooor_ESP = ESP
 
--- ESP STATUS STATE (Default ON FULL)
 ESPStatus = _G.Roooor_ESPStatus or {
-    Enabled = true,        -- 🆕 ON
-    ShowName = true,       -- 🆕 ON
-    ShowDistance = true,   -- 🆕 ON
-    ShowHealth = true,     -- 🆕 ON
-    Radius = 1000,         -- 🆕 Radius MAX
+    Enabled = true,
+    ShowName = true,
+    ShowDistance = true,
+    ShowHealth = true,
+    Radius = 1000,
 }
 _G.Roooor_ESPStatus = ESPStatus
 
@@ -367,23 +340,56 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (Default ON pas execute)
+Aimlock = _G.Roooor_Aimlock or {
+    Enabled = false,
+    Mode = "Auto",
+    AimPart = "Head",
+    MaxDistance = 500,
+    Locked = false,
+    AutoFire = false,
+    AutoFireDelay = 0.15,
+    FaceTarget = true,
+    Notify = true,
+    CurrentTarget = nil,
+}
+_G.Roooor_Aimlock = Aimlock
+
+AimlockLocked = false
+AimlockTarget = nil
+AimlockLastFire = 0
+
+Hitbox = _G.Roooor_Hitbox or {
+    Enabled = false,
+    Size = 70,
+    ESPShow = true,
+    HideESP = false,
+    Color = Color3.fromRGB(255, 60, 60),
+    ColorKiller = Color3.fromRGB(255, 60, 60),
+    ColorSurvivor = Color3.fromRGB(0, 200, 255),
+    Mode = "Auto",
+    WallBang = true,
+}
+_G.Roooor_Hitbox = Hitbox
+
+HitboxESPObjects = {}
+HitboxOriginalSizes = {}
+
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = true,          -- 🆕 ON
-    ParryDistance = 14,       -- 🆕 14
+    Enabled = true,
+    ParryDistance = 14,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = -1,     -- 🆕 -1
-    RequireFacing = false,    -- 🆕 auto (karena -1)
+    FaceSensitivity = -1,
+    RequireFacing = false,
     Wiggle = false,
     WiggleSpam = 5,
+    AggressiveMode = true,
 }
 _G.Roooor_AutoParry = AutoParry
 
-PARRY_DEBOUNCE = 0.1           -- 🆕 0.1
+PARRY_DEBOUNCE = 0.1
 ParryActive = false
 
--- AUTO SKILL CHECK
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = true,
     Mode = "Perfect",
@@ -393,39 +399,28 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- =========================================================
--- MOONWALK (FIXED - FALLENS LOGIC)
--- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
-    ShowButton = false,
+    Locked = false,
     SpamSpeed = 30,
     Intensity = 35,
     SlowSpeed = 13,
     UseSlow = true,
-    ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
-    GuiInstance = nil,
+    ShowButton = true,
 }
 _G.Roooor_Moonwalk = Moonwalk
 
-MoonwalkActive = false
-MoonwalkConnection = nil
-
--- =========================================================
--- FAST VAULT
--- =========================================================
 FastVault = _G.Roooor_FastVault or {
     Enabled = false,
     Speed = 1.2,
     ReplaceMap = {
-        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779", -- Running → Finesse
+        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
     },
 }
 _G.Roooor_FastVault = FastVault
 
 VaultTracks = {}
 
--- AUTO FLEE KILLER
 AutoFlee = _G.Roooor_AutoFlee or {
     Enabled = false,
     DetectDistance = 50,
@@ -434,7 +429,6 @@ AutoFlee = _G.Roooor_AutoFlee or {
 }
 _G.Roooor_AutoFlee = AutoFlee
 
--- LIST LAINNYA
 EightBitList = { "Royal Crown" }
 EightBitIds = { ["Royal Crown"] = 10138606900 }
 
@@ -450,49 +444,7 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-Combat = _G.Roooor_Combat or {
-    AimlockEnabled = false,
-    Holding = false,
-    AttackHeld = false,
-    Mode = "Killer",
-    Smoothness = 0.01,
-    LockRadius = 150,
-    AimPart = "Head",
-    Predict = true,
-    PredictStrength = 0.15,
-    VisibilityCheck = false,
-    WallCheck = false,
-    FOVCircle = false,
-    FOVRadius = 200,
-    TriggerBotEnabled = false,
-    TriggerDelay = 0.05,
-    HitboxSurvivor = false,
-    HitboxKiller = false,
-    HitboxSize = 25,
-    HitboxVisible = false,
-}
-_G.Roooor_Combat = Combat
-
-pcall(function()
-    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
-    if remotes then
-        local carry = remotes:FindFirstChild("Carry")
-        if carry then
-            CarryEvent = carry:FindFirstChild("CarrySurvivorEvent")
-            HookEvent = carry:FindFirstChild("HookEvent")
-        end
-        local atk = remotes:FindFirstChild("Attacks")
-        if atk then
-            AttackEvent = atk:FindFirstChild("BasicAttack")
-        end
-    end
-end)
-
-print("✅ [1/11] COSMIC HUB v3.3 - Base + State loaded")
-print("   Auto Parry: ON (Distance 14, Face -1, Debounce 0.1)")
-print("   ESP Full  : ON (Radius 1000)")
-print("   Moonwalk  : FIXED")
-print("   Crosshair : 8 MODE + 2 WARNA")-- =========================================================
+print("✅ [1/11] COSMIC HUB v3.4 - Base + State loaded")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -659,7 +611,6 @@ SkyIds = {
     },
 }
 
--- KILLER ANIMS (23 ID)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -676,7 +627,6 @@ print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =============
 -- SECTION 3/11 : FUNGSI UTAMA
 -- =========================================================
 
--- AUTO SAVE SYSTEM
 function saveState(key, value)
     _G.RoooorSavedStates = _G.RoooorSavedStates or {}
     _G.RoooorSavedStates[key] = value
@@ -695,7 +645,8 @@ task.spawn(function()
         _G.RoooorSavedStates.AutoParry = AutoParry
         _G.RoooorSavedStates.SkillCheck = SkillCheck
         _G.RoooorSavedStates.Moonwalk = Moonwalk
-        _G.RoooorSavedStates.Combat = Combat
+        _G.RoooorSavedStates.Aimlock = Aimlock
+        _G.RoooorSavedStates.Hitbox = Hitbox
         _G.RoooorSavedStates.GodMode = GodMode
         _G.RoooorSavedStates.AutoFlee = AutoFlee
         _G.RoooorSavedStates.FastVault = FastVault
@@ -802,7 +753,7 @@ task.spawn(function()
     end
 end)
 
--- 8-BIT ROYAL CROWN (CLIENT-ONLY)
+-- 8-BIT ROYAL CROWN
 eightBitPart = nil
 
 function clear8Bit()
@@ -846,7 +797,7 @@ function apply8Bit(enable, itemName, size, height)
     weld.Parent = eightBitPart
 end
 
--- KORBLOX PENCIL (CLIENT-ONLY)
+-- KORBLOX PENCIL
 korbloxParts = {}
 korbloxOrigData = {}
 
@@ -976,7 +927,7 @@ task.spawn(function()
     end
 end)
 
--- FIRE BEAM (10 EFEK)
+-- FIRE BEAM
 fireBeamParts = {}
 fireBeamConns = {}
 
@@ -1083,7 +1034,7 @@ function applyFireBeam(enable, beamType, color)
     end
 end
 
--- HD VISUAL (8 EXTRA)
+-- HD VISUAL EXTRAS
 hdExtras = {}
 
 function applyHDTexture(s)
@@ -1217,7 +1168,7 @@ function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
--- FPS + PING COUNTER (PUTIH SOLID)
+-- FPS + PING COUNTER
 fpsPingGui = nil
 fpsCounter = 0
 fpsLastTime = tick()
@@ -1323,11 +1274,10 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/11] COSMIC HUB - Fungsi utama loaded (FPS/Ping PUTIH)")-- =========================================================
--- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK + FASTVAULT + CROSSHAIR
+print("✅ [3/11] COSMIC HUB - Fungsi utama loaded")-- =========================================================
+-- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK NEW + AIMLOCK NEW + HITBOX NEW + CROSSHAIR
 -- =========================================================
 
--- ESP SYSTEM
 ESPObjects = {}
 StatusESP = {}
 CachedSCP = {}
@@ -1620,7 +1570,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY
+-- AUTO PARRY + AGGRESSIVE
 -- =========================================================
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
@@ -1689,14 +1639,12 @@ end
 
 function doParry()
     if shouldBlockParry() then return end
-
     local now = tick()
-    if now - lastParry < PARRY_DEBOUNCE then return end
+    local debounce = AutoParry.AggressiveMode and 0.03 or PARRY_DEBOUNCE
+    if now - lastParry < debounce then return end
     lastParry = now
-
     ParryActive = true
     pressParryButton()
-
     task.delay(0.3, function()
         ParryActive = false
     end)
@@ -1714,13 +1662,11 @@ end
 function isFacingTarget(targetChar)
     if not AutoParry.RequireFacing then return true end
     if AutoParry.FaceSensitivity <= -1 then return true end
-
     local myChar = LP.Character
     if not myChar then return false end
     local myRoot = myChar:FindFirstChild("HumanoidRootPart")
     local eRoot = targetChar:FindFirstChild("HumanoidRootPart")
     if not myRoot or not eRoot then return false end
-
     local enemyForward = eRoot.CFrame.LookVector
     local directionToMe = (myRoot.Position - eRoot.Position).Unit
     local dot = enemyForward:Dot(directionToMe)
@@ -1765,8 +1711,31 @@ task.spawn(function()
     end
 end)
 
+task.spawn(function()
+    while task.wait(0.05) do
+        if not AutoParry.Enabled then continue end
+        if not AutoParry.AggressiveMode then continue end
+        if shouldBlockParry() then continue end
+
+        local myRoot = getRoot()
+        if not myRoot then continue end
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
+                if eRoot then
+                    local dist = (eRoot.Position - myRoot.Position).Magnitude
+                    if dist <= AutoParry.ParryDistance then
+                        doParry()
+                    end
+                end
+            end
+        end
+    end
+end)
+
 -- =========================================================
--- AUTO SKILL CHECK (2 MODE)
+-- AUTO SKILL CHECK
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1805,28 +1774,21 @@ function startSkillCheck()
 
     SkillHeartbeat = RunService.RenderStepped:Connect(function()
         if not SkillCheck.Enabled or busy then return end
-
         local prompt = PG:FindFirstChild("SkillCheckPromptGui")
         if not prompt then return end
-
         local check = prompt:FindFirstChild("Check")
         if not check or not check.Visible then return end
-
         local line = check:FindFirstChild("Line")
         local goal = check:FindFirstChild("Goal")
         if not line or not goal then return end
-
         local gr = goal.Rotation % 360
 
-        -- MODE INSTANT
         if SkillCheck.Mode == "Instant" then
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
-
             if SkillCheck.HideNeedle then
                 pcall(function() line.Visible = false end)
             end
-
             busy = true
             task.spawn(function()
                 if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
@@ -1841,15 +1803,12 @@ function startSkillCheck()
             return
         end
 
-        -- MODE PERFECT
         local lr = line.Rotation % 360
         local startRange = (gr + 102) % 360
         local endRange = (gr + 116) % 360
-
         local success =
             (startRange > endRange and (lr >= startRange or lr <= endRange))
             or (lr >= startRange and lr <= endRange)
-
         if success then
             busy = true
             task.spawn(function()
@@ -1871,50 +1830,42 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK (FIXED - FALLENS LOGIC)
+-- MOONWALK NEW (STANDALONE - FIXED)
 -- =========================================================
-function isDowned()
+function mwIsDowned()
     local char = LP.Character
     if not char then return false end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
-
-    return hum.Health <= 0
-        or hum.Health < 2
+    return hum.Health <= 0 or hum.Health < 2
         or char:GetAttribute("Downed") == true
         or char:GetAttribute("IsDown") == true
         or char:GetAttribute("Knocked") == true
 end
 
-function startMoonwalk()
-    MoonwalkActive = true
-    if MoonwalkConnection then return end
+function mwResetSpeed()
+    local char = LP.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = 16 end
+end
 
-    MoonwalkConnection = RunService.RenderStepped:Connect(function()
-        -- Cek flag Moonwalk.Enabled + MoonwalkActive
-        if not Moonwalk.Enabled then return end
-        if ParryActive then return end
-        if isDowned() then return end
+RunService.RenderStepped:Connect(function()
+    if not Moonwalk.Enabled then return end
+    if ParryActive then return end
+    if mwIsDowned() then return end
 
-        local char = LP.Character
-        if not char or not char.Parent then return end
+    local char = LP.Character
+    if not char or not char.Parent then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local cam = workspace.CurrentCamera
 
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local cam = workspace.CurrentCamera
-
-        if not humanoid or not hrp or not cam then return end
-
-        -- Force WalkSpeed (biar gak ke-reset game)
-        if Moonwalk.UseSlow then
-            pcall(function()
-                humanoid.WalkSpeed = Moonwalk.SlowSpeed
-            end)
+    if humanoid and hrp and cam then
+        if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
+            humanoid.WalkSpeed = Moonwalk.SlowSpeed
         end
-
         local look = cam.CFrame.LookVector
         local flatLook = Vector3.new(look.X, 0, look.Z)
-
         if flatLook.Magnitude > 0 then
             flatLook = flatLook.Unit
             local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
@@ -1922,16 +1873,564 @@ function startMoonwalk()
             hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
             humanoid:Move(Vector3.new(0, 0, 1), true)
         end
+    end
+end)
+
+function setMoonwalk(state)
+    if Moonwalk.Locked and state ~= Moonwalk.Enabled then
+        return false
+    end
+    Moonwalk.Enabled = state
+    if not state then mwResetSpeed() end
+    return true
+end
+
+-- =========================================================
+-- MOONWALK GUI STANDALONE
+-- =========================================================
+if PG:FindFirstChild("MoonwalkGui") then
+    PG.MoonwalkGui:Destroy()
+end
+
+mwScreenGui = Instance.new("ScreenGui")
+mwScreenGui.Name = "MoonwalkGui"
+mwScreenGui.ResetOnSpawn = false
+mwScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+mwScreenGui.Parent = PG
+
+mwMainFrame = Instance.new("Frame")
+mwMainFrame.Name = "MainFrame"
+mwMainFrame.Size = UDim2.fromOffset(220, 200)
+mwMainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
+mwMainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+mwMainFrame.BorderSizePixel = 0
+mwMainFrame.Active = true
+mwMainFrame.Draggable = true
+mwMainFrame.Visible = false
+mwMainFrame.Parent = mwScreenGui
+
+local mwUICorner = Instance.new("UICorner")
+mwUICorner.CornerRadius = UDim.new(0, 10)
+mwUICorner.Parent = mwMainFrame
+
+local mwUIStroke = Instance.new("UIStroke")
+mwUIStroke.Color = Color3.fromRGB(90, 120, 210)
+mwUIStroke.Thickness = 1.5
+mwUIStroke.Parent = mwMainFrame
+
+local mwTitle = Instance.new("TextLabel")
+mwTitle.Size = UDim2.new(1, 0, 0, 32)
+mwTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+mwTitle.BorderSizePixel = 0
+mwTitle.Text = "🌙 Moonwalk Menu"
+mwTitle.TextColor3 = Color3.fromRGB(200, 215, 255)
+mwTitle.Font = Enum.Font.GothamBold
+mwTitle.TextSize = 14
+mwTitle.Parent = mwMainFrame
+
+local mwTitleCorner = Instance.new("UICorner")
+mwTitleCorner.CornerRadius = UDim.new(0, 10)
+mwTitleCorner.Parent = mwTitle
+
+local mwToggleBtn = Instance.new("TextButton")
+mwToggleBtn.Size = UDim2.new(1, -20, 0, 34)
+mwToggleBtn.Position = UDim2.new(0, 10, 0, 42)
+mwToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+mwToggleBtn.Text = "Moonwalk: OFF"
+mwToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+mwToggleBtn.Font = Enum.Font.GothamBold
+mwToggleBtn.TextSize = 13
+mwToggleBtn.BorderSizePixel = 0
+mwToggleBtn.Parent = mwMainFrame
+
+local mwToggleCorner = Instance.new("UICorner")
+mwToggleCorner.CornerRadius = UDim.new(0, 6)
+mwToggleCorner.Parent = mwToggleBtn
+
+local mwLockBtn = Instance.new("TextButton")
+mwLockBtn.Size = UDim2.new(1, -20, 0, 30)
+mwLockBtn.Position = UDim2.new(0, 10, 0, 82)
+mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+mwLockBtn.Text = "🔓 Unlocked"
+mwLockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+mwLockBtn.Font = Enum.Font.GothamBold
+mwLockBtn.TextSize = 12
+mwLockBtn.BorderSizePixel = 0
+mwLockBtn.Parent = mwMainFrame
+
+local mwLockCorner = Instance.new("UICorner")
+mwLockCorner.CornerRadius = UDim.new(0, 6)
+mwLockCorner.Parent = mwLockBtn
+
+local mwSpeedLabel = Instance.new("TextLabel")
+mwSpeedLabel.Size = UDim2.new(1, -20, 0, 16)
+mwSpeedLabel.Position = UDim2.new(0, 10, 0, 118)
+mwSpeedLabel.BackgroundTransparency = 1
+mwSpeedLabel.Text = "Spam Speed: " .. Moonwalk.SpamSpeed
+mwSpeedLabel.TextColor3 = Color3.fromRGB(200, 215, 255)
+mwSpeedLabel.Font = Enum.Font.Gotham
+mwSpeedLabel.TextSize = 11
+mwSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+mwSpeedLabel.Parent = mwMainFrame
+
+local mwSpeedSlider = Instance.new("Frame")
+mwSpeedSlider.Size = UDim2.new(1, -20, 0, 6)
+mwSpeedSlider.Position = UDim2.new(0, 10, 0, 138)
+mwSpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+mwSpeedSlider.BorderSizePixel = 0
+mwSpeedSlider.Parent = mwMainFrame
+
+local mwSpeedSliderCorner = Instance.new("UICorner")
+mwSpeedSliderCorner.CornerRadius = UDim.new(1, 0)
+mwSpeedSliderCorner.Parent = mwSpeedSlider
+
+local mwSpeedFill = Instance.new("Frame")
+mwSpeedFill.Size = UDim2.new(Moonwalk.SpamSpeed / 50, 0, 1, 0)
+mwSpeedFill.BackgroundColor3 = Color3.fromRGB(90, 120, 210)
+mwSpeedFill.BorderSizePixel = 0
+mwSpeedFill.Parent = mwSpeedSlider
+
+local mwSpeedFillCorner = Instance.new("UICorner")
+mwSpeedFillCorner.CornerRadius = UDim.new(1, 0)
+mwSpeedFillCorner.Parent = mwSpeedFill
+
+local mwSpeedKnob = Instance.new("Frame")
+mwSpeedKnob.Size = UDim2.fromOffset(14, 14)
+mwSpeedKnob.Position = UDim2.new(Moonwalk.SpamSpeed / 50, -7, 0.5, -7)
+mwSpeedKnob.BackgroundColor3 = Color3.fromRGB(200, 215, 255)
+mwSpeedKnob.BorderSizePixel = 0
+mwSpeedKnob.Parent = mwSpeedSlider
+
+local mwSpeedKnobCorner = Instance.new("UICorner")
+mwSpeedKnobCorner.CornerRadius = UDim.new(1, 0)
+mwSpeedKnobCorner.Parent = mwSpeedKnob
+
+local mwIntLabel = Instance.new("TextLabel")
+mwIntLabel.Size = UDim2.new(1, -20, 0, 16)
+mwIntLabel.Position = UDim2.new(0, 10, 0, 152)
+mwIntLabel.BackgroundTransparency = 1
+mwIntLabel.Text = "Intensity: " .. Moonwalk.Intensity
+mwIntLabel.TextColor3 = Color3.fromRGB(200, 215, 255)
+mwIntLabel.Font = Enum.Font.Gotham
+mwIntLabel.TextSize = 11
+mwIntLabel.TextXAlignment = Enum.TextXAlignment.Left
+mwIntLabel.Parent = mwMainFrame
+
+local mwIntSlider = Instance.new("Frame")
+mwIntSlider.Size = UDim2.new(1, -20, 0, 6)
+mwIntSlider.Position = UDim2.new(0, 10, 0, 172)
+mwIntSlider.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+mwIntSlider.BorderSizePixel = 0
+mwIntSlider.Parent = mwMainFrame
+
+local mwIntSliderCorner = Instance.new("UICorner")
+mwIntSliderCorner.CornerRadius = UDim.new(1, 0)
+mwIntSliderCorner.Parent = mwIntSlider
+
+local mwIntFill = Instance.new("Frame")
+mwIntFill.Size = UDim2.new(Moonwalk.Intensity / 50, 0, 1, 0)
+mwIntFill.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+mwIntFill.BorderSizePixel = 0
+mwIntFill.Parent = mwIntSlider
+
+local mwIntFillCorner = Instance.new("UICorner")
+mwIntFillCorner.CornerRadius = UDim.new(1, 0)
+mwIntFillCorner.Parent = mwIntFill
+
+local mwIntKnob = Instance.new("Frame")
+mwIntKnob.Size = UDim2.fromOffset(14, 14)
+mwIntKnob.Position = UDim2.new(Moonwalk.Intensity / 50, -7, 0.5, -7)
+mwIntKnob.BackgroundColor3 = Color3.fromRGB(200, 215, 255)
+mwIntKnob.BorderSizePixel = 0
+mwIntKnob.Parent = mwIntSlider
+
+local mwIntKnobCorner = Instance.new("UICorner")
+mwIntKnobCorner.CornerRadius = UDim.new(1, 0)
+mwIntKnobCorner.Parent = mwIntKnob
+
+function mwUpdateToggleUI()
+    if Moonwalk.Enabled then
+        mwToggleBtn.Text = "Moonwalk: ON"
+        mwToggleBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+    else
+        mwToggleBtn.Text = "Moonwalk: OFF"
+        mwToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+    end
+end
+
+mwToggleBtn.MouseButton1Click:Connect(function()
+    if Moonwalk.Locked then
+        mwToggleBtn.Text = "🔒 LOCKED!"
+        task.delay(1, mwUpdateToggleUI)
+        return
+    end
+    setMoonwalk(not Moonwalk.Enabled)
+    mwUpdateToggleUI()
+end)
+
+mwLockBtn.MouseButton1Click:Connect(function()
+    Moonwalk.Locked = not Moonwalk.Locked
+    if Moonwalk.Locked then
+        mwLockBtn.Text = "🔒 Locked"
+        mwLockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    else
+        mwLockBtn.Text = "🔓 Unlocked"
+        mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+    end
+end)
+
+local function mwMakeSlider(sliderFrame, knob, fill, label, text, minVal, maxVal, callback)
+    local dragging = false
+    local function update(input)
+        local pos = input.Position.X
+        local rel = (pos - sliderFrame.AbsolutePosition.X) / sliderFrame.AbsoluteSize.X
+        rel = math.clamp(rel, 0, 1)
+        local val = math.floor(minVal + (maxVal - minVal) * rel + 0.5)
+        knob.Position = UDim2.new(rel, -7, 0.5, -7)
+        fill.Size = UDim2.new(rel, 0, 1, 0)
+        label.Text = text .. ": " .. val
+        callback(val)
+    end
+    knob.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
     end)
 end
 
-function stopMoonwalk()
-    MoonwalkActive = false
-    if MoonwalkConnection then
-        MoonwalkConnection:Disconnect()
-        MoonwalkConnection = nil
+mwMakeSlider(mwSpeedSlider, mwSpeedKnob, mwSpeedFill, mwSpeedLabel, "Spam Speed", 1, 50, function(v)
+    Moonwalk.SpamSpeed = v
+end)
+
+mwMakeSlider(mwIntSlider, mwIntKnob, mwIntFill, mwIntLabel, "Intensity", 1, 50, function(v)
+    Moonwalk.Intensity = v
+end)
+
+mwUpdateToggleUI()
+
+-- TOMBOL MW BOTTOM
+mwBtnGui = Instance.new("ScreenGui")
+mwBtnGui.Name = "MW_BottomBtn"
+mwBtnGui.ResetOnSpawn = false
+mwBtnGui.IgnoreGuiInset = true
+mwBtnGui.Parent = PG
+
+mwBtn = Instance.new("TextButton")
+mwBtn.Size = UDim2.fromOffset(60, 60)
+mwBtn.Position = UDim2.new(0, 20, 1, -100)
+mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mwBtn.Text = "MW"
+mwBtn.TextColor3 = Color3.new(1, 1, 1)
+mwBtn.TextSize = 18
+mwBtn.Font = Enum.Font.GothamBlack
+mwBtn.AutoButtonColor = false
+mwBtn.Active = true
+mwBtn.Draggable = true
+mwBtn.Parent = mwBtnGui
+
+local mwBtnCorner = Instance.new("UICorner")
+mwBtnCorner.CornerRadius = UDim.new(1, 0)
+mwBtnCorner.Parent = mwBtn
+
+local mwBtnStroke = Instance.new("UIStroke")
+mwBtnStroke.Thickness = 2
+mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
+mwBtnStroke.Transparency = 0.5
+mwBtnStroke.Parent = mwBtn
+
+function mwBtnUpdateUI()
+    if Moonwalk.Enabled then
+        mwBtn.Text = "MW ON"
+        mwBtnStroke.Color = Color3.fromRGB(170, 0, 255)
+        mwBtn.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
+    else
+        mwBtn.Text = "MW"
+        mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
+        mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     end
 end
+
+local mwBtnHoldTime = 0
+mwBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        mwBtnHoldTime = tick()
+    end
+end)
+
+mwBtn.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        local held = tick() - mwBtnHoldTime
+        if held >= 0.5 then
+            mwMainFrame.Visible = not mwMainFrame.Visible
+        else
+            if Moonwalk.Locked then
+                mwBtn.Text = "🔒"
+                task.delay(0.8, mwBtnUpdateUI)
+                return
+            end
+            setMoonwalk(not Moonwalk.Enabled)
+            mwBtnUpdateUI()
+            mwUpdateToggleUI()
+        end
+    end
+end)
+
+-- =========================================================
+-- AIMLOCK NEW
+-- =========================================================
+function aimlockFindTarget()
+    local myRoot = getRoot()
+    if not myRoot then return nil end
+    local myTeam = LP.Team and LP.Team.Name or ""
+    local targetTeam = ""
+    if Aimlock.Mode == "Auto" then
+        if myTeam == "Killer" then targetTeam = "Survivors"
+        elseif myTeam == "Survivors" then targetTeam = "Killer" end
+    elseif Aimlock.Mode == "Killer" then targetTeam = "Killer"
+    elseif Aimlock.Mode == "Survivor" then targetTeam = "Survivors" end
+
+    local closest, shortest = nil, Aimlock.MaxDistance
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character then
+            local pTeam = p.Team and p.Team.Name or ""
+            if pTeam == targetTeam then
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                local aimPart = p.Character:FindFirstChild(Aimlock.AimPart)
+                    or p.Character:FindFirstChild("Head")
+                    or p.Character:FindFirstChild("HumanoidRootPart")
+                if hum and hum.Health > 0 and aimPart then
+                    local dist = (aimPart.Position - myRoot.Position).Magnitude
+                    if dist < shortest then
+                        shortest = dist
+                        closest = { part = aimPart, char = p.Character, player = p }
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+function aimlockFireAttack()
+    local now = tick()
+    if now - AimlockLastFire < Aimlock.AutoFireDelay then return end
+    AimlockLastFire = now
+    pcall(function()
+        local r = ReplicatedStorage:FindFirstChild("Remotes")
+        if r then
+            local a = r:FindFirstChild("Attacks")
+            if a then
+                local atk = a:FindFirstChild("BasicAttack")
+                if atk then atk:FireServer(false) end
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while task.wait() do
+        if not Aimlock.Enabled then
+            AimlockLocked = false
+            AimlockTarget = nil
+            continue
+        end
+        if not AimlockLocked then
+            AimlockTarget = nil
+            continue
+        end
+
+        local target = aimlockFindTarget()
+        if target then
+            AimlockTarget = target
+            local cam = workspace.CurrentCamera
+            if cam then
+                cam.CFrame = CFrame.new(cam.CFrame.Position, target.part.Position)
+                if Aimlock.FaceTarget then
+                    local myRoot = getRoot()
+                    if myRoot then
+                        local lookPos = Vector3.new(
+                            target.part.Position.X,
+                            myRoot.Position.Y,
+                            target.part.Position.Z
+                        )
+                        myRoot.CFrame = CFrame.new(myRoot.Position, lookPos)
+                    end
+                end
+                if Aimlock.AutoFire then
+                    aimlockFireAttack()
+                end
+            end
+        end
+    end
+end)
+
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if not Aimlock.Enabled then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        AimlockLocked = true
+    end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        AimlockLocked = true
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        AimlockLocked = false
+    end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        AimlockLocked = false
+    end
+end)
+
+-- =========================================================
+-- HITBOX NEW
+-- =========================================================
+function hitboxCreateESP(targetPart, color)
+    if not targetPart then return end
+    if HitboxESPObjects[targetPart] and HitboxESPObjects[targetPart].Parent then
+        HitboxESPObjects[targetPart].Color3 = color
+        return
+    end
+
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "CosmicHitboxESP"
+    box.Adornee = targetPart
+    box.AlwaysOnTop = true
+    box.ZIndex = 5
+    box.Size = targetPart.Size
+    box.Transparency = 0.7
+    box.Color3 = color
+    box.Parent = targetPart
+
+    local label = Instance.new("BillboardGui")
+    label.Name = "CosmicHitboxLabel"
+    label.Size = UDim2.new(0, 120, 0, 30)
+    label.AlwaysOnTop = true
+    label.StudsOffset = Vector3.new(0, targetPart.Size.Y / 2 + 2, 0)
+    label.Adornee = targetPart
+    label.Parent = targetPart
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.Text = "🎯 Hitbox: " .. Hitbox.Size
+    txt.TextColor3 = color
+    txt.TextStrokeTransparency = 0
+    txt.TextStrokeColor3 = Color3.new(0, 0, 0)
+    txt.Font = Enum.Font.GothamBlack
+    txt.TextSize = 14
+    txt.Parent = label
+
+    HitboxESPObjects[targetPart] = box
+end
+
+function hitboxRemoveESP(targetPart)
+    if not targetPart then return end
+    local box = targetPart:FindFirstChild("CosmicHitboxESP")
+    if box then box:Destroy() end
+    local label = targetPart:FindFirstChild("CosmicHitboxLabel")
+    if label then label:Destroy() end
+    HitboxESPObjects[targetPart] = nil
+end
+
+function hitboxClearAll()
+    for part, _ in pairs(HitboxESPObjects) do
+        hitboxRemoveESP(part)
+    end
+    HitboxESPObjects = {}
+    for part, origSize in pairs(HitboxOriginalSizes) do
+        if part and part.Parent then
+            part.Size = origSize
+            part.Transparency = 0
+        end
+    end
+    HitboxOriginalSizes = {}
+end
+
+task.spawn(function()
+    while task.wait(0.3) do
+        if not Hitbox.Enabled then
+            hitboxClearAll()
+            continue
+        end
+
+        local myRoot = getRoot()
+        if not myRoot then continue end
+        local myTeam = LP.Team and LP.Team.Name or ""
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character then
+                local targetTeam = p.Team and p.Team.Name or ""
+                local shouldHit = false
+
+                if Hitbox.Mode == "Auto" then
+                    if myTeam == "Survivors" and targetTeam == "Killer" then
+                        shouldHit = true
+                    elseif myTeam == "Killer" and targetTeam == "Survivors" then
+                        shouldHit = true
+                    end
+                elseif Hitbox.Mode == "Killer" and targetTeam == "Killer" then
+                    shouldHit = true
+                elseif Hitbox.Mode == "Survivor" and targetTeam == "Survivors" then
+                    shouldHit = true
+                end
+
+                if shouldHit then
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                    if hrp and hum and hum.Health > 0 then
+                        local dist = (hrp.Position - myRoot.Position).Magnitude
+                        if not HitboxOriginalSizes[hrp] then
+                            HitboxOriginalSizes[hrp] = hrp.Size
+                        end
+                        if dist <= Hitbox.Size then
+                            hrp.Size = Vector3.new(Hitbox.Size, Hitbox.Size, Hitbox.Size)
+                            hrp.Transparency = 1
+                            hrp.CanCollide = not Hitbox.WallBang
+                        end
+                        if Hitbox.ESPShow and not Hitbox.HideESP then
+                            local col = (targetTeam == "Killer")
+                                and Hitbox.ColorKiller
+                                or Hitbox.ColorSurvivor
+                            hitboxCreateESP(hrp, col)
+                        else
+                            hitboxRemoveESP(hrp)
+                        end
+                    end
+                else
+                    if p.Character then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            if HitboxOriginalSizes[hrp] then
+                                hrp.Size = HitboxOriginalSizes[hrp]
+                                HitboxOriginalSizes[hrp] = nil
+                            end
+                            hrp.Transparency = 0
+                            hitboxRemoveESP(hrp)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 
 -- =========================================================
 -- FAST VAULT
@@ -1944,37 +2443,26 @@ end
 function hookVault(char)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
     animator.AnimationPlayed:Connect(function(track)
         if not FastVault.Enabled then return end
-
         local anim = track.Animation
         if not anim or not anim.AnimationId then return end
-
         local id = normalizeVaultId(anim.AnimationId)
         if not id then return end
-
         local replaceId = FastVault.ReplaceMap[id]
         if not replaceId then return end
-
         if VaultTracks[track] then return end
         VaultTracks[track] = true
-
         track:Stop()
-
         local newAnim = Instance.new("Animation")
         newAnim.AnimationId = replaceId
-
         local newTrack = animator:LoadAnimation(newAnim)
-
         newTrack.Priority = Enum.AnimationPriority.Action
-
         newTrack:Play()
         newTrack:AdjustSpeed(FastVault.Speed)
-
         newTrack.Stopped:Connect(function()
             VaultTracks[track] = nil
         end)
@@ -2028,7 +2516,6 @@ function createParryCircle()
     for i = 1, segments do
         local attA = parryCircleAttachments[i]
         local attB = parryCircleAttachments[i % segments + 1]
-
         local beam = Instance.new("Beam")
         beam.Attachment0 = attA
         beam.Attachment1 = attB
@@ -2051,11 +2538,9 @@ function updateParryCircle()
         clearParryCircle()
         return
     end
-
     if not parryCirclePart or not parryCirclePart.Parent then
         createParryCircle()
     end
-
     local radius = S.ParryCircleSize or 12
     local myPos = root.Position
     local yOffset = root.Size.Y / 2 + 1.5
@@ -2078,12 +2563,10 @@ function updateParryCircle()
     local ringTrans = killerInside and 0.2 or 0.4
 
     parryCirclePart.Position = Vector3.new(myPos.X, myPos.Y - yOffset, myPos.Z)
-
     for i, att in ipairs(parryCircleAttachments) do
         local angle = (i / 36) * math.pi * 2
         att.Position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
     end
-
     for _, beam in ipairs(parryCircleBeams) do
         beam.Color = ColorSequence.new(ringColor)
         beam.Transparency = NumberSequence.new(ringTrans)
@@ -2302,7 +2785,6 @@ function applyHDShader(s)
         hdShaderObj.Contrast = 0.15
         hdShaderObj.Saturation = 0.12
         hdShaderObj.Brightness = 0.02
-
         if not _G.CosmicHDBloom then
             _G.CosmicHDBloom = Instance.new("BloomEffect")
             _G.CosmicHDBloom.Name = "CosmicHDBloom"
@@ -2330,7 +2812,6 @@ function applyHDSky(s)
         for _, v in pairs(Lighting:GetChildren()) do
             if v:IsA("Sky") then v:Destroy() end
         end
-
         if not _G.CosmicHDAtmosphere then
             _G.CosmicHDAtmosphere = Instance.new("Atmosphere")
             _G.CosmicHDAtmosphere.Name = "CosmicHDAtmosphere"
@@ -2356,13 +2837,11 @@ function applyTrail(enable, color)
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     if trailFireObj then
         trailFireObj:Destroy()
         trailFireObj = nil
     end
     if not enable then return end
-
     trailFireObj = Instance.new("Part")
     trailFireObj.Name = "RoooorTrailFire"
     trailFireObj.Size = Vector3.new(1, 1, 1)
@@ -2370,20 +2849,17 @@ function applyTrail(enable, color)
     trailFireObj.CanCollide = false
     trailFireObj.Massless = true
     trailFireObj.Parent = char
-
     local weld = Instance.new("Weld")
     weld.Part0 = hrp
     weld.Part1 = trailFireObj
     weld.C0 = CFrame.new(0, -2, 2)
     weld.Parent = trailFireObj
-
     local fire = Instance.new("Fire")
     fire.Size = 8
     fire.Heat = 20
     fire.Color = color or Color3.fromRGB(120, 60, 255)
     fire.SecondaryColor = Color3.fromRGB(0, 230, 255)
     fire.Parent = trailFireObj
-
     local spark = Instance.new("Sparkles")
     spark.SparkleColor = color or Color3.fromRGB(0, 230, 255)
     spark.SparkleSize = 2
@@ -2396,13 +2872,11 @@ function applyAura(enable, color)
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     if auraObj then
         auraObj:Destroy()
         auraObj = nil
     end
     if not enable then return end
-
     auraObj = Instance.new("ParticleEmitter")
     auraObj.Texture = "rbxassetid://243660364"
     auraObj.Color = ColorSequence.new(color or Color3.fromRGB(120, 60, 255))
@@ -2425,18 +2899,14 @@ function spawnKillEffect(pos)
     p.Color = Color3.fromRGB(120, 60, 255)
     p.Transparency = 0.3
     p.Parent = workspace
-
     TweenService:Create(p, TweenInfo.new(0.5), {
         Size = Vector3.new(15, 15, 15),
         Transparency = 1
     }):Play()
-
     task.delay(0.6, function() p:Destroy() end)
 end
 
--- =========================================================
--- CROSSHAIR 8 MODE + 2 WARNA
--- =========================================================
+-- CROSSHAIR 8 MODE
 crosshairGui = nil
 crosshairParts = {}
 crosshairGalaxyConn = nil
@@ -2456,7 +2926,6 @@ end
 function applyCrosshair(enable, color, size)
     clearCrosshair()
     if not enable then return end
-
     local style = S.CrosshairStyle or "Plus"
     local colorMode = S.CrosshairColorMode or "Solid"
     local thickness = S.CrosshairThickness or 2
@@ -2560,7 +3029,6 @@ function applyCrosshair(enable, color, size)
             })
             grad.Parent = part
         end
-
         crosshairGalaxyConn = RunService.RenderStepped:Connect(function()
             if not crosshairGui then return end
             local t = tick() * 60
@@ -2574,9 +3042,7 @@ function applyCrosshair(enable, color, size)
     end
 end
 
--- =========================================================
 -- FLY
--- =========================================================
 flyBV, flyBG, flyConn = nil, nil, nil
 function startFly()
     if flyConn then return end
@@ -2584,20 +3050,16 @@ function startFly()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     pcall(function() hrp:SetNetworkOwner(LP) end)
-
     flyBV = Instance.new("BodyVelocity")
     flyBV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     flyBV.Velocity = Vector3.new(0, 0, 0)
     flyBV.Parent = hrp
-
     flyBG = Instance.new("BodyGyro")
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     flyBG.P = 15000
     flyBG.D = 500
     flyBG.Parent = hrp
-
     flyConn = RunService.RenderStepped:Connect(function()
         if not S.Fly then return end
         local char = LP.Character
@@ -2605,7 +3067,6 @@ function startFly()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
         if not hrp or not cam then return end
-
         local moveDir = Vector3.new(0, 0, 0)
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
@@ -2615,14 +3076,12 @@ function startFly()
                 moveDir = Vector3.new(moveDir.X, 0, moveDir.Z).Unit
             end
         end
-
         if UIS:IsKeyDown(Enum.KeyCode.Space) then
             moveDir = moveDir + Vector3.new(0, 1, 0)
         end
         if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
             moveDir = moveDir - Vector3.new(0, 1, 0)
         end
-
         flyBV.Velocity = moveDir * S.FlySpeed
         flyBG.CFrame = cam.CFrame
     end)
@@ -2632,6 +3091,21 @@ function stopFly()
     if flyConn then flyConn:Disconnect(); flyConn = nil end
     if flyBV then flyBV:Destroy(); flyBV = nil end
     if flyBG then flyBG:Destroy(); flyBG = nil end
+end
+
+-- ZOOM OUT
+origZoom = nil
+function applyZoomOut(enable, value)
+    if enable then
+        if not origZoom then
+            origZoom = LP.CameraMaxZoomDistance
+        end
+        LP.CameraMaxZoomDistance = value or 500
+        LP.CameraMinZoomDistance = 0.5
+    else
+        LP.CameraMaxZoomDistance = origZoom or 128
+        LP.CameraMinZoomDistance = 0.5
+    end
 end
 
 -- EXPORT
@@ -2656,8 +3130,9 @@ _G.Roooor_UpdateMapESP = UpdateMapESP
 _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
 _G.Roooor_scanKillers = scanKillers
 _G.Roooor_startSkillCheck = startSkillCheck
-_G.Roooor_startMoonwalk = startMoonwalk
-_G.Roooor_stopMoonwalk = stopMoonwalk
+_G.Roooor_setMoonwalk = setMoonwalk
+_G.Roooor_mwUpdateToggleUI = mwUpdateToggleUI
+_G.Roooor_mwBtnUpdateUI = mwBtnUpdateUI
 _G.Roooor_applyFullbright = applyFullbright
 _G.Roooor_applyNoFog = applyNoFog
 _G.Roooor_applySky = applySky
@@ -2683,12 +3158,12 @@ _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
 _G.Roooor_isDowned = isDowned
+_G.Roooor_hitboxClearAll = hitboxClearAll
 
-print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + FastVault + Crosshair loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB v3.4 - ESP + Parry + Moonwalk NEW + Aimlock NEW + Hitbox NEW loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
--- INSTANT INTERACT
 task.spawn(function()
     while task.wait(0.3) do
         if S.InstantInteract and LP.Character then
@@ -2717,7 +3192,6 @@ task.spawn(function()
     end
 end)
 
--- SPEED HACK
 task.spawn(function()
     while task.wait(0.2) do
         if S.SpeedHack and LP.Character then
@@ -2729,7 +3203,6 @@ task.spawn(function()
     end
 end)
 
--- WALK SPEED
 task.spawn(function()
     while task.wait(0.2) do
         if S.WalkSpeed and not S.SpeedHack and LP.Character then
@@ -2744,7 +3217,6 @@ task.spawn(function()
     end
 end)
 
--- ANTI-AFK LOOP
 task.spawn(function()
     while task.wait(60) do
         if S.AntiAFK then
@@ -2757,7 +3229,6 @@ task.spawn(function()
     end
 end)
 
--- SAFE ZONE
 task.spawn(function()
     while task.wait(0.5) do
         if S.SafeZone and LP.Character then
@@ -2794,7 +3265,6 @@ task.spawn(function()
     end
 end)
 
--- ESCAPE ALERT
 task.spawn(function()
     while task.wait(0.5) do
         if S.EscapeAlert and LP.Character then
@@ -2912,7 +3382,6 @@ function createStunIcon(killerChar)
     if stunIcons[killerChar] then return stunIcons[killerChar] end
     local head = killerChar:FindFirstChild("Head")
     if not head then return end
-
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "CosmicStunIcon"
     billboard.Size = UDim2.new(0, 60, 0, 60)
@@ -2920,7 +3389,6 @@ function createStunIcon(killerChar)
     billboard.StudsOffset = Vector3.new(0, 4, 0)
     billboard.Adornee = head
     billboard.Parent = head
-
     local icon = Instance.new("TextLabel")
     icon.Size = UDim2.new(1, 0, 1, 0)
     icon.BackgroundTransparency = 1
@@ -2931,7 +3399,6 @@ function createStunIcon(killerChar)
     icon.TextStrokeTransparency = 0
     icon.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     icon.Parent = billboard
-
     task.spawn(function()
         while billboard.Parent do
             billboard.StudsOffset = Vector3.new(0, 4 + math.sin(tick() * 5) * 0.5, 0)
@@ -2939,7 +3406,6 @@ function createStunIcon(killerChar)
             task.wait(0.05)
         end
     end)
-
     stunIcons[killerChar] = billboard
     return billboard
 end
@@ -2956,7 +3422,6 @@ task.spawn(function()
         if not S.StunNotify then continue end
         local myRoot = getRoot()
         if not myRoot then continue end
-
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                 local krp = p.Character:FindFirstChild("HumanoidRootPart")
@@ -3023,18 +3488,15 @@ task.spawn(function()
         if S.Killer_KillAll and LP.Character then
             local myHum = LP.Character:FindFirstChildOfClass("Humanoid")
             if not myHum or myHum.Health <= 0 then continue end
-
             local isCarried = LP.Character:GetAttribute("IsCarried")
                 or LP.Character:GetAttribute("IsCarrying")
                 or LP.Character:GetAttribute("Hooked")
                 or LP.Character:GetAttribute("Hook")
             if isCarried then continue end
-
             local myRoot = getRoot()
             if not myRoot then continue end
             local myPos = myRoot.Position
             local closest, shortest = nil, 60
-
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
                     local hrp = p.Character:FindFirstChild("HumanoidRootPart")
@@ -3053,7 +3515,6 @@ task.spawn(function()
                     end
                 end
             end
-
             if closest then
                 local targetPos = closest.Position + (closest.AssemblyLinearVelocity * 0.15)
                 local behind = closest.CFrame.LookVector * -3
@@ -3083,30 +3544,25 @@ task.spawn(function()
         if not AutoParry.Wiggle then continue end
         local char = LP.Character
         if not char then continue end
-
         local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
             or (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
-
         if not carried then continue end
-
         local remotes = ReplicatedStorage:FindFirstChild("Remotes")
         if not remotes then continue end
         local carry = remotes:FindFirstChild("Carry")
         if not carry then continue end
         local event = carry:FindFirstChild("SelfUnHookEvent")
         if not event then continue end
-
         for i = 1, (AutoParry.WiggleSpam or 5) do
             pcall(function() event:FireServer() end)
         end
     end
 end)
 
--- AUTO FLEE KILLER
+-- AUTO FLEE
 function GetNearestKillerForFlee()
     local root = getRoot()
     if not root then return nil, math.huge end
-
     local closest, shortest = nil, math.huge
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LP and plr.Team and plr.Team.Name == "Killer" and plr.Character then
@@ -3143,7 +3599,6 @@ task.spawn(function()
         if not AutoFlee.Enabled then continue end
         local root = getRoot()
         if not root then continue end
-
         local killerRoot, distance = GetNearestKillerForFlee()
         if killerRoot and distance <= AutoFlee.DetectDistance
            and tick() - AutoFlee.LastFlee > AutoFlee.Cooldown then
@@ -3212,7 +3667,7 @@ function applyCleanSky()
     end
 end
 
--- AUTO CARRY + AUTO HOOK
+-- AUTO CARRY + HOOK
 KillerBusy = false
 
 function GetDownedSurvivor()
@@ -3254,19 +3709,15 @@ end
 task.spawn(function()
     while task.wait(0.2) do
         if not S.AutoCarry or KillerBusy then continue end
-
         local CarryEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
             and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
             and ReplicatedStorage.Remotes.Carry:FindFirstChild("CarrySurvivorEvent")
         local HookEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
             and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
             and ReplicatedStorage.Remotes.Carry:FindFirstChild("HookEvent")
-
         if not CarryEvent or not HookEvent then continue end
-
         local target = GetDownedSurvivor()
         local root = getRoot()
-
         if target and root then
             KillerBusy = true
             local tRoot = target:FindFirstChild("HumanoidRootPart")
@@ -3278,7 +3729,6 @@ task.spawn(function()
                     task.wait(0.2)
                 end
                 task.wait(0.6)
-
                 if S.AutoHook then
                     local hook = GetHookPoint()
                     if hook then
@@ -3302,7 +3752,6 @@ task.spawn(function()
         if not S.AutoEscapeGate then continue end
         local root = getRoot()
         if not root then continue end
-
         local killerNear = false
         if S.AutoEscapeUseKillerCheck then
             local kRoot, kDist = GetNearestKillerForFlee()
@@ -3310,7 +3759,6 @@ task.spawn(function()
                 killerNear = true
             end
         end
-
         local genDone = false
         if S.AutoEscapeUseGenCheck then
             local total, done = 0, 0
@@ -3324,7 +3772,6 @@ task.spawn(function()
             end
             if total > 0 and done >= total then genDone = true end
         end
-
         if killerNear or genDone then
             local found = nil
             for _, obj in ipairs(workspace:GetDescendants()) do
@@ -3338,7 +3785,6 @@ task.spawn(function()
                     end
                 end
             end
-
             if found then
                 pcall(function()
                     root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
@@ -3353,16 +3799,13 @@ local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
     if not root then return end
-
     local now = tick()
     if now - lastESPUpdate >= 0.1 then
         lastESPUpdate = now
-
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
                 local char = p.Character
                 local hum = char:FindFirstChildOfClass("Humanoid")
-
                 if hum and hum.Health > 0 then
                     local hrp = char:FindFirstChild("HumanoidRootPart")
                     if hrp then
@@ -3385,18 +3828,14 @@ RunService.Heartbeat:Connect(function()
                 end
             end
         end
-
         if ESP.Generator then
             for gen in pairs(Cached.Generators) do
                 UpdateGenerator(gen)
             end
         end
-
         for obj in pairs(Cached.Windows) do UpdateMapESP(obj, root) end
         for obj in pairs(Cached.Pallets) do UpdateMapESP(obj, root) end
-
         UpdateSCPEsp(root)
-
         if S.NoScreenEffects then applyNoScreenEffects() end
         if S.LowGraphics then applyLowGraphics() end
         if S.CleanSky then applyCleanSky() end
@@ -4499,65 +4938,80 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK
+-- TAB 5: MOONWALK (NEW)
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
-    sec("Moonwalk Control", "🕺")
-    tog("Enable Moonwalk (Keybind V)", false, function(s)
-        Moonwalk.Enabled = s
-        if s then
-            startMoonwalk()
-        else
-            stopMoonwalk()
-            local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                if S.WalkSpeed then
-                    hum.WalkSpeed = S.WalkSpeedVal
-                elseif S.SpeedHack then
-                    hum.WalkSpeed = S.SpeedHackVal
-                else
-                    hum.WalkSpeed = 16
-                end
-            end
-        end
-    end)
-    lbl("Tekan V juga bisa toggle", C.GRN)
+    sec("Moonwalk Standalone", "🕺")
+    lbl("🌙 GUI Moonwalk: Long press tombol MW", C.FIRE_BRIGHT)
+    lbl("⌨️ Tekan V untuk toggle cepat", C.GRN)
+    lbl("🔒 Bisa di-lock biar gak berubah", C.ACC2)
 
-    sec("Button", "🎯")
-    tog("Show Moonwalk Button (MW)", false, function(s)
-        Moonwalk.ShowButton = s
-        if s then
-            createMoonwalkButton()
+    tog("Enable Moonwalk", Moonwalk.Enabled, function(s)
+        if setMoonwalk then
+            setMoonwalk(s)
         else
-            removeMoonwalkButton()
+            Moonwalk.Enabled = s
+        end
+        if _G.Roooor_mwUpdateToggleUI then pcall(_G.Roooor_mwUpdateToggleUI) end
+        if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
+    end)
+
+    sec("Lock", "🔒")
+    tog("Lock Moonwalk State", Moonwalk.Locked, function(s)
+        Moonwalk.Locked = s
+    end)
+    lbl("Lock = cegah toggle gak sengaja", C.DIM)
+
+    sec("Button MW", "🎯")
+    tog("Show MW Button", Moonwalk.ShowButton, function(s)
+        Moonwalk.ShowButton = s
+        if mwBtnGui then
+            mwBtnGui.Enabled = s
         end
     end)
-    lbl("Button tulisan MW", C.FIRE_BRIGHT)
+    lbl("Tombol MW di pojok kiri bawah", C.FIRE_BRIGHT)
+    lbl("Klik = toggle | Long press = GUI", C.GRN)
+
+    btn("🎯 Reset Posisi MW Button", function()
+        if mwBtn then
+            mwBtn.Position = UDim2.new(0, 20, 1, -100)
+        end
+    end)
+
+    btn("🎯 Reset Posisi GUI Moonwalk", function()
+        if mwMainFrame then
+            mwMainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
+        end
+    end)
 
     sec("Sensitivitas", "⚙️")
-    sl("Spam Speed", 1, 50, 30, function(v)
+    sl("Spam Speed", 1, 50, Moonwalk.SpamSpeed, function(v)
         Moonwalk.SpamSpeed = v
+        if mwSpeedLabel then mwSpeedLabel.Text = "Spam Speed: " .. v end
+        if mwSpeedFill then mwSpeedFill.Size = UDim2.new(v / 50, 0, 1, 0) end
+        if mwSpeedKnob then mwSpeedKnob.Position = UDim2.new(v / 50, -7, 0.5, -7) end
     end)
-    lbl("Kecepatan goyang", C.DIM)
 
-    sl("Intensity", 1, 50, 35, function(v)
+    sl("Intensity", 1, 50, Moonwalk.Intensity, function(v)
         Moonwalk.Intensity = v
+        if mwIntLabel then mwIntLabel.Text = "Intensity: " .. v end
+        if mwIntFill then mwIntFill.Size = UDim2.new(v / 50, 0, 1, 0) end
+        if mwIntKnob then mwIntKnob.Position = UDim2.new(v / 50, -7, 0.5, -7) end
     end)
-    lbl("Besarnya goyangan (derajat)", C.DIM)
 
-    sl("Walk Speed (Moonwalk)", 5, 20, 13, function(v)
+    sl("Slow Speed", 5, 20, Moonwalk.SlowSpeed, function(v)
         Moonwalk.SlowSpeed = v
     end)
-    lbl("Kecepatan jalan pas moonwalk", C.DIM)
+    lbl("Kecepatan jalan saat moonwalk", C.DIM)
 
-    tog("Use Slow Speed", true, function(s)
+    tog("Use Slow Speed", Moonwalk.UseSlow, function(s)
         Moonwalk.UseSlow = s
     end)
 end)
 
 print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
--- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON
+-- SECTION 8/11 : TAB UI PART 2
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4568,81 +5022,6 @@ btn = _G.Roooor_btn
 drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
-
--- =========================================================
--- MOONWALK BUTTON (TULISAN "MW")
--- =========================================================
-function createMoonwalkButton()
-    if not PG or not PG.Parent then return end
-    if Moonwalk.GuiInstance then Moonwalk.GuiInstance:Destroy() end
-
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "MoonwalkGui"
-    gui.ResetOnSpawn = false
-    gui.Parent = PG
-
-    local btn = Instance.new("TextButton")   -- 🆕 TextButton (bukan ImageButton)
-    btn.Name = "ToggleButton"
-    btn.Size = UDim2.new(0, 50, 0, 50)
-    btn.Position = Moonwalk.ButtonPos
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    btn.BackgroundTransparency = 0.2
-    btn.Text = "MW"                          -- 🆕 Tulisan MW
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
-    btn.Font = Enum.Font.GothamBlack
-    btn.AutoButtonColor = false
-    btn.Parent = gui
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = btn
-
-    local stroke = Instance.new("UIStroke")
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Thickness = 1.5
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.5
-    stroke.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        Moonwalk.Enabled = not Moonwalk.Enabled
-
-        local char = LP.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-
-        if Moonwalk.Enabled then
-            stroke.Color = Color3.fromRGB(170, 0, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
-            startMoonwalk()
-        else
-            stroke.Color = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-            stopMoonwalk()
-            if hum then
-                if S.WalkSpeed then
-                    hum.WalkSpeed = S.WalkSpeedVal
-                elseif S.SpeedHack then
-                    hum.WalkSpeed = S.SpeedHackVal
-                else
-                    hum.WalkSpeed = 16
-                end
-            end
-        end
-    end)
-
-    Moonwalk.GuiInstance = gui
-end
-
-function removeMoonwalkButton()
-    if Moonwalk.GuiInstance then
-        Moonwalk.GuiInstance:Destroy()
-        Moonwalk.GuiInstance = nil
-    end
-end
-
-_G.createMoonwalkButton = createMoonwalkButton
-_G.removeMoonwalkButton = removeMoonwalkButton
 
 -- ============================================================
 -- TAB 6: FIRE FEET
@@ -4766,14 +5145,41 @@ makeTab("Misc", "⚙️", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: PLAYER (FPS Boost)
+-- TAB 8: PLAYER (Auto Parry Agresif + FPS Boost)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
-    sec("Aimlock Mode", "🎯")
-    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
-        Combat.Mode = v
+    sec("Auto Parry (AGGRESSIVE MODE)", "🛡️")
+    tog("Enable Auto Parry", true, function(s)
+        AutoParry.Enabled = s
+        if s then scanKillers() end
     end)
+    lbl("🆕 Mode Agresif: anti miss", C.FIRE_BRIGHT)
+
+    tog("⚡ Aggressive Mode", true, function(s)
+        AutoParry.AggressiveMode = s
+    end)
+    lbl("ON = parry tiap 0.03s (anti miss)", C.GRN)
+    lbl("OFF = normal (via animasi)", C.DIM)
+
+    sl("Parry Distance", 5, 20, 14, function(v)
+        AutoParry.ParryDistance = v
+    end)
+
+    sl("Face Sensitivity", -1, 1, -1, function(v)
+        AutoParry.FaceSensitivity = v
+        AutoParry.RequireFacing = (v > -1)
+    end)
+    lbl("-1 = gak cek arah (recommended)", C.GRN)
+
+    sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
+        PARRY_DEBOUNCE = v
+    end)
+
+    sec("Parry Circle", "⭕")
+    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
+    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
+    lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
 
     sec("FPS Boost", "🚀")
     tog("No Screen Effects", false, function(s)
@@ -4795,9 +5201,9 @@ makeTab("Player", "👤", 8, function()
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
     sec("Info", "ℹ️")
-    lbl("🎯 Aimbot = Hold tombol serang", C.FIRE_BRIGHT)
-    lbl("PC: klik kanan | HP: tombol attack", C.DIM)
     lbl("🕺 Moonwalk: Tekan V", C.FIRE_BRIGHT)
+    lbl("🎯 Tombol MW pojok kiri bawah", C.FIRE_BRIGHT)
+    lbl("🖱️ Klik kanan = Aimlock (hold)", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
     btn("✨ UNLOAD COSMIC HUB", function()
@@ -4807,12 +5213,14 @@ makeTab("Player", "👤", 8, function()
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
             if fpsPingGui then fpsPingGui:Destroy() end
+            if mwScreenGui then mwScreenGui:Destroy() end
+            if mwBtnGui then mwBtnGui:Destroy() end
             clear8Bit()
             clearKorblox()
             clearFireBeam()
             clearParryCircle()
-            stopMoonwalk()
-            removeMoonwalkButton()
+            hitboxClearAll()
+            stopFly()
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
@@ -4820,13 +5228,14 @@ makeTab("Player", "👤", 8, function()
         _G.Roooor_AutoParry = nil
         _G.Roooor_SkillCheck = nil
         _G.Roooor_Moonwalk = nil
-        _G.Roooor_Combat = nil
+        _G.Roooor_Aimlock = nil
+        _G.Roooor_Hitbox = nil
         _G.Roooor_GodMode = nil
     end)
 end)
 
 -- ============================================================
--- TAB 9: VISUAL (Crosshair 8 Mode + Fire Beam + 8-Bit + Korblox)
+-- TAB 9: VISUAL
 -- ============================================================
 makeTab("Visual", "✨", 9, function()
 
@@ -4918,9 +5327,7 @@ makeTab("Visual", "✨", 9, function()
         if S.Korblox then applyKorblox(true, "Pencil", S.KorbloxYOffset, v) end
     end)
 
-    -- CROSSHAIR 8 MODE
-    sec("Crosshair 8 Mode 🆕", "🎯")
-
+    sec("Crosshair 8 Mode", "🎯")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
         applyCrosshair(s, S.CrosshairColor, S.CrosshairSize)
@@ -4942,7 +5349,6 @@ makeTab("Visual", "✨", 9, function()
             applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
         end
     end)
-    lbl("Solid = warna biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
 
     cpk("Crosshair Color", S.CrosshairColor, function(c)
         S.CrosshairColor = c
@@ -4979,7 +5385,6 @@ makeTab("Visual", "✨", 9, function()
         end
     end)
 
-    -- FIRE BEAM
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -5062,63 +5467,58 @@ makeTab("Visual", "✨", 9, function()
 end)
 
 -- ============================================================
--- TAB 10: COMBAT
+-- TAB 10: HITBOX (NEW)
 -- ============================================================
-makeTab("Combat", "⚔️", 10, function()
-    sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
-    tog("Enable Aimbot", false, function(s)
-        Combat.AimlockEnabled = s
-        if not s then
-            Combat.AttackHeld = false
-            Combat.Holding = false
-        end
+makeTab("Hitbox", "📦", 10, function()
+
+    sec("Hitbox Control (RADIUS 70)", "📦")
+    tog("Enable Hitbox", false, function(s)
+        Hitbox.Enabled = s
+        if not s then hitboxClearAll() end
     end)
-    lbl("Tahan tombol attack = auto nempel", C.FIRE_BRIGHT)
-    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v) Combat.Mode = v end)
-    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v) Combat.AimPart = v end)
-    sl("Smoothness", 0.01, 1, 0.01, function(v) Combat.Smoothness = v end)
-    lbl("0.01 = INSTAN nempel", C.GRN)
-    sl("Lock Radius (studs)", 10, 500, 150, function(v) Combat.LockRadius = v end)
-    sl("FOV Radius (layar)", 50, 500, 200, function(v) Combat.FOVRadius = v end)
-    tog("Show FOV Circle", false, function(s) Combat.FOVCircle = s end)
+    lbl("🆕 Auto hit dalam radius 70 studs", C.FIRE_BRIGHT)
 
-    sec("Prediction", "📈")
-    tog("Predict Movement", true, function(s) Combat.Predict = s end)
-    sl("Predict Strength", 0, 1, 0.15, function(v) Combat.PredictStrength = v end)
+    sl("Hitbox Size (Radius)", 10, 70, 70, function(v)
+        Hitbox.Size = v
+    end)
+    lbl("Max 70 studs (default 70)", C.GRN)
 
-    sec("Visibility Check", "👁️")
-    tog("Anti-Wall (Silent)", false, function(s) Combat.VisibilityCheck = s end)
-    tog("Anti-Wall (Strict)", false, function(s) Combat.WallCheck = s end)
+    sec("Mode Target", "🎯")
+    drp("Mode", {"Auto", "Killer", "Survivor"}, "Auto", function(v)
+        Hitbox.Mode = v
+    end)
+    lbl("Auto = deteksi tim kita", C.DIM)
+    lbl("Killer = hitbox buat killer", C.DIM)
+    lbl("Survivor = hitbox buat survivor", C.DIM)
 
-    sec("Trigger Bot", "🔫")
-    tog("Auto Attack saat lock", false, function(s) Combat.TriggerBotEnabled = s end)
-    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v) Combat.TriggerDelay = v end)
+    sec("ESP Visual", "👁️")
+    tog("Show ESP Hitbox", true, function(s)
+        Hitbox.ESPShow = s
+    end)
+    lbl("Tampilkan box + tulisan Hitbox", C.GRN)
 
-    sec("Hitbox (BESAR - 2 Mode)", "📦")
-    tog("Hitbox Survivor Mode", false, function(s) Combat.HitboxSurvivor = s end)
-    tog("Hitbox Killer Mode", false, function(s) Combat.HitboxKiller = s end)
-    sl("Hitbox Size", 10, 120, 25, function(v) Combat.HitboxSize = v end)
-    lbl("Max 120 (manual ON)", C.GRN)
-    tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
+    tog("Hide ESP Hitbox", false, function(s)
+        Hitbox.HideESP = s
+    end)
+    lbl("Sembunyiin visual (hitbox tetap ada)", C.FIRE_BRIGHT)
 
-    sec("Keybind", "⌨️")
-    lbl("Hold tombol serang = aimbot ON", C.FIRE_BRIGHT)
+    cpk("Killer Hitbox Color", Hitbox.ColorKiller, function(c)
+        Hitbox.ColorKiller = c
+    end)
+
+    cpk("Survivor Hitbox Color", Hitbox.ColorSurvivor, function(c)
+        Hitbox.ColorSurvivor = c
+    end)
+
+    sec("Advanced", "⚙️")
+    tog("Wall Bang (tembus tembok)", true, function(s)
+        Hitbox.WallBang = s
+    end)
+    lbl("ON = hitbox bisa nembus tembok", C.GRN)
 end)
 
--- ============================================================
--- TAB 11: EXTRA
--- ============================================================
-makeTab("Extra", "✨", 11, function()
-    sec("Teleport", "🌀")
-    btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
-
-    sec("Sound", "🔊")
-    btn("🔊 Test Sound", function() playToggleSound() end)
-    lbl("Sound aktif saat toggle ON/OFF", C.DIM)
-end)
-
-print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button MW loaded")-- =========================================================
--- SECTION 9/11 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
+print("✅ [8/11] COSMIC HUB - Fire Feet + Misc + Player + Visual + Hitbox loaded")-- =========================================================
+-- SECTION 9/11 : FINAL - AIMLOCK NEW + AUTO RE-APPLY + KEYBIND
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -5130,276 +5530,67 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- COMBAT SYSTEM (AIMLOCK)
-RayParams = RaycastParams.new()
-RayParams.FilterType = Enum.RaycastFilterType.Blacklist
+-- ============================================================
+-- TAB 11: AIMLOCK (NEW - HARD LOCK INSTANT)
+-- ============================================================
+makeTab("Aimlock", "🎯", 11, function()
 
-function isVisible(part)
-    if not Combat.VisibilityCheck and not Combat.WallCheck then return true end
-    local cam = workspace.CurrentCamera
-    if not cam then return true end
-    RayParams.FilterDescendantsInstances = { LP.Character }
-    local origin = cam.CFrame.Position
-    local direction = (part.Position - origin)
-    local result = workspace:Raycast(origin, direction, RayParams)
-    if not result then return true end
-    return result.Instance:IsDescendantOf(part.Parent)
-end
-
-fovGui = nil
-function createFOVCircle()
-    if fovGui then fovGui:Destroy(); fovGui = nil end
-    fovGui = Instance.new("ScreenGui")
-    fovGui.Name = "CosmicFOV"
-    fovGui.ResetOnSpawn = false
-    fovGui.IgnoreGuiInset = true
-    fovGui.Parent = PG
-    local circle = Instance.new("Frame")
-    circle.Size = UDim2.new(0, 0, 0, 0)
-    circle.Position = UDim2.new(0.5, 0, 0.5, 0)
-    circle.AnchorPoint = Vector2.new(0.5, 0.5)
-    circle.BackgroundTransparency = 1
-    circle.Parent = fovGui
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1.5
-    stroke.Color = C.ACC2
-    stroke.Transparency = 0.3
-    stroke.Parent = circle
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = circle
-    return circle
-end
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if Combat.FOVCircle then
-            if not fovGui then createFOVCircle() end
-            local circle = fovGui:FindFirstChildOfClass("Frame")
-            if circle then
-                local r = Combat.FOVRadius * 2
-                circle.Size = UDim2.new(0, r, 0, r)
-                circle.Visible = true
-            end
-        else
-            if fovGui then
-                local circle = fovGui:FindFirstChildOfClass("Frame")
-                if circle then circle.Visible = false end
-            end
+    sec("Aimlock (HARD LOCK - INSTANT SNAP)", "🎯")
+    tog("Enable Aimlock", false, function(s)
+        Aimlock.Enabled = s
+        if not s then
+            AimlockLocked = false
+            AimlockTarget = nil
         end
-    end
+    end)
+    lbl("🖱️ PC: Hold klik kanan", C.FIRE_BRIGHT)
+    lbl("📱 HP: Hold tombol attack", C.FIRE_BRIGHT)
+    lbl("⚡ Lock INSTANT - langsung nempel", C.GRN)
+
+    sec("Target Mode", "🎯")
+    drp("Mode", {"Auto", "Killer", "Survivor"}, "Auto", function(v)
+        Aimlock.Mode = v
+    end)
+    lbl("Auto = deteksi tim kita", C.DIM)
+    lbl("Killer = lock ke killer", C.DIM)
+    lbl("Survivor = lock ke survivor", C.DIM)
+
+    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v)
+        Aimlock.AimPart = v
+    end)
+    lbl("Head = paling akurat", C.GRN)
+
+    sl("Max Distance", 50, 1000, 500, function(v)
+        Aimlock.MaxDistance = v
+    end)
+    lbl("Radius lock dari karakter lu", C.DIM)
+
+    sec("Auto Fire", "🔫")
+    tog("Auto Fire saat Lock", false, function(s)
+        Aimlock.AutoFire = s
+    end)
+    lbl("Auto attack saat lock ke target", C.FIRE_BRIGHT)
+
+    sl("Auto Fire Delay", 0.05, 1, 0.15, function(v)
+        Aimlock.AutoFireDelay = v
+    end)
+
+    sec("Auto Face Target", "👤")
+    tog("Auto Face Character", true, function(s)
+        Aimlock.FaceTarget = s
+    end)
+    lbl("Character auto nengok ke target", C.GRN)
+    lbl("Biar animasi attack kena", C.DIM)
+
+    sec("Info", "ℹ️")
+    lbl("🎯 Hold to aim - langsung lock", C.FIRE_BRIGHT)
+    lbl("⚡ Snap instant, bukan smooth", C.GRN)
+    lbl("🔄 Auto ganti target kalau mati", C.ACC2)
 end)
 
-UIS.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if not Combat.AimlockEnabled then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        Combat.AttackHeld = true
-    end
-    if input.UserInputType == Enum.UserInputType.Touch then
-        Combat.AttackHeld = true
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        Combat.AttackHeld = false
-    end
-    if input.UserInputType == Enum.UserInputType.Touch then
-        Combat.AttackHeld = false
-    end
-end)
-
-task.spawn(function()
-    function getAttackBtn()
-        local paths = {
-            "Survivor-mob.Controls.Gui-mob",
-            "Slasher-mob.Controls.attack",
-            "Masked-mob.Controls.attack",
-            "Killer-mob.Controls.attack",
-        }
-        for _, path in ipairs(paths) do
-            local cur = PG
-            for seg in string.gmatch(path, "[^%.]+") do
-                cur = cur and cur:FindFirstChild(seg)
-            end
-            if cur and cur:IsA("GuiObject") then
-                return cur
-            end
-        end
-    end
-    local lastBtn = nil
-    while task.wait(1) do
-        local btn = getAttackBtn()
-        if btn and btn ~= lastBtn then
-            lastBtn = btn
-            btn.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    Combat.AttackHeld = true
-                end
-            end)
-            btn.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    Combat.AttackHeld = false
-                end
-            end)
-        end
-    end
-end)
-
-lastTrigger = 0
-
-task.spawn(function()
-    while task.wait(0.01) do
-        if not Combat.AimlockEnabled then continue end
-        if not Combat.AttackHeld and not Combat.Holding then continue end
-        local myRoot = getRoot()
-        if not myRoot then continue end
-        local cam = workspace.CurrentCamera
-        if not cam then continue end
-        local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-        local closest, shortest = nil, Combat.LockRadius
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP and p.Character then
-                local teamName = p.Team and p.Team.Name or ""
-                local valid = false
-                if Combat.Mode == "Killer" and teamName == "Killer" then
-                    valid = true
-                elseif Combat.Mode == "Survivor" and teamName == "Survivors" then
-                    valid = true
-                end
-                if valid then
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    local aimPart = p.Character:FindFirstChild(Combat.AimPart)
-                        or p.Character:FindFirstChild("Head")
-                        or p.Character:FindFirstChild("HumanoidRootPart")
-                    if hum and hum.Health > 0 and aimPart then
-                        local dist3D = (aimPart.Position - myRoot.Position).Magnitude
-                        if dist3D < shortest then
-                            if Combat.VisibilityCheck or Combat.WallCheck then
-                                if not isVisible(aimPart) then continue end
-                            end
-                            local pos2D, onScreen = cam:WorldToViewportPoint(aimPart.Position)
-                            if onScreen then
-                                local dist2D = (Vector2.new(pos2D.X, pos2D.Y) - center).Magnitude
-                                if dist2D <= Combat.FOVRadius then
-                                    shortest = dist3D
-                                    closest = aimPart
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        if closest then
-            local pos = closest.Position
-            if Combat.Predict then
-                pos = pos + (closest.AssemblyLinearVelocity * Combat.PredictStrength)
-            end
-            local targetCF = CFrame.new(cam.CFrame.Position, pos)
-            local smooth = math.clamp(Combat.Smoothness, 0.01, 1)
-            cam.CFrame = cam.CFrame:Lerp(targetCF, smooth)
-            if Combat.TriggerBotEnabled then
-                local now = tick()
-                if now - lastTrigger >= Combat.TriggerDelay then
-                    lastTrigger = now
-                    pcall(function()
-                        local r = ReplicatedStorage:FindFirstChild("Remotes")
-                        if r then
-                            local a = r:FindFirstChild("Attacks")
-                            if a then
-                                local atk = a:FindFirstChild("BasicAttack")
-                                if atk then atk:FireServer(false) end
-                            end
-                        end
-                    end)
-                end
-            end
-        end
-    end
-end)
-
-hitboxCache = {}
-
-task.spawn(function()
-    while task.wait(0.5) do
-        local myTeam = LP.Team and LP.Team.Name or ""
-        local enabled = false
-        if Combat.HitboxSurvivor and myTeam == "Survivors" then enabled = true end
-        if Combat.HitboxKiller and myTeam == "Killer" then enabled = true end
-        if enabled then
-            local targetTeam = (myTeam == "Survivors") and "Killer" or "Survivors"
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LP and p.Character and p.Team and p.Team.Name == targetTeam then
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health > 0 then
-                        local part = p.Character:FindFirstChild("HumanoidRootPart")
-                        if part then
-                            if not hitboxCache[part] then
-                                hitboxCache[part] = {
-                                    Size = part.Size,
-                                    Transparency = part.Transparency,
-                                    CanCollide = part.CanCollide,
-                                    Material = part.Material,
-                                }
-                            end
-                            local size = Combat.HitboxSize or 25
-                            part.Size = Vector3.new(size, size, size)
-                            part.CanCollide = false
-                            part.Transparency = Combat.HitboxVisible and 0.5 or 1
-                            part.Material = Enum.Material.ForceField
-                        end
-                    end
-                end
-            end
-        else
-            for part, orig in pairs(hitboxCache) do
-                if part and part.Parent then
-                    part.Size = orig.Size
-                    part.Transparency = orig.Transparency
-                    part.CanCollide = orig.CanCollide
-                    part.Material = orig.Material
-                end
-                hitboxCache[part] = nil
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if not GodMode.Enabled then continue end
-        if not LP.Character then continue end
-        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-        if not hum then continue end
-        if hum.Health > 0 and hum.Health < hum.MaxHealth then
-            pcall(function() hum.Health = hum.MaxHealth end)
-        end
-        if hum.PlatformStand then hum.PlatformStand = false end
-        pcall(function()
-            local state = hum:GetState()
-            if state == Enum.HumanoidStateType.Dead
-                or state == Enum.HumanoidStateType.FallingDown
-                or state == Enum.HumanoidStateType.Ragdoll then
-                hum:ChangeState(Enum.HumanoidStateType.Running)
-            end
-        end)
-        local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for _, v in pairs(hrp:GetChildren()) do
-                if v:IsA("WeldConstraint") or v:IsA("Weld") or v:IsA("Motor6D") then
-                    local part1 = v.Part1 or v.Part0
-                    if part1 and not part1:IsDescendantOf(LP.Character) then
-                        v:Destroy()
-                    end
-                end
-            end
-        end
-    end
-end)
-
+-- =========================================================
 -- AUTO RE-APPLY SAAT RESPAWN
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
@@ -5433,10 +5624,6 @@ LP.CharacterAdded:Connect(function(char)
             if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
-    if Moonwalk.ShowButton then
-        task.wait(0.5)
-        pcall(createMoonwalkButton)
-    end
     pcall(function() hookVault(char) end)
 end)
 
@@ -5461,39 +5648,28 @@ end)
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
-        Moonwalk.Enabled = not Moonwalk.Enabled
-
-        local char = LP.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-
-        if Moonwalk.Enabled then
-            startMoonwalk()
+        if Moonwalk.Locked then
             pcall(function()
                 StarterGui:SetCore("SendNotification", {
                     Title = "Moonwalk",
-                    Text = "🕺 ON",
-                    Duration = 1.5
+                    Text = "🔒 LOCKED!",
+                    Duration = 1
                 })
             end)
-        else
-            stopMoonwalk()
-            if hum then
-                if S.WalkSpeed then
-                    hum.WalkSpeed = S.WalkSpeedVal
-                elseif S.SpeedHack then
-                    hum.WalkSpeed = S.SpeedHackVal
-                else
-                    hum.WalkSpeed = 16
-                end
-            end
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Moonwalk",
-                    Text = "OFF",
-                    Duration = 1.5
-                })
-            end)
+            return
         end
+
+        setMoonwalk(not Moonwalk.Enabled)
+        if _G.Roooor_mwUpdateToggleUI then pcall(_G.Roooor_mwUpdateToggleUI) end
+        if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
+
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Moonwalk",
+                Text = Moonwalk.Enabled and "🕺 ON" or "OFF",
+                Duration = 1.5
+            })
+        end)
     end
 end)
 
@@ -5517,8 +5693,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/11] COSMIC HUB - Final Combat + Auto Re-Apply + Keybind V loaded")-- =========================================================
--- SECTION 10/11 : LOGIC FITUR BARU (RAPIH)
+print("✅ [9/11] COSMIC HUB v3.4 - Aimlock NEW + Auto Re-Apply + Keybind V loaded")-- =========================================================
+-- SECTION 10/11 : LOGIC FITUR BARU
 -- =========================================================
 
 -- AUTO WIGGLE LOOP
@@ -5686,12 +5862,12 @@ print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- ====================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.3 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.4 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry ON (Distance 14)          ║")
+print("║  🛡️ Auto Parry + Aggressive Mode         ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Button MW)                 ║")
+print("║  🕺 Moonwalk NEW (Standalone + Lock)     ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -5699,8 +5875,8 @@ print("║  🚪 Auto Escape Gate                     ║")
 print("║  🎒 Auto Carry + Hook                    ║")
 print("║  🚀 FPS Boost (3 Mode)                   ║")
 print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
-print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
-print("║  📦 Hitbox BESAR + 2 Mode                ║")
+print("║  🎯 Aimlock NEW (HARD LOCK INSTANT)      ║")
+print("║  📦 Hitbox NEW (Radius 70 + ESP)         ║")
 print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
@@ -5712,9 +5888,10 @@ print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter (PUTIH)           ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
-print("║  🎯 Aimbot: Hold tombol serang           ║")
-print("║  🕺 Moonwalk: Tekan V                    ║")
+print("║  🎯 Aimlock: Hold klik kanan             ║")
+print("║  🕺 Moonwalk: Tekan V / Tombol MW        ║")
+print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.3 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.4 - FINAL LOADED! ✨")

@@ -340,6 +340,7 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
+-- 🆕 AIMLOCK (HOLD-TO-LOCK)
 Aimlock = _G.Roooor_Aimlock or {
     Enabled = false,
     Mode = "Auto",
@@ -351,13 +352,16 @@ Aimlock = _G.Roooor_Aimlock or {
     FaceTarget = true,
     Notify = true,
     CurrentTarget = nil,
+    RequireAttack = true,
 }
 _G.Roooor_Aimlock = Aimlock
 
 AimlockLocked = false
 AimlockTarget = nil
 AimlockLastFire = 0
+AimlockAttackHeld = false
 
+-- 🆕 HITBOX (RADIUS 70 + ESP HIDE)
 Hitbox = _G.Roooor_Hitbox or {
     Enabled = false,
     Size = 70,
@@ -374,6 +378,7 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
+-- AUTO PARRY + AGGRESSIVE MODE (DEFAULT ON)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
     ParryDistance = 14,
@@ -399,6 +404,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
+-- MOONWALK (TOMBOL MW + LOCK BUTTON)
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
     Locked = false,
@@ -444,7 +450,7 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-print("✅ [1/11] COSMIC HUB v3.4 - Base + State loaded")-- =========================================================
+print("✅ [1/11] COSMIC HUB v3.5 - Base + State loaded")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1275,7 +1281,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/11] COSMIC HUB - Fungsi utama loaded")-- =========================================================
--- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK NEW + AIMLOCK NEW + HITBOX NEW + CROSSHAIR
+-- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK + AIMLOCK + HITBOX + CROSSHAIR
 -- =========================================================
 
 ESPObjects = {}
@@ -1676,7 +1682,6 @@ end
 function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
-
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
     local animator = hum:FindFirstChildOfClass("Animator")
@@ -1711,6 +1716,7 @@ task.spawn(function()
     end
 end)
 
+-- 🆕 AGGRESSIVE PARRY LOOP (ANTI MISS)
 task.spawn(function()
     while task.wait(0.05) do
         if not AutoParry.Enabled then continue end
@@ -1771,7 +1777,6 @@ end
 
 function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
-
     SkillHeartbeat = RunService.RenderStepped:Connect(function()
         if not SkillCheck.Enabled or busy then return end
         local prompt = PG:FindFirstChild("SkillCheckPromptGui")
@@ -1830,7 +1835,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK NEW (STANDALONE - FIXED)
+-- MOONWALK (TOMBOL MW ONLY + LOCK BUTTON)
 -- =========================================================
 function mwIsDowned()
     local char = LP.Character
@@ -1885,256 +1890,25 @@ function setMoonwalk(state)
     return true
 end
 
--- =========================================================
--- MOONWALK GUI STANDALONE
--- =========================================================
-if PG:FindFirstChild("MoonwalkGui") then
-    PG.MoonwalkGui:Destroy()
+-- TOMBOL MW + LOCK BUTTON
+if PG:FindFirstChild("MW_BottomBtn") then
+    PG.MW_BottomBtn:Destroy()
 end
 
-mwScreenGui = Instance.new("ScreenGui")
-mwScreenGui.Name = "MoonwalkGui"
-mwScreenGui.ResetOnSpawn = false
-mwScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-mwScreenGui.Parent = PG
-
-mwMainFrame = Instance.new("Frame")
-mwMainFrame.Name = "MainFrame"
-mwMainFrame.Size = UDim2.fromOffset(220, 200)
-mwMainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
-mwMainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-mwMainFrame.BorderSizePixel = 0
-mwMainFrame.Active = true
-mwMainFrame.Draggable = true
-mwMainFrame.Visible = false
-mwMainFrame.Parent = mwScreenGui
-
-local mwUICorner = Instance.new("UICorner")
-mwUICorner.CornerRadius = UDim.new(0, 10)
-mwUICorner.Parent = mwMainFrame
-
-local mwUIStroke = Instance.new("UIStroke")
-mwUIStroke.Color = Color3.fromRGB(90, 120, 210)
-mwUIStroke.Thickness = 1.5
-mwUIStroke.Parent = mwMainFrame
-
-local mwTitle = Instance.new("TextLabel")
-mwTitle.Size = UDim2.new(1, 0, 0, 32)
-mwTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-mwTitle.BorderSizePixel = 0
-mwTitle.Text = "🌙 Moonwalk Menu"
-mwTitle.TextColor3 = Color3.fromRGB(200, 215, 255)
-mwTitle.Font = Enum.Font.GothamBold
-mwTitle.TextSize = 14
-mwTitle.Parent = mwMainFrame
-
-local mwTitleCorner = Instance.new("UICorner")
-mwTitleCorner.CornerRadius = UDim.new(0, 10)
-mwTitleCorner.Parent = mwTitle
-
-local mwToggleBtn = Instance.new("TextButton")
-mwToggleBtn.Size = UDim2.new(1, -20, 0, 34)
-mwToggleBtn.Position = UDim2.new(0, 10, 0, 42)
-mwToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-mwToggleBtn.Text = "Moonwalk: OFF"
-mwToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-mwToggleBtn.Font = Enum.Font.GothamBold
-mwToggleBtn.TextSize = 13
-mwToggleBtn.BorderSizePixel = 0
-mwToggleBtn.Parent = mwMainFrame
-
-local mwToggleCorner = Instance.new("UICorner")
-mwToggleCorner.CornerRadius = UDim.new(0, 6)
-mwToggleCorner.Parent = mwToggleBtn
-
-local mwLockBtn = Instance.new("TextButton")
-mwLockBtn.Size = UDim2.new(1, -20, 0, 30)
-mwLockBtn.Position = UDim2.new(0, 10, 0, 82)
-mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-mwLockBtn.Text = "🔓 Unlocked"
-mwLockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-mwLockBtn.Font = Enum.Font.GothamBold
-mwLockBtn.TextSize = 12
-mwLockBtn.BorderSizePixel = 0
-mwLockBtn.Parent = mwMainFrame
-
-local mwLockCorner = Instance.new("UICorner")
-mwLockCorner.CornerRadius = UDim.new(0, 6)
-mwLockCorner.Parent = mwLockBtn
-
-local mwSpeedLabel = Instance.new("TextLabel")
-mwSpeedLabel.Size = UDim2.new(1, -20, 0, 16)
-mwSpeedLabel.Position = UDim2.new(0, 10, 0, 118)
-mwSpeedLabel.BackgroundTransparency = 1
-mwSpeedLabel.Text = "Spam Speed: " .. Moonwalk.SpamSpeed
-mwSpeedLabel.TextColor3 = Color3.fromRGB(200, 215, 255)
-mwSpeedLabel.Font = Enum.Font.Gotham
-mwSpeedLabel.TextSize = 11
-mwSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-mwSpeedLabel.Parent = mwMainFrame
-
-local mwSpeedSlider = Instance.new("Frame")
-mwSpeedSlider.Size = UDim2.new(1, -20, 0, 6)
-mwSpeedSlider.Position = UDim2.new(0, 10, 0, 138)
-mwSpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-mwSpeedSlider.BorderSizePixel = 0
-mwSpeedSlider.Parent = mwMainFrame
-
-local mwSpeedSliderCorner = Instance.new("UICorner")
-mwSpeedSliderCorner.CornerRadius = UDim.new(1, 0)
-mwSpeedSliderCorner.Parent = mwSpeedSlider
-
-local mwSpeedFill = Instance.new("Frame")
-mwSpeedFill.Size = UDim2.new(Moonwalk.SpamSpeed / 50, 0, 1, 0)
-mwSpeedFill.BackgroundColor3 = Color3.fromRGB(90, 120, 210)
-mwSpeedFill.BorderSizePixel = 0
-mwSpeedFill.Parent = mwSpeedSlider
-
-local mwSpeedFillCorner = Instance.new("UICorner")
-mwSpeedFillCorner.CornerRadius = UDim.new(1, 0)
-mwSpeedFillCorner.Parent = mwSpeedFill
-
-local mwSpeedKnob = Instance.new("Frame")
-mwSpeedKnob.Size = UDim2.fromOffset(14, 14)
-mwSpeedKnob.Position = UDim2.new(Moonwalk.SpamSpeed / 50, -7, 0.5, -7)
-mwSpeedKnob.BackgroundColor3 = Color3.fromRGB(200, 215, 255)
-mwSpeedKnob.BorderSizePixel = 0
-mwSpeedKnob.Parent = mwSpeedSlider
-
-local mwSpeedKnobCorner = Instance.new("UICorner")
-mwSpeedKnobCorner.CornerRadius = UDim.new(1, 0)
-mwSpeedKnobCorner.Parent = mwSpeedKnob
-
-local mwIntLabel = Instance.new("TextLabel")
-mwIntLabel.Size = UDim2.new(1, -20, 0, 16)
-mwIntLabel.Position = UDim2.new(0, 10, 0, 152)
-mwIntLabel.BackgroundTransparency = 1
-mwIntLabel.Text = "Intensity: " .. Moonwalk.Intensity
-mwIntLabel.TextColor3 = Color3.fromRGB(200, 215, 255)
-mwIntLabel.Font = Enum.Font.Gotham
-mwIntLabel.TextSize = 11
-mwIntLabel.TextXAlignment = Enum.TextXAlignment.Left
-mwIntLabel.Parent = mwMainFrame
-
-local mwIntSlider = Instance.new("Frame")
-mwIntSlider.Size = UDim2.new(1, -20, 0, 6)
-mwIntSlider.Position = UDim2.new(0, 10, 0, 172)
-mwIntSlider.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-mwIntSlider.BorderSizePixel = 0
-mwIntSlider.Parent = mwMainFrame
-
-local mwIntSliderCorner = Instance.new("UICorner")
-mwIntSliderCorner.CornerRadius = UDim.new(1, 0)
-mwIntSliderCorner.Parent = mwIntSlider
-
-local mwIntFill = Instance.new("Frame")
-mwIntFill.Size = UDim2.new(Moonwalk.Intensity / 50, 0, 1, 0)
-mwIntFill.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
-mwIntFill.BorderSizePixel = 0
-mwIntFill.Parent = mwIntSlider
-
-local mwIntFillCorner = Instance.new("UICorner")
-mwIntFillCorner.CornerRadius = UDim.new(1, 0)
-mwIntFillCorner.Parent = mwIntFill
-
-local mwIntKnob = Instance.new("Frame")
-mwIntKnob.Size = UDim2.fromOffset(14, 14)
-mwIntKnob.Position = UDim2.new(Moonwalk.Intensity / 50, -7, 0.5, -7)
-mwIntKnob.BackgroundColor3 = Color3.fromRGB(200, 215, 255)
-mwIntKnob.BorderSizePixel = 0
-mwIntKnob.Parent = mwIntSlider
-
-local mwIntKnobCorner = Instance.new("UICorner")
-mwIntKnobCorner.CornerRadius = UDim.new(1, 0)
-mwIntKnobCorner.Parent = mwIntKnob
-
-function mwUpdateToggleUI()
-    if Moonwalk.Enabled then
-        mwToggleBtn.Text = "Moonwalk: ON"
-        mwToggleBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
-    else
-        mwToggleBtn.Text = "Moonwalk: OFF"
-        mwToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-    end
-end
-
-mwToggleBtn.MouseButton1Click:Connect(function()
-    if Moonwalk.Locked then
-        mwToggleBtn.Text = "🔒 LOCKED!"
-        task.delay(1, mwUpdateToggleUI)
-        return
-    end
-    setMoonwalk(not Moonwalk.Enabled)
-    mwUpdateToggleUI()
-end)
-
-mwLockBtn.MouseButton1Click:Connect(function()
-    Moonwalk.Locked = not Moonwalk.Locked
-    if Moonwalk.Locked then
-        mwLockBtn.Text = "🔒 Locked"
-        mwLockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    else
-        mwLockBtn.Text = "🔓 Unlocked"
-        mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-    end
-end)
-
-local function mwMakeSlider(sliderFrame, knob, fill, label, text, minVal, maxVal, callback)
-    local dragging = false
-    local function update(input)
-        local pos = input.Position.X
-        local rel = (pos - sliderFrame.AbsolutePosition.X) / sliderFrame.AbsoluteSize.X
-        rel = math.clamp(rel, 0, 1)
-        local val = math.floor(minVal + (maxVal - minVal) * rel + 0.5)
-        knob.Position = UDim2.new(rel, -7, 0.5, -7)
-        fill.Size = UDim2.new(rel, 0, 1, 0)
-        label.Text = text .. ": " .. val
-        callback(val)
-    end
-    knob.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-        end
-    end)
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
-            update(input)
-        end
-    end)
-end
-
-mwMakeSlider(mwSpeedSlider, mwSpeedKnob, mwSpeedFill, mwSpeedLabel, "Spam Speed", 1, 50, function(v)
-    Moonwalk.SpamSpeed = v
-end)
-
-mwMakeSlider(mwIntSlider, mwIntKnob, mwIntFill, mwIntLabel, "Intensity", 1, 50, function(v)
-    Moonwalk.Intensity = v
-end)
-
-mwUpdateToggleUI()
-
--- TOMBOL MW BOTTOM
 mwBtnGui = Instance.new("ScreenGui")
 mwBtnGui.Name = "MW_BottomBtn"
 mwBtnGui.ResetOnSpawn = false
 mwBtnGui.IgnoreGuiInset = true
 mwBtnGui.Parent = PG
 
+-- TOMBOL MW
 mwBtn = Instance.new("TextButton")
 mwBtn.Size = UDim2.fromOffset(60, 60)
 mwBtn.Position = UDim2.new(0, 20, 1, -100)
 mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mwBtn.Text = "MW"
 mwBtn.TextColor3 = Color3.new(1, 1, 1)
-mwBtn.TextSize = 18
+mwBtn.TextSize = 16
 mwBtn.Font = Enum.Font.GothamBlack
 mwBtn.AutoButtonColor = false
 mwBtn.Active = true
@@ -2151,6 +1925,28 @@ mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
 mwBtnStroke.Transparency = 0.5
 mwBtnStroke.Parent = mwBtn
 
+-- 🆕 TOMBOL LOCK MW (di atas tombol MW)
+mwLockBtn = Instance.new("TextButton")
+mwLockBtn.Size = UDim2.fromOffset(60, 22)
+mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
+mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+mwLockBtn.Text = "🔓 UNLOCK"
+mwLockBtn.TextColor3 = Color3.new(1, 1, 1)
+mwLockBtn.TextSize = 10
+mwLockBtn.Font = Enum.Font.GothamBold
+mwLockBtn.AutoButtonColor = false
+mwLockBtn.Parent = mwBtnGui
+
+local mwLockCorner = Instance.new("UICorner")
+mwLockCorner.CornerRadius = UDim.new(1, 0)
+mwLockCorner.Parent = mwLockBtn
+
+local mwLockStroke = Instance.new("UIStroke")
+mwLockStroke.Thickness = 1.5
+mwLockStroke.Color = Color3.fromRGB(255, 255, 255)
+mwLockStroke.Transparency = 0.5
+mwLockStroke.Parent = mwLockBtn
+
 function mwBtnUpdateUI()
     if Moonwalk.Enabled then
         mwBtn.Text = "MW ON"
@@ -2161,37 +1957,37 @@ function mwBtnUpdateUI()
         mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
         mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     end
+
+    if Moonwalk.Locked then
+        mwLockBtn.Text = "🔒 LOCKED"
+        mwLockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    else
+        mwLockBtn.Text = "🔓 UNLOCK"
+        mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+    end
 end
 
-local mwBtnHoldTime = 0
-mwBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        mwBtnHoldTime = tick()
+-- Klik tombol MW = toggle ON/OFF
+mwBtn.MouseButton1Click:Connect(function()
+    if Moonwalk.Locked then
+        mwBtn.Text = "🔒"
+        task.delay(0.8, mwBtnUpdateUI)
+        return
     end
+    setMoonwalk(not Moonwalk.Enabled)
+    mwBtnUpdateUI()
 end)
 
-mwBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        local held = tick() - mwBtnHoldTime
-        if held >= 0.5 then
-            mwMainFrame.Visible = not mwMainFrame.Visible
-        else
-            if Moonwalk.Locked then
-                mwBtn.Text = "🔒"
-                task.delay(0.8, mwBtnUpdateUI)
-                return
-            end
-            setMoonwalk(not Moonwalk.Enabled)
-            mwBtnUpdateUI()
-            mwUpdateToggleUI()
-        end
-    end
+-- 🆕 Klik tombol LOCK = toggle lock
+mwLockBtn.MouseButton1Click:Connect(function()
+    Moonwalk.Locked = not Moonwalk.Locked
+    mwBtnUpdateUI()
 end)
+
+mwBtnUpdateUI()
 
 -- =========================================================
--- AIMLOCK NEW
+-- AIMLOCK NEW (HOLD-TO-LOCK)
 -- =========================================================
 function aimlockFindTarget()
     local myRoot = getRoot()
@@ -2242,14 +2038,90 @@ function aimlockFireAttack()
     end)
 end
 
+-- 🆕 CEK APAKAH TOMBOL ATTACK LAGI DI-HOLD
+function isAttackButtonHeld()
+    if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+        return true
+    end
+
+    local attackPaths = {
+        "Survivor-mob.Controls.Gui-mob",
+        "Slasher-mob.Controls.attack",
+        "Masked-mob.Controls.attack",
+        "Killer-mob.Controls.attack",
+    }
+    for _, path in ipairs(attackPaths) do
+        local cur = PG
+        local valid = true
+        for seg in string.gmatch(path, "[^%.]+") do
+            cur = cur and cur:FindFirstChild(seg)
+            if not cur then valid = false; break end
+        end
+        if valid and cur and cur:IsA("GuiObject") then
+            if cur:GetAttribute("CosmicPressed") == true then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+-- 🆕 HOOK TOMBOL ATTACK
+task.spawn(function()
+    while task.wait(1) do
+        local attackPaths = {
+            "Survivor-mob.Controls.Gui-mob",
+            "Slasher-mob.Controls.attack",
+            "Masked-mob.Controls.attack",
+            "Killer-mob.Controls.attack",
+        }
+        for _, path in ipairs(attackPaths) do
+            local cur = PG
+            local valid = true
+            for seg in string.gmatch(path, "[^%.]+") do
+                cur = cur and cur:FindFirstChild(seg)
+                if not cur then valid = false; break end
+            end
+            if valid and cur and cur:IsA("GuiObject") then
+                if not cur:GetAttribute("CosmicHooked") then
+                    cur:SetAttribute("CosmicHooked", true)
+                    cur.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1
+                        or input.UserInputType == Enum.UserInputType.Touch then
+                            cur:SetAttribute("CosmicPressed", true)
+                        end
+                    end)
+                    cur.InputEnded:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1
+                        or input.UserInputType == Enum.UserInputType.Touch then
+                            cur:SetAttribute("CosmicPressed", false)
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- 🆕 AIMLOCK LOOP: HOLD-TO-LOCK
 task.spawn(function()
     while task.wait() do
         if not Aimlock.Enabled then
             AimlockLocked = false
+            AimlockAttackHeld = false
             AimlockTarget = nil
             continue
         end
-        if not AimlockLocked then
+
+        local held = isAttackButtonHeld()
+
+        if held then
+            AimlockAttackHeld = true
+            AimlockLocked = true
+        else
+            AimlockLocked = false
+            AimlockAttackHeld = false
             AimlockTarget = nil
             continue
         end
@@ -2279,33 +2151,14 @@ task.spawn(function()
     end
 end)
 
-UIS.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if not Aimlock.Enabled then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        AimlockLocked = true
-    end
-    if input.UserInputType == Enum.UserInputType.Touch then
-        AimlockLocked = true
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        AimlockLocked = false
-    end
-    if input.UserInputType == Enum.UserInputType.Touch then
-        AimlockLocked = false
-    end
-end)
-
 -- =========================================================
--- HITBOX NEW
+-- HITBOX (RADIUS 70 + ESP HIDE)
 -- =========================================================
 function hitboxCreateESP(targetPart, color)
     if not targetPart then return end
     if HitboxESPObjects[targetPart] and HitboxESPObjects[targetPart].Parent then
         HitboxESPObjects[targetPart].Color3 = color
+        HitboxESPObjects[targetPart].Transparency = Hitbox.HideESP and 1 or 0.7
         return
     end
 
@@ -2315,7 +2168,7 @@ function hitboxCreateESP(targetPart, color)
     box.AlwaysOnTop = true
     box.ZIndex = 5
     box.Size = targetPart.Size
-    box.Transparency = 0.7
+    box.Transparency = Hitbox.HideESP and 1 or 0.7
     box.Color3 = color
     box.Parent = targetPart
 
@@ -2325,6 +2178,7 @@ function hitboxCreateESP(targetPart, color)
     label.AlwaysOnTop = true
     label.StudsOffset = Vector3.new(0, targetPart.Size.Y / 2 + 2, 0)
     label.Adornee = targetPart
+    label.Enabled = not Hitbox.HideESP
     label.Parent = targetPart
 
     local txt = Instance.new("TextLabel")
@@ -2362,6 +2216,18 @@ function hitboxClearAll()
         end
     end
     HitboxOriginalSizes = {}
+end
+
+function hitboxUpdateVisibility()
+    for part, box in pairs(HitboxESPObjects) do
+        if box and box.Parent then
+            box.Transparency = Hitbox.HideESP and 1 or 0.7
+        end
+        local label = part and part:FindFirstChild("CosmicHitboxLabel")
+        if label then
+            label.Enabled = not Hitbox.HideESP
+        end
+    end
 end
 
 task.spawn(function()
@@ -2405,7 +2271,7 @@ task.spawn(function()
                             hrp.Transparency = 1
                             hrp.CanCollide = not Hitbox.WallBang
                         end
-                        if Hitbox.ESPShow and not Hitbox.HideESP then
+                        if Hitbox.ESPShow then
                             local col = (targetTeam == "Killer")
                                 and Hitbox.ColorKiller
                                 or Hitbox.ColorSurvivor
@@ -3108,6 +2974,47 @@ function applyZoomOut(enable, value)
     end
 end
 
+-- =========================================================
+-- 🆕 CAMERA FIX (ABIS DOWNED / DAGGER)
+-- =========================================================
+task.spawn(function()
+    local wasDowned = false
+    while task.wait(0.2) do
+        local isDown = false
+        if LP.Character then
+            local hum = LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                isDown = hum.Health <= 0 or hum.Health < 2
+                    or LP.Character:GetAttribute("Downed") == true
+                    or LP.Character:GetAttribute("IsDown") == true
+                    or LP.Character:GetAttribute("Knocked") == true
+                    or hum.PlatformStand == true
+            end
+        end
+
+        if wasDowned and not isDown then
+            task.wait(0.5)
+            local cam = workspace.CurrentCamera
+            if cam then
+                local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    cam.CameraType = Enum.CameraType.Custom
+                    cam.CameraSubject = hum
+                end
+            end
+        end
+
+        if isDown then
+            local cam = workspace.CurrentCamera
+            if cam then
+                cam.CameraType = Enum.CameraType.Custom
+            end
+        end
+
+        wasDowned = isDown
+    end
+end)
+
 -- EXPORT
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
@@ -3131,7 +3038,6 @@ _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
 _G.Roooor_scanKillers = scanKillers
 _G.Roooor_startSkillCheck = startSkillCheck
 _G.Roooor_setMoonwalk = setMoonwalk
-_G.Roooor_mwUpdateToggleUI = mwUpdateToggleUI
 _G.Roooor_mwBtnUpdateUI = mwBtnUpdateUI
 _G.Roooor_applyFullbright = applyFullbright
 _G.Roooor_applyNoFog = applyNoFog
@@ -3157,10 +3063,10 @@ _G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
-_G.Roooor_isDowned = isDowned
 _G.Roooor_hitboxClearAll = hitboxClearAll
+_G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
 
-print("✅ [4/11] COSMIC HUB v3.4 - ESP + Parry + Moonwalk NEW + Aimlock NEW + Hitbox NEW loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB v3.5 - ESP + Parry + Moonwalk + Aimlock + Hitbox + Camera Fix loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4667,12 +4573,17 @@ cs = _G.Roooor_cs
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry", "🛡️")
+    sec("Auto Parry (AGGRESSIVE)", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
     end)
-    lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
+    lbl("🆕 Agresif: parry tiap 0.03s", C.FIRE_BRIGHT)
+
+    tog("⚡ Aggressive Mode", true, function(s)
+        AutoParry.AggressiveMode = s
+    end)
+    lbl("ON = gak pernah miss", C.GRN)
 
     sl("Parry Distance", 5, 20, 14, function(v)
         AutoParry.ParryDistance = v
@@ -4687,7 +4598,6 @@ makeTab("Survivor", "🏃", 1, function()
     sl("Parry Debounce", 0.1, 0.5, 0.1, function(v)
         PARRY_DEBOUNCE = v
     end)
-    lbl("0.1 = Responsif", C.FIRE_BRIGHT)
 
     sec("Parry Circle (Hijau/Merah)", "⭕")
     tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
@@ -4938,14 +4848,15 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK (NEW)
+-- TAB 5: MOONWALK
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
-    sec("Moonwalk Standalone", "🕺")
-    lbl("🌙 GUI Moonwalk: Long press tombol MW", C.FIRE_BRIGHT)
-    lbl("⌨️ Tekan V untuk toggle cepat", C.GRN)
-    lbl("🔒 Bisa di-lock biar gak berubah", C.ACC2)
+    sec("Moonwalk (TOMBOL MW ONLY)", "🕺")
+    lbl("🌙 Cukup tombol MW di pojok layar", C.FIRE_BRIGHT)
+    lbl("Klik MW = ON/OFF", C.GRN)
+    lbl("Klik tombol LOCK = Lock state", C.ACC2)
+    lbl("⌨️ Tekan V juga bisa toggle", C.DIM)
 
     tog("Enable Moonwalk", Moonwalk.Enabled, function(s)
         if setMoonwalk then
@@ -4953,51 +4864,39 @@ makeTab("Moonwalk", "🕺", 5, function()
         else
             Moonwalk.Enabled = s
         end
-        if _G.Roooor_mwUpdateToggleUI then pcall(_G.Roooor_mwUpdateToggleUI) end
         if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
     end)
 
     sec("Lock", "🔒")
-    tog("Lock Moonwalk State", Moonwalk.Locked, function(s)
+    tog("🔒 Lock Moonwalk", Moonwalk.Locked, function(s)
         Moonwalk.Locked = s
+        if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
     end)
-    lbl("Lock = cegah toggle gak sengaja", C.DIM)
+    lbl("Lock = anti berubah gak sengaja", C.DIM)
 
-    sec("Button MW", "🎯")
+    sec("Tombol MW", "🎯")
     tog("Show MW Button", Moonwalk.ShowButton, function(s)
         Moonwalk.ShowButton = s
-        if mwBtnGui then
-            mwBtnGui.Enabled = s
-        end
+        if mwBtnGui then mwBtnGui.Enabled = s end
     end)
-    lbl("Tombol MW di pojok kiri bawah", C.FIRE_BRIGHT)
-    lbl("Klik = toggle | Long press = GUI", C.GRN)
+    lbl("Tombol MW + tombol LOCK", C.FIRE_BRIGHT)
 
-    btn("🎯 Reset Posisi MW Button", function()
+    btn("🎯 Reset Posisi Tombol MW", function()
         if mwBtn then
             mwBtn.Position = UDim2.new(0, 20, 1, -100)
         end
-    end)
-
-    btn("🎯 Reset Posisi GUI Moonwalk", function()
-        if mwMainFrame then
-            mwMainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
+        if mwLockBtn then
+            mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
         end
     end)
 
-    sec("Sensitivitas", "⚙️")
+    sec("Setting Internal", "⚙️")
     sl("Spam Speed", 1, 50, Moonwalk.SpamSpeed, function(v)
         Moonwalk.SpamSpeed = v
-        if mwSpeedLabel then mwSpeedLabel.Text = "Spam Speed: " .. v end
-        if mwSpeedFill then mwSpeedFill.Size = UDim2.new(v / 50, 0, 1, 0) end
-        if mwSpeedKnob then mwSpeedKnob.Position = UDim2.new(v / 50, -7, 0.5, -7) end
     end)
 
     sl("Intensity", 1, 50, Moonwalk.Intensity, function(v)
         Moonwalk.Intensity = v
-        if mwIntLabel then mwIntLabel.Text = "Intensity: " .. v end
-        if mwIntFill then mwIntFill.Size = UDim2.new(v / 50, 0, 1, 0) end
-        if mwIntKnob then mwIntKnob.Position = UDim2.new(v / 50, -7, 0.5, -7) end
     end)
 
     sl("Slow Speed", 5, 20, Moonwalk.SlowSpeed, function(v)
@@ -5201,9 +5100,9 @@ makeTab("Player", "👤", 8, function()
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
     sec("Info", "ℹ️")
-    lbl("🕺 Moonwalk: Tekan V", C.FIRE_BRIGHT)
-    lbl("🎯 Tombol MW pojok kiri bawah", C.FIRE_BRIGHT)
-    lbl("🖱️ Klik kanan = Aimlock (hold)", C.FIRE_BRIGHT)
+    lbl("🕺 Moonwalk: Tekan V atau tombol MW", C.FIRE_BRIGHT)
+    lbl("🎯 Aimlock: Hold attack (klik/HP)", C.FIRE_BRIGHT)
+    lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
     btn("✨ UNLOAD COSMIC HUB", function()
@@ -5213,7 +5112,6 @@ makeTab("Player", "👤", 8, function()
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
             if fpsPingGui then fpsPingGui:Destroy() end
-            if mwScreenGui then mwScreenGui:Destroy() end
             if mwBtnGui then mwBtnGui:Destroy() end
             clear8Bit()
             clearKorblox()
@@ -5467,7 +5365,7 @@ makeTab("Visual", "✨", 9, function()
 end)
 
 -- ============================================================
--- TAB 10: HITBOX (NEW)
+-- TAB 10: HITBOX (RADIUS 70 + ESP HIDE)
 -- ============================================================
 makeTab("Hitbox", "📦", 10, function()
 
@@ -5488,8 +5386,6 @@ makeTab("Hitbox", "📦", 10, function()
         Hitbox.Mode = v
     end)
     lbl("Auto = deteksi tim kita", C.DIM)
-    lbl("Killer = hitbox buat killer", C.DIM)
-    lbl("Survivor = hitbox buat survivor", C.DIM)
 
     sec("ESP Visual", "👁️")
     tog("Show ESP Hitbox", true, function(s)
@@ -5497,8 +5393,11 @@ makeTab("Hitbox", "📦", 10, function()
     end)
     lbl("Tampilkan box + tulisan Hitbox", C.GRN)
 
-    tog("Hide ESP Hitbox", false, function(s)
+    tog("🙈 Hide ESP Hitbox", false, function(s)
         Hitbox.HideESP = s
+        if _G.Roooor_hitboxUpdateVisibility then
+            pcall(_G.Roooor_hitboxUpdateVisibility)
+        end
     end)
     lbl("Sembunyiin visual (hitbox tetap ada)", C.FIRE_BRIGHT)
 
@@ -5514,11 +5413,10 @@ makeTab("Hitbox", "📦", 10, function()
     tog("Wall Bang (tembus tembok)", true, function(s)
         Hitbox.WallBang = s
     end)
-    lbl("ON = hitbox bisa nembus tembok", C.GRN)
 end)
 
 print("✅ [8/11] COSMIC HUB - Fire Feet + Misc + Player + Visual + Hitbox loaded")-- =========================================================
--- SECTION 9/11 : FINAL - AIMLOCK NEW + AUTO RE-APPLY + KEYBIND
+-- SECTION 9/11 : FINAL - AIMLOCK + AUTO RE-APPLY + KEYBIND
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -5531,21 +5429,23 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- ============================================================
--- TAB 11: AIMLOCK (NEW - HARD LOCK INSTANT)
+-- TAB 11: AIMLOCK (HARD LOCK - HOLD TO LOCK)
 -- ============================================================
 makeTab("Aimlock", "🎯", 11, function()
 
-    sec("Aimlock (HARD LOCK - INSTANT SNAP)", "🎯")
+    sec("Aimlock (HOLD TO LOCK)", "🎯")
     tog("Enable Aimlock", false, function(s)
         Aimlock.Enabled = s
         if not s then
             AimlockLocked = false
+            AimlockAttackHeld = false
             AimlockTarget = nil
         end
     end)
-    lbl("🖱️ PC: Hold klik kanan", C.FIRE_BRIGHT)
+    lbl("🖱️ PC: Hold klik kiri", C.FIRE_BRIGHT)
     lbl("📱 HP: Hold tombol attack", C.FIRE_BRIGHT)
-    lbl("⚡ Lock INSTANT - langsung nempel", C.GRN)
+    lbl("⚡ Lock INSTANT saat attack di-hold", C.GRN)
+    lbl("❌ Lepas attack = stop lock", C.RED)
 
     sec("Target Mode", "🎯")
     drp("Mode", {"Auto", "Killer", "Survivor"}, "Auto", function(v)
@@ -5583,7 +5483,7 @@ makeTab("Aimlock", "🎯", 11, function()
     lbl("Biar animasi attack kena", C.DIM)
 
     sec("Info", "ℹ️")
-    lbl("🎯 Hold to aim - langsung lock", C.FIRE_BRIGHT)
+    lbl("🎯 Hold attack = lock instan", C.FIRE_BRIGHT)
     lbl("⚡ Snap instant, bukan smooth", C.GRN)
     lbl("🔄 Auto ganti target kalau mati", C.ACC2)
 end)
@@ -5644,7 +5544,9 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 
+-- =========================================================
 -- KEYBIND V UNTUK MOONWALK
+-- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
@@ -5660,7 +5562,6 @@ UIS.InputBegan:Connect(function(input, gpe)
         end
 
         setMoonwalk(not Moonwalk.Enabled)
-        if _G.Roooor_mwUpdateToggleUI then pcall(_G.Roooor_mwUpdateToggleUI) end
         if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
 
         pcall(function()
@@ -5673,7 +5574,9 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- =========================================================
 -- AUTO APPLY ON EXECUTE
+-- =========================================================
 task.spawn(function()
     task.wait(3)
     pcall(createFPSPingGui)
@@ -5693,7 +5596,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/11] COSMIC HUB v3.4 - Aimlock NEW + Auto Re-Apply + Keybind V loaded")-- =========================================================
+print("✅ [9/11] COSMIC HUB v3.5 - Aimlock + Auto Re-Apply + Keybind V loaded")-- =========================================================
 -- SECTION 10/11 : LOGIC FITUR BARU
 -- =========================================================
 
@@ -5862,12 +5765,12 @@ print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- ====================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.4 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.5 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry + Aggressive Mode         ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk NEW (Standalone + Lock)     ║")
+print("║  🕺 Moonwalk (Tombol MW + Lock Button)   ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -5875,8 +5778,9 @@ print("║  🚪 Auto Escape Gate                     ║")
 print("║  🎒 Auto Carry + Hook                    ║")
 print("║  🚀 FPS Boost (3 Mode)                   ║")
 print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
-print("║  🎯 Aimlock NEW (HARD LOCK INSTANT)      ║")
-print("║  📦 Hitbox NEW (Radius 70 + ESP)         ║")
+print("║  🎯 Aimlock (HOLD TO LOCK)               ║")
+print("║  📦 Hitbox (Radius 70 + ESP Hide)        ║")
+print("║  🎥 Camera Fix (Abis Downed)             ║")
 print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
@@ -5888,10 +5792,11 @@ print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter (PUTIH)           ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
-print("║  🎯 Aimlock: Hold klik kanan             ║")
-print("║  🕺 Moonwalk: Tekan V / Tombol MW        ║")
+print("║  🎯 Aimlock: Hold attack (klik/HP)       ║")
+print("║  🕺 Moonwalk: Tombol MW / Tekan V        ║")
+print("║  🔒 Lock MW: Klik tombol LOCK            ║")
 print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.4 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.5 - FINAL LOADED! ✨")

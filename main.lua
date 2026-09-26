@@ -12,6 +12,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Stats = game:GetService("Stats")
 local GuiService = game:GetService("GuiService")
 local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
 
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
@@ -289,24 +290,26 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE (AUTO-ON SETTING)
 -- =========================================================
+_G.RoooorSavedStates = _G.RoooorSavedStates or {}
+
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
-    ParryCircle = false, ParryCircleSize = 15,
+    ParryCircle = true, ParryCircleSize = 12,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false,
-    Korblox = false, KorbloxType = "Pencil",
-    KorbloxYOffset = 0, KorbloxScale = 1,
-    Headless = false,
+    Korblox = true, KorbloxType = "Pencil",
+    KorbloxYOffset = 0.6, KorbloxScale = 1,
+    Headless = true,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
-    EightBitOn = false, EightBitType = "Royal Crown",
-    EightBitSize = 1, EightBitHeight = 1.5,
+    EightBitOn = true, EightBitType = "Royal Crown",
+    EightBitSize = 1.24, EightBitHeight = 0.88,
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
@@ -328,6 +331,9 @@ _G.RoooorS = _G.RoooorS or {
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
     ESPNameMode = "Text", ESPNameSize = 12,
+    AntiAFK = false,
+    ShowFPS = true,
+    ShowPing = true,
 }
 S = _G.RoooorS
 
@@ -352,21 +358,21 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (GACOR SETTING)
+-- AUTO PARRY GACOR
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false,
-    ParryDistance = 20,        -- ← ATAS: 10 (max distance 20)
+    Enabled = true,
+    ParryDistance = 12,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = -1,      -- ← TENGAH: -1 (semua arah)
-    RequireFacing = false,     -- ← Karena FaceSensitivity -1
+    FaceSensitivity = -1,
+    RequireFacing = false,
     Wiggle = false,
     WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
 SkillCheck = _G.Roooor_SkillCheck or {
-    Enabled = false,
+    Enabled = true,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
@@ -428,9 +434,16 @@ Combat = _G.Roooor_Combat or {
 _G.Roooor_Combat = Combat
 
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   Auto Parry  : GACOR (Distance 20, Face -1)")
-print("   8-Bit Crown : ID 10138606900 (client-only)")
-print("   Korblox     : ID 902942093 (client-only)")-- =========================================================
+print("   Auto Parry  : ON (Distance 12, Face -1, Debounce 0.5)")
+print("   Skill Check : ON")
+print("   Parry Circle: ON (Size 12)")
+print("   Headless    : ON")
+print("   Korblox     : ON (Scale 1, Y 0.6)")
+print("   8-Bit Crown : ON (Size 1.24, Height 0.88)")
+print("   ESP Radius  : Limit 500")
+print("   FPS + Ping  : ON (pojok kanan atas)")
+print("   Anti-AFK    : Toggle")
+print("   Rejoin/Hop  : Tombol")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -614,6 +627,31 @@ print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- ==============
 -- BAGIAN 3/8 : FUNGSI + KORBLOX CLIENT + 8BIT CLIENT + PARRY RING
 -- =========================================================
 
+-- =========================================================
+-- AUTO SAVE SYSTEM
+-- =========================================================
+function saveState(key, value)
+    _G.RoooorSavedStates = _G.RoooorSavedStates or {}
+    _G.RoooorSavedStates[key] = value
+end
+
+function loadState(key, default)
+    _G.RoooorSavedStates = _G.RoooorSavedStates or {}
+    return _G.RoooorSavedStates[key] or default
+end
+
+task.spawn(function()
+    while task.wait(2) do
+        _G.RoooorSavedStates = _G.RoooorSavedStates or {}
+        _G.RoooorSavedStates.S = S
+        _G.RoooorSavedStates.ESP = ESP
+        _G.RoooorSavedStates.AutoParry = AutoParry
+        _G.RoooorSavedStates.SkillCheck = SkillCheck
+        _G.RoooorSavedStates.Combat = Combat
+        _G.RoooorSavedStates.GodMode = GodMode
+    end
+end)
+
 -- FIRE (KEPALA)
 function clearFire()
     if not LP.Character then return end
@@ -735,8 +773,8 @@ function apply8Bit(enable, itemName, size, height)
     local head = char:FindFirstChild("Head")
     if not head then return end
 
-    size = size or S.EightBitSize or 1
-    height = height or S.EightBitHeight or 1.5
+    size = size or S.EightBitSize or 1.24
+    height = height or S.EightBitHeight or 0.88
 
     eightBitPart = Instance.new("Part")
     eightBitPart.Name = "Client8Bit"
@@ -791,7 +829,7 @@ function applyKorblox(enable, mode, yOffset, scale)
     clearKorblox()
     if not enable then return end
 
-    yOffset = yOffset or S.KorbloxYOffset or 0
+    yOffset = yOffset or S.KorbloxYOffset or 0.6
     scale = scale or S.KorbloxScale or 1
 
     local char = LP.Character
@@ -1100,7 +1138,143 @@ function applyHDAntiAliasing(s)
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
         end)
     end
-end-- =========================================================
+end
+
+-- =========================================================
+-- MISC UTILITY (Anti-AFK + Rejoin + Server Hop + FPS + Ping)
+-- =========================================================
+function applyAntiAFK(enable)
+    S.AntiAFK = enable
+end
+
+function serverHop()
+    local HttpService = game:GetService("HttpService")
+    task.spawn(function()
+        local servers = {}
+        pcall(function()
+            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+            local response = HttpService:JSONDecode(game:HttpGet(url))
+            if response and response.data then
+                for _, server in ipairs(response.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        table.insert(servers, server.id)
+                    end
+                end
+            end
+        end)
+        if #servers > 0 then
+            local randomServer = servers[math.random(1, #servers)]
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, randomServer, LP)
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "Server Hop",
+                Text = "Nggak ada server lain 😐",
+                Duration = 3
+            })
+        end
+    end)
+end
+
+function rejoinServer()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
+end
+
+fpsPingGui = nil
+function createFPSPingGui()
+    if fpsPingGui then fpsPingGui:Destroy() end
+    fpsPingGui = Instance.new("ScreenGui")
+    fpsPingGui.Name = "CosmicFPSPing"
+    fpsPingGui.ResetOnSpawn = false
+    fpsPingGui.IgnoreGuiInset = true
+    fpsPingGui.Parent = PG
+
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 180, 0, 60)
+    frame.Position = UDim2.new(1, -190, 0, 10)
+    frame.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Parent = fpsPingGui
+    rnd(frame, 8)
+    strk(frame, C.ACC, 1.5, 0.3)
+
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Name = "FPSLabel"
+    fpsLabel.Size = UDim2.new(1, -10, 0, 25)
+    fpsLabel.Position = UDim2.new(0, 5, 0, 5)
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.Text = "FPS: 0"
+    fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+    fpsLabel.TextSize = 13
+    fpsLabel.Font = Enum.Font.GothamBold
+    fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    fpsLabel.Parent = frame
+
+    local pingLabel = Instance.new("TextLabel")
+    pingLabel.Name = "PingLabel"
+    pingLabel.Size = UDim2.new(1, -10, 0, 25)
+    pingLabel.Position = UDim2.new(0, 5, 0, 30)
+    pingLabel.BackgroundTransparency = 1
+    pingLabel.Text = "Ping: 0 ms"
+    pingLabel.TextColor3 = Color3.fromRGB(0, 230, 255)
+    pingLabel.TextSize = 13
+    pingLabel.Font = Enum.Font.GothamBold
+    pingLabel.TextXAlignment = Enum.TextXAlignment.Left
+    pingLabel.Parent = frame
+end
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if not fpsPingGui then
+            createFPSPingGui()
+        end
+        if fpsPingGui then
+            local frame = fpsPingGui:FindFirstChild("MainFrame")
+            if frame then
+                local fpsLabel = frame:FindFirstChild("FPSLabel")
+                local pingLabel = frame:FindFirstChild("PingLabel")
+                if fpsLabel and pingLabel then
+                    if S.ShowFPS then
+                        fpsLabel.Visible = true
+                        fpsLabel.Text = "FPS: " .. tostring(math.floor(1 / math.max(RunService.RenderStepped:Wait(), 0.001)))
+                    else
+                        fpsLabel.Visible = false
+                    end
+
+                    if S.ShowPing then
+                        pingLabel.Visible = true
+                        pcall(function()
+                            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+                            pingLabel.Text = "Ping: " .. tostring(ping) .. " ms"
+                        end)
+                    else
+                        pingLabel.Visible = false
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- AUTO APPLY ON EXECUTE
+-- =========================================================
+task.spawn(function()
+    task.wait(3)
+    pcall(createFPSPingGui)
+    if LP.Character then
+        if S.Headless then pcall(function() applyHeadless(true) end) end
+        if S.Korblox then
+            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
+        end
+        if S.EightBitOn then
+            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
+        end
+        if AutoParry.Enabled then pcall(scanKillers) end
+        if SkillCheck.Enabled then pcall(startSkillCheck) end
+    end
+end)-- =========================================================
 -- ESP SYSTEM
 -- =========================================================
 ESPObjects = {}
@@ -1395,7 +1569,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR (Distance 20, Face -1)
+-- AUTO PARRY GACOR (Distance 12, Face -1)
 -- =========================================================
 PARRY_DEBOUNCE = 0.5
 lastParry = 0
@@ -1689,7 +1863,7 @@ function updateParryCircle()
         createParryCircle()
     end
 
-    local radius = S.ParryCircleSize or 15
+    local radius = S.ParryCircleSize or 12
     local myPos = root.Position
     local yOffset = root.Size.Y / 2 + 1.5
 
@@ -1728,7 +1902,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- TELEPORT
+-- TELEPORT (TP ke Gate & TP ke Dalam Gate DIHAPUS)
 -- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
@@ -1744,46 +1918,6 @@ function teleportToFinishLine()
         root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
     else
         warn("[COSMIC HUB] Finish line gak ketemu")
-    end
-end
-
-function teleportToGate()
-    local root = getRoot()
-    if not root then return end
-    local found = nil
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local n = string.lower(obj.Name)
-            if string.find(n, "gate") or string.find(n, "exit") or string.find(n, "escape") then
-                found = obj
-                break
-            end
-        end
-    end
-    if found then
-        root.CFrame = found.CFrame + Vector3.new(0, 5, 0) + found.CFrame.LookVector * 5
-    else
-        warn("[COSMIC HUB] Gate gak ketemu")
-    end
-end
-
-function teleportInsideGate()
-    local root = getRoot()
-    if not root then return end
-    local found = nil
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local n = string.lower(obj.Name)
-            if string.find(n, "inside") or string.find(n, "safe") or string.find(n, "chamber") then
-                found = obj
-                break
-            end
-        end
-    end
-    if found then
-        root.CFrame = CFrame.new(found.Position + Vector3.new(0, 3, 0))
-    else
-        warn("[COSMIC HUB] Inside gate gak ketemu")
     end
 end
 
@@ -2209,6 +2343,7 @@ function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
+-- EXPORT
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8Bit = apply8Bit
@@ -2242,16 +2377,17 @@ _G.Roooor_applyAura = applyAura
 _G.Roooor_applyCrosshair = applyCrosshair
 _G.Roooor_applyZoomOut = applyZoomOut
 _G.Roooor_teleportToFinishLine = teleportToFinishLine
-_G.Roooor_teleportToGate = teleportToGate
-_G.Roooor_teleportInsideGate = teleportInsideGate
 _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
 _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
+_G.Roooor_applyAntiAFK = applyAntiAFK
+_G.Roooor_serverHop = serverHop
+_G.Roooor_rejoinServer = rejoinServer
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Korblox Client + 8Bit Client + Parry Ring loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Korblox Client + 8Bit Client + Parry Ring + Misc Utility loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -2308,6 +2444,19 @@ task.spawn(function()
                     hum.WalkSpeed = target
                 end
             end
+        end
+    end
+end)
+
+-- ANTI-AFK LOOP
+task.spawn(function()
+    while task.wait(60) do
+        if S.AntiAFK then
+            pcall(function()
+                local VirtualUser = game:GetService("VirtualUser")
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
         end
     end
 end)
@@ -2717,7 +2866,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
+print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama + Anti-AFK loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
@@ -3173,6 +3322,8 @@ function tog(name, def, cb)
     cB.MouseButton1Click:Connect(function()
         state = not state
         _G.ToggleStates[name] = state
+        _G.RoooorSavedStates = _G.RoooorSavedStates or {}
+        _G.RoooorSavedStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
             Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
             BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
@@ -3207,7 +3358,11 @@ function sl(name, min, max, def, cb)
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
 
+    _G.RoooorSavedStates = _G.RoooorSavedStates or {}
     local curVal = _G.SliderStates[name] or def
+    if _G.RoooorSavedStates[name] ~= nil then
+        curVal = _G.RoooorSavedStates[name]
+    end
     _G.SliderStates[name] = curVal
 
     local v = Instance.new("TextLabel")
@@ -3258,6 +3413,8 @@ function sl(name, min, max, def, cb)
         )
         local val = math.floor((min + (max - min) * pos) * 100 + 0.5) / 100
         _G.SliderStates[name] = val
+        _G.RoooorSavedStates = _G.RoooorSavedStates or {}
+        _G.RoooorSavedStates[name] = val
         fill.Size = UDim2.new(pos, 0, 1, 0)
         kn.Position = UDim2.new(pos, -5.5, 0.5, -5.5)
         v.Text = tostring(val)
@@ -3539,13 +3696,13 @@ cs = _G.Roooor_cs
 makeTab("Survivor", "🏃", 1, function()
 
     sec("Auto Parry", "🛡️")
-    tog("Enable Auto Parry", false, function(s)
+    tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 30, 20, function(v)
+    sl("Parry Distance", 5, 30, 12, function(v)
         AutoParry.ParryDistance = v
     end)
 
@@ -3561,7 +3718,7 @@ makeTab("Survivor", "🏃", 1, function()
     lbl("0.5 = sweet spot", C.FIRE_BRIGHT)
 
     sec("Auto Skill Check", "⚡")
-    tog("Enable Auto Skill Check", false, function(s)
+    tog("Enable Auto Skill Check", true, function(s)
         SkillCheck.Enabled = s
         if s then startSkillCheck() end
     end)
@@ -3580,16 +3737,10 @@ makeTab("Survivor", "🏃", 1, function()
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
-    btn("TP ke Gate", function()
-        teleportToGate()
-    end)
-    btn("TP ke Dalam Gate", function()
-        teleportInsideGate()
-    end)
 
     sec("Parry Circle (Hijau/Merah)", "⭕")
-    tog("Show Parry Circle", false, function(s) S.ParryCircle = s end)
-    sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
+    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
+    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
     lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
 
     sec("Alert", "⚠️")
@@ -3659,16 +3810,16 @@ makeTab("ESP", "👁️", 3, function()
     tog("ESP SCP", false, function(s) ESP.SCP = s end)
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
-    sec("ESP Distance (Unlimited)", "📏")
-    sl("ESP Radius", 10, 999999, 50, function(v) ESP.Distance = v end)
-    lbl("Unlimited", C.GRN)
+    sec("ESP Distance", "📏")
+    sl("ESP Radius", 10, 500, 50, function(v) ESP.Distance = v end)
+    lbl("Max 500 studs", C.GRN)
 
     sec("Status ESP", "🟢")
     tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
     tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
     tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
     tog("Show Health", false, function(s) ESPStatus.ShowHealth = s end)
-    sl("Status Radius", 20, 999999, 50, function(v) ESPStatus.Radius = v end)
+    sl("Status Radius", 20, 500, 50, function(v) ESPStatus.Radius = v end)
 
     sec("Nama Mode", "✨")
     drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
@@ -3846,10 +3997,36 @@ makeTab("Misc", "⚙️", 6, function()
     sl("Fly Speed", 10, 300, 50, function(v) S.FlySpeed = v end)
 
     sec("Character", "🎭")
-    tog("Headless", false, function(s)
+    tog("Headless", true, function(s)
         S.Headless = s
         applyHeadless(s)
     end)
+
+    sec("Misc Utility", "🛠️")
+    tog("Anti-AFK", false, function(s)
+        S.AntiAFK = s
+        applyAntiAFK(s)
+    end)
+    lbl("Biar nggak kena kick AFK", C.GRN)
+
+    tog("Show FPS Counter", true, function(s)
+        S.ShowFPS = s
+    end)
+    lbl("Pojok kanan atas", C.GRN)
+
+    tog("Show Ping Counter", true, function(s)
+        S.ShowPing = s
+    end)
+    lbl("Pojok kanan atas", C.GRN)
+
+    btn("🔄 Rejoin Server", function()
+        rejoinServer()
+    end)
+
+    btn("🌐 Server Hop", function()
+        serverHop()
+    end)
+    lbl("Pindah server random", C.FIRE_BRIGHT)
 end)
 
 -- ============================================================
@@ -3966,17 +4143,17 @@ makeTab("Visual", "✨", 7, function()
 
     -- 8-BIT ROYAL CROWN (CLIENT-ONLY)
     sec("8-Bit Royal Crown (Client)", "👑")
-    tog("Enable 8-Bit Crown", false, function(s)
+    tog("Enable 8-Bit Crown", true, function(s)
         S.EightBitOn = s
         apply8Bit(s, "Royal Crown", S.EightBitSize, S.EightBitHeight)
     end)
-    sl("Size (Besar/Kecil)", 0.3, 3, 1, function(v)
+    sl("Size (Besar/Kecil)", 0.3, 3, 1.24, function(v)
         S.EightBitSize = v
         if S.EightBitOn then
             apply8Bit(true, "Royal Crown", v, S.EightBitHeight)
         end
     end)
-    sl("Height (Tinggi/Rendah)", -1, 4, 1.5, function(v)
+    sl("Height (Tinggi/Rendah)", -1, 4, 0.88, function(v)
         S.EightBitHeight = v
         if S.EightBitOn then
             apply8Bit(true, "Royal Crown", S.EightBitSize, v)
@@ -3986,11 +4163,11 @@ makeTab("Visual", "✨", 7, function()
 
     -- KORBLOX (CLIENT-ONLY)
     sec("Korblox Pencil (Client)", "🦴")
-    tog("Enable Korblox", false, function(s)
+    tog("Enable Korblox", true, function(s)
         S.Korblox = s
         applyKorblox(s, "Pencil", S.KorbloxYOffset, S.KorbloxScale)
     end)
-    sl("Korblox Y (Atas/Bawah)", -2, 2, 0, function(v)
+    sl("Korblox Y (Atas/Bawah)", -2, 2, 0.6, function(v)
         S.KorbloxYOffset = v
         if S.Korblox then
             applyKorblox(true, "Pencil", v, S.KorbloxScale)
@@ -4133,6 +4310,7 @@ makeTab("Player", "👤", 8, function()
             if killFeedGui then killFeedGui:Destroy() end
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
+            if fpsPingGui then fpsPingGui:Destroy() end
             clear8Bit()
             clearKorblox()
             clearFireBeam()
@@ -4430,7 +4608,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO RE-APPLY SAAT RESPAWN
+-- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
@@ -4523,7 +4703,7 @@ makeTab("Combat", "⚔️", 9, function()
     tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
 
     sec("Keybind", "⌨️")
-    lbl("Hold tombol attack = aimbot ON", C.FIRE_BRIGHT)
+    lbl("Hold tombol serang = aimbot ON", C.FIRE_BRIGHT)
 end)
 
 -- =========================================================
@@ -4532,8 +4712,6 @@ end)
 makeTab("Extra", "✨", 10, function()
     sec("Teleport", "🌀")
     btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
-    btn("🚪 TP ke Gate", function() teleportToGate() end)
-    btn("🚪 TP ke Dalam Gate", function() teleportInsideGate() end)
 
     sec("Sound", "🔊")
     btn("🔊 Test Sound", function() playToggleSound() end)
@@ -4547,7 +4725,7 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry GACOR (Distance 20)       ║")
+print("║  🛡️ Auto Parry GACOR (Distance 12)       ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  ⭕ Parry Circle BEAM RING                ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
@@ -4560,6 +4738,8 @@ print("║  💎 HD Visual + 8 HD Extra               ║")
 print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  🎵 Sound: Android Notif                 ║")
+print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
+print("║  📊 FPS + Ping Counter                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")

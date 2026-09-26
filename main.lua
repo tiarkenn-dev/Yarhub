@@ -1,13 +1,14 @@
 --[[
     ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v2.0                  ║
+    ║           COSMIC HUB - v3.0                  ║
     ║   Auto Parry + SkillCheck 2 Mode + Moonwalk  ║
+    ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
     ║   Cosmic Galaxy Theme (Solid Background)     ║
     ╚══════════════════════════════════════════════╝
 ]]
 
 -- =========================================================
--- SECTION 1/9 : LOADING + CONFIG + STATE
+-- SECTION 1/11 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -296,7 +297,16 @@ _G.RoooorS = _G.RoooorS or {
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
-    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 200, 255), CrosshairSize = 8,
+
+    -- 🆕 CROSSHAIR 8 MODE + 2 WARNA MODE
+    Crosshair = false,
+    CrosshairColor = Color3.fromRGB(0, 200, 255),
+    CrosshairSize = 8,
+    CrosshairThickness = 2,
+    CrosshairStyle = "Plus",        -- 🆕 Plus/Dot/Circle/X/Square/Diamond/TShape/CrossDot
+    CrosshairColorMode = "Solid",   -- 🆕 Solid / Galaxy
+    CrosshairOffsetX = 0,           -- 🆕
+    CrosshairOffsetY = 0,           -- 🆕
 
     -- Camera
     ZoomOut = false, ZoomOutValue = 500,
@@ -308,6 +318,12 @@ _G.RoooorS = _G.RoooorS or {
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     SkyId = "Default",
 
+    -- 🆕 FPS BOOST (3 fitur)
+    NoScreenEffects = false,        -- 🆕
+    LowGraphics = false,            -- 🆕
+    CleanSky = false,               -- 🆕
+    FPSBoostEnabled = false,        -- 🆕 master toggle
+
     -- HUD
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     KillFeed = false, StunNotify = false,
@@ -318,6 +334,11 @@ _G.RoooorS = _G.RoooorS or {
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
+
+    -- 🆕 AUTO CARRY + AUTO HOOK (KILLER)
+    AutoCarry = false,              -- 🆕
+    AutoHook = false,               -- 🆕
+    CarryRange = 60,                -- 🆕
 
     -- HD
     HDBoost = false, HDShader = false, HDSky = false,
@@ -331,6 +352,12 @@ _G.RoooorS = _G.RoooorS or {
 
     -- ESP
     ESPNameMode = "Text", ESPNameSize = 12,
+
+    -- 🆕 AUTO ESCAPE GATE (SURVIVOR)
+    AutoEscapeGate = false,         -- 🆕
+    AutoEscapeRange = 50,           -- 🆕
+    AutoEscapeUseKillerCheck = true,-- 🆕 TP kalau killer deket
+    AutoEscapeUseGenCheck = true,   -- 🆕 TP kalau cukup gen
 }
 S = _G.RoooorS
 
@@ -359,34 +386,38 @@ TeamColors = _G.Roooor_TeamColors or {
 _G.Roooor_TeamColors = TeamColors
 
 -- =========================================================
--- AUTO PARRY
+-- AUTO PARRY (🆕 PARry DISTANCE 5-20, DEBOUNCE 0.1-0.5)
 -- =========================================================
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
-    ParryDistance = 15,
+    ParryDistance = 15,        -- 🆕 range 5-20
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.7,
+    FaceSensitivity = 0.7,     -- TIDAK DIUBAH
     RequireFacing = true,
-    Wiggle = false,
+    Wiggle = false,            -- 🆕 auto wiggle (spam SelfUnHookEvent)
     WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
+-- PARRY_DEBOUNCE global (dipake di doParry)
+PARRY_DEBOUNCE = 0.2           -- 🆕 default, slider 0.1-0.5
+ParryActive = false
+
 -- =========================================================
--- AUTO SKILL CHECK (2 MODE) 🆕
+-- AUTO SKILL CHECK (2 MODE)
 -- =========================================================
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = true,
-    Mode = "Perfect",      -- 🆕 Perfect / Instant
-    HideNeedle = false,    -- 🆕 khusus Instant
-    Success = 0,           -- 🆕 counter
-    Total = 0,             -- 🆕 counter
+    Mode = "Perfect",      -- Perfect / Instant
+    HideNeedle = false,
+    Success = 0,
+    Total = 0,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
 -- =========================================================
--- MOONWALK 🆕
+-- MOONWALK
 -- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
@@ -400,9 +431,34 @@ Moonwalk = _G.Roooor_Moonwalk or {
     LockIconRef = nil,
     GuiInstance = nil,
     Connection = nil,
-    ImageId = "rbxassetid://1057298679",  -- 🖼️ Gambar Michael Jackson
+    ImageId = "rbxassetid://1057298679",
 }
 _G.Roooor_Moonwalk = Moonwalk
+
+-- =========================================================
+-- 🆕 AUTO FLEE KILLER
+-- =========================================================
+AutoFlee = _G.Roooor_AutoFlee or {
+    Enabled = false,
+    DetectDistance = 50,
+    Cooldown = 0.1,
+    LastFlee = 0,
+}
+_G.Roooor_AutoFlee = AutoFlee
+
+-- =========================================================
+-- 🆕 FAST VAULT (SAMA PERSIS FALLENS)
+-- =========================================================
+FastVault = _G.Roooor_FastVault or {
+    Enabled = false,
+    Speed = 1.2,
+    -- Work ID PERSIS FALLENS
+    ReplaceMap = {
+        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779", -- Running → Finesse
+    },
+    VaultTracks = {},
+}
+_G.Roooor_FastVault = FastVault
 
 -- =========================================================
 -- LIST & STATE LAINNYA
@@ -445,11 +501,33 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/9] COSMIC HUB - Base + State loaded")
-print("   Auto Parry  : ON")
-print("   Skill Check : 2 MODE (Perfect + Instant)")
-print("   Moonwalk    : READY")-- =========================================================
--- SECTION 2/9 : FIRE CONFIG + SKY + KILLER ANIMS
+-- =========================================================
+-- 🆕 CARRY / HOOK REMOTES (KILLER)
+-- =========================================================
+pcall(function()
+    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    if remotes then
+        local carry = remotes:FindFirstChild("Carry")
+        if carry then
+            CarryEvent = carry:FindFirstChild("CarrySurvivorEvent")
+            HookEvent = carry:FindFirstChild("HookEvent")
+        end
+        local atk = remotes:FindFirstChild("Attacks")
+        if atk then
+            AttackEvent = atk:FindFirstChild("BasicAttack")
+        end
+    end
+end)
+
+print("✅ [1/11] COSMIC HUB - Base + State v3.0 loaded")
+print("   Auto Parry   : Distance 5-20, Debounce 0.1-0.5")
+print("   Skill Check  : 2 MODE")
+print("   Crosshair    : 8 MODE + 2 WARNA")
+print("   FPS Boost    : READY")
+print("   Fast Vault   : READY (FALLENS ID)")
+print("   Auto Flee    : READY")
+print("   Auto Carry   : READY")-- =========================================================
+-- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 FireList = {
@@ -628,8 +706,8 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/9] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
--- SECTION 3/9 : FUNGSI UTAMA
+print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
+-- SECTION 3/11 : FUNGSI UTAMA
 -- =========================================================
 
 -- =========================================================
@@ -655,6 +733,8 @@ task.spawn(function()
         _G.RoooorSavedStates.Moonwalk = Moonwalk
         _G.RoooorSavedStates.Combat = Combat
         _G.RoooorSavedStates.GodMode = GodMode
+        _G.RoooorSavedStates.AutoFlee = AutoFlee
+        _G.RoooorSavedStates.FastVault = FastVault
     end
 end)
 
@@ -1188,7 +1268,7 @@ function rejoinServer()
 end
 
 -- =========================================================
--- FPS + PING COUNTER (FIX - NO STUTTER)
+-- FPS + PING COUNTER (🆕 PUTIH SOLID - NO GRADIENT)
 -- =========================================================
 fpsPingGui = nil
 fpsCounter = 0
@@ -1219,49 +1299,33 @@ function createFPSPingGui()
     rnd(frame, 8)
     strk(frame, C.ACC, 1.5, 0.3)
 
+    -- 🆕 FPS LABEL - PUTIH SOLID
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
     fpsLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
     fpsLabel.Position = UDim2.new(0, 4, 0, 3)
     fpsLabel.BackgroundTransparency = 1
     fpsLabel.Text = "FPS: 0"
-    fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 🆕 PUTIH
     fpsLabel.TextSize = math.floor(11 * sizeScale)
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
+    -- ❌ NO GRADIENT - HAPUS UIGRADIENT
 
-    local fpsGrad = Instance.new("UIGradient")
-    fpsGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 120)),
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(120, 60, 255)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 80, 200)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 120)),
-    })
-    fpsGrad.Parent = fpsLabel
-
+    -- 🆕 PING LABEL - PUTIH SOLID
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
     pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
     pingLabel.Position = UDim2.new(0, 4, 0, 21 * sizeScale)
     pingLabel.BackgroundTransparency = 1
     pingLabel.Text = "Ping: 0 ms"
-    pingLabel.TextColor3 = Color3.fromRGB(0, 230, 255)
+    pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 🆕 PUTIH
     pingLabel.TextSize = math.floor(11 * sizeScale)
     pingLabel.Font = Enum.Font.GothamBold
     pingLabel.TextXAlignment = Enum.TextXAlignment.Left
     pingLabel.Parent = frame
-
-    local pingGrad = Instance.new("UIGradient")
-    pingGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 230, 255)),
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 80, 200)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 60, 255)),
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 255, 150)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 230, 255)),
-    })
-    pingGrad.Parent = pingLabel
+    -- ❌ NO GRADIENT - HAPUS UIGRADIENT
 end
 
 -- FPS counter via RenderStepped (NO STUTTER)
@@ -1316,8 +1380,8 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/9] COSMIC HUB - Fungsi utama loaded")-- =========================================================
--- SECTION 4/9 : ESP SYSTEM + AUTO PARRY + SKILLCHECK + MOONWALK
+print("✅ [3/11] COSMIC HUB - Fungsi utama loaded (FPS/Ping PUTIH)")-- =========================================================
+-- SECTION 4/11 : ESP + AUTO PARRY + SKILLCHECK + MOONWALK + CROSSHAIR 8 MODE
 -- =========================================================
 
 -- =========================================================
@@ -1615,9 +1679,8 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (SAMA PERSIS FALLENS)
+-- AUTO PARRY (sama persis Fallens)
 -- =========================================================
-PARRY_DEBOUNCE = 0.2
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
@@ -1762,7 +1825,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK (2 MODE) 🆕
+-- AUTO SKILL CHECK (2 MODE)
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1814,7 +1877,7 @@ function startSkillCheck()
 
         local gr = goal.Rotation % 360
 
-        -- ============ MODE INSTANT 🆕 ============
+        -- ============ MODE INSTANT ============
         if SkillCheck.Mode == "Instant" then
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
@@ -1867,7 +1930,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK 🆕
+-- MOONWALK
 -- =========================================================
 function startMoonwalk()
     if Moonwalk.Connection then return end
@@ -2261,7 +2324,8 @@ function applyHDSky(s)
             _G.CosmicHDAtmosphere.Haze = 1.5
             _G.CosmicHDAtmosphere.Parent = Lighting
         end
-    else        if _G.CosmicHDAtmosphere then
+    else
+        if _G.CosmicHDAtmosphere then
             _G.CosmicHDAtmosphere:Destroy()
             _G.CosmicHDAtmosphere = nil
         end
@@ -2352,13 +2416,35 @@ function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
+-- =========================================================
+-- 🆕 CROSSHAIR 8 MODE + 2 WARNA MODE (SOLID / GALAXY)
+-- =========================================================
 crosshairGui = nil
-function applyCrosshair(enable, color, size)
+crosshairParts = {}
+crosshairGalaxyConn = nil
+
+function clearCrosshair()
     if crosshairGui then
         crosshairGui:Destroy()
         crosshairGui = nil
     end
+    if crosshairGalaxyConn then
+        crosshairGalaxyConn:Disconnect()
+        crosshairGalaxyConn = nil
+    end
+    crosshairParts = {}
+end
+
+function applyCrosshair(enable, color, size)
+    clearCrosshair()
     if not enable then return end
+
+    local style = S.CrosshairStyle or "Plus"
+    local colorMode = S.CrosshairColorMode or "Solid"
+    local thickness = S.CrosshairThickness or 2
+    local offX = S.CrosshairOffsetX or 0
+    local offY = S.CrosshairOffsetY or 0
+    size = size or S.CrosshairSize or 8
 
     crosshairGui = Instance.new("ScreenGui")
     crosshairGui.Name = "CosmicCrosshair"
@@ -2366,37 +2452,115 @@ function applyCrosshair(enable, color, size)
     crosshairGui.IgnoreGuiInset = true
     crosshairGui.Parent = PG
 
-    for i = 1, 4 do
-        local ln = Instance.new("Frame")
-        ln.BackgroundColor3 = color or C.ACC2
-        ln.BorderSizePixel = 0
+    local container = Instance.new("Frame")
+    container.Name = "Container"
+    container.Size = UDim2.new(0, 0, 0, 0)
+    container.Position = UDim2.new(0.5, offX, 0.5, offY)
+    container.AnchorPoint = Vector2.new(0.5, 0.5)
+    container.BackgroundTransparency = 1
+    container.Parent = crosshairGui
 
-        if i == 1 then
-            ln.Size = UDim2.new(0, size or 8, 0, 2)
-            ln.Position = UDim2.new(0.5, -(size or 8) - 3, 0.5, -1)
-        elseif i == 2 then
-            ln.Size = UDim2.new(0, size or 8, 0, 2)
-            ln.Position = UDim2.new(0.5, 3, 0.5, -1)
-        elseif i == 3 then
-            ln.Size = UDim2.new(0, 2, 0, size or 8)
-            ln.Position = UDim2.new(0.5, -1, 0.5, -(size or 8) - 3)
-        elseif i == 4 then
-            ln.Size = UDim2.new(0, 2, 0, size or 8)
-            ln.Position = UDim2.new(0.5, -1, 0.5, 3)
+    local baseColor = color or S.CrosshairColor or C.ACC2
+
+    local function mkBar(w, h, x, y, rot)
+        local f = Instance.new("Frame")
+        f.Size = UDim2.new(0, w, 0, h)
+        f.Position = UDim2.new(0, x, 0, y)
+        f.AnchorPoint = Vector2.new(0.5, 0.5)
+        f.BackgroundColor3 = baseColor
+        f.BorderSizePixel = 0
+        f.Rotation = rot or 0
+        f.Parent = container
+        table.insert(crosshairParts, f)
+        return f
+    end
+
+    local function mkDot(r)
+        local f = Instance.new("Frame")
+        f.Size = UDim2.new(0, r, 0, r)
+        f.Position = UDim2.new(0, 0, 0, 0)
+        f.AnchorPoint = Vector2.new(0.5, 0.5)
+        f.BackgroundColor3 = baseColor
+        f.BorderSizePixel = 0
+        f.Parent = container
+        rnd(f, 999)
+        table.insert(crosshairParts, f)
+        return f
+    end
+
+    local function mkOutline(w, h, r)
+        local c = Instance.new("Frame")
+        c.Size = UDim2.new(0, w, 0, h)
+        c.AnchorPoint = Vector2.new(0.5, 0.5)
+        c.Position = UDim2.new(0, 0, 0, 0)
+        c.BackgroundTransparency = 1
+        c.Rotation = r or 0
+        c.Parent = container
+        local s = Instance.new("UIStroke")
+        s.Thickness = thickness
+        s.Color = baseColor
+        s.Parent = c
+        rnd(c, 999)
+        table.insert(crosshairParts, c)
+        return c
+    end
+
+    -- ============ 8 MODE ============
+    if style == "Plus" then
+        mkBar(size, thickness, -size/2 - 2, 0)
+        mkBar(size, thickness,  size/2 + 2, 0)
+        mkBar(thickness, size, 0, -size/2 - 2)
+        mkBar(thickness, size, 0,  size/2 + 2)
+    elseif style == "Dot" then
+        mkDot(size)
+    elseif style == "Circle" then
+        mkOutline(size*2, size*2)
+    elseif style == "X" then
+        mkBar(size, thickness, 0, 0, 45)
+        mkBar(size, thickness, 0, 0, -45)
+    elseif style == "Square" then
+        mkOutline(size*2, size*2)
+    elseif style == "Diamond" then
+        mkOutline(size*2, size*2, 45)
+    elseif style == "TShape" then
+        mkBar(size*1.5, thickness, 0, -size/2 - 2)
+        mkBar(thickness, size, 0, size/2)
+    elseif style == "CrossDot" then
+        mkBar(size, thickness, -size/2 - 2, 0)
+        mkBar(size, thickness,  size/2 + 2, 0)
+        mkBar(thickness, size, 0, -size/2 - 2)
+        mkBar(thickness, size, 0,  size/2 + 2)
+        mkDot(thickness + 2)
+    end
+
+    -- ============ GALAXY MODE ============
+    if colorMode == "Galaxy" then
+        for _, part in ipairs(crosshairParts) do
+            local grad = Instance.new("UIGradient")
+            grad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 200)),
+            })
+            grad.Parent = part
         end
 
-        ln.Parent = crosshairGui
+        crosshairGalaxyConn = RunService.RenderStepped:Connect(function()
+            if not crosshairGui then return end
+            local t = tick() * 60
+            for _, part in ipairs(crosshairParts) do
+                local grad = part:FindFirstChildOfClass("UIGradient")
+                if grad then
+                    grad.Rotation = (t + (part.AbsolutePosition.X % 100)) % 360
+                end
+            end
+        end)
     end
 end
 
-function applyZoomOut(enable, val)
-    if enable then
-        LP.CameraMaxZoomDistance = val or 500
-    else
-        LP.CameraMaxZoomDistance = 128
-    end
-end
-
+-- =========================================================
+-- FLY
+-- =========================================================
 flyBV, flyBG, flyConn = nil, nil, nil
 function startFly()
     if flyConn then return end
@@ -2490,6 +2654,7 @@ _G.Roooor_applyHeadless = applyHeadless
 _G.Roooor_applyTrail = applyTrail
 _G.Roooor_applyAura = applyAura
 _G.Roooor_applyCrosshair = applyCrosshair
+_G.Roooor_clearCrosshair = clearCrosshair
 _G.Roooor_applyZoomOut = applyZoomOut
 _G.Roooor_teleportToFinishLine = teleportToFinishLine
 _G.Roooor_spawnKillEffect = spawnKillEffect
@@ -2503,8 +2668,8 @@ _G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [4/9] COSMIC HUB - ESP + Parry + SkillCheck 2 Mode + Moonwalk loaded")-- =========================================================
--- SECTION 5/9 : FITUR AKTIF + LOOP UTAMA
+print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + Crosshair 8 MODE loaded")-- =========================================================
+-- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA (v3.0)
 -- =========================================================
 
 -- INSTANT INTERACT
@@ -2896,7 +3061,329 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
+-- 🆕 AUTO WIGGLE (SURVIVOR)
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.5) do
+        if not AutoParry.Wiggle then continue end
+        local char = LP.Character
+        if not char then continue end
+
+        local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
+            or (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
+
+        if not carried then continue end
+
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        if not remotes then continue end
+        local carry = remotes:FindFirstChild("Carry")
+        if not carry then continue end
+        local event = carry:FindFirstChild("SelfUnHookEvent")
+        if not event then continue end
+
+        for i = 1, (AutoParry.WiggleSpam or 5) do
+            pcall(function() event:FireServer() end)
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 AUTO FLEE KILLER (SURVIVOR)
+-- =========================================================
+function GetNearestKillerForFlee()
+    local root = getRoot()
+    if not root then return nil, math.huge end
+
+    local closest, shortest = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LP and plr.Team and plr.Team.Name == "Killer" and plr.Character then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local dist = (hrp.Position - root.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = hrp
+                end
+            end
+        end
+    end
+    return closest, shortest
+end
+
+function GetFarthestGeneratorPoint(killerRoot)
+    if not killerRoot then return nil end
+    local bestPoint, farthestDistance = nil, 0
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and string.match(obj.Name, "^GeneratorPoint%d+$") then
+            local dist = (obj.Position - killerRoot.Position).Magnitude
+            if dist > farthestDistance then
+                farthestDistance = dist
+                bestPoint = obj
+            end
+        end
+    end
+    return bestPoint
+end
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not AutoFlee.Enabled then continue end
+        local root = getRoot()
+        if not root then continue end
+
+        local killerRoot, distance = GetNearestKillerForFlee()
+        if killerRoot and distance <= AutoFlee.DetectDistance
+           and tick() - AutoFlee.LastFlee > AutoFlee.Cooldown then
+            local point = GetFarthestGeneratorPoint(killerRoot)
+            if point then
+                AutoFlee.LastFlee = tick()
+                pcall(function()
+                    root.CFrame = point.CFrame + Vector3.new(0, 5, 0)
+                end)
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 FAST VAULT (PERSIS FALLENS)
+-- =========================================================
+function normalizeVaultId(id)
+    local num = tostring(id):match("%d+")
+    return num and ("rbxassetid://" .. num)
+end
+
+function hookVault(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+
+    animator.AnimationPlayed:Connect(function(track)
+        if not FastVault.Enabled then return end
+        local anim = track.Animation
+        if not anim or not anim.AnimationId then return end
+        local id = normalizeVaultId(anim.AnimationId)
+        if not id then return end
+        local replaceId = FastVault.ReplaceMap[id]
+        if not replaceId then return end
+        if FastVault.VaultTracks[track] then return end
+        FastVault.VaultTracks[track] = true
+
+        track:Stop()
+
+        local newAnim = Instance.new("Animation")
+        newAnim.AnimationId = replaceId
+        local newTrack = animator:LoadAnimation(newAnim)
+        newTrack.Priority = Enum.AnimationPriority.Action
+        newTrack:Play()
+        newTrack:AdjustSpeed(FastVault.Speed)
+
+        newTrack.Stopped:Connect(function()
+            FastVault.VaultTracks[track] = nil
+        end)
+    end)
+end
+
+-- =========================================================
+-- 🆕 FPS BOOST (No Screen Effects + Low Graphics + Clean Sky)
+-- =========================================================
+local ScreenEffectTypes = {
+    "ColorCorrectionEffect", "DepthOfFieldEffect", "BlurEffect",
+    "SunRaysEffect", "BloomEffect"
+}
+
+function applyNoScreenEffects()
+    if S.NoScreenEffects then
+        for _, v in pairs(Lighting:GetChildren()) do
+            for _, t in pairs(ScreenEffectTypes) do
+                if v:IsA(t) then
+                    DisabledEffects[v] = v.Enabled
+                    v.Enabled = false
+                end
+            end
+        end
+    else
+        for obj, state in pairs(DisabledEffects) do
+            if obj and obj.Parent then obj.Enabled = state end
+        end
+        DisabledEffects = {}
+    end
+end
+
+Lighting.ChildAdded:Connect(function(v)
+    if not S.NoScreenEffects then return end
+    task.wait()
+    for _, t in pairs(ScreenEffectTypes) do
+        if v:IsA(t) then
+            DisabledEffects[v] = v.Enabled
+            v.Enabled = false
+        end
+    end
+end)
+
+function applyLowGraphics()
+    pcall(function()
+        if S.LowGraphics then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        else
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        end
+    end)
+end
+
+function applyCleanSky()
+    if S.CleanSky then
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") then v:Destroy() end
+        end
+    end
+end
+
+-- =========================================================
+-- 🆕 AUTO CARRY + AUTO HOOK (KILLER)
+-- =========================================================
+function GetDownedSurvivor()
+    local root = getRoot()
+    if not root then return nil end
+    local best, dist = nil, math.huge
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hrp and hum.Health > 0 and hum.Health <= hum.MaxHealth * 0.25 then
+                local d = (hrp.Position - root.Position).Magnitude
+                if d < dist and d <= S.CarryRange then
+                    dist = d
+                    best = p.Character
+                end
+            end
+        end
+    end
+    return best
+end
+
+function GetHookPoint()
+    local root = getRoot()
+    if not root then return nil end
+    local bestHook, shortestDistance = nil, math.huge
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj.Name == "HookPoint" and obj:IsA("BasePart") then
+            local dist = (obj.Position - root.Position).Magnitude
+            if dist < shortestDistance and dist < 400 then
+                shortestDistance = dist
+                bestHook = obj
+            end
+        end
+    end
+    return bestHook
+end
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if not S.AutoCarry or KillerBusy then continue end
+
+        local CarryEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
+            and ReplicatedStorage.Remotes.Carry:FindFirstChild("CarrySurvivorEvent")
+        local HookEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
+            and ReplicatedStorage.Remotes.Carry:FindFirstChild("HookEvent")
+
+        if not CarryEvent or not HookEvent then continue end
+
+        local target = GetDownedSurvivor()
+        local root = getRoot()
+
+        if target and root then
+            KillerBusy = true
+            local tRoot = target:FindFirstChild("HumanoidRootPart")
+            if tRoot then
+                root.CFrame = tRoot.CFrame * CFrame.new(0, 3, -2)
+                task.wait(0.4)
+                for i = 1, 4 do
+                    pcall(function() CarryEvent:FireServer(target) end)
+                    task.wait(0.2)
+                end
+                task.wait(0.6)
+
+                if S.AutoHook then
+                    local hook = GetHookPoint()
+                    if hook then
+                        root.CFrame = hook.CFrame * CFrame.new(0, 4, -3)
+                        task.wait(0.7)
+                        for i = 1, 6 do
+                            pcall(function() HookEvent:FireServer(hook) end)
+                            task.wait(0.15)
+                        end
+                    end
+                end
+            end
+            task.delay(2, function() KillerBusy = false end)
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 AUTO ESCAPE GATE (SURVIVOR)
+-- =========================================================
+task.spawn(function()
+    while task.wait(1) do
+        if not S.AutoEscapeGate then continue end
+        local root = getRoot()
+        if not root then continue end
+
+        -- Cek killer deket
+        local killerNear = false
+        if S.AutoEscapeUseKillerCheck then
+            local kRoot, kDist = GetNearestKillerForFlee()
+            if kRoot and kDist <= (S.AutoEscapeRange or 50) then
+                killerNear = true
+            end
+        end
+
+        -- Cek generator cukup
+        local genDone = false
+        if S.AutoEscapeUseGenCheck then
+            local total, done = 0, 0
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj.Name == "Generator" then
+                    total = total + 1
+                    local p = obj:GetAttribute("RepairProgress")
+                        or obj:GetAttribute("Progress") or 0
+                    if p >= 100 then done = done + 1 end
+                end
+            end
+            if total > 0 and done >= total then genDone = true end
+        end
+
+        if killerNear or genDone then
+            local found = nil
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") then
+                    local n = string.lower(obj.Name)
+                    if n == "fininshline" or n == "finishline" 
+                       or n == "escape" or n == "escapegate"
+                       or string.find(n, "escape") then
+                        found = obj
+                        break
+                    end
+                end
+            end
+
+            if found then
+                pcall(function()
+                    root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
+                end)
+            end
+        end
+    end
+end)
+
+-- =========================================================
 -- MAIN ESP LOOP
+-- =========================================================
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
@@ -2944,6 +3431,11 @@ RunService.Heartbeat:Connect(function()
         for obj in pairs(Cached.Pallets) do UpdateMapESP(obj, root) end
 
         UpdateSCPEsp(root)
+
+        -- FPS Boost update
+        applyNoScreenEffects()
+        applyLowGraphics()
+        applyCleanSky()
     end
 end)
 
@@ -2981,8 +3473,14 @@ task.spawn(function()
     end
 end)
 
-print("✅ [5/9] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
--- SECTION 6/9 : GUI COSMIC HUB + TOMBOL + PANEL
+print("✅ [5/11] COSMIC HUB - Fitur aktif + Loop utama loaded")
+print("   Auto Wiggle    : ✅")
+print("   Auto Flee      : ✅")
+print("   Fast Vault     : ✅ (FALLENS ID)")
+print("   FPS Boost      : ✅")
+print("   Auto Carry/Hook: ✅")
+print("   Auto Escape    : ✅")-- =========================================================
+-- SECTION 6/11 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
 gui.Name = "CosmicHub"
@@ -2992,7 +3490,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU COSMIC (SAMA KAYAK ASLI)
+-- TOMBOL MENU COSMIC
 -- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
@@ -3163,7 +3661,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- PANEL MENU COSMIC (BACKGROUND GALAXY SOLID - NO BINTANG)
+-- PANEL MENU COSMIC
 -- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
@@ -3176,7 +3674,6 @@ panel.Parent = gui
 rnd(panel, 18)
 strk(panel, C.ACC, 2, 0.3)
 
--- Gradient STATIS (gak muter) - galaxy dark purple
 local panelGrad = Instance.new("UIGradient")
 panelGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, C.BG),
@@ -3185,9 +3682,6 @@ panelGrad.Color = ColorSequence.new({
 })
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
-
--- ❌ HAPUS starsGui (background bintang)
--- ❌ HAPUS starsList (30 bintang)
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
@@ -3764,8 +4258,8 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [6/9] COSMIC HUB - GUI + Tombol + Panel (NO BINTANG) loaded")-- =========================================================
--- SECTION 7/9 : TAB UI PART 1
+print("✅ [6/11] COSMIC HUB - GUI + Tombol + Panel loaded")-- =========================================================
+-- SECTION 7/11 : TAB UI PART 1
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3778,10 +4272,11 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- ============================================================
--- TAB 1: SURVIVOR (SKILLCHECK 2 MODE) 🆕
+-- TAB 1: SURVIVOR 🆕 (Tambah Auto Wiggle, Auto Flee, Fast Vault, Auto Escape)
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
+    -- ================= AUTO PARRY =================
     sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
@@ -3789,24 +4284,27 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 30, 15, function(v)
+    sl("Parry Distance", 5, 20, 15, function(v)         -- 🆕 5-20
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, 0.7, function(v)
+    sl("Face Sensitivity", -1, 1, 0.7, function(v)      -- TIDAK DIUBAH
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
     lbl("0.7 = Facing (recommended)", C.GRN)
 
-    sl("Parry Debounce", 0.05, 1, 0.2, function(v)
+    sl("Parry Debounce", 0.1, 0.5, 0.2, function(v)     -- 🆕 0.1-0.5
         PARRY_DEBOUNCE = v
     end)
     lbl("0.2 = Responsif", C.FIRE_BRIGHT)
 
-    -- ==========================================
-    -- AUTO SKILL CHECK (2 MODE) 🆕
-    -- ==========================================
+    sec("Parry Circle (Hijau/Merah)", "⭕")
+    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
+    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
+    lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
+
+    -- ================= AUTO SKILL CHECK =================
     sec("Auto Skill Check (2 MODE)", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
         SkillCheck.Enabled = s
@@ -3828,40 +4326,74 @@ makeTab("Survivor", "🏃", 1, function()
         SkillCheck.Total = 0
     end)
 
-    task.spawn(function()
-        while task.wait(0.5) do
-            if cs.Parent then
-                local success = SkillCheck.Success or 0
-                local total = SkillCheck.Total or 0
-                if activeTab and activeTab:FindFirstChildOfClass("TextLabel") then
-                    local tabName = activeTab:FindFirstChildOfClass("TextLabel").Text
-                    if tabName == "SURVIVOR" then
-                        -- Update label counter (opsional)
-                    end
-                end
-            end
-        end
+    -- ================= 🆕 AUTO WIGGLE =================
+    sec("Auto Wiggle (Anti Gendong)", "🔓")
+    tog("Enable Auto Wiggle", false, function(s)
+        AutoParry.Wiggle = s
+    end)
+    lbl("Spam lepas kalau digendong killer", C.GRN)
+    sl("Wiggle Spam", 1, 20, 5, function(v)
+        AutoParry.WiggleSpam = v
     end)
 
+    -- ================= 🆕 AUTO FLEE KILLER =================
+    sec("Auto Flee Killer", "🏃‍♂️")
+    tog("Enable Auto Flee", false, function(s)
+        AutoFlee.Enabled = s
+    end)
+    lbl("TP ke generator terjauh kalau killer deket", C.FIRE_BRIGHT)
+    sl("Detect Distance", 10, 150, 50, function(v)
+        AutoFlee.DetectDistance = v
+    end)
+    sl("Cooldown", 0.1, 5, 0.5, function(v)
+        AutoFlee.Cooldown = v
+    end)
+
+    -- ================= 🆕 FAST VAULT =================
+    sec("Fast Vault (FALLENS)", "⚡")
+    tog("Enable Fast Vault", false, function(s)
+        FastVault.Enabled = s
+    end)
+    lbl("Ganti animasi vault jadi lebih cepat", C.GRN)
+    sl("Animation Speed", 1, 5, 1.2, function(v)
+        FastVault.Speed = v
+    end)
+
+    -- ================= 🆕 AUTO ESCAPE GATE =================
+    sec("Auto Escape Gate", "🚪")
+    tog("Enable Auto Escape", false, function(s)
+        S.AutoEscapeGate = s
+    end)
+    lbl("TP ke finish kalau cukup gen / killer deket", C.FIRE_BRIGHT)
+
+    tog("Trigger: Killer Deket", true, function(s)
+        S.AutoEscapeUseKillerCheck = s
+    end)
+    tog("Trigger: Generator Cukup", true, function(s)
+        S.AutoEscapeUseGenCheck = s
+    end)
+    sl("Killer Range", 10, 150, 50, function(v)
+        S.AutoEscapeRange = v
+    end)
+
+    -- ================= GOD MODE =================
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
         GodMode.Enabled = s
     end)
     lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
 
+    -- ================= SUPPORT =================
     sec("Support", "💊")
     tog("Instant Interact", false, function(s) S.InstantInteract = s end)
 
+    -- ================= TELEPORT =================
     sec("Teleport", "🌀")
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
 
-    sec("Parry Circle (Hijau/Merah)", "⭕")
-    tog("Show Parry Circle", true, function(s) S.ParryCircle = s end)
-    sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
-    lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
-
+    -- ================= ALERT =================
     sec("Alert", "⚠️")
     tog("Safe Zone", false, function(s) S.SafeZone = s end)
     tog("Escape Alert", false, function(s) S.EscapeAlert = s end)
@@ -3882,6 +4414,14 @@ makeTab("Killer", "🔪", 2, function()
     sec("Kill All", "💀")
     tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
     lbl("Auto TP ke survivor + attack", C.DIM)
+
+    -- 🆕 AUTO CARRY + AUTO HOOK
+    sec("Auto Carry + Hook", "🎒")
+    tog("Auto Carry (Downed)", false, function(s) S.AutoCarry = s end)
+    lbl("Auto gendong survivor yang down", C.FIRE_BRIGHT)
+    tog("Auto Hook", false, function(s) S.AutoHook = s end)
+    lbl("Auto hook survivor yang digendong", C.FIRE_BRIGHT)
+    sl("Carry Range", 10, 200, 60, function(v) S.CarryRange = v end)
 
     sec("Masked Power", "🎭")
     drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
@@ -4016,7 +4556,7 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK 🆕
+-- TAB 5: MOONWALK
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
@@ -4081,8 +4621,8 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 end)
 
-print("✅ [7/9] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
--- SECTION 8/9 : TAB UI PART 2 + MOONWALK BUTTON
+print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
+-- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4095,7 +4635,7 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- =========================================================
--- FUNGSI MOONWALK BUTTON 🆕
+-- FUNGSI MOONWALK BUTTON
 -- =========================================================
 function createMoonwalkButton()
     if not PG or not PG.Parent then return end
@@ -4353,9 +4893,71 @@ makeTab("Misc", "⚙️", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: VISUAL
+-- TAB 8: PLAYER 🆕 (Tambah FPS Boost + Info)
 -- ============================================================
-makeTab("Visual", "✨", 8, function()
+makeTab("Player", "👤", 8, function()
+
+    sec("Aimlock Mode", "🎯")
+    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
+        Combat.Mode = v
+    end)
+
+    -- 🆕 FPS BOOST
+    sec("FPS Boost", "🚀")
+    tog("No Screen Effects", false, function(s)
+        S.NoScreenEffects = s
+        applyNoScreenEffects()
+    end)
+    lbl("Matikan blur, bloom, DOF (FPS naik)", C.GRN)
+
+    tog("Low Graphics", false, function(s)
+        S.LowGraphics = s
+        applyLowGraphics()
+    end)
+    lbl("Quality Level 1 (FPS paling tinggi)", C.GRN)
+
+    tog("Clean Sky", false, function(s)
+        S.CleanSky = s
+        applyCleanSky()
+    end)
+    lbl("Hapus Sky (FPS boost)", C.GRN)
+
+    -- INFO
+    sec("Info", "ℹ️")
+    lbl("🎯 Aimbot = Hold tombol serang", C.FIRE_BRIGHT)
+    lbl("PC: klik kanan | HP: tombol attack", C.DIM)
+    lbl("🕺 Moonwalk: Tekan V", C.FIRE_BRIGHT)
+
+    sec("Danger Zone", "⚠️")
+    btn("✨ UNLOAD COSMIC HUB", function()
+        pcall(function()
+            if gui then gui:Destroy() end
+            if killFeedGui then killFeedGui:Destroy() end
+            if loadingGui then loadingGui:Destroy() end
+            if crosshairGui then crosshairGui:Destroy() end
+            if fpsPingGui then fpsPingGui:Destroy() end
+            clear8Bit()
+            clearKorblox()
+            clearFireBeam()
+            clearParryCircle()
+            stopMoonwalk()
+            removeMoonwalkButton()
+        end)
+        _G.RoooorS = nil
+        _G.Roooor_ESP = nil
+        _G.Roooor_ESPStatus = nil
+        _G.Roooor_AutoParry = nil
+        _G.Roooor_SkillCheck = nil
+        _G.Roooor_Moonwalk = nil
+        _G.Roooor_Combat = nil
+        _G.Roooor_GodMode = nil
+    end)
+end)
+
+-- ============================================================
+-- TAB 9: VISUAL 🆕 (Crosshair 8 mode + 2 warna)
+-- ============================================================
+makeTab("Visual", "✨", 9, function()
 
     sec("Fullbright & No Fog", "💡")
     tog("Fullbright (max 200)", false, function(s)
@@ -4445,6 +5047,68 @@ makeTab("Visual", "✨", 8, function()
         if S.Korblox then applyKorblox(true, "Pencil", S.KorbloxYOffset, v) end
     end)
 
+    -- ============ 🆕 CROSSHAIR 8 MODE ============
+    sec("Crosshair 8 Mode 🆕", "🎯")
+
+    tog("Enable Crosshair", false, function(s)
+        S.Crosshair = s
+        applyCrosshair(s, S.CrosshairColor, S.CrosshairSize)
+    end)
+
+    drp("Style (8 Mode)", {
+        "Plus", "Dot", "Circle", "X",
+        "Square", "Diamond", "TShape", "CrossDot"
+    }, "Plus", function(v)
+        S.CrosshairStyle = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
+        end
+    end)
+
+    drp("Color Mode", {"Solid", "Galaxy"}, "Solid", function(v)
+        S.CrosshairColorMode = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
+        end
+    end)
+    lbl("Solid = warna biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
+
+    cpk("Crosshair Color", S.CrosshairColor, function(c)
+        S.CrosshairColor = c
+        if S.Crosshair then
+            applyCrosshair(true, c, S.CrosshairSize)
+        end
+    end)
+
+    sl("Crosshair Size", 4, 30, 8, function(v)
+        S.CrosshairSize = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, v)
+        end
+    end)
+
+    sl("Crosshair Thickness", 1, 6, 2, function(v)
+        S.CrosshairThickness = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
+        end
+    end)
+
+    sl("Offset X", -200, 200, 0, function(v)
+        S.CrosshairOffsetX = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
+        end
+    end)
+
+    sl("Offset Y", -200, 200, 0, function(v)
+        S.CrosshairOffsetY = v
+        if S.Crosshair then
+            applyCrosshair(true, S.CrosshairColor, S.CrosshairSize)
+        end
+    end)
+
+    -- ============ FIRE BEAM ============
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -4524,65 +5188,66 @@ makeTab("Visual", "✨", 8, function()
     end)
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
-
-    sec("Crosshair", "🎯")
-    tog("Enable Crosshair", false, function(s)
-        S.Crosshair = s
-        applyCrosshair(s, S.CrosshairColor, S.CrosshairSize)
-    end)
-    cpk("Crosshair Color", S.CrosshairColor, function(c)
-        S.CrosshairColor = c
-        if S.Crosshair then applyCrosshair(true, c, S.CrosshairSize) end
-    end)
-    sl("Crosshair Size", 4, 20, 8, function(v)
-        S.CrosshairSize = v
-        if S.Crosshair then applyCrosshair(true, S.CrosshairColor, v) end
-    end)
 end)
 
 -- ============================================================
--- TAB 9: PLAYER
+-- TAB 10: COMBAT
 -- ============================================================
-makeTab("Player", "👤", 9, function()
-
-    sec("Aimlock Mode", "🎯")
-    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
-        Combat.Mode = v
+makeTab("Combat", "⚔️", 10, function()
+    sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
+    tog("Enable Aimbot", false, function(s)
+        Combat.AimlockEnabled = s
+        if not s then
+            Combat.AttackHeld = false
+            Combat.Holding = false
+        end
     end)
+    lbl("Tahan tombol attack = auto nempel", C.FIRE_BRIGHT)
+    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v) Combat.Mode = v end)
+    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v) Combat.AimPart = v end)
+    sl("Smoothness", 0.01, 1, 0.01, function(v) Combat.Smoothness = v end)
+    lbl("0.01 = INSTAN nempel", C.GRN)
+    sl("Lock Radius (studs)", 10, 500, 150, function(v) Combat.LockRadius = v end)
+    sl("FOV Radius (layar)", 50, 500, 200, function(v) Combat.FOVRadius = v end)
+    tog("Show FOV Circle", false, function(s) Combat.FOVCircle = s end)
 
-    sec("Info", "ℹ️")
-    lbl("🎯 Aimbot = Hold tombol serang", C.FIRE_BRIGHT)
-    lbl("PC: klik kanan | HP: tombol attack", C.DIM)
-    lbl("🕺 Moonwalk: Tekan V", C.FIRE_BRIGHT)
+    sec("Prediction", "📈")
+    tog("Predict Movement", true, function(s) Combat.Predict = s end)
+    sl("Predict Strength", 0, 1, 0.15, function(v) Combat.PredictStrength = v end)
 
-    sec("Danger Zone", "⚠️")
-    btn("✨ UNLOAD COSMIC HUB", function()
-        pcall(function()
-            if gui then gui:Destroy() end
-            if killFeedGui then killFeedGui:Destroy() end
-            if loadingGui then loadingGui:Destroy() end
-            if crosshairGui then crosshairGui:Destroy() end
-            if fpsPingGui then fpsPingGui:Destroy() end
-            clear8Bit()
-            clearKorblox()
-            clearFireBeam()
-            clearParryCircle()
-            stopMoonwalk()
-            removeMoonwalkButton()
-        end)
-        _G.RoooorS = nil
-        _G.Roooor_ESP = nil
-        _G.Roooor_ESPStatus = nil
-        _G.Roooor_AutoParry = nil
-        _G.Roooor_SkillCheck = nil
-        _G.Roooor_Moonwalk = nil
-        _G.Roooor_Combat = nil
-        _G.Roooor_GodMode = nil
-    end)
+    sec("Visibility Check", "👁️")
+    tog("Anti-Wall (Silent)", false, function(s) Combat.VisibilityCheck = s end)
+    tog("Anti-Wall (Strict)", false, function(s) Combat.WallCheck = s end)
+
+    sec("Trigger Bot", "🔫")
+    tog("Auto Attack saat lock", false, function(s) Combat.TriggerBotEnabled = s end)
+    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v) Combat.TriggerDelay = v end)
+
+    sec("Hitbox (BESAR - 2 Mode)", "📦")
+    tog("Hitbox Survivor Mode", false, function(s) Combat.HitboxSurvivor = s end)
+    tog("Hitbox Killer Mode", false, function(s) Combat.HitboxKiller = s end)
+    sl("Hitbox Size", 10, 120, 25, function(v) Combat.HitboxSize = v end)
+    lbl("Max 120 (manual ON)", C.GRN)
+    tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
+
+    sec("Keybind", "⌨️")
+    lbl("Hold tombol serang = aimbot ON", C.FIRE_BRIGHT)
 end)
 
-print("✅ [8/9] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
--- SECTION 9/9 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
+-- ============================================================
+-- TAB 11: EXTRA
+-- ============================================================
+makeTab("Extra", "✨", 11, function()
+    sec("Teleport", "🌀")
+    btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
+
+    sec("Sound", "🔊")
+    btn("🔊 Test Sound", function() playToggleSound() end)
+    lbl("Sound aktif saat toggle ON/OFF", C.DIM)
+end)
+
+print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
+-- SECTION 9/11 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4905,6 +5570,10 @@ LP.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         pcall(createMoonwalkButton)
     end
+    -- 🆕 Fast Vault hook ke char baru
+    if FastVault.Enabled then
+        pcall(function() hookVault(char) end)
+    end
 end)
 
 task.spawn(function()
@@ -4925,82 +5594,7 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- =========================================================
--- TAB 10: COMBAT
--- =========================================================
-makeTab("Combat", "⚔️", 10, function()
-    sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
-    tog("Enable Aimbot", false, function(s)
-        Combat.AimlockEnabled = s
-        if not s then
-            Combat.AttackHeld = false
-            Combat.Holding = false
-        end
-    end)
-    lbl("Tahan tombol attack = auto nempel", C.FIRE_BRIGHT)
-    drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v) Combat.Mode = v end)
-    drp("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, "Head", function(v) Combat.AimPart = v end)
-    sl("Smoothness", 0.01, 1, 0.01, function(v) Combat.Smoothness = v end)
-    lbl("0.01 = INSTAN nempel", C.GRN)
-    sl("Lock Radius (studs)", 10, 500, 150, function(v) Combat.LockRadius = v end)
-    sl("FOV Radius (layar)", 50, 500, 200, function(v) Combat.FOVRadius = v end)
-    tog("Show FOV Circle", false, function(s) Combat.FOVCircle = s end)
-
-    sec("Prediction", "📈")
-    tog("Predict Movement", true, function(s) Combat.Predict = s end)
-    sl("Predict Strength", 0, 1, 0.15, function(v) Combat.PredictStrength = v end)
-
-    sec("Visibility Check", "👁️")
-    tog("Anti-Wall (Silent)", false, function(s) Combat.VisibilityCheck = s end)
-    tog("Anti-Wall (Strict)", false, function(s) Combat.WallCheck = s end)
-
-    sec("Trigger Bot", "🔫")
-    tog("Auto Attack saat lock", false, function(s) Combat.TriggerBotEnabled = s end)
-    sl("Trigger Delay", 0.01, 0.5, 0.05, function(v) Combat.TriggerDelay = v end)
-
-    sec("Hitbox (BESAR - 2 Mode)", "📦")
-    tog("Hitbox Survivor Mode", false, function(s) Combat.HitboxSurvivor = s end)
-    tog("Hitbox Killer Mode", false, function(s) Combat.HitboxKiller = s end)
-    sl("Hitbox Size", 10, 120, 25, function(v) Combat.HitboxSize = v end)
-    lbl("Max 120 (manual ON)", C.GRN)
-    tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
-
-    sec("Keybind", "⌨️")
-    lbl("Hold tombol serang = aimbot ON", C.FIRE_BRIGHT)
-end)
-
--- =========================================================
--- TAB 11: EXTRA
--- =========================================================
-makeTab("Extra", "✨", 11, function()
-    sec("Teleport", "🌀")
-    btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
-
-    sec("Sound", "🔊")
-    btn("🔊 Test Sound", function() playToggleSound() end)
-    lbl("Sound aktif saat toggle ON/OFF", C.DIM)
-end)
-
--- =========================================================
--- AUTO APPLY ON EXECUTE
--- =========================================================
-task.spawn(function()
-    task.wait(3)
-    pcall(createFPSPingGui)
-    if LP.Character then
-        if S.Headless then pcall(function() applyHeadless(true) end) end
-        if S.Korblox then
-            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
-        end
-        if S.EightBitOn then
-            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
-        end
-        if AutoParry.Enabled then pcall(scanKillers) end
-        if SkillCheck.Enabled then pcall(startSkillCheck) end
-    end
-end)
-
--- =========================================================
--- KEYBIND V UNTUK MOONWALK 🆕
+-- KEYBIND V UNTUK MOONWALK
 -- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -5033,21 +5627,298 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 -- =========================================================
+-- AUTO APPLY ON EXECUTE
+-- =========================================================
+task.spawn(function()
+    task.wait(3)
+    pcall(createFPSPingGui)
+    if LP.Character then
+        if S.Headless then pcall(function() applyHeadless(true) end) end
+        if S.Korblox then
+            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
+        end
+        if S.EightBitOn then
+            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
+        end
+        if AutoParry.Enabled then pcall(scanKillers) end
+        if SkillCheck.Enabled then pcall(startSkillCheck) end
+        -- 🆕 Fast Vault hook awal
+        if FastVault.Enabled then
+            pcall(function() hookVault(LP.Character) end)
+        end
+    end
+end)
+
+-- =========================================================
 -- PRINT FINAL
 -- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v2.0 ✨                    ║")
+print("║  ✨ COSMIC HUB v3.0 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry (sama persis Fallens)     ║")
-print("║  ⚡ Auto Skill Check (2 MODE!)           ║")
-print("║     → Perfect + Instant + Hide Needle    ║")
-print("║  🕺 Moonwalk (Keybind V + Button + Lock) ║")
-print("║  ⭕ Parry Circle BEAM RING                ║")
+print("║  🛡️ Auto Parry (5-20)                    ║")
+print("║  ⚡ Auto Skill Check (2 MODE)            ║")
+print("║  🕺 Moonwalk (Keybind V + Button)        ║")
+print("║  🔓 Auto Wiggle                           ║")
+print("║  🏃 Auto Flee Killer                      ║")
+print("║  ⚡ Fast Vault (FALLENS)                  ║")
+print("║  🚪 Auto Escape Gate                      ║")
+print("║  🎒 Auto Carry + Hook                     ║")
+print("║  🚀 FPS Boost (3 Mode)                    ║")
+print("║  🎯 Crosshair 8 Mode + 2 Warna            ║")
+print("║  🎯 Aimbot INSTAN + Hold to Aim           ║")
+print("║  📦 Hitbox BESAR + 2 Mode                 ║")
+print("║  🛡️ God Mode                              ║")
+print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)       ║")
+print("║  🦴 Korblox Pencil (CLIENT-ONLY)          ║")
+print("║  🔥 Fire Beam 10 efek                     ║")
+print("║  💎 HD Visual + 8 HD Extra                ║")
+print("║  🌌 ESP Nama 2 Mode                       ║")
+print("║  🎵 Sound: Android Notif                  ║")
+print("║  🛠️ Anti-AFK + Rejoin + Server Hop        ║")
+print("║  📊 FPS + Ping Counter (PUTIH)            ║")
+print("╠══════════════════════════════════════════╣")
+print("║  🎮 Buka menu: Klik tombol ✨            ║")
+print("║  🎯 Aimbot: Hold tombol serang            ║")
+print("║  🕺 Moonwalk: Tekan V                     ║")
+print("║  🛡️ Auto Parry ON = GACOR!                ║")
+print("╚══════════════════════════════════════════╝")
+
+print("✅ [9/11] COSMIC HUB - FINAL LOADED! ✨")-- =========================================================
+-- SECTION 10/11 : LOGIC FITUR BARU (RAPIH)
+-- =========================================================
+-- Note: Sebagian logic udah ada di Section 5 & 4.
+-- Section ini cuma buat rapihin + pastiin semua fungsi kepanggil.
+
+-- =========================================================
+-- 🆕 AUTO WIGGLE - LOOP UTAMA
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.5) do
+        if not AutoParry.Wiggle then continue end
+        local char = LP.Character
+        if not char then continue end
+
+        local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
+            or (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
+
+        if not carried then continue end
+
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        if not remotes then continue end
+        local carry = remotes:FindFirstChild("Carry")
+        if not carry then continue end
+        local event = carry:FindFirstChild("SelfUnHookEvent")
+        if not event then continue end
+
+        for i = 1, (AutoParry.WiggleSpam or 5) do
+            pcall(function() event:FireServer() end)
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 AUTO FLEE KILLER - LOOP UTAMA
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.2) do
+        if not AutoFlee.Enabled then continue end
+        local root = getRoot()
+        if not root then continue end
+
+        local killerRoot, distance = GetNearestKillerForFlee()
+        if killerRoot and distance <= AutoFlee.DetectDistance
+           and tick() - AutoFlee.LastFlee > AutoFlee.Cooldown then
+            local point = GetFarthestGeneratorPoint(killerRoot)
+            if point then
+                AutoFlee.LastFlee = tick()
+                pcall(function()
+                    root.CFrame = point.CFrame + Vector3.new(0, 5, 0)
+                end)
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 AUTO ESCAPE GATE - LOOP UTAMA
+-- =========================================================
+task.spawn(function()
+    while task.wait(1) do
+        if not S.AutoEscapeGate then continue end
+        local root = getRoot()
+        if not root then continue end
+
+        local killerNear = false
+        if S.AutoEscapeUseKillerCheck then
+            local kRoot, kDist = GetNearestKillerForFlee()
+            if kRoot and kDist <= (S.AutoEscapeRange or 50) then
+                killerNear = true
+            end
+        end
+
+        local genDone = false
+        if S.AutoEscapeUseGenCheck then
+            local total, done = 0, 0
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj.Name == "Generator" then
+                    total = total + 1
+                    local p = obj:GetAttribute("RepairProgress")
+                        or obj:GetAttribute("Progress") or 0
+                    if p >= 100 then done = done + 1 end
+                end
+            end
+            if total > 0 and done >= total then genDone = true end
+        end
+
+        if killerNear or genDone then
+            local found = nil
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") then
+                    local n = string.lower(obj.Name)
+                    if n == "fininshline" or n == "finishline" 
+                       or n == "escape" or n == "escapegate"
+                       or string.find(n, "escape") then
+                        found = obj
+                        break
+                    end
+                end
+            end
+
+            if found then
+                pcall(function()
+                    root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
+                end)
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 FAST VAULT - HOOK KE CHARACTER
+-- =========================================================
+LP.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    if FastVault.Enabled then
+        pcall(function() hookVault(char) end)
+    end
+end)
+
+if LP.Character and FastVault.Enabled then
+    pcall(function() hookVault(LP.Character) end)
+end
+
+-- =========================================================
+-- 🆕 AUTO CARRY + HOOK - LOOP UTAMA
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.2) do
+        if not S.AutoCarry or KillerBusy then continue end
+
+        local CarryEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
+            and ReplicatedStorage.Remotes.Carry:FindFirstChild("CarrySurvivorEvent")
+        local HookEvent = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Carry", true)
+            and ReplicatedStorage.Remotes.Carry:FindFirstChild("HookEvent")
+
+        if not CarryEvent or not HookEvent then continue end
+
+        local target = GetDownedSurvivor()
+        local root = getRoot()
+
+        if target and root then
+            KillerBusy = true
+            local tRoot = target:FindFirstChild("HumanoidRootPart")
+            if tRoot then
+                root.CFrame = tRoot.CFrame * CFrame.new(0, 3, -2)
+                task.wait(0.4)
+                for i = 1, 4 do
+                    pcall(function() CarryEvent:FireServer(target) end)
+                    task.wait(0.2)
+                end
+                task.wait(0.6)
+
+                if S.AutoHook then
+                    local hook = GetHookPoint()
+                    if hook then
+                        root.CFrame = hook.CFrame * CFrame.new(0, 4, -3)
+                        task.wait(0.7)
+                        for i = 1, 6 do
+                            pcall(function() HookEvent:FireServer(hook) end)
+                            task.wait(0.15)
+                        end
+                    end
+                end
+            end
+            task.delay(2, function() KillerBusy = false end)
+        end
+    end
+end)
+
+-- =========================================================
+-- 🆕 FPS BOOST - LOOP UTAMA
+-- =========================================================
+task.spawn(function()
+    while task.wait(1) do
+        if S.NoScreenEffects then applyNoScreenEffects() end
+        if S.LowGraphics then applyLowGraphics() end
+        if S.CleanSky then applyCleanSky() end
+    end
+end)
+
+print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- =========================================================
+-- SECTION 11/11 : PRINT FINAL + AUTO APPLY
+-- =========================================================
+
+-- =========================================================
+-- AUTO APPLY ON EXECUTE
+-- =========================================================
+task.spawn(function()
+    task.wait(3)
+
+    -- Apply FPS/Ping
+    pcall(createFPSPingGui)
+
+    if LP.Character then
+        if S.Headless then pcall(function() applyHeadless(true) end) end
+        if S.Korblox then
+            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
+        end
+        if S.EightBitOn then
+            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
+        end
+        if AutoParry.Enabled then pcall(scanKillers) end
+        if SkillCheck.Enabled then pcall(startSkillCheck) end
+        if FastVault.Enabled then
+            pcall(function() hookVault(LP.Character) end)
+        end
+    end
+end)
+
+-- =========================================================
+-- PRINT FINAL
+-- =========================================================
+task.wait(0.5)
+
+print("╔══════════════════════════════════════════╗")
+print("║  ✨ COSMIC HUB v3.0 ✨                   ║")
+print("║  ✅ SEMUA FITUR LOADED                   ║")
+print("╠══════════════════════════════════════════╣")
+print("║  🛡️ Auto Parry (5-20)                    ║")
+print("║  ⚡ Auto Skill Check (2 MODE)            ║")
+print("║  🕺 Moonwalk (Keybind V + Button)        ║")
+print("║  🔓 Auto Wiggle                          ║")
+print("║  🏃 Auto Flee Killer                     ║")
+print("║  ⚡ Fast Vault (FALLENS)                 ║")
+print("║  🚪 Auto Escape Gate                     ║")
+print("║  🎒 Auto Carry + Hook                    ║")
+print("║  🚀 FPS Boost (3 Mode)                   ║")
+print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
-print("║  📦 Hitbox BESAR (max 120) + 2 Mode      ║")
+print("║  📦 Hitbox BESAR + 2 Mode                ║")
 print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
@@ -5056,12 +5927,12 @@ print("║  💎 HD Visual + 8 HD Extra               ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
-print("║  📊 FPS + Ping Counter (resize + drag)   ║")
+print("║  📊 FPS + Ping Counter (PUTIH)           ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol ✨            ║")
+print("║  🎮 Buka menu: Klik tombol ✨           ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
 print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [9/9] COSMIC HUB - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.0 - FINAL LOADED! ✨")

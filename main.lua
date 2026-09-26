@@ -31,9 +31,6 @@ C = {
     ACC3 = Color3.fromRGB(255, 80, 200),
     ACC4 = Color3.fromRGB(255, 200, 80),
     GOLD = Color3.fromRGB(255, 215, 0),
-    FIRE1 = Color3.fromRGB(120, 60, 255),
-    FIRE2 = Color3.fromRGB(0, 230, 255),
-    FIRE3 = Color3.fromRGB(255, 80, 200),
     FIRE_BRIGHT = Color3.fromRGB(220, 180, 255),
     TXT = Color3.fromRGB(240, 240, 255),
     DIM = Color3.fromRGB(130, 120, 180),
@@ -296,7 +293,7 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE (12 FITUR DIHAPUS + FITUR BARU)
+-- STATE
 -- =========================================================
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
@@ -351,13 +348,15 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (VERSI FALLENS)
+-- AUTO PARRY (2 VERSI: V1 LAMA + V2 GACOR)
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false,
+    V1Enabled = false,  -- versi lama
+    V2Enabled = false,  -- versi gacor (dual layer)
+    Enabled = false,    -- master switch (kalau salah satu ON)
     ParryDistance = 15,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.7,
+    FaceSensitivity = 0.5,  -- lebih longgar biar lebih gacor
     RequireFacing = true,
     Wiggle = false,
     WiggleSpam = 5,
@@ -583,7 +582,7 @@ end
 
 print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + AUTO PARRY (FALLENS) + AUTO SKILL CHECK
+-- BAGIAN 3/8 : FUNGSI + AUTO PARRY V1 & V2 + AUTO SKILL CHECK
 -- =========================================================
 
 -- ============================
@@ -850,7 +849,6 @@ function removeStatusESP(char)
     end
 end
 
--- ESP STATUS 2 MODE (TEXT / GALAXY)
 function createStatusESP(player, char, root)
     if not ESPStatus.Enabled then
         removeStatusESP(char)
@@ -923,7 +921,6 @@ function createStatusESP(player, char, root)
         end
     end
 
-    -- MODE GALAXY
     local label = billboard:FindFirstChildOfClass("TextLabel")
     if label then
         if mode == "Galaxy" then
@@ -1067,13 +1064,16 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (VERSI FALLENS - GACOR)
+-- AUTO PARRY (V1 LAMA + V2 GACOR)
 -- =========================================================
-PARRY_DEBOUNCE = 0.5
-lastParry = 0
+PARRY_DEBOUNCE_V1 = 0.5
+PARRY_DEBOUNCE_V2 = 0.35
+lastParryV1 = 0
+lastParryV2 = 0
 hookedKillers = _G.HookedKillers or {}
 _G.HookedKillers = hookedKillers
-ParryActive = false
+ParryActiveV1 = false
+ParryActiveV2 = false
 
 function pressRightClick()
     VirtualInputManager:SendMouseButtonEvent(0, 0, 1, true, game, 0)
@@ -1107,21 +1107,17 @@ function pressParryButton()
     end
 end
 
--- CEK KONDISI: kapan TIDAK boleh parry
 function shouldBlockParry()
     local char = LP.Character
     if not char then return true end
-
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return true end
 
-    -- Downed / down
     if hum.Health <= 0 or hum.Health < 2 then return true end
     if char:GetAttribute("Downed") == true then return true end
     if char:GetAttribute("IsDown") == true then return true end
     if char:GetAttribute("Knocked") == true then return true end
 
-    -- Cek animasi sendiri
     local animator = hum:FindFirstChildOfClass("Animator")
     if animator then
         for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
@@ -1133,23 +1129,44 @@ function shouldBlockParry()
             end
         end
     end
-
     return false
 end
 
-function doParry()
+-- ===== V1: doParry LAMA (dipanggil dari anim hooking) =====
+function doParryV1()
     if shouldBlockParry() then return end
-
     local now = tick()
-    if now - lastParry < PARRY_DEBOUNCE then return end
-    if ParryActive then return end
-    lastParry = now
-
-    ParryActive = true
+    if now - lastParryV1 < PARRY_DEBOUNCE_V1 then return end
+    if ParryActiveV1 then return end
+    lastParryV1 = now
+    ParryActiveV1 = true
     pressParryButton()
     task.delay(0.3, function()
-        ParryActive = false
+        ParryActiveV1 = false
     end)
+end
+
+-- ===== V2: doParry GACOR (dipanggil dari anim + proximity) =====
+function doParryV2()
+    if shouldBlockParry() then return end
+    local now = tick()
+    if now - lastParryV2 < PARRY_DEBOUNCE_V2 then return end
+    if ParryActiveV2 then return end
+    lastParryV2 = now
+    ParryActiveV2 = true
+    pressParryButton()
+    task.delay(0.3, function()
+        ParryActiveV2 = false
+    end)
+end
+
+-- Wrapper: pilih versi mana yang aktif
+function doParry()
+    if AutoParry.V2Enabled then
+        doParryV2()
+    elseif AutoParry.V1Enabled then
+        doParryV1()
+    end
 end
 
 function isInParryRange(killerChar)
@@ -1177,6 +1194,7 @@ function isFacingTarget(targetChar)
     return dot >= AutoParry.FaceSensitivity
 end
 
+-- ===== LAYER 1: Hook animasi killer =====
 function hookKiller(char)
     if hookedKillers[char] then return end
     hookedKillers[char] = true
@@ -1187,7 +1205,7 @@ function hookKiller(char)
     if not animator then return end
 
     animator.AnimationPlayed:Connect(function(track)
-        if not AutoParry.Enabled then return end
+        if not AutoParry.V1Enabled and not AutoParry.V2Enabled then return end
         local anim = track.Animation
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
@@ -1201,6 +1219,46 @@ function hookKiller(char)
     end)
 end
 
+-- ===== LAYER 2: Proximity + Movement (HANYA V2) =====
+task.spawn(function()
+    while task.wait(0.05) do
+        if not AutoParry.V2Enabled then continue end
+
+        local myRoot = getRoot()
+        if not myRoot then continue end
+
+        local myPos = myRoot.Position
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p == LP then continue end
+            if not p.Character then continue end
+            if not p.Team or p.Team.Name ~= "Killer" then continue end
+
+            local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
+            if not eRoot then continue end
+
+            local ePos = eRoot.Position
+            local dist = (ePos - myPos).Magnitude
+
+            if dist <= AutoParry.ParryDistance then
+                if isFacingTarget(p.Character) then
+                    local toMe = (myPos - ePos).Unit
+                    local killerVel = eRoot.AssemblyLinearVelocity
+                    local approachSpeed = killerVel:Dot(toMe)
+
+                    if approachSpeed > 3 then
+                        doParryV2()
+                    end
+
+                    if dist <= 8 then
+                        doParryV2()
+                    end
+                end
+            end
+        end
+    end
+end)
+
 function scanKillers()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
@@ -1211,7 +1269,9 @@ end
 
 task.spawn(function()
     while task.wait(0.5) do
-        if AutoParry.Enabled then scanKillers() end
+        if AutoParry.V1Enabled or AutoParry.V2Enabled then
+            scanKillers()
+        end
     end
 end)
 
@@ -1517,7 +1577,7 @@ function applyContrast()
 end
 
 -- =========================================================
--- FITUR HD BARU (RINGAN)
+-- HD RINGAN
 -- =========================================================
 hdBoostOrig = nil
 hdShaderObj = nil
@@ -1614,10 +1674,7 @@ function applyKorblox(s)
 
     if s then
         if not KorbloxOrig then
-            KorbloxOrig = {
-                Transparency = rightLeg.Transparency,
-                CanCollide = rightLeg.CanCollide
-            }
+            KorbloxOrig = { Transparency = rightLeg.Transparency, CanCollide = rightLeg.CanCollide }
         end
         rightLeg.Transparency = 1
         rightLeg.CanCollide = false
@@ -1913,7 +1970,7 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry (Fallens) + Auto Skill Check loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry V1 & V2 + HD loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA (12 FITUR DIHAPUS)
 -- =========================================================
@@ -2019,10 +2076,10 @@ task.spawn(function()
                     end
                 end
                 if nearKiller < 50 then
-                    local warn = PG:FindFirstChild("RoooorWarn")
+                    local warn = PG:FindFirstChild("CosmicWarn")
                     if not warn then
                         warn = Instance.new("Frame")
-                        warn.Name = "RoooorWarn"
+                        warn.Name = "CosmicWarn"
                         warn.Size = UDim2.new(1, 0, 0, 6)
                         warn.Position = UDim2.new(0, 0, 0, 0)
                         warn.BackgroundColor3 = Color3.fromRGB(120, 60, 255)
@@ -2329,9 +2386,14 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE (2 MODE: NORMAL / GALAXY)
+-- PARRY CIRCLE (GRADIENT GALAXY)
+-- =========================================================
+-- Ring 1 (luar): gradient muter lambat (ungu → cyan → pink)
+-- Ring 2 (dalam): gradient muter cepat arah berlawanan
+-- Pulse effect: membesar-mengecil
 -- =========================================================
 _G.Roooor_ParryCircle = nil
+_G.Roooor_ParryCircle2 = nil
 
 function updateParryCircle()
     local root = getRoot()
@@ -2339,6 +2401,10 @@ function updateParryCircle()
         if _G.Roooor_ParryCircle then
             _G.Roooor_ParryCircle:Destroy()
             _G.Roooor_ParryCircle = nil
+        end
+        if _G.Roooor_ParryCircle2 then
+            _G.Roooor_ParryCircle2:Destroy()
+            _G.Roooor_ParryCircle2 = nil
         end
         return
     end
@@ -2353,21 +2419,49 @@ function updateParryCircle()
         _G.Roooor_ParryCircle.Parent = workspace
     end
 
-    local size = (S.ParryCircleSize or 15) * 2
-    _G.Roooor_ParryCircle.Size = Vector3.new(0.1, size, size)
+    if not _G.Roooor_ParryCircle2 then
+        _G.Roooor_ParryCircle2 = Instance.new("Part")
+        _G.Roooor_ParryCircle2.Shape = Enum.PartType.Cylinder
+        _G.Roooor_ParryCircle2.Anchored = true
+        _G.Roooor_ParryCircle2.CanCollide = false
+        _G.Roooor_ParryCircle2.Material = Enum.Material.Neon
+        _G.Roooor_ParryCircle2.Name = "CosmicParryCircle2"
+        _G.Roooor_ParryCircle2.Parent = workspace
+    end
+
+    local t = tick()
+    local baseSize = (S.ParryCircleSize or 15) * 2
+    local pulse = 1 + math.sin(t * 3) * 0.05
     local yOffset = root.Size.Y / 2 + 1.5
+
+    -- RING 1 (luar)
+    _G.Roooor_ParryCircle.Size = Vector3.new(0.15, baseSize * pulse, baseSize * pulse)
     _G.Roooor_ParryCircle.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset, 0))
         * CFrame.Angles(0, 0, math.rad(90))
 
+    -- RING 2 (dalam, 80% dari ring luar)
+    local innerSize = baseSize * 0.8
+    _G.Roooor_ParryCircle2.Size = Vector3.new(0.1, innerSize, innerSize)
+    _G.Roooor_ParryCircle2.CFrame = CFrame.new(root.Position - Vector3.new(0, yOffset - 0.05, 0))
+        * CFrame.Angles(0, 0, math.rad(90))
+
     local mode = S.ParryCircleMode or "Normal"
-    local t = tick()
 
     if mode == "Galaxy" then
-        _G.Roooor_ParryCircle.Color = Color3.fromHSV((t * 0.5) % 1, 0.9, 1)
-        _G.Roooor_ParryCircle.Transparency = 0.3 + math.sin(t * 4) * 0.15
+        -- Ring 1: gradient muter lambat (ungu → cyan → pink)
+        local hue1 = (t * 0.3) % 1
+        _G.Roooor_ParryCircle.Color = Color3.fromHSV(hue1, 0.85, 1)
+        _G.Roooor_ParryCircle.Transparency = 0.35 + math.sin(t * 4) * 0.1
+
+        -- Ring 2: gradient muter cepat (warna beda fase)
+        local hue2 = (t * 0.6 + 0.5) % 1
+        _G.Roooor_ParryCircle2.Color = Color3.fromHSV(hue2, 0.9, 1)
+        _G.Roooor_ParryCircle2.Transparency = 0.4 + math.sin(t * 5 + 1) * 0.1
     else
+        -- Mode normal
         _G.Roooor_ParryCircle.Color = C.ACC2
         _G.Roooor_ParryCircle.Transparency = 0.5
+        _G.Roooor_ParryCircle2.Transparency = 1
     end
 end
 
@@ -2462,7 +2556,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama loaded (12 fitur dihapus)")-- =========================================================
+print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama + Parry Circle Galaxy loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + AIMLOCK + PANEL
 -- =========================================================
@@ -2869,7 +2963,7 @@ for i = 1, 3 do
     end)
 end
 
--- ===== BINTANG KELAP-KELIP GALAXY =====
+-- BINTANG KELAP-KELIP
 task.spawn(function()
     while starsGui.Parent do
         local t = tick()
@@ -3458,7 +3552,7 @@ end)
 
 print("✅ [5/8] COSMIC HUB - GUI + Tombol + Aimlock + Panel + Bintang kelap-kelip loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 6/8 : TAB UI PART 1 (FIRE + FIRE FEET + ESP + SURVIVOR)
+-- BAGIAN 6/8 : TAB UI PART 1 (SURVIVOR + KILLER + ESP + FIRE)
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3470,10 +3564,174 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- ============================
--- TAB: FIRE
--- ============================
-makeTab("Fire", "🔥", 1, function()
+-- ============================================================
+-- TAB 1: SURVIVOR (TAB PERTAMA)
+-- ============================================================
+makeTab("Survivor", "🏃", 1, function()
+
+    sec("Auto Parry V1 (Klasik)", "🛡️")
+    tog("Enable Parry V1", false, function(s)
+        AutoParry.V1Enabled = s
+        if s then scanKillers() end
+    end)
+    lbl("Versi lama - deteksi animasi killer", C.DIM)
+
+    sec("Auto Parry V2 (GACOR)", "⚡")
+    tog("Enable Parry V2 (Gacor)", false, function(s)
+        AutoParry.V2Enabled = s
+        if s then scanKillers() end
+    end)
+    lbl("Anti miss - deteksi gerak + jarak", C.FIRE_BRIGHT)
+
+    sec("Parry Settings", "⚙️")
+    sl("Parry Distance", 5, 30, 15, function(v)
+        AutoParry.ParryDistance = v
+    end)
+
+    sl("Face Sensitivity", -1, 1, 0.5, function(v)
+        AutoParry.FaceSensitivity = v
+        AutoParry.RequireFacing = (v > -1)
+    end)
+    lbl("Face Sens: -1 = 360° | 0.5 = Facing (gacor)", C.GRN)
+
+    sl("Parry Debounce V1", 0.05, 1, 0.5, function(v)
+        PARRY_DEBOUNCE_V1 = v
+    end)
+    sl("Parry Debounce V2", 0.05, 1, 0.35, function(v)
+        PARRY_DEBOUNCE_V2 = v
+    end)
+    lbl("V2 lebih cepat (0.35) - lebih responsif", C.FIRE_BRIGHT)
+
+    sec("Auto Skill Check", "⚡")
+    tog("Auto Skill Check", false, function(s)
+        SkillCheck.Enabled = s
+        if s then
+            startSkillCheck()
+        end
+    end)
+    lbl("Auto trigger saat masuk zona", C.GRN)
+
+    sec("God Mode", "🛡️")
+    tog("God Mode (Full)", false, function(s)
+        GodMode.Enabled = s
+    end)
+    lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
+
+    sec("Support", "💊")
+    tog("Instant Interact", false, function(s) S.InstantInteract = s end)
+    tog("Auto Vault", false, function(s) S.AutoVault = s end)
+
+    sec("Teleport", "🌀")
+    btn("TP ke Finish Line", function()
+        teleportToFinishLine()
+    end)
+    btn("TP ke Gate", function()
+        teleportToGate()
+    end)
+    btn("TP ke Dalam Gate", function()
+        teleportInsideGate()
+    end)
+
+    sec("Parry Circle Visual", "⭕")
+    tog("Show Parry Circle", false, function(s) S.ParryCircle = s end)
+    sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
+    drp("Circle Mode", {"Normal", "Galaxy"}, "Galaxy", function(v)
+        S.ParryCircleMode = v
+    end)
+    lbl("Galaxy = gradient muter + double ring", C.FIRE_BRIGHT)
+
+    sec("Alert", "⚠️")
+    tog("Safe Zone", false, function(s) S.SafeZone = s end)
+    tog("Escape Alert", false, function(s) S.EscapeAlert = s end)
+    sl("Alert Range", 20, 150, 60, function(v) S.EscapeAlertRange = v end)
+    tog("Stun Notify", false, function(s) S.StunNotify = s end)
+    tog("Kill Feed", false, function(s) S.KillFeed = s end)
+end)
+
+-- ============================================================
+-- TAB 2: KILLER
+-- ============================================================
+makeTab("Killer", "🔪", 2, function()
+
+    sec("Auto Attack", "⚔️")
+    tog("Killer Auto Attack", false, function(s) S.Killer_AutoAtk = s end)
+    sl("Attack Delay", 0.1, 1, 0.35, function(v) S.Killer_AtkDelay = v end)
+
+    sec("Kill All", "💀")
+    tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
+    lbl("Auto TP ke survivor + attack", C.DIM)
+
+    sec("Masked Power", "🎭")
+    drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
+        S.MaskedPower = v
+    end)
+
+    btn("Activate Power", function()
+        local Event = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Killers", true)
+            and ReplicatedStorage.Remotes.Killers:FindFirstChild("Masked", true)
+            and ReplicatedStorage.Remotes.Killers.Masked:FindFirstChild("Activatepower")
+        if Event then
+            Event:FireServer(S.MaskedPower)
+        end
+    end)
+
+    btn("Deactivate Power", function()
+        local Event = ReplicatedStorage:FindFirstChild("Remotes", true)
+            and ReplicatedStorage.Remotes:FindFirstChild("Killers", true)
+            and ReplicatedStorage.Remotes.Killers:FindFirstChild("Masked", true)
+            and ReplicatedStorage.Remotes.Killers.Masked:FindFirstChild("Deactivatepower")
+        if Event then
+            Event:FireServer()
+        end
+    end)
+end)
+
+-- ============================================================
+-- TAB 3: ESP
+-- ============================================================
+makeTab("ESP", "👁️", 3, function()
+    sec("Player ESP", "🟢")
+    tog("ESP Survivor", false, function(s) ESP.Survivor = s end)
+    cpk("Survivor Color", TeamColors.Survivor, function(c) TeamColors.Survivor = c end)
+    tog("ESP Killer", false, function(s) ESP.Killer = s end)
+    cpk("Killer Color", TeamColors.Killer, function(c) TeamColors.Killer = c end)
+
+    sec("Object ESP", "⚡")
+    tog("ESP Generator", false, function(s) ESP.Generator = s end)
+    cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
+    tog("ESP Pallet", false, function(s) ESP.Pallet = s end)
+    cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
+    tog("ESP Window", false, function(s) ESP.Window = s end)
+    cpk("Window Color", WindowColor, function(c) WindowColor = c end)
+    tog("ESP SCP", false, function(s) ESP.SCP = s end)
+    cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
+
+    sec("ESP Distance (Unlimited)", "📏")
+    sl("ESP Radius", 10, 999999, 50, function(v) ESP.Distance = v end)
+    lbl("Unlimited - bebas set berapa aja", C.GRN)
+
+    sec("Status ESP", "🟢")
+    tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
+    tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
+    tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
+    tog("Show Health", false, function(s) ESPStatus.ShowHealth = s end)
+    sl("Status Radius", 20, 999999, 50, function(v) ESPStatus.Radius = v end)
+
+    sec("Nama Mode", "✨")
+    drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
+        S.ESPNameMode = v
+    end)
+    sl("Name Size", 8, 30, 12, function(v)
+        S.ESPNameSize = v
+    end)
+    lbl("Text = biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
+end)
+
+-- ============================================================
+-- TAB 4: FIRE
+-- ============================================================
+makeTab("Fire", "🔥", 4, function()
     sec("Fire Control", "⚙️")
     tog("Enable Fire", false, function(s)
         S.FireOn = s
@@ -3535,10 +3793,24 @@ makeTab("Fire", "🔥", 1, function()
     end
 end)
 
--- ============================
--- TAB: FIRE FEET
--- ============================
-makeTab("Fire Feet", "👟", 2, function()
+print("✅ [6/8] COSMIC HUB - Survivor(1) + Killer(2) + ESP + Fire loaded")-- =========================================================
+-- COSMIC HUB
+-- BAGIAN 7/8 : TAB UI PART 2 (FIRE FEET + MISC + VISUAL + PLAYER)
+-- =========================================================
+sec = _G.Roooor_sec
+lbl = _G.Roooor_lbl
+tog = _G.Roooor_tog
+sl = _G.Roooor_sl
+cpk = _G.Roooor_cpk
+btn = _G.Roooor_btn
+drp = _G.Roooor_drp
+makeTab = _G.Roooor_makeTab
+cs = _G.Roooor_cs
+
+-- ============================================================
+-- TAB 5: FIRE FEET
+-- ============================================================
+makeTab("Fire Feet", "👟", 5, function()
     sec("Fire Feet Control", "👟")
     tog("Enable Fire Feet", false, function(s)
         S.FireFeetOn = s
@@ -3596,168 +3868,8 @@ makeTab("Fire Feet", "👟", 2, function()
     end
 end)
 
--- ============================
--- TAB: ESP
--- ============================
-makeTab("ESP", "👁️", 3, function()
-    sec("Player ESP", "🟢")
-    tog("ESP Survivor", false, function(s) ESP.Survivor = s end)
-    cpk("Survivor Color", TeamColors.Survivor, function(c) TeamColors.Survivor = c end)
-    tog("ESP Killer", false, function(s) ESP.Killer = s end)
-    cpk("Killer Color", TeamColors.Killer, function(c) TeamColors.Killer = c end)
-
-    sec("Object ESP", "⚡")
-    tog("ESP Generator", false, function(s) ESP.Generator = s end)
-    cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
-    tog("ESP Pallet", false, function(s) ESP.Pallet = s end)
-    cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
-    tog("ESP Window", false, function(s) ESP.Window = s end)
-    cpk("Window Color", WindowColor, function(c) WindowColor = c end)
-    tog("ESP SCP", false, function(s) ESP.SCP = s end)
-    cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
-
-    sec("ESP Distance (Unlimited)", "📏")
-    sl("ESP Radius", 10, 999999, 50, function(v) ESP.Distance = v end)
-    lbl("Unlimited - bebas set berapa aja", C.GRN)
-
-    sec("Status ESP", "🟢")
-    tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
-    tog("Show Name", true, function(s) ESPStatus.ShowName = s end)
-    tog("Show Distance", true, function(s) ESPStatus.ShowDistance = s end)
-    tog("Show Health", false, function(s) ESPStatus.ShowHealth = s end)
-    sl("Status Radius", 20, 999999, 50, function(v) ESPStatus.Radius = v end)
-
-    sec("Nama Mode", "✨")
-    drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
-        S.ESPNameMode = v
-    end)
-    sl("Name Size", 8, 30, 12, function(v)
-        S.ESPNameSize = v
-    end)
-    lbl("Text = biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
-end)
-
 -- ============================================================
--- TAB: SURVIVOR
--- ============================================================
-makeTab("Survivor", "🏃", 4, function()
-
-    sec("Auto Parry", "🛡️")
-    tog("Enable Auto Parry", false, function(s)
-        AutoParry.Enabled = s
-        if s then scanKillers() end
-    end)
-
-    sl("Parry Distance", 5, 30, 15, function(v)
-        AutoParry.ParryDistance = v
-    end)
-
-    sl("Face Sensitivity", -1, 1, 0.7, function(v)
-        AutoParry.FaceSensitivity = v
-        AutoParry.RequireFacing = (v > -1)
-    end)
-    lbl("Face Sens: -1 = 360° | 0.7 = Facing (recommended)", C.GRN)
-
-    sl("Parry Debounce", 0.05, 1, 0.5, function(v)
-        PARRY_DEBOUNCE = v
-    end)
-    lbl("Rekomendasi 0.5 (sweet spot)", C.FIRE_BRIGHT)
-
-    sec("Auto Skill Check", "⚡")
-    tog("Auto Skill Check", false, function(s)
-        SkillCheck.Enabled = s
-        if s then
-            startSkillCheck()
-        end
-    end)
-    lbl("Auto trigger saat masuk zona", C.GRN)
-
-    sec("Support", "💊")
-    tog("Instant Interact", false, function(s) S.InstantInteract = s end)
-    tog("Auto Vault", false, function(s) S.AutoVault = s end)
-
-    sec("Teleport", "🌀")
-    btn("TP ke Finish Line", function()
-        teleportToFinishLine()
-    end)
-    btn("TP ke Gate", function()
-        teleportToGate()
-    end)
-    btn("TP ke Dalam Gate", function()
-        teleportInsideGate()
-    end)
-
-    sec("Parry Circle Visual", "⭕")
-    tog("Show Parry Circle", false, function(s) S.ParryCircle = s end)
-    sl("Circle Size", 5, 30, 15, function(v) S.ParryCircleSize = v end)
-    drp("Circle Mode", {"Normal", "Galaxy"}, "Normal", function(v)
-        S.ParryCircleMode = v
-    end)
-    lbl("Normal = warna solid | Galaxy = gradient muter", C.FIRE_BRIGHT)
-
-    sec("Alert", "⚠️")
-    tog("Safe Zone", false, function(s) S.SafeZone = s end)
-    tog("Escape Alert", false, function(s) S.EscapeAlert = s end)
-    sl("Alert Range", 20, 150, 60, function(v) S.EscapeAlertRange = v end)
-    tog("Stun Notify", false, function(s) S.StunNotify = s end)
-    tog("Kill Feed", false, function(s) S.KillFeed = s end)
-end)
-
-print("✅ [6/8] COSMIC HUB - Tab Fire + Fire Feet + ESP + Survivor loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 7/8 : TAB UI PART 2 (KILLER + MISC + VISUAL + PLAYER)
--- =========================================================
-sec = _G.Roooor_sec
-lbl = _G.Roooor_lbl
-tog = _G.Roooor_tog
-sl = _G.Roooor_sl
-cpk = _G.Roooor_cpk
-btn = _G.Roooor_btn
-drp = _G.Roooor_drp
-makeTab = _G.Roooor_makeTab
-cs = _G.Roooor_cs
-
--- ============================================================
--- TAB: KILLER
--- ============================================================
-makeTab("Killer", "🔪", 5, function()
-
-    sec("Auto Attack", "⚔️")
-    tog("Killer Auto Attack", false, function(s) S.Killer_AutoAtk = s end)
-    sl("Attack Delay", 0.1, 1, 0.35, function(v) S.Killer_AtkDelay = v end)
-
-    sec("Kill All", "💀")
-    tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
-    lbl("Auto TP ke survivor + attack", C.DIM)
-
-    sec("Masked Power", "🎭")
-    drp("Select Power", {"Cobra", "Richter", "Brandon", "Rabbit", "Alex"}, "Cobra", function(v)
-        S.MaskedPower = v
-    end)
-
-    btn("Activate Power", function()
-        local Event = ReplicatedStorage:FindFirstChild("Remotes", true)
-            and ReplicatedStorage.Remotes:FindFirstChild("Killers", true)
-            and ReplicatedStorage.Remotes.Killers:FindFirstChild("Masked", true)
-            and ReplicatedStorage.Remotes.Killers.Masked:FindFirstChild("Activatepower")
-        if Event then
-            Event:FireServer(S.MaskedPower)
-        end
-    end)
-
-    btn("Deactivate Power", function()
-        local Event = ReplicatedStorage:FindFirstChild("Remotes", true)
-            and ReplicatedStorage.Remotes:FindFirstChild("Killers", true)
-            and ReplicatedStorage.Remotes.Killers:FindFirstChild("Masked", true)
-            and ReplicatedStorage.Remotes.Killers.Masked:FindFirstChild("Deactivatepower")
-        if Event then
-            Event:FireServer()
-        end
-    end)
-end)
-
--- ============================================================
--- TAB: MISC
+-- TAB 6: MISC
 -- ============================================================
 makeTab("Misc", "⚙️", 6, function()
 
@@ -3805,7 +3917,7 @@ makeTab("Misc", "⚙️", 6, function()
 end)
 
 -- ============================================================
--- TAB: VISUAL
+-- TAB 7: VISUAL
 -- ============================================================
 makeTab("Visual", "✨", 7, function()
 
@@ -3935,7 +4047,7 @@ makeTab("Visual", "✨", 7, function()
 end)
 
 -- ============================================================
--- TAB: PLAYER
+-- TAB 8: PLAYER
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
@@ -3981,6 +4093,7 @@ makeTab("Player", "👤", 8, function()
             if loadingGui then loadingGui:Destroy() end
             if crosshairGui then crosshairGui:Destroy() end
             if _G.Roooor_ParryCircle then _G.Roooor_ParryCircle:Destroy() end
+            if _G.Roooor_ParryCircle2 then _G.Roooor_ParryCircle2:Destroy() end
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
@@ -3993,7 +4106,7 @@ makeTab("Player", "👤", 8, function()
     end)
 end)
 
-print("✅ [7/8] COSMIC HUB - Tab Killer + Misc + Visual + Player loaded")-- =========================================================
+print("✅ [7/8] COSMIC HUB - Fire Feet + Misc + Visual + Player loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
@@ -4375,7 +4488,6 @@ LP.CharacterAdded:Connect(function(char)
         pcall(function() applySky(S.SkyId) end)
     end
 
-    -- HD AUTO RE-APPLY
     if S.HDBoost then pcall(function() applyHDBoost(true) end) end
     if S.HDShader then pcall(function() applyHDShader(true) end) end
     if S.HDSky then pcall(function() applyHDSky(true) end) end
@@ -4395,7 +4507,7 @@ end)
 -- =========================================================
 task.spawn(function()
     while task.wait(1) do
-        if AutoParry.Enabled then
+        if AutoParry.V1Enabled or AutoParry.V2Enabled then
             scanKillers()
         end
     end
@@ -4407,7 +4519,7 @@ end)
 Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function(char)
         task.wait(1)
-        if AutoParry.Enabled then
+        if AutoParry.V1Enabled or AutoParry.V2Enabled then
             if p.Team and p.Team.Name == "Killer" then
                 hookKiller(char)
             end
@@ -4416,7 +4528,7 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- =========================================================
--- TAB: COMBAT (AIMBOT + HITBOX)
+-- TAB 9: COMBAT (AIMBOT + HITBOX)
 -- =========================================================
 makeTab("Combat", "⚔️", 9, function()
 
@@ -4509,15 +4621,9 @@ makeTab("Combat", "⚔️", 9, function()
 end)
 
 -- =========================================================
--- TAB: EXTRA (FITUR TAMBAHAN)
+-- TAB 10: EXTRA (FITUR TAMBAHAN)
 -- =========================================================
 makeTab("Extra", "✨", 10, function()
-
-    sec("God Mode", "🛡️")
-    tog("God Mode (Full)", false, function(s)
-        GodMode.Enabled = s
-    end)
-    lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
 
     sec("Fullbright Max", "💡")
     tog("Fullbright (max 200)", false, function(s)
@@ -4564,19 +4670,21 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry (Fallens Style)           ║")
+print("║  🛡️ Auto Parry V1 (Klasik)               ║")
+print("║  ⚡ Auto Parry V2 (GACOR - Anti Miss)     ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  🎯 Aimbot (Hold to Attack)              ║")
 print("║  📦 Hitbox 2 Mode                        ║")
-print("║  🛡️ God Mode (Full)                      ║")
+print("║  🛡️ God Mode (Full) - Survivor           ║")
 print("║  💎 HD Visual (Ringan)                   ║")
 print("║  🌌 ESP Nama 2 Mode (Text / Galaxy)      ║")
-print("║  ⭕ Parry Circle 2 Mode                  ║")
+print("║  ⭕ Parry Circle GRADIENT GALAXY          ║")
 print("║  ✨ Menu Bintang Kelap-kelip             ║")
 print("║  🌀 Teleport 3 Opsi                      ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
+print("║  🛡️ Auto Parry V2 ON = GACOR!            ║")
 print("╚══════════════════════════════════════════╝")
 
 print("✅ [8/8] COSMIC HUB - FINAL LOADED! ✨")

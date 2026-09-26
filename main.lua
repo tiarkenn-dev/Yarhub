@@ -54,7 +54,6 @@ function strk(o, col, t, tr)
     return s
 end
 
--- SOUND BARU (ANDROID NOTIF)
 local ToggleSoundId = "rbxassetid://6073491164"
 
 function playToggleSound()
@@ -373,7 +372,6 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- 8-BIT ITEM (1 SAJA)
 EightBitList = {
     "Royal Crown",
 }
@@ -382,7 +380,6 @@ EightBitIds = {
     ["Royal Crown"] = 10159600649,
 }
 
--- KORBLOX (1 SAJA - PENCIL)
 KorbloxList = {
     "Pencil",
 }
@@ -391,7 +388,6 @@ KorbloxIds = {
     ["Pencil"] = 129701348614901,
 }
 
--- FIRE BEAM (10)
 FireBeamList = {
     "Classic Beam",
     "Laser Beam",
@@ -433,11 +429,7 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   Sound Toggle : Android Notif (6073491164)")
-print("   8-Bit Item   : Royal Crown (1 pilihan)")
-print("   Korblox      : Pencil (kaki asli dihapus)")
-print("   Parry Circle : Ring Bolong (karet gelang)")-- =========================================================
+print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -740,7 +732,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 8-BIT ITEM (PAKAI ACCESSORY - WORKS)
+-- 8-BIT ROYAL CROWN (ACCESSORY)
 -- =========================================================
 eightBitAccessory = nil
 
@@ -781,7 +773,6 @@ function apply8Bit(enable, itemName, size, height)
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
     mesh.MeshId = "rbxassetid://" .. id
-    mesh.TextureId = ""
     mesh.Scale = Vector3.new(size, size, size)
     mesh.Parent = handle
 
@@ -803,7 +794,7 @@ function apply8Bit(enable, itemName, size, height)
 end
 
 -- =========================================================
--- KORBLOX (KAKI ASLI DIHAPUS - DIGANTI MESH)
+-- KORBLOX PENCIL (KAKI ASLI DIHAPUS)
 -- =========================================================
 korbloxMesh = nil
 korbloxOriginalTrans = nil
@@ -818,7 +809,7 @@ function clearKorblox()
         local rightLeg = char:FindFirstChild("Right Leg")
             or char:FindFirstChild("RightUpperLeg")
             or char:FindFirstChild("RightLowerLeg")
-        if rightLeg and korbloxOriginalTrans then
+        if rightLeg and korbloxOriginalTrans ~= nil then
             rightLeg.Transparency = korbloxOriginalTrans
             korbloxOriginalTrans = nil
         end
@@ -840,15 +831,12 @@ function applyKorblox(enable, mode)
     local id = KorbloxIds[mode]
     if not id then return end
 
-    -- Simpan transparency asli
-    if not korbloxOriginalTrans then
+    if korbloxOriginalTrans == nil then
         korbloxOriginalTrans = rightLeg.Transparency
     end
 
-    -- Hide kaki asli
     rightLeg.Transparency = 1
 
-    -- Bikin mesh Korblox
     korbloxMesh = Instance.new("Part")
     korbloxMesh.Name = "CosmicKorblox"
     korbloxMesh.Size = rightLeg.Size
@@ -1425,7 +1413,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY FALLENS
+-- AUTO PARRY
 -- =========================================================
 PARRY_DEBOUNCE = 0.5
 lastParry = 0
@@ -1679,7 +1667,6 @@ function updateParryCircle()
     local myPos = root.Position
     local yOffset = root.Size.Y / 2 + 1.5
 
-    -- Cek killer dalam radius
     local killerInside = false
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
@@ -1697,7 +1684,6 @@ function updateParryCircle()
     local ringColor = killerInside and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(0, 255, 100)
     local ringTrans = killerInside and 0.2 or 0.4
 
-    -- Bikin ring dari 24 part
     for i = 1, PARRY_SEGMENTS do
         local angle = (i / PARRY_SEGMENTS) * math.pi * 2
         local x = math.cos(angle) * radius
@@ -1945,7 +1931,6 @@ function applyContrast()
     end
 end
 
--- HD RINGAN
 hdBoostOrig = nil
 hdShaderObj = nil
 hdSkyOrig = nil
@@ -2030,7 +2015,6 @@ function applyHDSky(s)
     end
 end
 
--- TRAIL / AURA / KILL EFFECT / CROSSHAIR / ZOOM / FLY
 trailFireObj = nil
 function applyTrail(enable, color)
     local char = LP.Character
@@ -3579,12 +3563,12 @@ cs = _G.Roooor_cs
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry (Fallens Style)", "🛡️")
+    sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then scanKillers() end
     end)
-    lbl("Cuma parry pas killer nyerang", C.FIRE_BRIGHT)
+    lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
     sl("Parry Distance", 5, 30, 15, function(v)
         AutoParry.ParryDistance = v
@@ -4072,6 +4056,24 @@ makeTab("Visual", "✨", 7, function()
         btn3.MouseButton1Click:Connect(function()
             S.FireBeamType = beamName
             applyFireBeam(S.FireBeamOn, beamName, S.FireBeamColor)
+            for _, c in pairs(cs:GetChildren()) do
+                if c:IsA("TextButton") and c:FindFirstChildOfClass("TextLabel") then
+                    local lx = c:FindFirstChildOfClass("TextLabel")
+                    if lx and string.sub(lx.Text, 1, 4) == "🔥 " then
+                        if string.find(lx.Text, "Beam") or string.find(lx.Text, "Wings")
+                            or string.find(lx.Text, "Halo") or string.find(lx.Text, "Hands")
+                            or string.find(lx.Text, "Foot") or string.find(lx.Text, "Body")
+                            or string.find(lx.Text, "Mouth") or string.find(lx.Text, "Eyes") then
+                            c.BackgroundColor3 = C.BG
+                            c.BackgroundTransparency = 0.4
+                            lx.TextColor3 = C.TXT
+                        end
+                    end
+                end
+            end
+            btn3.BackgroundColor3 = C.ACC
+            btn3.BackgroundTransparency = 0
+            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
         end)
     end
 
@@ -4548,7 +4550,7 @@ print("╔═══════════════════════�
 print("║  ✨ COSMIC HUB ✨                        ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry FALLENS Style             ║")
+print("║  🛡️ Auto Parry                            ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  ⭕ Parry Circle RING BOLONG              ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")

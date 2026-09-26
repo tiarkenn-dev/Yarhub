@@ -1,7 +1,7 @@
 --[[
     ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v3.1                  ║
-    ║   Moonwalk + Fast Vault 100% FALLENS         ║
+    ║           COSMIC HUB - v3.2                  ║
+    ║   Moonwalk + Fast Vault (Michael Jackson)    ║
     ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
     ╚══════════════════════════════════════════════╝
 ]]
@@ -266,32 +266,26 @@ end)
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
-    -- Fire
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
 
-    -- Parry
     ParryCircle = true, ParryCircleSize = 12,
 
-    -- Movement
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false, NoClipCamera = false,
     Fly = false, FlySpeed = 50,
 
-    -- Character
     Korblox = true, KorbloxType = "Pencil",
     KorbloxYOffset = 0.6, KorbloxScale = 1,
     Headless = true,
     EightBitOn = true, EightBitType = "Royal Crown",
     EightBitSize = 1.24, EightBitHeight = 0.88,
 
-    -- Effects
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
 
-    -- CROSSHAIR 8 MODE + 2 WARNA
     Crosshair = false,
     CrosshairColor = Color3.fromRGB(0, 200, 255),
     CrosshairSize = 8,
@@ -301,51 +295,41 @@ _G.RoooorS = _G.RoooorS or {
     CrosshairOffsetX = 0,
     CrosshairOffsetY = 0,
 
-    -- Camera
     ZoomOut = false, ZoomOutValue = 500,
     FOV = 70, FOVEnabled = false,
 
-    -- Visual
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     SkyId = "Default",
 
-    -- FPS BOOST
     NoScreenEffects = false,
     LowGraphics = false,
     CleanSky = false,
 
-    -- HUD
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     KillFeed = false, StunNotify = false,
     AntiAFK = false, ShowFPS = true, ShowPing = true,
 
-    -- Killer
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
 
-    -- AUTO CARRY + AUTO HOOK
     AutoCarry = false,
     AutoHook = false,
     CarryRange = 60,
 
-    -- HD
     HDBoost = false, HDShader = false, HDSky = false,
     HDTexture = false, HDReflection = false, HDBloom = false,
     HDShadow = false, HDWater = false, HDSunRays = false,
     HDDepthField = false, HDAntiAliasing = false,
 
-    -- Beam
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
 
-    -- ESP
     ESPNameMode = "Text", ESPNameSize = 12,
 
-    -- AUTO ESCAPE GATE
     AutoEscapeGate = false,
     AutoEscapeRange = 50,
     AutoEscapeUseKillerCheck = true,
@@ -377,7 +361,7 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (Distance 5-20, Debounce 0.1-0.5)
+-- AUTO PARRY
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
     ParryDistance = 15,
@@ -404,7 +388,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 _G.Roooor_SkillCheck = SkillCheck
 
 -- =========================================================
--- MOONWALK (100% PERSIS FALLENS)
+-- MOONWALK (LOGIC SAMA PERSIS, GAMBAR GANTI MICHAEL JACKSON)
 -- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
@@ -415,14 +399,14 @@ Moonwalk = _G.Roooor_Moonwalk or {
     UseSlow = true,
     ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
     GuiInstance = nil,
-    ImageId = "rbxassetid://93349170559446",  -- 🆕 FALLENS ID
+    ImageId = "rbxassetid://111776278275092",  -- 🖼️ Michael Jackson Decal
 }
 _G.Roooor_Moonwalk = Moonwalk
 
 MoonwalkConnection = nil
 
 -- =========================================================
--- FAST VAULT (100% PERSIS FALLENS)
+-- FAST VAULT (LOGIC SAMA PERSIS)
 -- =========================================================
 FastVault = _G.Roooor_FastVault or {
     Enabled = false,
@@ -483,7 +467,6 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
--- REMOTES
 pcall(function()
     local remotes = ReplicatedStorage:FindFirstChild("Remotes")
     if remotes then
@@ -499,9 +482,9 @@ pcall(function()
     end
 end)
 
-print("✅ [1/11] COSMIC HUB v3.1 - Base + State loaded")
-print("   Moonwalk  : 100% FALLENS")
-print("   Fast Vault: 100% FALLENS")
+print("✅ [1/11] COSMIC HUB v3.2 - Base + State loaded")
+print("   Moonwalk  : Michael Jackson Image")
+print("   Fast Vault: Ready")
 print("   Auto Parry: Distance 5-20, Debounce 0.1-0.5")
 print("   Crosshair : 8 MODE + 2 WARNA")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
@@ -687,9 +670,7 @@ print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =============
 -- SECTION 3/11 : FUNGSI UTAMA
 -- =========================================================
 
--- =========================================================
 -- AUTO SAVE SYSTEM
--- =========================================================
 function saveState(key, value)
     _G.RoooorSavedStates = _G.RoooorSavedStates or {}
     _G.RoooorSavedStates[key] = value
@@ -715,9 +696,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- FIRE (KEPALA)
--- =========================================================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -817,9 +796,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- 8-BIT ROYAL CROWN (CLIENT-ONLY)
--- =========================================================
 eightBitPart = nil
 
 function clear8Bit()
@@ -863,9 +840,7 @@ function apply8Bit(enable, itemName, size, height)
     weld.Parent = eightBitPart
 end
 
--- =========================================================
 -- KORBLOX PENCIL (CLIENT-ONLY)
--- =========================================================
 korbloxParts = {}
 korbloxOrigData = {}
 
@@ -954,9 +929,7 @@ function applyKorblox(enable, mode, yOffset, scale)
     table.insert(korbloxParts, korbloxPart)
 end
 
--- =========================================================
 -- HEADLESS
--- =========================================================
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -997,9 +970,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- FIRE BEAM (10 EFEK)
--- =========================================================
 fireBeamParts = {}
 fireBeamConns = {}
 
@@ -1106,9 +1077,7 @@ function applyFireBeam(enable, beamType, color)
     end
 end
 
--- =========================================================
 -- HD VISUAL (8 EXTRA)
--- =========================================================
 hdExtras = {}
 
 function applyHDTexture(s)
@@ -1205,9 +1174,7 @@ function applyHDAntiAliasing(s)
     end
 end
 
--- =========================================================
--- MISC UTILITY (Anti-AFK + Rejoin + Server Hop)
--- =========================================================
+-- MISC UTILITY
 function applyAntiAFK(enable)
     S.AntiAFK = enable
 end
@@ -1245,7 +1212,7 @@ function rejoinServer()
 end
 
 -- =========================================================
--- FPS + PING COUNTER (🆕 PUTIH SOLID - NO GRADIENT)
+-- FPS + PING COUNTER (PUTIH SOLID)
 -- =========================================================
 fpsPingGui = nil
 fpsCounter = 0
@@ -1276,36 +1243,33 @@ function createFPSPingGui()
     rnd(frame, 8)
     strk(frame, C.ACC, 1.5, 0.3)
 
-    -- 🆕 FPS LABEL - PUTIH SOLID
+    -- FPS LABEL - PUTIH SOLID
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
     fpsLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
     fpsLabel.Position = UDim2.new(0, 4, 0, 3)
     fpsLabel.BackgroundTransparency = 1
     fpsLabel.Text = "FPS: 0"
-    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 🆕 PUTIH
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     fpsLabel.TextSize = math.floor(11 * sizeScale)
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
-    -- ❌ NO GRADIENT - HAPUS UIGRADIENT
 
-    -- 🆕 PING LABEL - PUTIH SOLID
+    -- PING LABEL - PUTIH SOLID
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
     pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
     pingLabel.Position = UDim2.new(0, 4, 0, 21 * sizeScale)
     pingLabel.BackgroundTransparency = 1
     pingLabel.Text = "Ping: 0 ms"
-    pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 🆕 PUTIH
+    pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     pingLabel.TextSize = math.floor(11 * sizeScale)
     pingLabel.Font = Enum.Font.GothamBold
     pingLabel.TextXAlignment = Enum.TextXAlignment.Left
     pingLabel.Parent = frame
-    -- ❌ NO GRADIENT - HAPUS UIGRADIENT
 end
 
--- FPS counter via RenderStepped (NO STUTTER)
 RunService.RenderStepped:Connect(function()
     fpsCounter = fpsCounter + 1
     if tick() - fpsLastTime >= 1 then
@@ -1361,7 +1325,7 @@ print("✅ [3/11] COSMIC HUB - Fungsi utama loaded (FPS/Ping PUTIH)")-- ========
 -- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK + FASTVAULT + CROSSHAIR
 -- =========================================================
 
--- ESP SYSTEM (SAMA KAYAK SEBELUMNYA)
+-- ESP SYSTEM
 ESPObjects = {}
 StatusESP = {}
 CachedSCP = {}
@@ -1654,7 +1618,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (SAMA KAYAK SEBELUMNYA)
+-- AUTO PARRY
 -- =========================================================
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
@@ -1905,7 +1869,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK LOGIC (100% PERSIS FALLENS)
+-- MOONWALK LOGIC (MICHAEL JACKSON)
 -- =========================================================
 function isDowned()
     local char = LP.Character
@@ -1962,7 +1926,7 @@ function stopMoonwalk()
 end
 
 -- =========================================================
--- FAST VAULT (100% PERSIS FALLENS)
+-- FAST VAULT
 -- =========================================================
 function normalizeVaultId(id)
     local num = tostring(id):match("%d+")
@@ -2009,7 +1973,6 @@ function hookVault(char)
     end)
 end
 
--- APPLY KE CHARACTER (PERSIS FALLENS)
 LP.CharacterAdded:Connect(function(char)
     task.wait(0.5)
     hookVault(char)
@@ -2020,7 +1983,7 @@ if LP.Character then
 end
 
 -- =========================================================
--- PARRY CIRCLE (BEAM RING)
+-- PARRY CIRCLE
 -- =========================================================
 parryCirclePart = nil
 parryCircleAttachments = {}
@@ -2159,7 +2122,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- VISUAL (Fullbright, Sky, FOV, dll) - SAMA KAYAK SEBELUMNYA
+-- VISUAL FUNCTIONS
 -- =========================================================
 origLighting = {
     Brightness = Lighting.Brightness,
@@ -2464,7 +2427,7 @@ function spawnKillEffect(pos)
 end
 
 -- =========================================================
--- CROSSHAIR 8 MODE + 2 WARNA (SAMA KAYAK SEBELUMNYA)
+-- CROSSHAIR 8 MODE + 2 WARNA
 -- =========================================================
 crosshairGui = nil
 crosshairParts = {}
@@ -2713,9 +2676,7 @@ _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
 _G.Roooor_isDowned = isDowned
 
-print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + FastVault + Crosshair loaded")
-print("   Moonwalk  : 100% FALLENS")
-print("   FastVault : 100% FALLENS")-- =========================================================
+print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + FastVault + Crosshair loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4333,7 +4294,7 @@ makeTab("Survivor", "🏃", 1, function()
         AutoFlee.Cooldown = v
     end)
 
-    sec("Fast Vault (FALLENS)", "⚡")
+    sec("Fast Vault", "⚡")
     tog("Enable Fast Vault", false, function(s)
         FastVault.Enabled = s
         if s and LP.Character then
@@ -4536,7 +4497,7 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK (100% PERSIS FALLENS)
+-- TAB 5: MOONWALK (Michael Jackson)
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
@@ -4570,7 +4531,7 @@ makeTab("Moonwalk", "🕺", 5, function()
             removeMoonwalkButton()
         end
     end)
-    lbl("Image ID: 93349170559446 (FALLENS)", C.FIRE_BRIGHT)
+    lbl("Image: Michael Jackson", C.FIRE_BRIGHT)
 
     sec("Sensitivitas", "⚙️")
     sl("Spam Speed", 1, 50, 30, function(v)
@@ -4594,7 +4555,7 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
--- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON (FALLENS)
+-- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4607,7 +4568,7 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- =========================================================
--- MOONWALK BUTTON (100% PERSIS FALLENS - NO LOCK, NO DRAG)
+-- MOONWALK BUTTON (MICHAEL JACKSON IMAGE)
 -- =========================================================
 function createMoonwalkButton()
     if not PG or not PG.Parent then return end
@@ -4624,7 +4585,7 @@ function createMoonwalkButton()
     btn.Position = Moonwalk.ButtonPos
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     btn.BackgroundTransparency = 0.9
-    btn.Image = "rbxassetid://93349170559446"  -- FALLENS ID
+    btn.Image = "rbxassetid://111776278275092"  -- 🖼️ Michael Jackson
     btn.ImageTransparency = 0.1
     btn.AutoButtonColor = false
     btn.Parent = gui
@@ -5151,7 +5112,7 @@ makeTab("Extra", "✨", 11, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
-print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button (FALLENS) loaded")-- =========================================================
+print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
 -- SECTION 9/11 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
@@ -5164,9 +5125,7 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- =========================================================
 -- COMBAT SYSTEM (AIMLOCK)
--- =========================================================
 RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -5435,9 +5394,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO RE-APPLY SAAT RESPAWN
--- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
@@ -5475,7 +5432,6 @@ LP.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         pcall(createMoonwalkButton)
     end
-    -- FAST VAULT HOOK (PERSIS FALLENS)
     pcall(function() hookVault(char) end)
 end)
 
@@ -5496,9 +5452,7 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 
--- =========================================================
--- KEYBIND V UNTUK MOONWALK (PERSIS FALLENS)
--- =========================================================
+-- KEYBIND V UNTUK MOONWALK
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
@@ -5562,9 +5516,7 @@ print("✅ [9/11] COSMIC HUB - Final Combat + Auto Re-Apply + Keybind V loaded")
 -- SECTION 10/11 : LOGIC FITUR BARU (RAPIH)
 -- =========================================================
 
--- =========================================================
 -- AUTO WIGGLE LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
@@ -5585,9 +5537,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO FLEE LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not AutoFlee.Enabled then continue end
@@ -5607,9 +5557,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO ESCAPE LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if not S.AutoEscapeGate then continue end
@@ -5660,9 +5608,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- FAST VAULT HOOK (PERSIS FALLENS)
--- =========================================================
+-- FAST VAULT HOOK
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
     if FastVault.Enabled then
@@ -5674,9 +5620,7 @@ if LP.Character then
     pcall(function() hookVault(LP.Character) end)
 end
 
--- =========================================================
 -- AUTO CARRY LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not S.AutoCarry or KillerBusy then continue end
@@ -5722,9 +5666,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- FPS BOOST LOOP
--- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if S.NoScreenEffects then applyNoScreenEffects() end
@@ -5739,13 +5681,13 @@ print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- ====================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.1 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.2 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry (5-20)                    ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (FALLENS 100%)              ║")
-print("║  ⚡ Fast Vault (FALLENS 100%)            ║")
+print("║  🕺 Moonwalk (Michael Jackson)           ║")
+print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
 print("║  🚪 Auto Escape Gate                     ║")
@@ -5770,4 +5712,4 @@ print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.1 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.2 - FINAL LOADED! ✨")

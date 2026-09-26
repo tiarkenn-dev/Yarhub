@@ -302,13 +302,12 @@ _G.RoooorS = _G.RoooorS or {
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false,
-    Korblox = false, KorbloxType = "Deathspeaker",
+    Korblox = false, KorbloxType = "Pencil",
     Headless = false,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
-    -- 8-BIT ITEM
     EightBitOn = false, EightBitType = "Royal Crown",
     EightBitSize = 1, EightBitHeight = 1.5,
     Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
@@ -326,6 +325,13 @@ _G.RoooorS = _G.RoooorS or {
     Fly = false, FlySpeed = 50,
     KillFeed = false, StunNotify = false,
     HDBoost = false, HDShader = false, HDSky = false,
+    -- HD BARU
+    HDTexture = false, HDReflection = false, HDBloom = false,
+    HDShadow = false, HDWater = false, HDSunRays = false,
+    HDDepthField = false, HDAntiAliasing = false,
+    -- FIRE BEAM (10)
+    FireBeamOn = false, FireBeamType = "Classic Beam",
+    FireBeamColor = Color3.fromRGB(120, 60, 255),
     ESPNameMode = "Text", ESPNameSize = 12,
 }
 S = _G.RoooorS
@@ -351,7 +357,6 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY FALLENS
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false,
     ParryDistance = 15,
@@ -364,13 +369,12 @@ AutoParry = _G.Roooor_AutoParry or {
 }
 _G.Roooor_AutoParry = AutoParry
 
--- AUTO SKILL CHECK
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = false,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
--- 8-BIT ITEM LIST
+-- 8-BIT ITEM LIST (5)
 EightBitList = {
     "Royal Crown",
     "Big Bertha Sword",
@@ -380,14 +384,14 @@ EightBitList = {
 }
 
 EightBitIds = {
-    ["Royal Crown"] = "rbxassetid://10159600649",
-    ["Big Bertha Sword"] = "rbxassetid://89787109276629",
-    ["Diamond Axe"] = "rbxassetid://128213278917461",
-    ["Enchanted Diamond Sword"] = "rbxassetid://79607595516051",
-    ["Skull"] = "rbxassetid://14535450117",
+    ["Royal Crown"] = 10159600649,
+    ["Big Bertha Sword"] = 89787109276629,
+    ["Diamond Axe"] = 128213278917461,
+    ["Enchanted Diamond Sword"] = 79607595516051,
+    ["Skull"] = 14535450117,
 }
 
--- KORBLOX LIST
+-- KORBLOX (3)
 KorbloxList = {
     "Deathspeaker",
     "Pencil",
@@ -395,9 +399,23 @@ KorbloxList = {
 }
 
 KorbloxIds = {
-    ["Deathspeaker"] = "rbxassetid://139607718",
-    ["Pencil"] = "rbxassetid://129701348614901",
-    ["Pirate"] = "rbxassetid://111464125231349",
+    ["Deathspeaker"] = 139607718,
+    ["Pencil"] = 129701348614901,
+    ["Pirate"] = 111464125231349,
+}
+
+-- FIRE BEAM LIST (10)
+FireBeamList = {
+    "Classic Beam",
+    "Laser Beam",
+    "Rainbow Beam",
+    "Fire Wings",
+    "Fire Halo",
+    "Fire Hands",
+    "Fire Foot Trail",
+    "Fire Body Aura",
+    "Fire Mouth",
+    "Fire Eyes Glow",
 }
 
 GodMode = _G.Roooor_GodMode or {
@@ -405,7 +423,6 @@ GodMode = _G.Roooor_GodMode or {
 }
 _G.Roooor_GodMode = GodMode
 
--- AIMBOT (INSTAN NEMPEL)
 Combat = _G.Roooor_Combat or {
     AimlockEnabled = false,
     Holding = false,
@@ -432,10 +449,11 @@ _G.Roooor_Combat = Combat
 print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
 print("   Auto Parry : FALLENS Style")
 print("   Auto Skill : ON")
-print("   8-Bit Item : 5 pilihan (size + height)")
-print("   Korblox    : 3 pilihan")
-print("   Aimbot     : INSTAN + Hold to Aim")
-print("   Hitbox     : 25 (besar)")-- =========================================================
+print("   8-Bit Item : 5 pilihan (Accessory)")
+print("   Korblox    : 3 pilihan (kaki asli tetap)")
+print("   Fire Beam  : 10 efek")
+print("   HD Visual  : 8 fitur tambahan")
+print("   Headless   : balik di Misc")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -616,12 +634,10 @@ end
 
 print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
 -- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + AUTO PARRY + 8BIT + KORBLOX + PARRY CIRCLE
+-- BAGIAN 3/8 : FUNGSI + PARRY + 8BIT + KORBLOX + FIRE BEAM + HD
 -- =========================================================
 
--- ============================
 -- FIRE (KEPALA)
--- ============================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -640,7 +656,6 @@ function applyFire()
     if not char then return end
     local head = char:FindFirstChild("Head")
     if not head then return end
-
     local cfg = FireConfig[S.FireType] or FireConfig.Classic
 
     local fire = Instance.new("Fire")
@@ -688,7 +703,6 @@ function applyFireFeet()
     if not S.FireFeetOn then return end
     local char = LP.Character
     if not char then return end
-
     local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
     local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
     local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
@@ -720,38 +734,19 @@ task.spawn(function()
                 end
             end
         end
-        if S.FireFeetOn and LP.Character then
-            local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
-            if cfg.rainbow then
-                local char = LP.Character
-                local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
-                local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
-                local t = tick()
-                for _, leg in pairs({lLeg, rLeg}) do
-                    if leg then
-                        local fire = leg:FindFirstChild("RoooorFootFire")
-                        if fire then
-                            fire.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
-                            fire.SecondaryColor = Color3.fromHSV(((t * 0.5) + 0.5) % 1, 1, 1)
-                        end
-                    end
-                end
-            end
-        end
     end
 end)
 
 -- =========================================================
--- 8-BIT ITEM (DROPDOWN + SIZE + HEIGHT + EFEK)
+-- 8-BIT ITEM (PAKAI ACCESSORY - YANG WORKS)
 -- =========================================================
-eightBitPart = nil
-eightBitSparkles = nil
-eightBitTrail = nil
+eightBitAccessory = nil
 
 function clear8Bit()
-    if eightBitPart then eightBitPart:Destroy(); eightBitPart = nil end
-    if eightBitSparkles then eightBitSparkles:Destroy(); eightBitSparkles = nil end
-    if eightBitTrail then eightBitTrail:Destroy(); eightBitTrail = nil end
+    if eightBitAccessory then
+        eightBitAccessory:Destroy()
+        eightBitAccessory = nil
+    end
 end
 
 function apply8Bit(enable, itemName, size, height)
@@ -770,98 +765,49 @@ function apply8Bit(enable, itemName, size, height)
     local id = EightBitIds[itemName]
     if not id then return end
 
-    -- Base part
-    eightBitPart = Instance.new("Part")
-    eightBitPart.Name = "Cosmic8Bit"
-    eightBitPart.Size = Vector3.new(2, 2, 2) * size
-    eightBitPart.CanCollide = false
-    eightBitPart.Massless = true
-    eightBitPart.Transparency = 0
-    eightBitPart.Parent = head
+    -- PAKAI ACCESSORY (sistem resmi Roblox)
+    local accessory = Instance.new("Accessory")
+    accessory.Name = "Cosmic8Bit"
+
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1, 1, 1) * size
+    handle.CanCollide = false
+    handle.Massless = true
+    handle.Transparency = 1
+    handle.Parent = accessory
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = id
-    mesh.Scale = Vector3.new(1.5, 1.5, 1.5) * size
-    mesh.Parent = eightBitPart
+    mesh.MeshId = "rbxassetid://" .. id
+    mesh.TextureId = ""
+    mesh.Scale = Vector3.new(1, 1, 1) * size
+    mesh.Parent = handle
 
-    local weld = Instance.new("Weld")
-    weld.Part0 = head
-    weld.Part1 = eightBitPart
-    weld.C0 = CFrame.new(0, height * size, 0)
-    weld.Parent = eightBitPart
+    local attachment = Instance.new("Attachment")
+    attachment.Name = "HatAttachment"
+    attachment.Position = Vector3.new(0, height * size, 0)
+    attachment.Parent = handle
 
-    -- Efek Sparkles
-    eightBitSparkles = Instance.new("Sparkles")
-    eightBitSparkles.Name = "Cosmic8BitSparkle"
-    eightBitSparkles.SparkleColor = Color3.fromRGB(0, 230, 255)
-    eightBitSparkles.SparkleSize = 2 * size
-    eightBitSparkles.Parent = eightBitPart
+    accessory.Parent = char
 
-    -- Efek Particle
-    local emitter = Instance.new("ParticleEmitter")
-    emitter.Texture = "rbxassetid://243660364"
-    emitter.Rate = 15
-    emitter.Lifetime = NumberRange.new(2.5)
-    emitter.Speed = NumberRange.new(3)
-    emitter.Size = NumberSequence.new(1.5 * size)
-    emitter.SpreadAngle = Vector2.new(15, 15)
-    emitter.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.2),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    emitter.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(200, 150, 255)),
-        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(120, 60, 255)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 230, 255)),
-        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 80, 200)),
-        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 255, 255)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(120, 60, 255))
-    })
-    emitter.Parent = eightBitPart
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum:AddAccessory(accessory)
+    end
 
-    -- Efek Trail (glow ungu)
-    local attachment0 = Instance.new("Attachment")
-    attachment0.Position = Vector3.new(0, 1 * size, 0)
-    attachment0.Parent = eightBitPart
-
-    local attachment1 = Instance.new("Attachment")
-    attachment1.Position = Vector3.new(0, -1 * size, 0)
-    attachment1.Parent = eightBitPart
-
-    eightBitTrail = Instance.new("Trail")
-    eightBitTrail.Attachment0 = attachment0
-    eightBitTrail.Attachment1 = attachment1
-    eightBitTrail.Lifetime = 0.5
-    eightBitTrail.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 200)),
-    })
-    eightBitTrail.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.3),
-        NumberSequenceKeypoint.new(1, 1),
-    })
-    eightBitTrail.Parent = eightBitPart
+    eightBitAccessory = accessory
 end
 
 -- =========================================================
--- KORBLOX (3 PILIHAN)
+-- KORBLOX (KAKI ASLI TETAP - CUMA TIMPA MESH)
 -- =========================================================
-korbloxPart = nil
+korbloxMesh = nil
 
 function clearKorblox()
-    if korbloxPart then korbloxPart:Destroy(); korbloxPart = nil end
-    -- Restore kaki asli
-    local char = LP.Character
-    if char then
-        local rightLeg = char:FindFirstChild("Right Leg")
-            or char:FindFirstChild("RightUpperLeg")
-            or char:FindFirstChild("RightLowerLeg")
-        if rightLeg then
-            rightLeg.Transparency = 0
-            rightLeg.CanCollide = true
-        end
+    if korbloxMesh then
+        korbloxMesh:Destroy()
+        korbloxMesh = nil
     end
 end
 
@@ -876,34 +822,299 @@ function applyKorblox(enable, mode)
         or char:FindFirstChild("RightLowerLeg")
     if not rightLeg then return end
 
-    mode = mode or S.KorbloxType or "Deathspeaker"
+    mode = mode or S.KorbloxType or "Pencil"
     local id = KorbloxIds[mode]
     if not id then return end
 
-    -- Sembunyiin kaki asli
-    rightLeg.Transparency = 1
-    rightLeg.CanCollide = false
+    -- Kaki asli TETAP (jangan dihilangin)
+    -- Cuma timpa mesh Korblox di atasnya
 
-    -- Bikin mesh Korblox
-    korbloxPart = Instance.new("Part")
-    korbloxPart.Name = "CosmicKorblox"
-    korbloxPart.Size = rightLeg.Size
-    korbloxPart.CanCollide = false
-    korbloxPart.Massless = true
-    korbloxPart.Transparency = 0
-    korbloxPart.Parent = char
+    korbloxMesh = Instance.new("Part")
+    korbloxMesh.Name = "CosmicKorbloxMesh"
+    korbloxMesh.Size = Vector3.new(1, 2, 1)
+    korbloxMesh.CanCollide = false
+    korbloxMesh.Massless = true
+    korbloxMesh.Transparency = 0
+    korbloxMesh.Parent = char
 
     local mesh = Instance.new("SpecialMesh")
     mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = id
-    mesh.Scale = Vector3.new(1, 1, 1) * (rightLeg.Size.Y / 2)
-    mesh.Parent = korbloxPart
+    mesh.MeshId = "rbxassetid://" .. id
+    mesh.Scale = Vector3.new(1, 1, 1)
+    mesh.Parent = korbloxMesh
 
     local weld = Instance.new("Weld")
     weld.Part0 = rightLeg
-    weld.Part1 = korbloxPart
-    weld.C0 = CFrame.new(0, 0, 0)
-    weld.Parent = korbloxPart
+    weld.Part1 = korbloxMesh
+    weld.C0 = CFrame.new(0, -0.5, 0)
+    weld.Parent = korbloxMesh
+end
+
+-- =========================================================
+-- HEADLESS
+-- =========================================================
+function applyHeadless(s)
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    if s then
+        head.Transparency = 1
+        for _, v in pairs(head:GetChildren()) do
+            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                v.Transparency = 1
+            end
+        end
+    else
+        head.Transparency = 0
+        for _, v in pairs(head:GetChildren()) do
+            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                v.Transparency = 0
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if S.Headless and LP.Character then
+            local head = LP.Character:FindFirstChild("Head")
+            if head then
+                if head.Transparency ~= 1 then head.Transparency = 1 end
+                for _, v in pairs(head:GetChildren()) do
+                    if (v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh"))
+                        and v.Transparency ~= 1 then
+                        v.Transparency = 1
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- FIRE BEAM (10 EFEK)
+-- =========================================================
+fireBeamParts = {}
+fireBeamConns = {}
+
+function clearFireBeam()
+    for _, p in pairs(fireBeamParts) do
+        if p and p.Parent then p:Destroy() end
+    end
+    fireBeamParts = {}
+    for _, c in pairs(fireBeamConns) do
+        if c then pcall(function() c:Disconnect() end) end
+    end
+    fireBeamConns = {}
+end
+
+function applyFireBeam(enable, beamType, color)
+    clearFireBeam()
+    if not enable then return end
+
+    local char = LP.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    beamType = beamType or S.FireBeamType or "Classic Beam"
+    color = color or S.FireBeamColor or Color3.fromRGB(120, 60, 255)
+
+    local function createBeamAttachment(parentPart, offset, lightColor)
+        local att = Instance.new("Attachment")
+        att.Position = offset
+        att.Parent = parentPart
+
+        local beam = Instance.new("Beam")
+        beam.Color = ColorSequence.new(lightColor)
+        beam.Width0 = 0.15
+        beam.Width1 = 0.15
+        beam.FaceCamera = true
+        beam.Attachment0 = att
+        beam.LightEmission = 1
+        beam.LightInfluence = 0
+        beam.Parent = parentPart
+
+        local fire = Instance.new("Fire")
+        fire.Size = 2
+        fire.Heat = 20
+        fire.Color = lightColor
+        fire.SecondaryColor = Color3.new(1, 1, 1)
+        fire.Parent = parentPart
+
+        return att
+    end
+
+    if beamType == "Classic Beam" then
+        local leftEye = head:FindFirstChild("LeftEye") or head
+        local rightEye = head:FindFirstChild("RightEye") or head
+        createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
+        createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
+    elseif beamType == "Laser Beam" then
+        createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
+        createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
+    elseif beamType == "Rainbow Beam" then
+        local att1 = createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
+        local att2 = createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
+        table.insert(fireBeamConns, RunService.RenderStepped:Connect(function()
+            local t = tick()
+            for _, beam in pairs(head:GetChildren()) do
+                if beam:IsA("Beam") then
+                    beam.Color = ColorSequence.new(Color3.fromHSV((t * 0.5) % 1, 1, 1))
+                end
+            end
+        end))
+    elseif beamType == "Fire Wings" then
+        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+        if torso then
+            createBeamAttachment(torso, Vector3.new(1, 1, 0), color)
+            createBeamAttachment(torso, Vector3.new(-1, 1, 0), color)
+        end
+    elseif beamType == "Fire Halo" then
+        for i = 1, 12 do
+            local angle = (i / 12) * math.pi * 2
+            createBeamAttachment(head, Vector3.new(math.cos(angle) * 1.5, 1.5, math.sin(angle) * 1.5), color)
+        end
+    elseif beamType == "Fire Hands" then
+        local lHand = char:FindFirstChild("LeftHand") or char:FindFirstChild("Left Arm")
+        local rHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+        if lHand then createBeamAttachment(lHand, Vector3.new(0, -0.5, 0), color) end
+        if rHand then createBeamAttachment(rHand, Vector3.new(0, -0.5, 0), color) end
+    elseif beamType == "Fire Foot Trail" then
+        local lFoot = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg")
+        local rFoot = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg")
+        if lFoot then createBeamAttachment(lFoot, Vector3.new(0, -0.5, 0), color) end
+        if rFoot then createBeamAttachment(rFoot, Vector3.new(0, -0.5, 0), color) end
+    elseif beamType == "Fire Body Aura" then
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for i = 1, 8 do
+                local angle = (i / 8) * math.pi * 2
+                createBeamAttachment(hrp, Vector3.new(math.cos(angle) * 1, 0, math.sin(angle) * 1), color)
+            end
+        end
+    elseif beamType == "Fire Mouth" then
+        createBeamAttachment(head, Vector3.new(0, -0.3, -0.6), color)
+    elseif beamType == "Fire Eyes Glow" then
+        createBeamAttachment(head, Vector3.new(0.3, 0.3, -0.5), color)
+        createBeamAttachment(head, Vector3.new(-0.3, 0.3, -0.5), color)
+    end
+end
+
+-- =========================================================
+-- HD VISUAL BARU (8 FITUR)
+-- =========================================================
+hdExtras = {
+    Texture = nil,
+    Reflection = nil,
+    Bloom = nil,
+    Shadow = nil,
+    Water = nil,
+    SunRays = nil,
+    DepthField = nil,
+    AntiAliasing = nil,
+}
+
+function applyHDTexture(s)
+    if s then
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
+        end)
+    end
+end
+
+function applyHDReflection(s)
+    if s then
+        if not hdExtras.Reflection then
+            hdExtras.Reflection = Instance.new("ColorCorrectionEffect")
+            hdExtras.Reflection.Name = "CosmicReflection"
+            hdExtras.Reflection.Brightness = 0.05
+            hdExtras.Reflection.Contrast = 0.1
+            hdExtras.Reflection.Parent = Lighting
+        end
+    else
+        if hdExtras.Reflection then hdExtras.Reflection:Destroy(); hdExtras.Reflection = nil end
+    end
+end
+
+function applyHDBloom(s)
+    if s then
+        if not hdExtras.Bloom then
+            hdExtras.Bloom = Instance.new("BloomEffect")
+            hdExtras.Bloom.Name = "CosmicHDBloom2"
+            hdExtras.Bloom.Intensity = 0.7
+            hdExtras.Bloom.Size = 24
+            hdExtras.Bloom.Threshold = 0.9
+            hdExtras.Bloom.Parent = Lighting
+        end
+    else
+        if hdExtras.Bloom then hdExtras.Bloom:Destroy(); hdExtras.Bloom = nil end
+    end
+end
+
+function applyHDShadow(s)
+    if s then
+        Lighting.GlobalShadows = true
+        pcall(function()
+            settings().Rendering.ShadowSoftness = 0.2
+        end)
+    else
+        Lighting.GlobalShadows = origLighting.GlobalShadows
+    end
+end
+
+function applyHDWater(s)
+    if s then
+        if not hdExtras.Water then
+            hdExtras.Water = Instance.new("ColorCorrectionEffect")
+            hdExtras.Water.Name = "CosmicWater"
+            hdExtras.Water.TintColor = Color3.fromRGB(180, 220, 255)
+            hdExtras.Water.Parent = Lighting
+        end
+    else
+        if hdExtras.Water then hdExtras.Water:Destroy(); hdExtras.Water = nil end
+    end
+end
+
+function applyHDSunRays(s)
+    if s then
+        if not hdExtras.SunRays then
+            hdExtras.SunRays = Instance.new("SunRaysEffect")
+            hdExtras.SunRays.Name = "CosmicSunRays"
+            hdExtras.SunRays.Intensity = 0.15
+            hdExtras.SunRays.Spread = 1
+            hdExtras.SunRays.Parent = Lighting
+        end
+    else
+        if hdExtras.SunRays then hdExtras.SunRays:Destroy(); hdExtras.SunRays = nil end
+    end
+end
+
+function applyHDDepthField(s)
+    if s then
+        if not hdExtras.DepthField then
+            hdExtras.DepthField = Instance.new("DepthOfFieldEffect")
+            hdExtras.DepthField.Name = "CosmicDOF"
+            hdExtras.DepthField.FarIntensity = 0.15
+            hdExtras.DepthField.FocusDistance = 20
+            hdExtras.DepthField.InFocusRadius = 15
+            hdExtras.DepthField.NearIntensity = 0.1
+            hdExtras.DepthField.Parent = Lighting
+        end
+    else
+        if hdExtras.DepthField then hdExtras.DepthField:Destroy(); hdExtras.DepthField = nil end
+    end
+end
+
+function applyHDAntiAliasing(s)
+    if s then
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
+            settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level10
+        end)
+    end
 end
 
 -- =========================================================
@@ -1266,13 +1477,11 @@ function shouldBlockParry()
             end
         end
     end
-
     return false
 end
 
 function doParry()
     if shouldBlockParry() then return end
-
     local now = tick()
     if now - lastParry < PARRY_DEBOUNCE then return end
     if ParryActive then return end
@@ -1795,47 +2004,6 @@ function applyHDSky(s)
     end
 end
 
--- HEADLESS
-function applyHeadless(s)
-    local char = LP.Character
-    if not char then return end
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-
-    if s then
-        head.Transparency = 1
-        for _, v in pairs(head:GetChildren()) do
-            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
-                v.Transparency = 1
-            end
-        end
-    else
-        head.Transparency = 0
-        for _, v in pairs(head:GetChildren()) do
-            if v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh") then
-                v.Transparency = 0
-            end
-        end
-    end
-end
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if S.Headless and LP.Character then
-            local head = LP.Character:FindFirstChild("Head")
-            if head then
-                if head.Transparency ~= 1 then head.Transparency = 1 end
-                for _, v in pairs(head:GetChildren()) do
-                    if (v:IsA("Decal") or v:IsA("SpecialMesh") or v:IsA("Mesh"))
-                        and v.Transparency ~= 1 then
-                        v.Transparency = 1
-                    end
-                end
-            end
-        end
-    end
-end)
-
 -- TRAIL / AURA / KILL EFFECT / CROSSHAIR / ZOOM / FLY
 trailFireObj = nil
 function applyTrail(enable, color)
@@ -2027,6 +2195,15 @@ _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8Bit = apply8Bit
 _G.Roooor_applyKorblox = applyKorblox
+_G.Roooor_applyFireBeam = applyFireBeam
+_G.Roooor_applyHDTexture = applyHDTexture
+_G.Roooor_applyHDReflection = applyHDReflection
+_G.Roooor_applyHDBloom = applyHDBloom
+_G.Roooor_applyHDShadow = applyHDShadow
+_G.Roooor_applyHDWater = applyHDWater
+_G.Roooor_applyHDSunRays = applyHDSunRays
+_G.Roooor_applyHDDepthField = applyHDDepthField
+_G.Roooor_applyHDAntiAliasing = applyHDAntiAliasing
 _G.Roooor_createESP = createESP
 _G.Roooor_removeESP = removeESP
 _G.Roooor_createStatusESP = createStatusESP
@@ -2056,7 +2233,7 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry + 8Bit + Korblox + Parry Circle loaded")-- =========================================================
+print("✅ [3/8] COSMIC HUB - Fungsi + 8Bit + Korblox + FireBeam + HD loaded")-- =========================================================
 -- COSMIC HUB
 -- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
@@ -2533,9 +2710,6 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
--- =========================================================
--- TOMBOL MENU COSMIC (KECIL 32×32)
--- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
 btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
@@ -2704,9 +2878,6 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- =========================================================
--- PANEL MENU COSMIC
--- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -2915,9 +3086,6 @@ local csL = Instance.new("UIListLayout")
 csL.Padding = UDim.new(0, 5)
 csL.Parent = cs
 
--- =========================================================
--- KOMPONEN UI
--- =========================================================
 function sec(title, icon)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 22)
@@ -3712,6 +3880,7 @@ makeTab("Visual", "✨", 7, function()
     end)
     lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
 
+    -- HD VISUAL RINGAN
     sec("HD Visual (Ringan)", "💎")
     tog("HD Graphics Boost", false, function(s)
         S.HDBoost = s
@@ -3731,6 +3900,57 @@ makeTab("Visual", "✨", 7, function()
     end)
     lbl("Atmosphere HD + Haze + Glare", C.GRN)
 
+    -- HD VISUAL BARU (8 FITUR)
+    sec("HD Visual (Extra)", "🌟")
+    tog("HD Texture", false, function(s)
+        S.HDTexture = s
+        applyHDTexture(s)
+    end)
+    lbl("Texture quality max", C.GRN)
+
+    tog("HD Reflection", false, function(s)
+        S.HDReflection = s
+        applyHDReflection(s)
+    end)
+    lbl("Karakter glossy/mengkilap", C.GRN)
+
+    tog("HD Bloom", false, function(s)
+        S.HDBloom = s
+        applyHDBloom(s)
+    end)
+    lbl("Bloom effect kuat", C.GRN)
+
+    tog("HD Shadow", false, function(s)
+        S.HDShadow = s
+        applyHDShadow(s)
+    end)
+    lbl("Shadow detail tinggi", C.GRN)
+
+    tog("HD Water", false, function(s)
+        S.HDWater = s
+        applyHDWater(s)
+    end)
+    lbl("Air keliatan HD (biru)", C.GRN)
+
+    tog("HD Sun Rays", false, function(s)
+        S.HDSunRays = s
+        applyHDSunRays(s)
+    end)
+    lbl("Sinar matahari HD", C.GRN)
+
+    tog("HD Depth of Field", false, function(s)
+        S.HDDepthField = s
+        applyHDDepthField(s)
+    end)
+    lbl("Blur background (cinematic)", C.GRN)
+
+    tog("HD Anti-Aliasing", false, function(s)
+        S.HDAntiAliasing = s
+        applyHDAntiAliasing(s)
+    end)
+    lbl("Pinggiran objek halus", C.GRN)
+
+    -- LIGHTING
     sec("Lighting", "💡")
     tog("Ultra HD", false, function(s)
         S.UltraHD = s
@@ -3750,12 +3970,14 @@ makeTab("Visual", "✨", 7, function()
         applyContrast()
     end)
 
+    -- SKY
     sec("Sky", "🌌")
     drp("Sky Preset", SkyList, "Default", function(v)
         S.SkyId = v
         applySky(v)
     end)
 
+    -- CAMERA
     sec("Camera", "🎥")
     tog("FOV Override", false, function(s)
         S.FOVEnabled = s
@@ -3775,8 +3997,75 @@ makeTab("Visual", "✨", 7, function()
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
+    -- FIRE BEAM (10)
+    sec("Fire Beam (10 Efek)", "🔥")
+    tog("Enable Fire Beam", false, function(s)
+        S.FireBeamOn = s
+        applyFireBeam(s, S.FireBeamType, S.FireBeamColor)
+    end)
+
+    for _, beamName in ipairs(FireBeamList) do
+        local btn3 = Instance.new("TextButton")
+        btn3.Size = UDim2.new(1, -4, 0, 24)
+        btn3.BackgroundColor3 = C.BG
+        btn3.BackgroundTransparency = 0.4
+        btn3.BorderSizePixel = 0
+        btn3.Text = ""
+        btn3.AutoButtonColor = false
+        btn3.Parent = cs
+        rnd(btn3, 7)
+        strk(btn3, C.ACC, 1, 0.6)
+
+        local btnLbl3 = Instance.new("TextLabel")
+        btnLbl3.Size = UDim2.new(1, -10, 1, 0)
+        btnLbl3.Position = UDim2.new(0, 8, 0, 0)
+        btnLbl3.BackgroundTransparency = 1
+        btnLbl3.Text = "🔥 " .. beamName
+        btnLbl3.TextColor3 = C.TXT
+        btnLbl3.TextSize = 9
+        btnLbl3.Font = Enum.Font.GothamMedium
+        btnLbl3.TextXAlignment = Enum.TextXAlignment.Left
+        btnLbl3.Parent = btn3
+
+        if S.FireBeamType == beamName then
+            btn3.BackgroundColor3 = C.ACC
+            btn3.BackgroundTransparency = 0
+            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
+        end
+
+        btn3.MouseButton1Click:Connect(function()
+            S.FireBeamType = beamName
+            applyFireBeam(S.FireBeamOn, beamName, S.FireBeamColor)
+            for _, c in pairs(cs:GetChildren()) do
+                if c:IsA("TextButton") and c:FindFirstChildOfClass("TextLabel") then
+                    local lblx = c:FindFirstChildOfClass("TextLabel")
+                    if lblx and string.sub(lblx.Text, 1, 4) == "🔥 " and lblx.Text ~= "🔥 " .. beamName then
+                        if string.find(lblx.Text, "Beam") or string.find(lblx.Text, "Wings") 
+                            or string.find(lblx.Text, "Halo") or string.find(lblx.Text, "Hands")
+                            or string.find(lblx.Text, "Foot") or string.find(lblx.Text, "Body")
+                            or string.find(lblx.Text, "Mouth") or string.find(lblx.Text, "Eyes") then
+                            c.BackgroundColor3 = C.BG
+                            c.BackgroundTransparency = 0.4
+                            lblx.TextColor3 = C.TXT
+                        end
+                    end
+                end
+            end
+            btn3.BackgroundColor3 = C.ACC
+            btn3.BackgroundTransparency = 0
+            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
+        end)
+    end
+
+    cpk("Beam Color", S.FireBeamColor, function(c)
+        S.FireBeamColor = c
+        if S.FireBeamOn then
+            applyFireBeam(true, S.FireBeamType, c)
+        end
+    end)
+
     -- 8-BIT ITEM
-    sec("8-Bit Item", "👑")
+    sec("8-Bit Item (Accessory)", "👑")
     tog("Enable 8-Bit Item", false, function(s)
         S.EightBitOn = s
         apply8Bit(s, S.EightBitType, S.EightBitSize, S.EightBitHeight)
@@ -3799,7 +4088,7 @@ makeTab("Visual", "✨", 7, function()
             apply8Bit(true, S.EightBitType, S.EightBitSize, v)
         end
     end)
-    lbl("Ada efek Sparkle + Particle + Trail", C.GRN)
+    lbl("Pakai Accessory (works)", C.GRN)
 
     -- KORBLOX
     sec("Korblox (Right Leg)", "🦴")
@@ -3807,14 +4096,15 @@ makeTab("Visual", "✨", 7, function()
         S.Korblox = s
         applyKorblox(s, S.KorbloxType)
     end)
-    drp("Pilih Korblox", KorbloxList, "Deathspeaker", function(v)
+    drp("Pilih Korblox", KorbloxList, "Pencil", function(v)
         S.KorbloxType = v
         if S.Korblox then
             applyKorblox(true, v)
         end
     end)
+    lbl("Kaki asli tetap (cuma ditimpa mesh)", C.FIRE_BRIGHT)
 
-    -- TRAIL / AURA / KILL EFFECT
+    -- CHARACTER EFFECTS
     sec("Character Effects", "✨")
     tog("Fire Trail", false, function(s)
         S.Trail = s
@@ -3836,6 +4126,7 @@ makeTab("Visual", "✨", 7, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
+    -- CROSSHAIR
     sec("Crosshair", "🎯")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
@@ -3878,6 +4169,7 @@ makeTab("Player", "👤", 8, function()
             if _G.Roooor_ParryCircle then _G.Roooor_ParryCircle:Destroy() end
             clear8Bit()
             clearKorblox()
+            clearFireBeam()
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
@@ -3979,7 +4271,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO-DETECT HOLD ATTACK (PC + HP)
+-- AUTO-DETECT HOLD ATTACK
 -- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -4042,7 +4334,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AIMBOT LOOP (HOLD-TO-AIM - INSTAN)
+-- AIMBOT LOOP (HOLD-TO-AIM INSTAN)
 -- =========================================================
 lastTrigger = 0
 
@@ -4235,7 +4527,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO RE-APPLY SAAT CHARACTER RESPAWN
+-- AUTO RE-APPLY SAAT RESPAWN
 -- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.2)
@@ -4251,6 +4543,10 @@ LP.CharacterAdded:Connect(function(char)
 
     if S.Korblox then
         pcall(function() applyKorblox(true, S.KorbloxType) end)
+    end
+
+    if S.FireBeamOn then
+        pcall(function() applyFireBeam(true, S.FireBeamType, S.FireBeamColor) end)
     end
 
     if S.Trail then
@@ -4274,6 +4570,14 @@ LP.CharacterAdded:Connect(function(char)
     if S.HDBoost then pcall(function() applyHDBoost(true) end) end
     if S.HDShader then pcall(function() applyHDShader(true) end) end
     if S.HDSky then pcall(function() applyHDSky(true) end) end
+    if S.HDTexture then pcall(function() applyHDTexture(true) end) end
+    if S.HDReflection then pcall(function() applyHDReflection(true) end) end
+    if S.HDBloom then pcall(function() applyHDBloom(true) end) end
+    if S.HDShadow then pcall(function() applyHDShadow(true) end) end
+    if S.HDWater then pcall(function() applyHDWater(true) end) end
+    if S.HDSunRays then pcall(function() applyHDSunRays(true) end) end
+    if S.HDDepthField then pcall(function() applyHDDepthField(true) end) end
+    if S.HDAntiAliasing then pcall(function() applyHDAntiAliasing(true) end) end
 
     if S.NoClip then
         task.wait(0.3)
@@ -4311,7 +4615,7 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- =========================================================
--- TAB 9: COMBAT (AIMBOT + HITBOX)
+-- TAB 9: COMBAT
 -- =========================================================
 makeTab("Combat", "⚔️", 9, function()
 
@@ -4434,9 +4738,11 @@ print("║  ⭕ Parry Circle HIJAU/MERAH              ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
 print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
 print("║  🛡️ God Mode                             ║")
-print("║  👑 8-Bit Item (5 pilihan + size/height) ║")
-print("║  🦴 Korblox 3 pilihan                    ║")
-print("║  💎 HD Visual + Fullbright + No Fog      ║")
+print("║  👑 8-Bit Item (Accessory - works)       ║")
+print("║  🦴 Korblox 3 pilihan (kaki asli tetap)  ║")
+print("║  🔥 Fire Beam 10 efek                    ║")
+print("║  💎 HD Visual + 8 HD Extra               ║")
+print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  ✨ Menu Bintang Kelap-kelip             ║")
 print("╠══════════════════════════════════════════╣")

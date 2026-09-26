@@ -1,9 +1,8 @@
 --[[
     ╔══════════════════════════════════════════════╗
-    ║           COSMIC HUB - v3.0                  ║
-    ║   Auto Parry + SkillCheck 2 Mode + Moonwalk  ║
+    ║           COSMIC HUB - v3.1                  ║
+    ║   Moonwalk + Fast Vault 100% FALLENS         ║
     ║   + Crosshair 8 Mode + FPS Boost + Extra     ║
-    ║   Cosmic Galaxy Theme (Solid Background)     ║
     ╚══════════════════════════════════════════════╝
 ]]
 
@@ -30,9 +29,7 @@ function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
--- =========================================================
--- WARNA TEMA (COSMIC GALAXY SOLID)
--- =========================================================
+-- WARNA TEMA
 C = {
     BG = Color3.fromRGB(10, 5, 25),
     BG2 = Color3.fromRGB(20, 10, 45),
@@ -84,9 +81,7 @@ end
 
 _G.Roooor_playSound = playToggleSound
 
--- =========================================================
--- LOADING GALAXY (SIMPLE - NO BINTANG)
--- =========================================================
+-- LOADING GALAXY
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
 loadingGui.ResetOnSpawn = false
@@ -267,9 +262,7 @@ task.delay(1.5, function()
     loadingGui:Destroy()
 end)
 
--- =========================================================
 -- STATE UTAMA
--- =========================================================
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
@@ -298,15 +291,15 @@ _G.RoooorS = _G.RoooorS or {
     Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
     KillEffect = false,
 
-    -- 🆕 CROSSHAIR 8 MODE + 2 WARNA MODE
+    -- CROSSHAIR 8 MODE + 2 WARNA
     Crosshair = false,
     CrosshairColor = Color3.fromRGB(0, 200, 255),
     CrosshairSize = 8,
     CrosshairThickness = 2,
-    CrosshairStyle = "Plus",        -- 🆕 Plus/Dot/Circle/X/Square/Diamond/TShape/CrossDot
-    CrosshairColorMode = "Solid",   -- 🆕 Solid / Galaxy
-    CrosshairOffsetX = 0,           -- 🆕
-    CrosshairOffsetY = 0,           -- 🆕
+    CrosshairStyle = "Plus",
+    CrosshairColorMode = "Solid",
+    CrosshairOffsetX = 0,
+    CrosshairOffsetY = 0,
 
     -- Camera
     ZoomOut = false, ZoomOutValue = 500,
@@ -318,11 +311,10 @@ _G.RoooorS = _G.RoooorS or {
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     SkyId = "Default",
 
-    -- 🆕 FPS BOOST (3 fitur)
-    NoScreenEffects = false,        -- 🆕
-    LowGraphics = false,            -- 🆕
-    CleanSky = false,               -- 🆕
-    FPSBoostEnabled = false,        -- 🆕 master toggle
+    -- FPS BOOST
+    NoScreenEffects = false,
+    LowGraphics = false,
+    CleanSky = false,
 
     -- HUD
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
@@ -335,10 +327,10 @@ _G.RoooorS = _G.RoooorS or {
     MaskedPower = "Cobra",
     InstantInteract = false,
 
-    -- 🆕 AUTO CARRY + AUTO HOOK (KILLER)
-    AutoCarry = false,              -- 🆕
-    AutoHook = false,               -- 🆕
-    CarryRange = 60,                -- 🆕
+    -- AUTO CARRY + AUTO HOOK
+    AutoCarry = false,
+    AutoHook = false,
+    CarryRange = 60,
 
     -- HD
     HDBoost = false, HDShader = false, HDSky = false,
@@ -353,11 +345,11 @@ _G.RoooorS = _G.RoooorS or {
     -- ESP
     ESPNameMode = "Text", ESPNameSize = 12,
 
-    -- 🆕 AUTO ESCAPE GATE (SURVIVOR)
-    AutoEscapeGate = false,         -- 🆕
-    AutoEscapeRange = 50,           -- 🆕
-    AutoEscapeUseKillerCheck = true,-- 🆕 TP kalau killer deket
-    AutoEscapeUseGenCheck = true,   -- 🆕 TP kalau cukup gen
+    -- AUTO ESCAPE GATE
+    AutoEscapeGate = false,
+    AutoEscapeRange = 50,
+    AutoEscapeUseKillerCheck = true,
+    AutoEscapeUseGenCheck = true,
 }
 S = _G.RoooorS
 
@@ -385,31 +377,26 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- =========================================================
--- AUTO PARRY (🆕 PARry DISTANCE 5-20, DEBOUNCE 0.1-0.5)
--- =========================================================
+-- AUTO PARRY (Distance 5-20, Debounce 0.1-0.5)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
-    ParryDistance = 15,        -- 🆕 range 5-20
+    ParryDistance = 15,
     ParryDelay = 0,
     Cooldown = 1,
-    FaceSensitivity = 0.7,     -- TIDAK DIUBAH
+    FaceSensitivity = 0.7,
     RequireFacing = true,
-    Wiggle = false,            -- 🆕 auto wiggle (spam SelfUnHookEvent)
+    Wiggle = false,
     WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
--- PARRY_DEBOUNCE global (dipake di doParry)
-PARRY_DEBOUNCE = 0.2           -- 🆕 default, slider 0.1-0.5
+PARRY_DEBOUNCE = 0.2
 ParryActive = false
 
--- =========================================================
--- AUTO SKILL CHECK (2 MODE)
--- =========================================================
+-- AUTO SKILL CHECK
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = true,
-    Mode = "Perfect",      -- Perfect / Instant
+    Mode = "Perfect",
     HideNeedle = false,
     Success = 0,
     Total = 0,
@@ -417,7 +404,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 _G.Roooor_SkillCheck = SkillCheck
 
 -- =========================================================
--- MOONWALK
+-- MOONWALK (100% PERSIS FALLENS)
 -- =========================================================
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = false,
@@ -426,18 +413,29 @@ Moonwalk = _G.Roooor_Moonwalk or {
     Intensity = 35,
     SlowSpeed = 13,
     UseSlow = true,
-    ButtonLocked = true,
     ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
-    LockIconRef = nil,
     GuiInstance = nil,
-    Connection = nil,
-    ImageId = "rbxassetid://1057298679",
+    ImageId = "rbxassetid://93349170559446",  -- 🆕 FALLENS ID
 }
 _G.Roooor_Moonwalk = Moonwalk
 
+MoonwalkConnection = nil
+
 -- =========================================================
--- 🆕 AUTO FLEE KILLER
+-- FAST VAULT (100% PERSIS FALLENS)
 -- =========================================================
+FastVault = _G.Roooor_FastVault or {
+    Enabled = false,
+    Speed = 1.2,
+    ReplaceMap = {
+        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779", -- Running → Finesse
+    },
+}
+_G.Roooor_FastVault = FastVault
+
+VaultTracks = {}
+
+-- AUTO FLEE KILLER
 AutoFlee = _G.Roooor_AutoFlee or {
     Enabled = false,
     DetectDistance = 50,
@@ -446,23 +444,7 @@ AutoFlee = _G.Roooor_AutoFlee or {
 }
 _G.Roooor_AutoFlee = AutoFlee
 
--- =========================================================
--- 🆕 FAST VAULT (SAMA PERSIS FALLENS)
--- =========================================================
-FastVault = _G.Roooor_FastVault or {
-    Enabled = false,
-    Speed = 1.2,
-    -- Work ID PERSIS FALLENS
-    ReplaceMap = {
-        ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779", -- Running → Finesse
-    },
-    VaultTracks = {},
-}
-_G.Roooor_FastVault = FastVault
-
--- =========================================================
--- LIST & STATE LAINNYA
--- =========================================================
+-- LIST LAINNYA
 EightBitList = { "Royal Crown" }
 EightBitIds = { ["Royal Crown"] = 10138606900 }
 
@@ -501,9 +483,7 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
--- =========================================================
--- 🆕 CARRY / HOOK REMOTES (KILLER)
--- =========================================================
+-- REMOTES
 pcall(function()
     local remotes = ReplicatedStorage:FindFirstChild("Remotes")
     if remotes then
@@ -519,14 +499,11 @@ pcall(function()
     end
 end)
 
-print("✅ [1/11] COSMIC HUB - Base + State v3.0 loaded")
-print("   Auto Parry   : Distance 5-20, Debounce 0.1-0.5")
-print("   Skill Check  : 2 MODE")
-print("   Crosshair    : 8 MODE + 2 WARNA")
-print("   FPS Boost    : READY")
-print("   Fast Vault   : READY (FALLENS ID)")
-print("   Auto Flee    : READY")
-print("   Auto Carry   : READY")-- =========================================================
+print("✅ [1/11] COSMIC HUB v3.1 - Base + State loaded")
+print("   Moonwalk  : 100% FALLENS")
+print("   Fast Vault: 100% FALLENS")
+print("   Auto Parry: Distance 5-20, Debounce 0.1-0.5")
+print("   Crosshair : 8 MODE + 2 WARNA")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1381,12 +1358,10 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/11] COSMIC HUB - Fungsi utama loaded (FPS/Ping PUTIH)")-- =========================================================
--- SECTION 4/11 : ESP + AUTO PARRY + SKILLCHECK + MOONWALK + CROSSHAIR 8 MODE
+-- SECTION 4/11 : ESP + PARRY + SKILLCHECK + MOONWALK + FASTVAULT + CROSSHAIR
 -- =========================================================
 
--- =========================================================
--- ESP SYSTEM
--- =========================================================
+-- ESP SYSTEM (SAMA KAYAK SEBELUMNYA)
 ESPObjects = {}
 StatusESP = {}
 CachedSCP = {}
@@ -1679,7 +1654,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY (sama persis Fallens)
+-- AUTO PARRY (SAMA KAYAK SEBELUMNYA)
 -- =========================================================
 lastParry = 0
 hookedKillers = _G.HookedKillers or {}
@@ -1877,7 +1852,7 @@ function startSkillCheck()
 
         local gr = goal.Rotation % 360
 
-        -- ============ MODE INSTANT ============
+        -- MODE INSTANT
         if SkillCheck.Mode == "Instant" then
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
@@ -1900,7 +1875,7 @@ function startSkillCheck()
             return
         end
 
-        -- ============ MODE PERFECT ============
+        -- MODE PERFECT
         local lr = line.Rotation % 360
         local startRange = (gr + 102) % 360
         local endRange = (gr + 116) % 360
@@ -1930,14 +1905,28 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- MOONWALK
+-- MOONWALK LOGIC (100% PERSIS FALLENS)
 -- =========================================================
-function startMoonwalk()
-    if Moonwalk.Connection then return end
+function isDowned()
+    local char = LP.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return false end
 
-    Moonwalk.Connection = RunService.RenderStepped:Connect(function()
+    return hum.Health <= 0
+        or hum.Health < 2
+        or char:GetAttribute("Downed") == true
+        or char:GetAttribute("IsDown") == true
+        or char:GetAttribute("Knocked") == true
+end
+
+function startMoonwalk()
+    if MoonwalkConnection then return end
+
+    MoonwalkConnection = RunService.RenderStepped:Connect(function()
         if not Moonwalk.Enabled then return end
-        if shouldBlockParry() then return end
+        if ParryActive then return end
+        if isDowned() then return end
 
         local char = LP.Character
         if not char or not char.Parent then return end
@@ -1966,10 +1955,68 @@ function startMoonwalk()
 end
 
 function stopMoonwalk()
-    if Moonwalk.Connection then
-        Moonwalk.Connection:Disconnect()
-        Moonwalk.Connection = nil
+    if MoonwalkConnection then
+        MoonwalkConnection:Disconnect()
+        MoonwalkConnection = nil
     end
+end
+
+-- =========================================================
+-- FAST VAULT (100% PERSIS FALLENS)
+-- =========================================================
+function normalizeVaultId(id)
+    local num = tostring(id):match("%d+")
+    return num and ("rbxassetid://" .. num)
+end
+
+function hookVault(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+
+    animator.AnimationPlayed:Connect(function(track)
+        if not FastVault.Enabled then return end
+
+        local anim = track.Animation
+        if not anim or not anim.AnimationId then return end
+
+        local id = normalizeVaultId(anim.AnimationId)
+        if not id then return end
+
+        local replaceId = FastVault.ReplaceMap[id]
+        if not replaceId then return end
+
+        if VaultTracks[track] then return end
+        VaultTracks[track] = true
+
+        track:Stop()
+
+        local newAnim = Instance.new("Animation")
+        newAnim.AnimationId = replaceId
+
+        local newTrack = animator:LoadAnimation(newAnim)
+
+        newTrack.Priority = Enum.AnimationPriority.Action
+
+        newTrack:Play()
+        newTrack:AdjustSpeed(FastVault.Speed)
+
+        newTrack.Stopped:Connect(function()
+            VaultTracks[track] = nil
+        end)
+    end)
+end
+
+-- APPLY KE CHARACTER (PERSIS FALLENS)
+LP.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    hookVault(char)
+end)
+
+if LP.Character then
+    hookVault(LP.Character)
 end
 
 -- =========================================================
@@ -2112,7 +2159,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- VISUAL FUNCTIONS (Fullbright, Sky, FOV, dll)
+-- VISUAL (Fullbright, Sky, FOV, dll) - SAMA KAYAK SEBELUMNYA
 -- =========================================================
 origLighting = {
     Brightness = Lighting.Brightness,
@@ -2417,7 +2464,7 @@ function spawnKillEffect(pos)
 end
 
 -- =========================================================
--- 🆕 CROSSHAIR 8 MODE + 2 WARNA MODE (SOLID / GALAXY)
+-- CROSSHAIR 8 MODE + 2 WARNA (SAMA KAYAK SEBELUMNYA)
 -- =========================================================
 crosshairGui = nil
 crosshairParts = {}
@@ -2505,7 +2552,6 @@ function applyCrosshair(enable, color, size)
         return c
     end
 
-    -- ============ 8 MODE ============
     if style == "Plus" then
         mkBar(size, thickness, -size/2 - 2, 0)
         mkBar(size, thickness,  size/2 + 2, 0)
@@ -2533,7 +2579,6 @@ function applyCrosshair(enable, color, size)
         mkDot(thickness + 2)
     end
 
-    -- ============ GALAXY MODE ============
     if colorMode == "Galaxy" then
         for _, part in ipairs(crosshairParts) do
             local grad = Instance.new("UIGradient")
@@ -2618,9 +2663,7 @@ function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- =========================================================
--- EXPORT KE _G
--- =========================================================
+-- EXPORT
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8Bit = apply8Bit
@@ -2667,9 +2710,13 @@ _G.Roooor_applyAntiAFK = applyAntiAFK
 _G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
+_G.Roooor_hookVault = hookVault
+_G.Roooor_isDowned = isDowned
 
-print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + Crosshair 8 MODE loaded")-- =========================================================
--- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA (v3.0)
+print("✅ [4/11] COSMIC HUB - ESP + Parry + SkillCheck + Moonwalk + FastVault + Crosshair loaded")
+print("   Moonwalk  : 100% FALLENS")
+print("   FastVault : 100% FALLENS")-- =========================================================
+-- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
 -- INSTANT INTERACT
@@ -2889,7 +2936,7 @@ task.spawn(function()
     end
 end)
 
--- NOTIFIKASI KILLER STUN
+-- STUN NOTIFY
 stunIcons = {}
 
 function createStunIcon(killerChar)
@@ -2978,7 +3025,7 @@ task.spawn(function()
     end
 end)
 
--- KILLER: AUTO ATTACK
+-- KILLER AUTO ATTACK
 lastAtk = 0
 task.spawn(function()
     while task.wait(0.2) do
@@ -3061,9 +3108,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🆕 AUTO WIGGLE (SURVIVOR)
--- =========================================================
+-- AUTO WIGGLE
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
@@ -3088,9 +3133,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🆕 AUTO FLEE KILLER (SURVIVOR)
--- =========================================================
+-- AUTO FLEE KILLER
 function GetNearestKillerForFlee()
     local root = getRoot()
     if not root then return nil, math.huge end
@@ -3146,53 +3189,12 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🆕 FAST VAULT (PERSIS FALLENS)
--- =========================================================
-function normalizeVaultId(id)
-    local num = tostring(id):match("%d+")
-    return num and ("rbxassetid://" .. num)
-end
-
-function hookVault(char)
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then return end
-
-    animator.AnimationPlayed:Connect(function(track)
-        if not FastVault.Enabled then return end
-        local anim = track.Animation
-        if not anim or not anim.AnimationId then return end
-        local id = normalizeVaultId(anim.AnimationId)
-        if not id then return end
-        local replaceId = FastVault.ReplaceMap[id]
-        if not replaceId then return end
-        if FastVault.VaultTracks[track] then return end
-        FastVault.VaultTracks[track] = true
-
-        track:Stop()
-
-        local newAnim = Instance.new("Animation")
-        newAnim.AnimationId = replaceId
-        local newTrack = animator:LoadAnimation(newAnim)
-        newTrack.Priority = Enum.AnimationPriority.Action
-        newTrack:Play()
-        newTrack:AdjustSpeed(FastVault.Speed)
-
-        newTrack.Stopped:Connect(function()
-            FastVault.VaultTracks[track] = nil
-        end)
-    end)
-end
-
--- =========================================================
--- 🆕 FPS BOOST (No Screen Effects + Low Graphics + Clean Sky)
--- =========================================================
+-- FPS BOOST
 local ScreenEffectTypes = {
     "ColorCorrectionEffect", "DepthOfFieldEffect", "BlurEffect",
     "SunRaysEffect", "BloomEffect"
 }
+DisabledEffects = {}
 
 function applyNoScreenEffects()
     if S.NoScreenEffects then
@@ -3241,9 +3243,9 @@ function applyCleanSky()
     end
 end
 
--- =========================================================
--- 🆕 AUTO CARRY + AUTO HOOK (KILLER)
--- =========================================================
+-- AUTO CARRY + AUTO HOOK
+KillerBusy = false
+
 function GetDownedSurvivor()
     local root = getRoot()
     if not root then return nil end
@@ -3325,16 +3327,13 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🆕 AUTO ESCAPE GATE (SURVIVOR)
--- =========================================================
+-- AUTO ESCAPE GATE
 task.spawn(function()
     while task.wait(1) do
         if not S.AutoEscapeGate then continue end
         local root = getRoot()
         if not root then continue end
 
-        -- Cek killer deket
         local killerNear = false
         if S.AutoEscapeUseKillerCheck then
             local kRoot, kDist = GetNearestKillerForFlee()
@@ -3343,7 +3342,6 @@ task.spawn(function()
             end
         end
 
-        -- Cek generator cukup
         local genDone = false
         if S.AutoEscapeUseGenCheck then
             local total, done = 0, 0
@@ -3381,9 +3379,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- MAIN ESP LOOP
--- =========================================================
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
@@ -3432,10 +3428,9 @@ RunService.Heartbeat:Connect(function()
 
         UpdateSCPEsp(root)
 
-        -- FPS Boost update
-        applyNoScreenEffects()
-        applyLowGraphics()
-        applyCleanSky()
+        if S.NoScreenEffects then applyNoScreenEffects() end
+        if S.LowGraphics then applyLowGraphics() end
+        if S.CleanSky then applyCleanSky() end
     end
 end)
 
@@ -3473,13 +3468,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [5/11] COSMIC HUB - Fitur aktif + Loop utama loaded")
-print("   Auto Wiggle    : ✅")
-print("   Auto Flee      : ✅")
-print("   Fast Vault     : ✅ (FALLENS ID)")
-print("   FPS Boost      : ✅")
-print("   Auto Carry/Hook: ✅")
-print("   Auto Escape    : ✅")-- =========================================================
+print("✅ [5/11] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
 -- SECTION 6/11 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
@@ -4272,11 +4261,10 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- ============================================================
--- TAB 1: SURVIVOR 🆕 (Tambah Auto Wiggle, Auto Flee, Fast Vault, Auto Escape)
+-- TAB 1: SURVIVOR
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
-    -- ================= AUTO PARRY =================
     sec("Auto Parry", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
@@ -4284,17 +4272,17 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("Parry otomatis saat killer nyerang", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 20, 15, function(v)         -- 🆕 5-20
+    sl("Parry Distance", 5, 20, 15, function(v)
         AutoParry.ParryDistance = v
     end)
 
-    sl("Face Sensitivity", -1, 1, 0.7, function(v)      -- TIDAK DIUBAH
+    sl("Face Sensitivity", -1, 1, 0.7, function(v)
         AutoParry.FaceSensitivity = v
         AutoParry.RequireFacing = (v > -1)
     end)
     lbl("0.7 = Facing (recommended)", C.GRN)
 
-    sl("Parry Debounce", 0.1, 0.5, 0.2, function(v)     -- 🆕 0.1-0.5
+    sl("Parry Debounce", 0.1, 0.5, 0.2, function(v)
         PARRY_DEBOUNCE = v
     end)
     lbl("0.2 = Responsif", C.FIRE_BRIGHT)
@@ -4304,7 +4292,6 @@ makeTab("Survivor", "🏃", 1, function()
     sl("Circle Size", 5, 30, 12, function(v) S.ParryCircleSize = v end)
     lbl("Hijau = aman | Merah = killer dalem", C.FIRE_BRIGHT)
 
-    -- ================= AUTO SKILL CHECK =================
     sec("Auto Skill Check (2 MODE)", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
         SkillCheck.Enabled = s
@@ -4319,14 +4306,12 @@ makeTab("Survivor", "🏃", 1, function()
     tog("Hide Needle (Instant only)", false, function(s)
         SkillCheck.HideNeedle = s
     end)
-    lbl("Sembunyiin jarum biar gak keliatan", C.DIM)
 
     btn("🔄 Reset Counter", function()
         SkillCheck.Success = 0
         SkillCheck.Total = 0
     end)
 
-    -- ================= 🆕 AUTO WIGGLE =================
     sec("Auto Wiggle (Anti Gendong)", "🔓")
     tog("Enable Auto Wiggle", false, function(s)
         AutoParry.Wiggle = s
@@ -4336,7 +4321,6 @@ makeTab("Survivor", "🏃", 1, function()
         AutoParry.WiggleSpam = v
     end)
 
-    -- ================= 🆕 AUTO FLEE KILLER =================
     sec("Auto Flee Killer", "🏃‍♂️")
     tog("Enable Auto Flee", false, function(s)
         AutoFlee.Enabled = s
@@ -4349,17 +4333,18 @@ makeTab("Survivor", "🏃", 1, function()
         AutoFlee.Cooldown = v
     end)
 
-    -- ================= 🆕 FAST VAULT =================
     sec("Fast Vault (FALLENS)", "⚡")
     tog("Enable Fast Vault", false, function(s)
         FastVault.Enabled = s
+        if s and LP.Character then
+            hookVault(LP.Character)
+        end
     end)
     lbl("Ganti animasi vault jadi lebih cepat", C.GRN)
     sl("Animation Speed", 1, 5, 1.2, function(v)
         FastVault.Speed = v
     end)
 
-    -- ================= 🆕 AUTO ESCAPE GATE =================
     sec("Auto Escape Gate", "🚪")
     tog("Enable Auto Escape", false, function(s)
         S.AutoEscapeGate = s
@@ -4376,24 +4361,20 @@ makeTab("Survivor", "🏃", 1, function()
         S.AutoEscapeRange = v
     end)
 
-    -- ================= GOD MODE =================
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
         GodMode.Enabled = s
     end)
     lbl("Anti Down + Anti Stun + Anti Grab", C.DIM)
 
-    -- ================= SUPPORT =================
     sec("Support", "💊")
     tog("Instant Interact", false, function(s) S.InstantInteract = s end)
 
-    -- ================= TELEPORT =================
     sec("Teleport", "🌀")
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
 
-    -- ================= ALERT =================
     sec("Alert", "⚠️")
     tog("Safe Zone", false, function(s) S.SafeZone = s end)
     tog("Escape Alert", false, function(s) S.EscapeAlert = s end)
@@ -4415,7 +4396,6 @@ makeTab("Killer", "🔪", 2, function()
     tog("Killer Kill All", false, function(s) S.Killer_KillAll = s end)
     lbl("Auto TP ke survivor + attack", C.DIM)
 
-    -- 🆕 AUTO CARRY + AUTO HOOK
     sec("Auto Carry + Hook", "🎒")
     tog("Auto Carry (Downed)", false, function(s) S.AutoCarry = s end)
     lbl("Auto gendong survivor yang down", C.FIRE_BRIGHT)
@@ -4556,7 +4536,7 @@ makeTab("Fire", "🔥", 4, function()
 end)
 
 -- ============================================================
--- TAB 5: MOONWALK
+-- TAB 5: MOONWALK (100% PERSIS FALLENS)
 -- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
@@ -4568,7 +4548,15 @@ makeTab("Moonwalk", "🕺", 5, function()
         else
             stopMoonwalk()
             local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.WalkSpeed = 16 end
+            if hum then
+                if S.WalkSpeed then
+                    hum.WalkSpeed = S.WalkSpeedVal
+                elseif S.SpeedHack then
+                    hum.WalkSpeed = S.SpeedHackVal
+                else
+                    hum.WalkSpeed = 16
+                end
+            end
         end
     end)
     lbl("Tekan V juga bisa toggle", C.GRN)
@@ -4582,14 +4570,7 @@ makeTab("Moonwalk", "🕺", 5, function()
             removeMoonwalkButton()
         end
     end)
-
-    tog("🔒 Lock Button Position", true, function(s)
-        Moonwalk.ButtonLocked = s
-        if Moonwalk.LockIconRef then
-            Moonwalk.LockIconRef.Visible = s
-        end
-    end)
-    lbl("ON = gak bisa digeser | OFF = bisa drag", C.FIRE_BRIGHT)
+    lbl("Image ID: 93349170559446 (FALLENS)", C.FIRE_BRIGHT)
 
     sec("Sensitivitas", "⚙️")
     sl("Spam Speed", 1, 50, 30, function(v)
@@ -4610,19 +4591,10 @@ makeTab("Moonwalk", "🕺", 5, function()
     tog("Use Slow Speed", true, function(s)
         Moonwalk.UseSlow = s
     end)
-
-    sec("Gambar", "🖼️")
-    lbl("Gambar: Michael Jackson", C.FIRE_BRIGHT)
-    btn("🔄 Reset Button Position", function()
-        Moonwalk.ButtonPos = UDim2.new(0.65, 0, 0.75, 0)
-        if Moonwalk.GuiInstance then
-            createMoonwalkButton()
-        end
-    end)
 end)
 
 print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
--- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON
+-- SECTION 8/11 : TAB UI PART 2 + MOONWALK BUTTON (FALLENS)
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4635,16 +4607,15 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- =========================================================
--- FUNGSI MOONWALK BUTTON
+-- MOONWALK BUTTON (100% PERSIS FALLENS - NO LOCK, NO DRAG)
 -- =========================================================
 function createMoonwalkButton()
     if not PG or not PG.Parent then return end
     if Moonwalk.GuiInstance then Moonwalk.GuiInstance:Destroy() end
 
     local gui = Instance.new("ScreenGui")
-    gui.Name = "CosmicMoonwalk"
+    gui.Name = "MoonwalkGui"
     gui.ResetOnSpawn = false
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     gui.Parent = PG
 
     local btn = Instance.new("ImageButton")
@@ -4653,7 +4624,7 @@ function createMoonwalkButton()
     btn.Position = Moonwalk.ButtonPos
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     btn.BackgroundTransparency = 0.9
-    btn.Image = Moonwalk.ImageId
+    btn.Image = "rbxassetid://93349170559446"  -- FALLENS ID
     btn.ImageTransparency = 0.1
     btn.AutoButtonColor = false
     btn.Parent = gui
@@ -4669,91 +4640,28 @@ function createMoonwalkButton()
     stroke.Transparency = 0.8
     stroke.Parent = btn
 
-    -- 🔒 Icon lock
-    local lockIcon = Instance.new("TextLabel")
-    lockIcon.Size = UDim2.new(0, 14, 0, 14)
-    lockIcon.Position = UDim2.new(1, -16, 0, 2)
-    lockIcon.BackgroundTransparency = 1
-    lockIcon.Text = "🔒"
-    lockIcon.TextColor3 = Color3.fromRGB(255, 80, 80)
-    lockIcon.TextScaled = true
-    lockIcon.Font = Enum.Font.GothamBold
-    lockIcon.Visible = Moonwalk.ButtonLocked
-    lockIcon.Parent = btn
-
-    Moonwalk.LockIconRef = lockIcon
-
-    -- DRAG SYSTEM
-    local dragging = false
-    local dragInput, dragStart, startPos
-    local wasDragged = false
-
-    btn.InputBegan:Connect(function(input)
-        if Moonwalk.ButtonLocked then return end
-
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-
-            dragging = true
-            wasDragged = false
-            dragStart = input.Position
-            startPos = btn.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    btn.InputChanged:Connect(function(input)
-        if Moonwalk.ButtonLocked then return end
-
-        if input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UIS.InputChanged:Connect(function(input)
-        if Moonwalk.ButtonLocked then return end
-        if not dragging then return end
-        if input ~= dragInput then return end
-
-        local delta = input.Position - dragStart
-
-        if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
-            wasDragged = true
-        end
-
-        local newPos = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-
-        btn.Position = newPos
-        Moonwalk.ButtonPos = newPos
-    end)
-
-    -- TOGGLE
     btn.MouseButton1Click:Connect(function()
-        if wasDragged then return end
-
         Moonwalk.Enabled = not Moonwalk.Enabled
 
-        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        local char = LP.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
 
         if Moonwalk.Enabled then
             stroke.Color = Color3.fromRGB(170, 0, 255)
-            if not Moonwalk.Connection then
+            if not MoonwalkConnection then
                 startMoonwalk()
             end
         else
             stroke.Color = Color3.fromRGB(255, 255, 255)
-            if hum then hum.WalkSpeed = 16 end
+            if hum then
+                if S.WalkSpeed then
+                    hum.WalkSpeed = S.WalkSpeedVal
+                elseif S.SpeedHack then
+                    hum.WalkSpeed = S.SpeedHackVal
+                else
+                    hum.WalkSpeed = 16
+                end
+            end
         end
     end)
 
@@ -4764,7 +4672,6 @@ function removeMoonwalkButton()
     if Moonwalk.GuiInstance then
         Moonwalk.GuiInstance:Destroy()
         Moonwalk.GuiInstance = nil
-        Moonwalk.LockIconRef = nil
     end
 end
 
@@ -4893,7 +4800,7 @@ makeTab("Misc", "⚙️", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: PLAYER 🆕 (Tambah FPS Boost + Info)
+-- TAB 8: PLAYER (FPS Boost)
 -- ============================================================
 makeTab("Player", "👤", 8, function()
 
@@ -4902,7 +4809,6 @@ makeTab("Player", "👤", 8, function()
         Combat.Mode = v
     end)
 
-    -- 🆕 FPS BOOST
     sec("FPS Boost", "🚀")
     tog("No Screen Effects", false, function(s)
         S.NoScreenEffects = s
@@ -4922,7 +4828,6 @@ makeTab("Player", "👤", 8, function()
     end)
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
-    -- INFO
     sec("Info", "ℹ️")
     lbl("🎯 Aimbot = Hold tombol serang", C.FIRE_BRIGHT)
     lbl("PC: klik kanan | HP: tombol attack", C.DIM)
@@ -4955,7 +4860,7 @@ makeTab("Player", "👤", 8, function()
 end)
 
 -- ============================================================
--- TAB 9: VISUAL 🆕 (Crosshair 8 mode + 2 warna)
+-- TAB 9: VISUAL (Crosshair 8 Mode + Fire Beam + 8-Bit + Korblox)
 -- ============================================================
 makeTab("Visual", "✨", 9, function()
 
@@ -5047,7 +4952,7 @@ makeTab("Visual", "✨", 9, function()
         if S.Korblox then applyKorblox(true, "Pencil", S.KorbloxYOffset, v) end
     end)
 
-    -- ============ 🆕 CROSSHAIR 8 MODE ============
+    -- CROSSHAIR 8 MODE
     sec("Crosshair 8 Mode 🆕", "🎯")
 
     tog("Enable Crosshair", false, function(s)
@@ -5108,7 +5013,7 @@ makeTab("Visual", "✨", 9, function()
         end
     end)
 
-    -- ============ FIRE BEAM ============
+    -- FIRE BEAM
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -5246,7 +5151,7 @@ makeTab("Extra", "✨", 11, function()
     lbl("Sound aktif saat toggle ON/OFF", C.DIM)
 end)
 
-print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
+print("✅ [8/11] COSMIC HUB - Tab UI Part 2 + Moonwalk Button (FALLENS) loaded")-- =========================================================
 -- SECTION 9/11 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
@@ -5570,10 +5475,8 @@ LP.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         pcall(createMoonwalkButton)
     end
-    -- 🆕 Fast Vault hook ke char baru
-    if FastVault.Enabled then
-        pcall(function() hookVault(char) end)
-    end
+    -- FAST VAULT HOOK (PERSIS FALLENS)
+    pcall(function() hookVault(char) end)
 end)
 
 task.spawn(function()
@@ -5594,14 +5497,15 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- =========================================================
--- KEYBIND V UNTUK MOONWALK
+-- KEYBIND V UNTUK MOONWALK (PERSIS FALLENS)
 -- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
         Moonwalk.Enabled = not Moonwalk.Enabled
 
-        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        local char = LP.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
 
         if Moonwalk.Enabled then
             startMoonwalk()
@@ -5614,7 +5518,15 @@ UIS.InputBegan:Connect(function(input, gpe)
             end)
         else
             stopMoonwalk()
-            if hum then hum.WalkSpeed = 16 end
+            if hum then
+                if S.WalkSpeed then
+                    hum.WalkSpeed = S.WalkSpeedVal
+                elseif S.SpeedHack then
+                    hum.WalkSpeed = S.SpeedHackVal
+                else
+                    hum.WalkSpeed = 16
+                end
+            end
             pcall(function()
                 StarterGui:SetCore("SendNotification", {
                     Title = "Moonwalk",
@@ -5626,9 +5538,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- =========================================================
 -- AUTO APPLY ON EXECUTE
--- =========================================================
 task.spawn(function()
     task.wait(3)
     pcall(createFPSPingGui)
@@ -5642,77 +5552,33 @@ task.spawn(function()
         end
         if AutoParry.Enabled then pcall(scanKillers) end
         if SkillCheck.Enabled then pcall(startSkillCheck) end
-        -- 🆕 Fast Vault hook awal
         if FastVault.Enabled then
             pcall(function() hookVault(LP.Character) end)
         end
     end
 end)
 
--- =========================================================
--- PRINT FINAL
--- =========================================================
-task.wait(0.5)
-
-print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.0 ✨                   ║")
-print("║  ✅ SEMUA FITUR LOADED                   ║")
-print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry (5-20)                    ║")
-print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Keybind V + Button)        ║")
-print("║  🔓 Auto Wiggle                           ║")
-print("║  🏃 Auto Flee Killer                      ║")
-print("║  ⚡ Fast Vault (FALLENS)                  ║")
-print("║  🚪 Auto Escape Gate                      ║")
-print("║  🎒 Auto Carry + Hook                     ║")
-print("║  🚀 FPS Boost (3 Mode)                    ║")
-print("║  🎯 Crosshair 8 Mode + 2 Warna            ║")
-print("║  🎯 Aimbot INSTAN + Hold to Aim           ║")
-print("║  📦 Hitbox BESAR + 2 Mode                 ║")
-print("║  🛡️ God Mode                              ║")
-print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)       ║")
-print("║  🦴 Korblox Pencil (CLIENT-ONLY)          ║")
-print("║  🔥 Fire Beam 10 efek                     ║")
-print("║  💎 HD Visual + 8 HD Extra                ║")
-print("║  🌌 ESP Nama 2 Mode                       ║")
-print("║  🎵 Sound: Android Notif                  ║")
-print("║  🛠️ Anti-AFK + Rejoin + Server Hop        ║")
-print("║  📊 FPS + Ping Counter (PUTIH)            ║")
-print("╠══════════════════════════════════════════╣")
-print("║  🎮 Buka menu: Klik tombol ✨            ║")
-print("║  🎯 Aimbot: Hold tombol serang            ║")
-print("║  🕺 Moonwalk: Tekan V                     ║")
-print("║  🛡️ Auto Parry ON = GACOR!                ║")
-print("╚══════════════════════════════════════════╝")
-
-print("✅ [9/11] COSMIC HUB - FINAL LOADED! ✨")-- =========================================================
+print("✅ [9/11] COSMIC HUB - Final Combat + Auto Re-Apply + Keybind V loaded")-- =========================================================
 -- SECTION 10/11 : LOGIC FITUR BARU (RAPIH)
 -- =========================================================
--- Note: Sebagian logic udah ada di Section 5 & 4.
--- Section ini cuma buat rapihin + pastiin semua fungsi kepanggil.
 
 -- =========================================================
--- 🆕 AUTO WIGGLE - LOOP UTAMA
+-- AUTO WIGGLE LOOP
 -- =========================================================
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
         local char = LP.Character
         if not char then continue end
-
         local carried = (char:FindFirstChild("IsCarried") and char.IsCarried.Value)
             or (char:FindFirstChild("IsCarrying") and char.IsCarrying.Value)
-
         if not carried then continue end
-
         local remotes = ReplicatedStorage:FindFirstChild("Remotes")
         if not remotes then continue end
         local carry = remotes:FindFirstChild("Carry")
         if not carry then continue end
         local event = carry:FindFirstChild("SelfUnHookEvent")
         if not event then continue end
-
         for i = 1, (AutoParry.WiggleSpam or 5) do
             pcall(function() event:FireServer() end)
         end
@@ -5720,14 +5586,13 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🆕 AUTO FLEE KILLER - LOOP UTAMA
+-- AUTO FLEE LOOP
 -- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if not AutoFlee.Enabled then continue end
         local root = getRoot()
         if not root then continue end
-
         local killerRoot, distance = GetNearestKillerForFlee()
         if killerRoot and distance <= AutoFlee.DetectDistance
            and tick() - AutoFlee.LastFlee > AutoFlee.Cooldown then
@@ -5743,7 +5608,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🆕 AUTO ESCAPE GATE - LOOP UTAMA
+-- AUTO ESCAPE LOOP
 -- =========================================================
 task.spawn(function()
     while task.wait(1) do
@@ -5786,7 +5651,6 @@ task.spawn(function()
                     end
                 end
             end
-
             if found then
                 pcall(function()
                     root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
@@ -5797,7 +5661,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🆕 FAST VAULT - HOOK KE CHARACTER
+-- FAST VAULT HOOK (PERSIS FALLENS)
 -- =========================================================
 LP.CharacterAdded:Connect(function(char)
     task.wait(1)
@@ -5806,12 +5670,12 @@ LP.CharacterAdded:Connect(function(char)
     end
 end)
 
-if LP.Character and FastVault.Enabled then
+if LP.Character then
     pcall(function() hookVault(LP.Character) end)
 end
 
 -- =========================================================
--- 🆕 AUTO CARRY + HOOK - LOOP UTAMA
+-- AUTO CARRY LOOP
 -- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
@@ -5859,7 +5723,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🆕 FPS BOOST - LOOP UTAMA
+-- FPS BOOST LOOP
 -- =========================================================
 task.spawn(function()
     while task.wait(1) do
@@ -5870,49 +5734,20 @@ task.spawn(function()
 end)
 
 print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- =========================================================
--- SECTION 11/11 : PRINT FINAL + AUTO APPLY
--- =========================================================
-
--- =========================================================
--- AUTO APPLY ON EXECUTE
--- =========================================================
-task.spawn(function()
-    task.wait(3)
-
-    -- Apply FPS/Ping
-    pcall(createFPSPingGui)
-
-    if LP.Character then
-        if S.Headless then pcall(function() applyHeadless(true) end) end
-        if S.Korblox then
-            pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
-        end
-        if S.EightBitOn then
-            pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
-        end
-        if AutoParry.Enabled then pcall(scanKillers) end
-        if SkillCheck.Enabled then pcall(startSkillCheck) end
-        if FastVault.Enabled then
-            pcall(function() hookVault(LP.Character) end)
-        end
-    end
-end)
-
--- =========================================================
--- PRINT FINAL
+-- SECTION 11/11 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v3.0 ✨                   ║")
+print("║  ✨ COSMIC HUB v3.1 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry (5-20)                    ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Keybind V + Button)        ║")
+print("║  🕺 Moonwalk (FALLENS 100%)              ║")
+print("║  ⚡ Fast Vault (FALLENS 100%)            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
-print("║  ⚡ Fast Vault (FALLENS)                 ║")
 print("║  🚪 Auto Escape Gate                     ║")
 print("║  🎒 Auto Carry + Hook                    ║")
 print("║  🚀 FPS Boost (3 Mode)                   ║")
@@ -5935,4 +5770,4 @@ print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/11] COSMIC HUB v3.0 - FINAL LOADED! ✨")
+print("✅ [11/11] COSMIC HUB v3.1 - FINAL LOADED! ✨")

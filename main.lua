@@ -341,8 +341,8 @@ _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
 
 ESP = _G.Roooor_ESP or {
-    Survivor = false, Killer = false, Generator = false,
-    Pallet = false, Window = false, SCP = false, Distance = 50,
+    Survivor = true, Killer = true, Generator = true,
+    Pallet = false, Window = false, SCP = false, Distance = 500,
 }
 _G.Roooor_ESP = ESP
 
@@ -354,7 +354,7 @@ _G.Roooor_ESPStatus = ESPStatus
 
 TeamColors = _G.Roooor_TeamColors or {
     Killer = Color3.fromRGB(255, 60, 60),
-    Survivor = Color3.fromRGB(60, 255, 120),
+    Survivor = Color3.fromRGB(0, 120, 255),
 }
 _G.Roooor_TeamColors = TeamColors
 
@@ -440,8 +440,10 @@ print("   Parry Circle: ON (Size 12)")
 print("   Headless    : ON")
 print("   Korblox     : ON (Scale 1, Y 0.6)")
 print("   8-Bit Crown : ON (Size 1.24, Height 0.88)")
-print("   ESP Radius  : Limit 500")
-print("   FPS + Ping  : ON (pojok kanan atas)")
+print("   ESP         : ON (Survivor Biru, Killer Merah)")
+print("   ESP Radius  : 500 (max 500)")
+print("   FPS + Ping  : ON (rainbow galaxy)")
+print("   Hitbox      : MANUAL (max 120)")
 print("   Anti-AFK    : Toggle")
 print("   Rejoin/Hop  : Tombol")-- =========================================================
 -- COSMIC HUB
@@ -1190,8 +1192,8 @@ function createFPSPingGui()
 
     local frame = Instance.new("Frame")
     frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, 180, 0, 60)
-    frame.Position = UDim2.new(1, -190, 0, 10)
+    frame.Size = UDim2.new(0, 110, 0, 42)
+    frame.Position = UDim2.new(1, -120, 0, 5)
     frame.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
     frame.BackgroundTransparency = 0.3
     frame.BorderSizePixel = 0
@@ -1201,27 +1203,67 @@ function createFPSPingGui()
 
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
-    fpsLabel.Size = UDim2.new(1, -10, 0, 25)
-    fpsLabel.Position = UDim2.new(0, 5, 0, 5)
+    fpsLabel.Size = UDim2.new(1, -8, 0, 18)
+    fpsLabel.Position = UDim2.new(0, 4, 0, 3)
     fpsLabel.BackgroundTransparency = 1
     fpsLabel.Text = "FPS: 0"
     fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
-    fpsLabel.TextSize = 13
+    fpsLabel.TextSize = 11
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
 
+    local fpsGrad = Instance.new("UIGradient")
+    fpsGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 120)),
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(120, 60, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 80, 200)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 120)),
+    })
+    fpsGrad.Parent = fpsLabel
+
+    task.spawn(function()
+        while fpsGrad.Parent do
+            for i = 0, 1, 0.02 do
+                if not fpsGrad.Parent then break end
+                fpsGrad.Rotation = i * 360
+                task.wait(0.05)
+            end
+        end
+    end)
+
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
-    pingLabel.Size = UDim2.new(1, -10, 0, 25)
-    pingLabel.Position = UDim2.new(0, 5, 0, 30)
+    pingLabel.Size = UDim2.new(1, -8, 0, 18)
+    pingLabel.Position = UDim2.new(0, 4, 0, 21)
     pingLabel.BackgroundTransparency = 1
     pingLabel.Text = "Ping: 0 ms"
     pingLabel.TextColor3 = Color3.fromRGB(0, 230, 255)
-    pingLabel.TextSize = 13
+    pingLabel.TextSize = 11
     pingLabel.Font = Enum.Font.GothamBold
     pingLabel.TextXAlignment = Enum.TextXAlignment.Left
     pingLabel.Parent = frame
+
+    local pingGrad = Instance.new("UIGradient")
+    pingGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 230, 255)),
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 80, 200)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 60, 255)),
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 255, 150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 230, 255)),
+    })
+    pingGrad.Parent = pingLabel
+
+    task.spawn(function()
+        while pingGrad.Parent do
+            for i = 0, 1, 0.02 do
+                if not pingGrad.Parent then break end
+                pingGrad.Rotation = i * 360
+                task.wait(0.05)
+            end
+        end
+    end)
 end
 
 task.spawn(function()
@@ -1902,7 +1944,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- TELEPORT (TP ke Gate & TP ke Dalam Gate DIHAPUS)
+-- TELEPORT (TP ke Finish Line ONLY)
 -- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
@@ -3795,13 +3837,13 @@ end)
 -- ============================================================
 makeTab("ESP", "👁️", 3, function()
     sec("Player ESP", "🟢")
-    tog("ESP Survivor", false, function(s) ESP.Survivor = s end)
+    tog("ESP Survivor", true, function(s) ESP.Survivor = s end)
     cpk("Survivor Color", TeamColors.Survivor, function(c) TeamColors.Survivor = c end)
-    tog("ESP Killer", false, function(s) ESP.Killer = s end)
+    tog("ESP Killer", true, function(s) ESP.Killer = s end)
     cpk("Killer Color", TeamColors.Killer, function(c) TeamColors.Killer = c end)
 
     sec("Object ESP", "⚡")
-    tog("ESP Generator", false, function(s) ESP.Generator = s end)
+    tog("ESP Generator", true, function(s) ESP.Generator = s end)
     cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
     tog("ESP Pallet", false, function(s) ESP.Pallet = s end)
     cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
@@ -3811,8 +3853,8 @@ makeTab("ESP", "👁️", 3, function()
     cpk("SCP Color", SCPColor, function(c) SCPColor = c end)
 
     sec("ESP Distance", "📏")
-    sl("ESP Radius", 10, 500, 50, function(v) ESP.Distance = v end)
-    lbl("Max 500 studs", C.GRN)
+    sl("ESP Radius", 10, 500, 500, function(v) ESP.Distance = v end)
+    lbl("Max 500 (default 500)", C.GRN)
 
     sec("Status ESP", "🟢")
     tog("Enable Status ESP", false, function(s) ESPStatus.Enabled = s end)
@@ -4699,7 +4741,8 @@ makeTab("Combat", "⚔️", 9, function()
     sec("Hitbox (BESAR - 2 Mode)", "📦")
     tog("Hitbox Survivor Mode", false, function(s) Combat.HitboxSurvivor = s end)
     tog("Hitbox Killer Mode", false, function(s) Combat.HitboxKiller = s end)
-    sl("Hitbox Size", 10, 50, 25, function(v) Combat.HitboxSize = v end)
+    sl("Hitbox Size", 10, 120, 25, function(v) Combat.HitboxSize = v end)
+    lbl("Max 120 (manual ON)", C.GRN)
     tog("Show Hitbox (Visible)", false, function(s) Combat.HitboxVisible = s end)
 
     sec("Keybind", "⌨️")
@@ -4729,7 +4772,7 @@ print("║  🛡️ Auto Parry GACOR (Distance 12)       ║")
 print("║  ⚡ Auto Skill Check                     ║")
 print("║  ⭕ Parry Circle BEAM RING                ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
-print("║  📦 Hitbox BESAR (25) + 2 Mode           ║")
+print("║  📦 Hitbox BESAR (max 120) + 2 Mode      ║")
 print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
@@ -4739,7 +4782,7 @@ print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
-print("║  📊 FPS + Ping Counter                   ║")
+print("║  📊 FPS + Ping Counter (rainbow galaxy)  ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")

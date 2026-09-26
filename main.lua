@@ -1,6 +1,13 @@
+--[[
+    ╔══════════════════════════════════════════════╗
+    ║           COSMIC HUB - v2.0                  ║
+    ║   Auto Parry + SkillCheck 2 Mode + Moonwalk  ║
+    ║   Cosmic Galaxy Theme (Solid Background)     ║
+    ╚══════════════════════════════════════════════╝
+]]
+
 -- =========================================================
--- COSMIC HUB
--- BAGIAN 1/8 : LOADING + CONFIG + STATE
+-- SECTION 1/9 : LOADING + CONFIG + STATE
 -- =========================================================
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -22,14 +29,17 @@ function getRoot()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
 
+-- =========================================================
+-- WARNA TEMA (COSMIC GALAXY SOLID)
+-- =========================================================
 C = {
-    BG = Color3.fromRGB(8, 5, 20),
-    BG2 = Color3.fromRGB(15, 8, 35),
-    PANEL = Color3.fromRGB(18, 10, 40),
-    PANEL2 = Color3.fromRGB(28, 15, 55),
-    ACC = Color3.fromRGB(120, 60, 255),
-    ACC2 = Color3.fromRGB(0, 230, 255),
-    ACC3 = Color3.fromRGB(255, 80, 200),
+    BG = Color3.fromRGB(10, 5, 25),
+    BG2 = Color3.fromRGB(20, 10, 45),
+    PANEL = Color3.fromRGB(22, 12, 48),
+    PANEL2 = Color3.fromRGB(35, 18, 75),
+    ACC = Color3.fromRGB(140, 70, 255),
+    ACC2 = Color3.fromRGB(0, 200, 255),
+    ACC3 = Color3.fromRGB(255, 100, 200),
     ACC4 = Color3.fromRGB(255, 200, 80),
     GOLD = Color3.fromRGB(255, 215, 0),
     FIRE_BRIGHT = Color3.fromRGB(220, 180, 255),
@@ -74,7 +84,7 @@ end
 _G.Roooor_playSound = playToggleSound
 
 -- =========================================================
--- LOADING GALAXY
+-- LOADING GALAXY (SIMPLE - NO BINTANG)
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
@@ -85,50 +95,17 @@ loadingGui.Parent = PG
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(5, 3, 15)
+bg.BackgroundColor3 = Color3.fromRGB(8, 4, 20)
 bg.BorderSizePixel = 0
 bg.Parent = loadingGui
 
 local bgGrad = Instance.new("UIGradient")
 bgGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 8, 50)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 10, 55)),
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 5, 30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 8, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 10, 55)),
 })
 bgGrad.Parent = bg
-
-task.spawn(function()
-    while bg.Parent do
-        for i = 0, 360, 6 do
-            if not bg.Parent then break end
-            bgGrad.Rotation = i
-            task.wait(0.04)
-        end
-    end
-end)
-
-for i = 1, 15 do
-    local p = Instance.new("Frame")
-    p.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
-    p.Position = UDim2.new(math.random(), 0, 1.1, 0)
-    p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.7, 1)
-    p.BorderSizePixel = 0
-    p.Parent = bg
-    rnd(p, 999)
-
-    task.spawn(function()
-        while p.Parent do
-            local speed = math.random(5, 15) / 1000
-            p.Position = UDim2.new(p.Position.X.Scale, p.Position.X.Offset, p.Position.Y.Scale - speed, 0)
-            p.BackgroundTransparency = p.BackgroundTransparency + 0.01
-            if p.BackgroundTransparency >= 1 or p.Position.Y.Scale < -0.1 then
-                p.Position = UDim2.new(math.random(), 0, 1.1, 0)
-                p.BackgroundTransparency = 0
-            end
-            task.wait(0.08)
-        end
-    end)
-end
 
 local ringContainer = Instance.new("Frame")
 ringContainer.Size = UDim2.new(0, 240, 0, 240)
@@ -139,16 +116,16 @@ ringContainer.Parent = bg
 local rings = {}
 for i = 1, 3 do
     local ring = Instance.new("Frame")
-    local ringSize = 200 - (i-1) * 50
+    local ringSize = 200 - (i - 1) * 50
     ring.Size = UDim2.new(0, ringSize, 0, ringSize)
-    ring.Position = UDim2.new(0.5, -ringSize/2, 0.5, -ringSize/2)
+    ring.Position = UDim2.new(0.5, -ringSize / 2, 0.5, -ringSize / 2)
     ring.BackgroundTransparency = 1
     ring.Parent = ringContainer
 
     local rStrk = Instance.new("UIStroke")
-    rStrk.Thickness = 4 - (i-1) * 0.5
+    rStrk.Thickness = 4 - (i - 1) * 0.5
     rStrk.Color = C.ACC2
-    rStrk.Transparency = 0.05 + (i-1) * 0.15
+    rStrk.Transparency = 0.05 + (i - 1) * 0.15
     rStrk.Parent = ring
 
     local rGrad = Instance.new("UIGradient")
@@ -159,7 +136,7 @@ for i = 1, 3 do
     })
     rGrad.Parent = rStrk
 
-    table.insert(rings, {ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1})
+    table.insert(rings, { ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1 })
 end
 
 local core = Instance.new("Frame")
@@ -273,15 +250,15 @@ task.spawn(function()
 end)
 
 task.delay(1.5, function()
-    TweenService:Create(bg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(bg, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
     for _, el in pairs(bg:GetDescendants()) do
         pcall(function()
             if el:IsA("TextLabel") then
-                TweenService:Create(el, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+                TweenService:Create(el, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
             elseif el:IsA("Frame") then
-                TweenService:Create(el, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(el, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
             elseif el:IsA("UIStroke") then
-                TweenService:Create(el, TweenInfo.new(0.5), {Transparency = 1}):Play()
+                TweenService:Create(el, TweenInfo.new(0.5), { Transparency = 1 }):Play()
             end
         end)
     end
@@ -290,58 +267,74 @@ task.delay(1.5, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE UTAMA
 -- =========================================================
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
+    -- Fire
     FireOn = false, FireType = "Classic", FireSize = 5,
     FireFeetOn = false, FireFeetType = "Classic",
+
+    -- Parry
     ParryCircle = true, ParryCircleSize = 12,
+
+    -- Movement
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
-    NoClip = false,
+    NoClip = false, NoClipCamera = false,
+    Fly = false, FlySpeed = 50,
+
+    -- Character
     Korblox = true, KorbloxType = "Pencil",
     KorbloxYOffset = 0.6, KorbloxScale = 1,
     Headless = true,
+    EightBitOn = true, EightBitType = "Royal Crown",
+    EightBitSize = 1.24, EightBitHeight = 0.88,
+
+    -- Effects
+    Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
+    Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
+    KillEffect = false,
+    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 200, 255), CrosshairSize = 8,
+
+    -- Camera
+    ZoomOut = false, ZoomOutValue = 500,
+    FOV = 70, FOVEnabled = false,
+
+    -- Visual
+    Fullbright = false, FullbrightVal = 50,
+    NoFog = false, UltraHD = false,
+    Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
+    SkyId = "Default",
+
+    -- HUD
+    SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
+    KillFeed = false, StunNotify = false,
+    AntiAFK = false, ShowFPS = true, ShowPing = true,
+
+    -- Killer
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
     Killer_KillAll = false,
     MaskedPower = "Cobra",
     InstantInteract = false,
-    EightBitOn = true, EightBitType = "Royal Crown",
-    EightBitSize = 1.24, EightBitHeight = 0.88,
-    Trail = false, TrailColor = Color3.fromRGB(120, 60, 255),
-    Aura = false, AuraColor = Color3.fromRGB(120, 60, 255),
-    KillEffect = false,
-    Crosshair = false, CrosshairColor = Color3.fromRGB(0, 230, 255), CrosshairSize = 8,
-    NoClipCamera = false,
-    ZoomOut = false, ZoomOutValue = 500,
-    Fullbright = false, FullbrightVal = 50,
-    NoFog = false, UltraHD = false,
-    Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
-    FOV = 70, FOVEnabled = false,
-    SkyId = "Default",
-    SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
-    Fly = false, FlySpeed = 50,
-    KillFeed = false, StunNotify = false,
+
+    -- HD
     HDBoost = false, HDShader = false, HDSky = false,
     HDTexture = false, HDReflection = false, HDBloom = false,
     HDShadow = false, HDWater = false, HDSunRays = false,
     HDDepthField = false, HDAntiAliasing = false,
+
+    -- Beam
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
+
+    -- ESP
     ESPNameMode = "Text", ESPNameSize = 12,
-    AntiAFK = false,
-    ShowFPS = true,
-    ShowPing = true,
 }
 S = _G.RoooorS
 
-FPSPingConfig = _G.Roooor_FPSPing or {
-    Size = 1,
-    X = 0,
-    Y = 0,
-}
+FPSPingConfig = _G.Roooor_FPSPing or { Size = 1, X = 0, Y = 0 }
 _G.Roooor_FPSPing = FPSPingConfig
 
 _G.ToggleStates = _G.ToggleStates or {}
@@ -365,7 +358,9 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- AUTO PARRY (SAMA PERSIS FALLENS)
+-- =========================================================
+-- AUTO PARRY
+-- =========================================================
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true,
     ParryDistance = 15,
@@ -378,43 +373,53 @@ AutoParry = _G.Roooor_AutoParry or {
 }
 _G.Roooor_AutoParry = AutoParry
 
+-- =========================================================
+-- AUTO SKILL CHECK (2 MODE) 🆕
+-- =========================================================
 SkillCheck = _G.Roooor_SkillCheck or {
     Enabled = true,
+    Mode = "Perfect",      -- 🆕 Perfect / Instant
+    HideNeedle = false,    -- 🆕 khusus Instant
+    Success = 0,           -- 🆕 counter
+    Total = 0,             -- 🆕 counter
 }
 _G.Roooor_SkillCheck = SkillCheck
 
-EightBitList = {
-    "Royal Crown",
+-- =========================================================
+-- MOONWALK 🆕
+-- =========================================================
+Moonwalk = _G.Roooor_Moonwalk or {
+    Enabled = false,
+    ShowButton = false,
+    SpamSpeed = 30,
+    Intensity = 35,
+    SlowSpeed = 13,
+    UseSlow = true,
+    ButtonLocked = true,
+    ButtonPos = UDim2.new(0.65, 0, 0.75, 0),
+    LockIconRef = nil,
+    GuiInstance = nil,
+    Connection = nil,
+    ImageId = "rbxassetid://1057298679",  -- 🖼️ Gambar Michael Jackson
 }
+_G.Roooor_Moonwalk = Moonwalk
 
-EightBitIds = {
-    ["Royal Crown"] = 10138606900,
-}
+-- =========================================================
+-- LIST & STATE LAINNYA
+-- =========================================================
+EightBitList = { "Royal Crown" }
+EightBitIds = { ["Royal Crown"] = 10138606900 }
 
-KorbloxList = {
-    "Pencil",
-}
-
-KorbloxIds = {
-    ["Pencil"] = 902942093,
-}
+KorbloxList = { "Pencil" }
+KorbloxIds = { ["Pencil"] = 902942093 }
 
 FireBeamList = {
-    "Classic Beam",
-    "Laser Beam",
-    "Rainbow Beam",
-    "Fire Wings",
-    "Fire Halo",
-    "Fire Hands",
-    "Fire Foot Trail",
-    "Fire Body Aura",
-    "Fire Mouth",
-    "Fire Eyes Glow",
+    "Classic Beam", "Laser Beam", "Rainbow Beam",
+    "Fire Wings", "Fire Halo", "Fire Hands",
+    "Fire Foot Trail", "Fire Body Aura", "Fire Mouth", "Fire Eyes Glow",
 }
 
-GodMode = _G.Roooor_GodMode or {
-    Enabled = false,
-}
+GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
 Combat = _G.Roooor_Combat or {
@@ -440,22 +445,13 @@ Combat = _G.Roooor_Combat or {
 }
 _G.Roooor_Combat = Combat
 
-print("✅ [1/8] COSMIC HUB - Loading + Config + State loaded")
-print("   Auto Parry  : ON (Distance 15, Face 0.7, Debounce 0.2)")
-print("   Skill Check : ON")
-print("   Parry Circle: ON (Size 12)")
-print("   Headless    : ON")
-print("   Korblox     : ON (Scale 1, Y 0.6)")
-print("   8-Bit Crown : ON (Size 1.24, Height 0.88)")
-print("   ESP         : ON (Survivor Biru, Killer Merah)")
-print("   ESP Radius  : 500 (max 500)")
-print("   FPS + Ping  : ON (rainbow galaxy)")
-print("   Hitbox      : MANUAL (max 120)")
-print("   Anti-AFK    : Toggle")
-print("   Rejoin/Hop  : Tombol")-- =========================================================
--- COSMIC HUB
--- BAGIAN 2/8 : FIRE CONFIG + SKY + KILLER ANIMS
+print("✅ [1/9] COSMIC HUB - Base + State loaded")
+print("   Auto Parry  : ON")
+print("   Skill Check : 2 MODE (Perfect + Instant)")
+print("   Moonwalk    : READY")-- =========================================================
+-- SECTION 2/9 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
+
 FireList = {
     "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
     "GoldenKing", "SakuraFire", "EmeraldFire", "BloodFire", "ShadowFire",
@@ -619,7 +615,7 @@ SkyIds = {
     },
 }
 
--- KILLER ANIMS (SAMA PERSIS FALLENS - 23 ID)
+-- KILLER ANIMS (23 ID)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -632,9 +628,8 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/8] COSMIC HUB - Fire + Sky + KillerAnims (23 ID) loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 3/8 : FUNGSI + KORBLOX CLIENT + 8BIT CLIENT + PARRY RING
+print("✅ [2/9] COSMIC HUB - Fire + Sky + KillerAnims loaded")-- =========================================================
+-- SECTION 3/9 : FUNGSI UTAMA
 -- =========================================================
 
 -- =========================================================
@@ -657,12 +652,15 @@ task.spawn(function()
         _G.RoooorSavedStates.ESP = ESP
         _G.RoooorSavedStates.AutoParry = AutoParry
         _G.RoooorSavedStates.SkillCheck = SkillCheck
+        _G.RoooorSavedStates.Moonwalk = Moonwalk
         _G.RoooorSavedStates.Combat = Combat
         _G.RoooorSavedStates.GodMode = GodMode
     end
 end)
 
+-- =========================================================
 -- FIRE (KEPALA)
+-- =========================================================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -763,7 +761,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 8-BIT ROYAL CROWN (CLIENT-ONLY, WORKS)
+-- 8-BIT ROYAL CROWN (CLIENT-ONLY)
 -- =========================================================
 eightBitPart = nil
 
@@ -809,7 +807,7 @@ function apply8Bit(enable, itemName, size, height)
 end
 
 -- =========================================================
--- KORBLOX PENCIL (CLIENT-ONLY, AUTO-SCALE + Y OFFSET)
+-- KORBLOX PENCIL (CLIENT-ONLY)
 -- =========================================================
 korbloxParts = {}
 korbloxOrigData = {}
@@ -1190,9 +1188,13 @@ function rejoinServer()
 end
 
 -- =========================================================
--- FPS + PING COUNTER (RESIZE + DRAG)
+-- FPS + PING COUNTER (FIX - NO STUTTER)
 -- =========================================================
 fpsPingGui = nil
+fpsCounter = 0
+fpsLastTime = tick()
+currentFPS = 0
+currentPing = 0
 
 function createFPSPingGui()
     if fpsPingGui then fpsPingGui:Destroy() end
@@ -1239,16 +1241,6 @@ function createFPSPingGui()
     })
     fpsGrad.Parent = fpsLabel
 
-    task.spawn(function()
-        while fpsGrad.Parent do
-            for i = 0, 1, 0.02 do
-                if not fpsGrad.Parent then break end
-                fpsGrad.Rotation = i * 360
-                task.wait(0.05)
-            end
-        end
-    end)
-
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
     pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
@@ -1270,17 +1262,20 @@ function createFPSPingGui()
         ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 230, 255)),
     })
     pingGrad.Parent = pingLabel
-
-    task.spawn(function()
-        while pingGrad.Parent do
-            for i = 0, 1, 0.02 do
-                if not pingGrad.Parent then break end
-                pingGrad.Rotation = i * 360
-                task.wait(0.05)
-            end
-        end
-    end)
 end
+
+-- FPS counter via RenderStepped (NO STUTTER)
+RunService.RenderStepped:Connect(function()
+    fpsCounter = fpsCounter + 1
+    if tick() - fpsLastTime >= 1 then
+        currentFPS = fpsCounter
+        fpsCounter = 0
+        fpsLastTime = tick()
+        pcall(function()
+            currentPing = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+    end
+end)
 
 task.spawn(function()
     while task.wait(0.5) do
@@ -1295,17 +1290,13 @@ task.spawn(function()
                 if fpsLabel and pingLabel then
                     if S.ShowFPS then
                         fpsLabel.Visible = true
-                        fpsLabel.Text = "FPS: " .. tostring(math.floor(1 / math.max(RunService.RenderStepped:Wait(), 0.001)))
+                        fpsLabel.Text = "FPS: " .. tostring(currentFPS)
                     else
                         fpsLabel.Visible = false
                     end
-
                     if S.ShowPing then
                         pingLabel.Visible = true
-                        pcall(function()
-                            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-                            pingLabel.Text = "Ping: " .. tostring(ping) .. " ms"
-                        end)
+                        pingLabel.Text = "Ping: " .. tostring(currentPing) .. " ms"
                     else
                         pingLabel.Visible = false
                     end
@@ -1323,7 +1314,13 @@ function updateFPSPing()
     createFPSPingGui()
 end
 
-_G.Roooor_updateFPSPing = updateFPSPing-- =========================================================
+_G.Roooor_updateFPSPing = updateFPSPing
+
+print("✅ [3/9] COSMIC HUB - Fungsi utama loaded")-- =========================================================
+-- SECTION 4/9 : ESP SYSTEM + AUTO PARRY + SKILLCHECK + MOONWALK
+-- =========================================================
+
+-- =========================================================
 -- ESP SYSTEM
 -- =========================================================
 ESPObjects = {}
@@ -1765,7 +1762,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- AUTO SKILL CHECK
+-- AUTO SKILL CHECK (2 MODE) 🆕
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -1815,11 +1812,35 @@ function startSkillCheck()
         local goal = check:FindFirstChild("Goal")
         if not line or not goal then return end
 
-        local lr = line.Rotation % 360
         local gr = goal.Rotation % 360
 
+        -- ============ MODE INSTANT 🆕 ============
+        if SkillCheck.Mode == "Instant" then
+            local targetRot = (gr + 109) % 360
+            pcall(function() line.Rotation = targetRot end)
+
+            if SkillCheck.HideNeedle then
+                pcall(function() line.Visible = false end)
+            end
+
+            busy = true
+            task.spawn(function()
+                if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
+                SkillCheck.Success += 1
+                SkillCheck.Total += 1
+                task.wait(0.05)
+                busy = false
+                if SkillCheck.HideNeedle then
+                    pcall(function() line.Visible = true end)
+                end
+            end)
+            return
+        end
+
+        -- ============ MODE PERFECT ============
+        local lr = line.Rotation % 360
         local startRange = (gr + 102) % 360
-        local endRange   = (gr + 116) % 360
+        local endRange = (gr + 116) % 360
 
         local success =
             (startRange > endRange and (lr >= startRange or lr <= endRange))
@@ -1828,11 +1849,9 @@ function startSkillCheck()
         if success then
             busy = true
             task.spawn(function()
-                if UIS.TouchEnabled then
-                    TriggerMobileButton()
-                else
-                    pressSpace()
-                end
+                if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
+                SkillCheck.Success += 1
+                SkillCheck.Total += 1
                 task.wait(0.05)
                 busy = false
             end)
@@ -1848,7 +1867,50 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- PARRY CIRCLE - BEAM RING (GARIS BULAT BOLONG)
+-- MOONWALK 🆕
+-- =========================================================
+function startMoonwalk()
+    if Moonwalk.Connection then return end
+
+    Moonwalk.Connection = RunService.RenderStepped:Connect(function()
+        if not Moonwalk.Enabled then return end
+        if shouldBlockParry() then return end
+
+        local char = LP.Character
+        if not char or not char.Parent then return end
+
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+
+        if not humanoid or not hrp or not cam then return end
+
+        if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
+            humanoid.WalkSpeed = Moonwalk.SlowSpeed
+        end
+
+        local look = cam.CFrame.LookVector
+        local flatLook = Vector3.new(look.X, 0, look.Z)
+
+        if flatLook.Magnitude > 0 then
+            flatLook = flatLook.Unit
+            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+            local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
+            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+            humanoid:Move(Vector3.new(0, 0, 1), true)
+        end
+    end)
+end
+
+function stopMoonwalk()
+    if Moonwalk.Connection then
+        Moonwalk.Connection:Disconnect()
+        Moonwalk.Connection = nil
+    end
+end
+
+-- =========================================================
+-- PARRY CIRCLE (BEAM RING)
 -- =========================================================
 parryCirclePart = nil
 parryCircleAttachments = {}
@@ -1952,7 +2014,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- TELEPORT (TP ke Finish Line ONLY)
+-- TELEPORT FINISH LINE
 -- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
@@ -1987,7 +2049,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- VISUAL FUNCTIONS
+-- VISUAL FUNCTIONS (Fullbright, Sky, FOV, dll)
 -- =========================================================
 origLighting = {
     Brightness = Lighting.Brightness,
@@ -2199,8 +2261,7 @@ function applyHDSky(s)
             _G.CosmicHDAtmosphere.Haze = 1.5
             _G.CosmicHDAtmosphere.Parent = Lighting
         end
-    else
-        if _G.CosmicHDAtmosphere then
+    else        if _G.CosmicHDAtmosphere then
             _G.CosmicHDAtmosphere:Destroy()
             _G.CosmicHDAtmosphere = nil
         end
@@ -2393,7 +2454,9 @@ function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- EXPORT
+-- =========================================================
+-- EXPORT KE _G
+-- =========================================================
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8Bit = apply8Bit
@@ -2415,6 +2478,8 @@ _G.Roooor_UpdateMapESP = UpdateMapESP
 _G.Roooor_UpdateSCPEsp = UpdateSCPEsp
 _G.Roooor_scanKillers = scanKillers
 _G.Roooor_startSkillCheck = startSkillCheck
+_G.Roooor_startMoonwalk = startMoonwalk
+_G.Roooor_stopMoonwalk = stopMoonwalk
 _G.Roooor_applyFullbright = applyFullbright
 _G.Roooor_applyNoFog = applyNoFog
 _G.Roooor_applySky = applySky
@@ -2438,9 +2503,8 @@ _G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/8] COSMIC HUB - Fungsi + Auto Parry + Parry Ring + Misc Utility loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 4/8 : FITUR AKTIF + LOOP UTAMA
+print("✅ [4/9] COSMIC HUB - ESP + Parry + SkillCheck 2 Mode + Moonwalk loaded")-- =========================================================
+-- SECTION 5/9 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
 -- INSTANT INTERACT
@@ -2917,9 +2981,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [4/8] COSMIC HUB - Fitur aktif + Loop utama + Anti-AFK loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 5/8 : GUI COSMIC HUB + TOMBOL + PANEL
+print("✅ [5/9] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
+-- SECTION 6/9 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
 gui = Instance.new("ScreenGui")
 gui.Name = "CosmicHub"
@@ -2929,7 +2992,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- TOMBOL MENU COSMIC
+-- TOMBOL MENU COSMIC (SAMA KAYAK ASLI)
 -- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 32, 0, 32)
@@ -3100,7 +3163,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- =========================================================
--- PANEL MENU COSMIC
+-- PANEL MENU COSMIC (BACKGROUND GALAXY SOLID - NO BINTANG)
 -- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
@@ -3113,50 +3176,18 @@ panel.Parent = gui
 rnd(panel, 18)
 strk(panel, C.ACC, 2, 0.3)
 
+-- Gradient STATIS (gak muter) - galaxy dark purple
 local panelGrad = Instance.new("UIGradient")
-panelGrad.Color = ColorSequence.new(C.BG, C.BG2, C.BG)
+panelGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, C.BG),
+    ColorSequenceKeypoint.new(0.5, C.BG2),
+    ColorSequenceKeypoint.new(1, C.BG),
+})
 panelGrad.Rotation = 45
 panelGrad.Parent = panel
 
-local starsGui = Instance.new("Frame")
-starsGui.Name = "CosmicStars"
-starsGui.Size = UDim2.new(1, 0, 1, 0)
-starsGui.BackgroundTransparency = 1
-starsGui.ZIndex = 0
-starsGui.ClipsDescendants = true
-starsGui.Parent = panel
-rnd(starsGui, 18)
-
-local starsList = {}
-
-for i = 1, 30 do
-    local star = Instance.new("Frame")
-    star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    star.BackgroundColor3 = Color3.fromHSV(math.random(), 0.5, 1)
-    star.BackgroundTransparency = math.random(30, 90) / 100
-    star.BorderSizePixel = 0
-    star.ZIndex = 0
-    star.Parent = starsGui
-    rnd(star, 999)
-    table.insert(starsList, star)
-end
-
-task.spawn(function()
-    while starsGui.Parent do
-        local t = tick()
-        for i, star in ipairs(starsList) do
-            if star.Parent then
-                local twinkle = (math.sin(t * (2 + i * 0.3) + i) + 1) / 2
-                star.BackgroundTransparency = 0.2 + (1 - twinkle) * 0.7
-                star.BackgroundColor3 = Color3.fromHSV((t * 0.1 + i * 0.07) % 1, 0.6, 1)
-                local sz = 2 + twinkle * 3
-                star.Size = UDim2.new(0, sz, 0, sz)
-            end
-        end
-        task.wait(0.08)
-    end
-end)
+-- ❌ HAPUS starsGui (background bintang)
+-- ❌ HAPUS starsList (30 bintang)
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
@@ -3733,9 +3764,8 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [5/8] COSMIC HUB - GUI + Tombol + Panel loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 6/8 : TAB UI PART 1 (SURVIVOR + KILLER + ESP + FIRE)
+print("✅ [6/9] COSMIC HUB - GUI + Tombol + Panel (NO BINTANG) loaded")-- =========================================================
+-- SECTION 7/9 : TAB UI PART 1
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3748,7 +3778,7 @@ makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
 -- ============================================================
--- TAB 1: SURVIVOR
+-- TAB 1: SURVIVOR (SKILLCHECK 2 MODE) 🆕
 -- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
@@ -3774,12 +3804,44 @@ makeTab("Survivor", "🏃", 1, function()
     end)
     lbl("0.2 = Responsif", C.FIRE_BRIGHT)
 
-    sec("Auto Skill Check", "⚡")
+    -- ==========================================
+    -- AUTO SKILL CHECK (2 MODE) 🆕
+    -- ==========================================
+    sec("Auto Skill Check (2 MODE)", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
         SkillCheck.Enabled = s
         if s then startSkillCheck() end
     end)
-    lbl("Auto trigger saat masuk zona", C.GRN)
+
+    drp("Mode", {"Perfect", "Instant"}, "Perfect", function(v)
+        SkillCheck.Mode = v
+    end)
+    lbl("Perfect = tunggu zona | Instant = paksa jarum", C.FIRE_BRIGHT)
+
+    tog("Hide Needle (Instant only)", false, function(s)
+        SkillCheck.HideNeedle = s
+    end)
+    lbl("Sembunyiin jarum biar gak keliatan", C.DIM)
+
+    btn("🔄 Reset Counter", function()
+        SkillCheck.Success = 0
+        SkillCheck.Total = 0
+    end)
+
+    task.spawn(function()
+        while task.wait(0.5) do
+            if cs.Parent then
+                local success = SkillCheck.Success or 0
+                local total = SkillCheck.Total or 0
+                if activeTab and activeTab:FindFirstChildOfClass("TextLabel") then
+                    local tabName = activeTab:FindFirstChildOfClass("TextLabel").Text
+                    if tabName == "SURVIVOR" then
+                        -- Update label counter (opsional)
+                    end
+                end
+            end
+        end
+    end)
 
     sec("God Mode", "🛡️")
     tog("God Mode (Full)", false, function(s)
@@ -3953,9 +4015,74 @@ makeTab("Fire", "🔥", 4, function()
     end
 end)
 
-print("✅ [6/8] COSMIC HUB - Survivor + Killer + ESP + Fire loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 7/8 : TAB UI PART 2 (FIRE FEET + MISC + VISUAL + PLAYER)
+-- ============================================================
+-- TAB 5: MOONWALK 🆕
+-- ============================================================
+makeTab("Moonwalk", "🕺", 5, function()
+
+    sec("Moonwalk Control", "🕺")
+    tog("Enable Moonwalk (Keybind V)", false, function(s)
+        Moonwalk.Enabled = s
+        if s then
+            startMoonwalk()
+        else
+            stopMoonwalk()
+            local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.WalkSpeed = 16 end
+        end
+    end)
+    lbl("Tekan V juga bisa toggle", C.GRN)
+
+    sec("Button", "🎯")
+    tog("Show Moonwalk Button", false, function(s)
+        Moonwalk.ShowButton = s
+        if s then
+            createMoonwalkButton()
+        else
+            removeMoonwalkButton()
+        end
+    end)
+
+    tog("🔒 Lock Button Position", true, function(s)
+        Moonwalk.ButtonLocked = s
+        if Moonwalk.LockIconRef then
+            Moonwalk.LockIconRef.Visible = s
+        end
+    end)
+    lbl("ON = gak bisa digeser | OFF = bisa drag", C.FIRE_BRIGHT)
+
+    sec("Sensitivitas", "⚙️")
+    sl("Spam Speed", 1, 50, 30, function(v)
+        Moonwalk.SpamSpeed = v
+    end)
+    lbl("Kecepatan goyang", C.DIM)
+
+    sl("Intensity", 1, 50, 35, function(v)
+        Moonwalk.Intensity = v
+    end)
+    lbl("Besarnya goyangan (derajat)", C.DIM)
+
+    sl("Walk Speed (Moonwalk)", 5, 20, 13, function(v)
+        Moonwalk.SlowSpeed = v
+    end)
+    lbl("Kecepatan jalan pas moonwalk", C.DIM)
+
+    tog("Use Slow Speed", true, function(s)
+        Moonwalk.UseSlow = s
+    end)
+
+    sec("Gambar", "🖼️")
+    lbl("Gambar: Michael Jackson", C.FIRE_BRIGHT)
+    btn("🔄 Reset Button Position", function()
+        Moonwalk.ButtonPos = UDim2.new(0.65, 0, 0.75, 0)
+        if Moonwalk.GuiInstance then
+            createMoonwalkButton()
+        end
+    end)
+end)
+
+print("✅ [7/9] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded")-- =========================================================
+-- SECTION 8/9 : TAB UI PART 2 + MOONWALK BUTTON
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -3967,10 +4094,147 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
+-- =========================================================
+-- FUNGSI MOONWALK BUTTON 🆕
+-- =========================================================
+function createMoonwalkButton()
+    if not PG or not PG.Parent then return end
+    if Moonwalk.GuiInstance then Moonwalk.GuiInstance:Destroy() end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "CosmicMoonwalk"
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.Parent = PG
+
+    local btn = Instance.new("ImageButton")
+    btn.Name = "ToggleButton"
+    btn.Size = UDim2.new(0, 50, 0, 50)
+    btn.Position = Moonwalk.ButtonPos
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.9
+    btn.Image = Moonwalk.ImageId
+    btn.ImageTransparency = 0.1
+    btn.AutoButtonColor = false
+    btn.Parent = gui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Thickness = 1.2
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Transparency = 0.8
+    stroke.Parent = btn
+
+    -- 🔒 Icon lock
+    local lockIcon = Instance.new("TextLabel")
+    lockIcon.Size = UDim2.new(0, 14, 0, 14)
+    lockIcon.Position = UDim2.new(1, -16, 0, 2)
+    lockIcon.BackgroundTransparency = 1
+    lockIcon.Text = "🔒"
+    lockIcon.TextColor3 = Color3.fromRGB(255, 80, 80)
+    lockIcon.TextScaled = true
+    lockIcon.Font = Enum.Font.GothamBold
+    lockIcon.Visible = Moonwalk.ButtonLocked
+    lockIcon.Parent = btn
+
+    Moonwalk.LockIconRef = lockIcon
+
+    -- DRAG SYSTEM
+    local dragging = false
+    local dragInput, dragStart, startPos
+    local wasDragged = false
+
+    btn.InputBegan:Connect(function(input)
+        if Moonwalk.ButtonLocked then return end
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+            dragging = true
+            wasDragged = false
+            dragStart = input.Position
+            startPos = btn.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    btn.InputChanged:Connect(function(input)
+        if Moonwalk.ButtonLocked then return end
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if Moonwalk.ButtonLocked then return end
+        if not dragging then return end
+        if input ~= dragInput then return end
+
+        local delta = input.Position - dragStart
+
+        if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
+            wasDragged = true
+        end
+
+        local newPos = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+
+        btn.Position = newPos
+        Moonwalk.ButtonPos = newPos
+    end)
+
+    -- TOGGLE
+    btn.MouseButton1Click:Connect(function()
+        if wasDragged then return end
+
+        Moonwalk.Enabled = not Moonwalk.Enabled
+
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+
+        if Moonwalk.Enabled then
+            stroke.Color = Color3.fromRGB(170, 0, 255)
+            if not Moonwalk.Connection then
+                startMoonwalk()
+            end
+        else
+            stroke.Color = Color3.fromRGB(255, 255, 255)
+            if hum then hum.WalkSpeed = 16 end
+        end
+    end)
+
+    Moonwalk.GuiInstance = gui
+end
+
+function removeMoonwalkButton()
+    if Moonwalk.GuiInstance then
+        Moonwalk.GuiInstance:Destroy()
+        Moonwalk.GuiInstance = nil
+        Moonwalk.LockIconRef = nil
+    end
+end
+
+_G.createMoonwalkButton = createMoonwalkButton
+_G.removeMoonwalkButton = removeMoonwalkButton
+
 -- ============================================================
--- TAB 5: FIRE FEET
+-- TAB 6: FIRE FEET
 -- ============================================================
-makeTab("Fire Feet", "👟", 5, function()
+makeTab("Fire Feet", "👟", 6, function()
     sec("Fire Feet Control", "👟")
     tog("Enable Fire Feet", false, function(s)
         S.FireFeetOn = s
@@ -4029,9 +4293,9 @@ makeTab("Fire Feet", "👟", 5, function()
 end)
 
 -- ============================================================
--- TAB 6: MISC
+-- TAB 7: MISC
 -- ============================================================
-makeTab("Misc", "⚙️", 6, function()
+makeTab("Misc", "⚙️", 7, function()
 
     sec("Movement", "🏃")
     tog("Walk Speed", false, function(s) S.WalkSpeed = s end)
@@ -4066,54 +4330,32 @@ makeTab("Misc", "⚙️", 6, function()
     end)
     lbl("Biar nggak kena kick AFK", C.GRN)
 
-    tog("Show FPS Counter", true, function(s)
-        S.ShowFPS = s
-    end)
-    lbl("Pojok kanan atas", C.GRN)
-
-    tog("Show Ping Counter", true, function(s)
-        S.ShowPing = s
-    end)
-    lbl("Pojok kanan atas", C.GRN)
+    tog("Show FPS Counter", true, function(s) S.ShowFPS = s end)
+    tog("Show Ping Counter", true, function(s) S.ShowPing = s end)
 
     sl("FPS/Ping Size", 0.5, 3, 1, function(v)
         FPSPingConfig.Size = v
-        if _G.Roooor_updateFPSPing then
-            _G.Roooor_updateFPSPing()
-        end
+        if _G.Roooor_updateFPSPing then _G.Roooor_updateFPSPing() end
     end)
-    lbl("Besar/kecil FPS + Ping", C.FIRE_BRIGHT)
 
     sl("FPS/Ping X", -1000, 200, 0, function(v)
         FPSPingConfig.X = v
-        if _G.Roooor_updateFPSPing then
-            _G.Roooor_updateFPSPing()
-        end
+        if _G.Roooor_updateFPSPing then _G.Roooor_updateFPSPing() end
     end)
-    lbl("Geser kiri/kanan", C.GRN)
 
     sl("FPS/Ping Y", -200, 500, 0, function(v)
         FPSPingConfig.Y = v
-        if _G.Roooor_updateFPSPing then
-            _G.Roooor_updateFPSPing()
-        end
-    end)
-    lbl("Geser atas/bawah", C.GRN)
-
-    btn("🔄 Rejoin Server", function()
-        rejoinServer()
+        if _G.Roooor_updateFPSPing then _G.Roooor_updateFPSPing() end
     end)
 
-    btn("🌐 Server Hop", function()
-        serverHop()
-    end)
-    lbl("Pindah server random", C.FIRE_BRIGHT)
+    btn("🔄 Rejoin Server", function() rejoinServer() end)
+    btn("🌐 Server Hop", function() serverHop() end)
 end)
 
 -- ============================================================
--- TAB 7: VISUAL
+-- TAB 8: VISUAL
 -- ============================================================
-makeTab("Visual", "✨", 7, function()
+makeTab("Visual", "✨", 8, function()
 
     sec("Fullbright & No Fog", "💡")
     tog("Fullbright (max 200)", false, function(s)
@@ -4124,13 +4366,11 @@ makeTab("Visual", "✨", 7, function()
         S.FullbrightVal = v
         if S.Fullbright then applyFullbright(true) end
     end)
-    lbl("Bisa sampai 200 (super terang)", C.FIRE_BRIGHT)
 
     tog("No Fog (Fix)", false, function(s)
         S.NoFog = s
         applyNoFog(s)
     end)
-    lbl("Atmosphere + Fog dihapus (loop)", C.GRN)
 
     sec("HD Visual (Ringan)", "💎")
     tog("HD Graphics Boost", false, function(s)
@@ -4147,56 +4387,20 @@ makeTab("Visual", "✨", 7, function()
     end)
 
     sec("HD Visual (Extra)", "🌟")
-    tog("HD Texture", false, function(s)
-        S.HDTexture = s
-        applyHDTexture(s)
-    end)
-    tog("HD Reflection", false, function(s)
-        S.HDReflection = s
-        applyHDReflection(s)
-    end)
-    tog("HD Bloom", false, function(s)
-        S.HDBloom = s
-        applyHDBloom(s)
-    end)
-    tog("HD Shadow", false, function(s)
-        S.HDShadow = s
-        applyHDShadow(s)
-    end)
-    tog("HD Water", false, function(s)
-        S.HDWater = s
-        applyHDWater(s)
-    end)
-    tog("HD Sun Rays", false, function(s)
-        S.HDSunRays = s
-        applyHDSunRays(s)
-    end)
-    tog("HD Depth of Field", false, function(s)
-        S.HDDepthField = s
-        applyHDDepthField(s)
-    end)
-    tog("HD Anti-Aliasing", false, function(s)
-        S.HDAntiAliasing = s
-        applyHDAntiAliasing(s)
-    end)
+    tog("HD Texture", false, function(s) S.HDTexture = s; applyHDTexture(s) end)
+    tog("HD Reflection", false, function(s) S.HDReflection = s; applyHDReflection(s) end)
+    tog("HD Bloom", false, function(s) S.HDBloom = s; applyHDBloom(s) end)
+    tog("HD Shadow", false, function(s) S.HDShadow = s; applyHDShadow(s) end)
+    tog("HD Water", false, function(s) S.HDWater = s; applyHDWater(s) end)
+    tog("HD Sun Rays", false, function(s) S.HDSunRays = s; applyHDSunRays(s) end)
+    tog("HD Depth of Field", false, function(s) S.HDDepthField = s; applyHDDepthField(s) end)
+    tog("HD Anti-Aliasing", false, function(s) S.HDAntiAliasing = s; applyHDAntiAliasing(s) end)
 
     sec("Lighting", "💡")
-    tog("Ultra HD", false, function(s)
-        S.UltraHD = s
-        applyUltraHD()
-    end)
-    tog("Contrast Boost", false, function(s)
-        S.Contrast = s
-        applyContrast()
-    end)
-    sl("Contrast", 0, 1, 0.3, function(v)
-        S.ContrastVal = v
-        applyContrast()
-    end)
-    sl("Saturation", 0, 1, 0.2, function(v)
-        S.SaturationVal = v
-        applyContrast()
-    end)
+    tog("Ultra HD", false, function(s) S.UltraHD = s; applyUltraHD() end)
+    tog("Contrast Boost", false, function(s) S.Contrast = s; applyContrast() end)
+    sl("Contrast", 0, 1, 0.3, function(v) S.ContrastVal = v; applyContrast() end)
+    sl("Saturation", 0, 1, 0.2, function(v) S.SaturationVal = v; applyContrast() end)
 
     sec("Sky", "🌌")
     drp("Sky Preset", SkyList, "Default", function(v)
@@ -4205,64 +4409,42 @@ makeTab("Visual", "✨", 7, function()
     end)
 
     sec("Camera", "🎥")
-    tog("FOV Override", false, function(s)
-        S.FOVEnabled = s
-        applyFOV()
-    end)
-    sl("FOV Value", 40, 120, 70, function(v)
-        S.FOV = v
-        if S.FOVEnabled then applyFOV() end
-    end)
-    tog("Zoom Out", false, function(s)
-        S.ZoomOut = s
-        applyZoomOut(s, S.ZoomOutValue)
-    end)
+    tog("FOV Override", false, function(s) S.FOVEnabled = s; applyFOV() end)
+    sl("FOV Value", 40, 120, 70, function(v) S.FOV = v; if S.FOVEnabled then applyFOV() end end)
+    tog("Zoom Out", false, function(s) S.ZoomOut = s; applyZoomOut(s, S.ZoomOutValue) end)
     sl("Max Zoom Distance", 100, 1000, 500, function(v)
         S.ZoomOutValue = v
         if S.ZoomOut then applyZoomOut(true, v) end
     end)
 
-    -- 8-BIT ROYAL CROWN (CLIENT-ONLY)
     sec("8-Bit Royal Crown (Client)", "👑")
     tog("Enable 8-Bit Crown", true, function(s)
         S.EightBitOn = s
         apply8Bit(s, "Royal Crown", S.EightBitSize, S.EightBitHeight)
     end)
-    sl("Size (Besar/Kecil)", 0.3, 3, 1.24, function(v)
+    sl("Size", 0.3, 3, 1.24, function(v)
         S.EightBitSize = v
-        if S.EightBitOn then
-            apply8Bit(true, "Royal Crown", v, S.EightBitHeight)
-        end
+        if S.EightBitOn then apply8Bit(true, "Royal Crown", v, S.EightBitHeight) end
     end)
-    sl("Height (Tinggi/Rendah)", -1, 4, 0.88, function(v)
+    sl("Height", -1, 4, 0.88, function(v)
         S.EightBitHeight = v
-        if S.EightBitOn then
-            apply8Bit(true, "Royal Crown", S.EightBitSize, v)
-        end
+        if S.EightBitOn then apply8Bit(true, "Royal Crown", S.EightBitSize, v) end
     end)
-    lbl("Cuma KAMU yang bisa lihat", C.GRN)
 
-    -- KORBLOX (CLIENT-ONLY)
     sec("Korblox Pencil (Client)", "🦴")
     tog("Enable Korblox", true, function(s)
         S.Korblox = s
         applyKorblox(s, "Pencil", S.KorbloxYOffset, S.KorbloxScale)
     end)
-    sl("Korblox Y (Atas/Bawah)", -2, 2, 0.6, function(v)
+    sl("Korblox Y", -2, 2, 0.6, function(v)
         S.KorbloxYOffset = v
-        if S.Korblox then
-            applyKorblox(true, "Pencil", v, S.KorbloxScale)
-        end
+        if S.Korblox then applyKorblox(true, "Pencil", v, S.KorbloxScale) end
     end)
-    sl("Korblox Scale (Besar/Kecil)", 0.3, 3, 1, function(v)
+    sl("Korblox Scale", 0.3, 3, 1, function(v)
         S.KorbloxScale = v
-        if S.Korblox then
-            applyKorblox(true, "Pencil", S.KorbloxYOffset, v)
-        end
+        if S.Korblox then applyKorblox(true, "Pencil", S.KorbloxYOffset, v) end
     end)
-    lbl("Cuma KAMU yang bisa lihat", C.GRN)
 
-    -- FIRE BEAM (10 EFEK)
     sec("Fire Beam (10 Efek)", "🔥")
     tog("Enable Fire Beam", false, function(s)
         S.FireBeamOn = s
@@ -4305,14 +4487,9 @@ makeTab("Visual", "✨", 7, function()
                 if c:IsA("TextButton") and c:FindFirstChildOfClass("TextLabel") then
                     local lx = c:FindFirstChildOfClass("TextLabel")
                     if lx and string.sub(lx.Text, 1, 4) == "🔥 " then
-                        if string.find(lx.Text, "Beam") or string.find(lx.Text, "Wings")
-                            or string.find(lx.Text, "Halo") or string.find(lx.Text, "Hands")
-                            or string.find(lx.Text, "Foot") or string.find(lx.Text, "Body")
-                            or string.find(lx.Text, "Mouth") or string.find(lx.Text, "Eyes") then
-                            c.BackgroundColor3 = C.BG
-                            c.BackgroundTransparency = 0.4
-                            lx.TextColor3 = C.TXT
-                        end
+                        c.BackgroundColor3 = C.BG
+                        c.BackgroundTransparency = 0.4
+                        lx.TextColor3 = C.TXT
                     end
                 end
             end
@@ -4324,12 +4501,9 @@ makeTab("Visual", "✨", 7, function()
 
     cpk("Beam Color", S.FireBeamColor, function(c)
         S.FireBeamColor = c
-        if S.FireBeamOn then
-            applyFireBeam(true, S.FireBeamType, c)
-        end
+        if S.FireBeamOn then applyFireBeam(true, S.FireBeamType, c) end
     end)
 
-    -- CHARACTER EFFECTS
     sec("Character Effects", "✨")
     tog("Fire Trail", false, function(s)
         S.Trail = s
@@ -4351,7 +4525,6 @@ makeTab("Visual", "✨", 7, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
-    -- CROSSHAIR
     sec("Crosshair", "🎯")
     tog("Enable Crosshair", false, function(s)
         S.Crosshair = s
@@ -4368,9 +4541,9 @@ makeTab("Visual", "✨", 7, function()
 end)
 
 -- ============================================================
--- TAB 8: PLAYER
+-- TAB 9: PLAYER
 -- ============================================================
-makeTab("Player", "👤", 8, function()
+makeTab("Player", "👤", 9, function()
 
     sec("Aimlock Mode", "🎯")
     drp("Aim Mode", {"Killer", "Survivor"}, "Killer", function(v)
@@ -4380,9 +4553,7 @@ makeTab("Player", "👤", 8, function()
     sec("Info", "ℹ️")
     lbl("🎯 Aimbot = Hold tombol serang", C.FIRE_BRIGHT)
     lbl("PC: klik kanan | HP: tombol attack", C.DIM)
-
-    sec("Keybind", "⌨️")
-    lbl("Toggle Menu: Klik tombol ✨", C.FIRE_BRIGHT)
+    lbl("🕺 Moonwalk: Tekan V", C.FIRE_BRIGHT)
 
     sec("Danger Zone", "⚠️")
     btn("✨ UNLOAD COSMIC HUB", function()
@@ -4396,20 +4567,22 @@ makeTab("Player", "👤", 8, function()
             clearKorblox()
             clearFireBeam()
             clearParryCircle()
+            stopMoonwalk()
+            removeMoonwalkButton()
         end)
         _G.RoooorS = nil
         _G.Roooor_ESP = nil
         _G.Roooor_ESPStatus = nil
         _G.Roooor_AutoParry = nil
         _G.Roooor_SkillCheck = nil
+        _G.Roooor_Moonwalk = nil
         _G.Roooor_Combat = nil
         _G.Roooor_GodMode = nil
     end)
 end)
 
-print("✅ [7/8] COSMIC HUB - Fire Feet + Misc + Visual + Player loaded")-- =========================================================
--- COSMIC HUB
--- BAGIAN 8/8 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
+print("✅ [8/9] COSMIC HUB - Tab UI Part 2 + Moonwalk Button loaded")-- =========================================================
+-- SECTION 9/9 : FINAL - COMBAT + EXTRA + AUTO RE-APPLY
 -- =========================================================
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
@@ -4421,6 +4594,9 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
+-- =========================================================
+-- COMBAT SYSTEM (AIMLOCK)
+-- =========================================================
 RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
@@ -4725,6 +4901,10 @@ LP.CharacterAdded:Connect(function(char)
             if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
+    if Moonwalk.ShowButton then
+        task.wait(0.5)
+        pcall(createMoonwalkButton)
+    end
 end)
 
 task.spawn(function()
@@ -4745,9 +4925,9 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- =========================================================
--- TAB 9: COMBAT
+-- TAB 10: COMBAT
 -- =========================================================
-makeTab("Combat", "⚔️", 9, function()
+makeTab("Combat", "⚔️", 10, function()
     sec("Aimbot (Hold to Aim - INSTAN)", "🎯")
     tog("Enable Aimbot", false, function(s)
         Combat.AimlockEnabled = s
@@ -4789,9 +4969,9 @@ makeTab("Combat", "⚔️", 9, function()
 end)
 
 -- =========================================================
--- TAB 10: EXTRA
+-- TAB 11: EXTRA
 -- =========================================================
-makeTab("Extra", "✨", 10, function()
+makeTab("Extra", "✨", 11, function()
     sec("Teleport", "🌀")
     btn("🚪 TP ke Finish Line", function() teleportToFinishLine() end)
 
@@ -4819,15 +4999,52 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
+-- KEYBIND V UNTUK MOONWALK 🆕
+-- =========================================================
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        Moonwalk.Enabled = not Moonwalk.Enabled
+
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+
+        if Moonwalk.Enabled then
+            startMoonwalk()
+            pcall(function()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Moonwalk",
+                    Text = "🕺 ON",
+                    Duration = 1.5
+                })
+            end)
+        else
+            stopMoonwalk()
+            if hum then hum.WalkSpeed = 16 end
+            pcall(function()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Moonwalk",
+                    Text = "OFF",
+                    Duration = 1.5
+                })
+            end)
+        end
+    end
+end)
+
+-- =========================================================
 -- PRINT FINAL
+-- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB ✨                        ║")
+print("║  ✨ COSMIC HUB v2.0 ✨                    ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry (sama persis Fallens)     ║")
-print("║  ⚡ Auto Skill Check                     ║")
+print("║  ⚡ Auto Skill Check (2 MODE!)           ║")
+print("║     → Perfect + Instant + Hide Needle    ║")
+print("║  🕺 Moonwalk (Keybind V + Button + Lock) ║")
 print("║  ⭕ Parry Circle BEAM RING                ║")
 print("║  🎯 Aimbot INSTAN + Hold to Aim          ║")
 print("║  📦 Hitbox BESAR (max 120) + 2 Mode      ║")
@@ -4836,7 +5053,6 @@ print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
 print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
 print("║  🔥 Fire Beam 10 efek                    ║")
 print("║  💎 HD Visual + 8 HD Extra               ║")
-print("║  👤 Headless (di Misc)                   ║")
 print("║  🌌 ESP Nama 2 Mode                      ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
@@ -4844,7 +5060,8 @@ print("║  📊 FPS + Ping Counter (resize + drag)   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨            ║")
 print("║  🎯 Aimbot: Hold tombol serang           ║")
+print("║  🕺 Moonwalk: Tekan V                    ║")
 print("║  🛡️ Auto Parry ON = GACOR!               ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [8/8] COSMIC HUB - FINAL LOADED! ✨")
+print("✅ [9/9] COSMIC HUB - FINAL LOADED! ✨")

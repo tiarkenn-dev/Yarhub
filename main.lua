@@ -1,5 +1,5 @@
 -- =========================================================
--- SECTION 1/12 : LOADING GALAXY + CONFIG + STATE
+-- SECTION 1/12 : LOADING GALAXY + CONFIG + STATE (COSMIC)
 -- =========================================================
 
 Players = game:GetService("Players")
@@ -74,7 +74,7 @@ end
 _G.Roooor_playSound = playToggleSound
 
 -- =========================================================
--- 🌌 COSMIC HUB LOADING - GALAXY THEME
+-- 🌌 COSMIC LOADING - GALAXY THEME (OPTIMIZED)
 -- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
@@ -112,17 +112,18 @@ task.spawn(function()
     while nebula.Parent do
         t = t + 0.005
         nebulaGrad.Rotation = (t * 20) % 360
-        task.wait(0.03)
+        task.wait(0.06) -- OPTIMIZE
     end
 end)
 
+-- Starfield (OPTIMIZE: 50 bintang)
 local starContainer = Instance.new("Frame")
 starContainer.Size = UDim2.new(1, 0, 1, 0)
 starContainer.BackgroundTransparency = 1
 starContainer.Parent = bg
 
 local stars = {}
-for i = 1, 80 do
+for i = 1, 50 do
     local star = Instance.new("Frame")
     star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
     star.Position = UDim2.new(math.random(), 0, math.random(), 0)
@@ -155,13 +156,12 @@ task.spawn(function()
                 else
                     s.obj.Position = UDim2.new(p.X.Scale, 0, newY, 0)
                 end
-
                 s.twinkle = s.twinkle + 0.1
                 local base = 0.4
                 s.obj.BackgroundTransparency = base + math.sin(s.twinkle) * 0.3
             end
         end
-        task.wait(0.05)
+        task.wait(0.1) -- OPTIMIZE
     end
 end)
 
@@ -223,7 +223,7 @@ task.spawn(function()
         spiral2.Rotation = -t * 1.1
         spiral1Grad.Rotation = (t * 2) % 360
         spiral2Grad.Rotation = 180 + (t * 1.5) % 360
-        task.wait(0.03)
+        task.wait(0.06) -- OPTIMIZE
     end
 end)
 
@@ -248,7 +248,7 @@ local welcomeTitle = Instance.new("TextLabel")
 welcomeTitle.Size = UDim2.new(1, 0, 0, 90)
 welcomeTitle.Position = UDim2.new(0, 0, 0.42, -20)
 welcomeTitle.BackgroundTransparency = 1
-welcomeTitle.Text = "COSMIC HUB"
+welcomeTitle.Text = "COSMIC"
 welcomeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 welcomeTitle.TextSize = 0
 welcomeTitle.Font = Enum.Font.GothamBlack
@@ -272,7 +272,7 @@ task.spawn(function()
     while welcomeTitle.Parent do
         t = t + 1
         titleGrad.Rotation = (t * 2) % 360
-        task.wait(0.03)
+        task.wait(0.06) -- OPTIMIZE
     end
 end)
 
@@ -402,13 +402,14 @@ task.delay(1.6, function()
 end)
 
 -- =========================================================
--- STATE
+-- STATE (AUTO ON PRESET)
 -- =========================================================
 
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
-    FireOn = false, FireType = "Classic", FireSize = 5,
+    -- 🔥 AUTO ON
+    FireOn = true, FireType = "CosmicFire", FireSize = 5,
     ParryCircle = true, ParryCircleSize = 12,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
@@ -427,12 +428,14 @@ _G.RoooorS = _G.RoooorS or {
     CrosshairStyle = "Plus", CrosshairColorMode = "Solid",
     CrosshairOffsetX = 0, CrosshairOffsetY = 0,
     ZoomOut = false, ZoomOutValue = 500,
-    FOV = 70, FOVEnabled = false,
+    -- 🔥 FOV AUTO ON 90
+    FOV = 90, FOVEnabled = true,
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
-    Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
-    -- 🔥 SKY DEFAULT (auto ON saat execute)
-    SkyId = "GalaxyPurple",
+    -- 🔥 CONTRAST ON
+    Contrast = true, ContrastVal = 0.3, SaturationVal = 0.2,
+    -- 🔥 SKY SUNSET HD
+    SkyId = "SunsetHD",
     SkyAutoApplied = false,
     NoScreenEffects = false, LowGraphics = false, CleanSky = false,
     HDSky = false,
@@ -446,7 +449,8 @@ _G.RoooorS = _G.RoooorS or {
     HDDepthField = false, HDAntiAliasing = false,
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
-    ESPNameMode = "Text", ESPNameSize = 12,
+    -- 🔥 ESP GALAXY + SIZE 9.35
+    ESPNameMode = "Galaxy", ESPNameSize = 9.35,
     AutoEscapeGate = false, AutoEscapeRange = 50,
     AutoEscapeUseKillerCheck = true, AutoEscapeUseGenCheck = true,
 }
@@ -488,8 +492,9 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
+-- 🔥 AUTO PARRY 13
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false, ParryDistance = 14.3, ParryDelay = 0,
+    Enabled = false, ParryDistance = 13, ParryDelay = 0,
     Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
     Wiggle = false, WiggleSpam = 5,
 }
@@ -548,9 +553,7 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
--- =========================================================
--- AIMLOCK V2 CONFIG (TARGET: SURVIVOR)
--- =========================================================
+-- AIMLOCK V2
 Aimlock = _G.RoooorAimlock or {
     Enabled = false,
     Radius = 80,
@@ -563,9 +566,13 @@ _G.RoooorAimlock = Aimlock
 
 Aimlock_AttackButtons = {}
 
-print("✅ [1/12] COSMIC HUB - Base + State + Aimlock Config Loaded")
-print("🌌 Galaxy Loading Animation Active")
-print("🔷 Sky Default: GalaxyPurple (auto ON)")-- =========================================================
+print("✅ [1/12] COSMIC - Base + State + Auto ON Config Loaded")
+print("🔥 Fire: CosmicFire (ON)")
+print("🌈 ESP: Galaxy Mode (Size 9.35)")
+print("🔷 Sky: SunsetHD (ON)")
+print("🎨 Contrast: ON")
+print("🎥 FOV: 90 (ON)")
+print("🛡️ Auto Parry: Distance 13")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -653,20 +660,16 @@ for _, name in ipairs(FireList) do
     end
 end
 
--- =========================================================
 -- 🔷 SKY LIST (18 PRESET)
--- =========================================================
 SkyList = {
     "Default", "Sunset", "Night", "Space",
     "Alien", "Purple", "Galaxy", "Void",
-    -- GALAXY BARU
     "GalaxyPurple", "GalaxyBlue", "GalaxyPink", "GalaxyMulticolor",
     "Nebula", "CosmicStorm", "Aurora",
     "SunsetHD", "NightHD", "DeepSpace",
 }
 
 SkyIds = {
-    -- ============ 8 PRESET LAMA ============
     Sunset = {
         Bk = "rbxassetid://169210149", Dn = "rbxassetid://169210108",
         Ft = "rbxassetid://169210121", Lf = "rbxassetid://169210133",
@@ -702,8 +705,6 @@ SkyIds = {
         Ft = "rbxassetid://17817511804", Lf = "rbxassetid://17817511804",
         Rt = "rbxassetid://17817511804", Up = "rbxassetid://17817511804"
     },
-
-    -- ============ 🔥 GALAXY BARU ============
     GalaxyPurple = {
         Bk = "rbxassetid://126146408999925", Dn = "rbxassetid://118112392224589",
         Ft = "rbxassetid://121253817183621", Lf = "rbxassetid://138429250948648",
@@ -769,7 +770,7 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/12] COSMIC HUB - Fire + Sky (18 preset) + KillerAnims Loaded")
+print("✅ [2/12] COSMIC - Fire + Sky (18) + KillerAnims Loaded")
 print("🔷 Sky Presets: " .. #SkyList)
 print("🎯 Total KillerAnims: 23")-- =========================================================
 -- SECTION 3/12 : FUNGSI UTAMA + HD SKY + APPLY SKY
@@ -800,9 +801,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- FIRE (KEPALA)
--- =========================================================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -867,9 +866,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- 8-BIT ROYAL CROWN
--- =========================================================
 eightBitPart = nil
 
 function clear8Bit()
@@ -913,9 +910,7 @@ function apply8Bit(enable, itemName, size, height)
     weld.Parent = eightBitPart
 end
 
--- =========================================================
 -- KORBLOX PENCIL
--- =========================================================
 korbloxParts = {}
 korbloxOrigData = {}
 
@@ -1004,9 +999,7 @@ function applyKorblox(enable, mode, yOffset, scale)
     table.insert(korbloxParts, korbloxPart)
 end
 
--- =========================================================
 -- HEADLESS
--- =========================================================
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -1047,12 +1040,9 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🔷 HD VISUAL EXTRAS
--- =========================================================
+-- HD VISUAL EXTRAS
 hdExtras = {}
 
--- ============ HD SKY (JERNIH + RINGAN) ============
 function applyHDSky(s)
     if s then
         for _, v in pairs(Lighting:GetChildren()) do
@@ -1206,16 +1196,12 @@ function applyHDAntiAliasing(s)
     end
 end
 
--- =========================================================
--- 🔷 APPLY SKY (FIX — 18 PRESET)
--- =========================================================
+-- APPLY SKY (FIX)
 function applySky(skyName)
-    -- Hapus sky lama
     for _, v in pairs(Lighting:GetChildren()) do
         if v:IsA("Sky") then v:Destroy() end
     end
     
-    -- Default → restore sky asli game
     if not skyName or skyName == "Default" then
         if origSky then
             origSky:Clone().Parent = Lighting
@@ -1224,14 +1210,12 @@ function applySky(skyName)
         return
     end
     
-    -- Cek SkyIds
     local ids = SkyIds[skyName]
     if not ids then
-        warn("[SKY] Sky '" .. tostring(skyName) .. "' gak ada, fallback ke GalaxyPurple")
-        ids = SkyIds.GalaxyPurple
+        warn("[SKY] Sky '" .. tostring(skyName) .. "' gak ada, fallback")
+        ids = SkyIds.SunsetHD
     end
     
-    -- Pasang sky baru
     local sky = Instance.new("Sky")
     sky.Name = "CosmicSky_" .. skyName
     sky.SkyboxBk = ids.Bk
@@ -1254,9 +1238,7 @@ function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
--- =========================================================
 -- FPS + PING
--- =========================================================
 fpsPingGui = nil
 fpsCounter = 0
 fpsLastTime = tick()
@@ -1358,9 +1340,7 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/12] COSMIC HUB - Fungsi Utama + HD Sky + Apply Sky Loaded")
-print("🔷 HD Sky: Jernih + Ringan")
-print("🔷 applySky: 18 preset siap dipakai")-- =========================================================
+print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
 -- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX + GALAXY
 -- =========================================================
 
@@ -1402,9 +1382,6 @@ for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
--- =========================================================
--- HIGHLIGHT ESP
--- =========================================================
 function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
@@ -1444,9 +1421,6 @@ function removeStatusESP(char)
     end
 end
 
--- =========================================================
--- STATUS ESP (NAMA + HP + DISTANCE)
--- =========================================================
 function createStatusESP(player, char, root)
     if not ESPStatus.Enabled then
         removeStatusESP(char)
@@ -1519,7 +1493,6 @@ function createStatusESP(player, char, root)
         end
     end
 
-    -- 🔥 GALAXY MODE: kalo bukan galaxy, hapus gradient
     if mode ~= "Galaxy" then
         local label = billboard:FindFirstChildOfClass("TextLabel")
         if label then
@@ -1529,11 +1502,9 @@ function createStatusESP(player, char, root)
     end
 end
 
--- =========================================================
--- 🔥 GALAXY NAME ANIMATOR (ANIMATED RAINBOW)
--- =========================================================
+-- 🔥 GALAXY NAME ANIMATOR (OPTIMIZED)
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.08) do -- OPTIMIZE: 0.05 → 0.08
         if S.ESPNameMode == "Galaxy" then
             for char, billboard in pairs(StatusESP) do
                 if billboard and billboard.Parent then
@@ -1559,9 +1530,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🟠 ESP GENERATOR FIX
--- =========================================================
+-- ESP GENERATOR FIX
 function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
@@ -1698,7 +1667,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- 🛡️ AUTO PARRY CUSTOM
+-- 🛡️ AUTO PARRY CUSTOM (Distance 13 + RADIUS CHECK)
 -- =========================================================
 AP_lastParry = 0
 AP_parryCount = 0
@@ -1738,6 +1707,7 @@ function AP_PressParryButton()
     end
 end
 
+-- 🔥 CEK RADIUS (Distance 13)
 function AP_IsInRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -1771,6 +1741,7 @@ function AP_HookKiller(char)
         local id = anim.AnimationId:match("%d+")
         if not id then return end
         if KillerAnims["rbxassetid://" .. id] then
+            -- 🔥 CEK RADIUS DULU
             if AP_IsInRange(char) then
                 AP_DoParry()
             end
@@ -2184,7 +2155,7 @@ end)
 mwBtnUpdateUI()
 
 -- =========================================================
--- 📦 HITBOX (TEXT ANGKA SAJA)
+-- 📦 HITBOX (TEXT ANGKA)
 -- =========================================================
 HitboxTextObjects = {}
 HitboxTextOriginalSizes = {}
@@ -2455,7 +2426,7 @@ end
 function applyFOV()
     local cam = workspace.CurrentCamera
     if cam then
-        cam.FieldOfView = S.FOVEnabled and S.FOV or 70
+        cam.FieldOfView = S.FOVEnabled and S.FOV or 90
     end
 end
 
@@ -2662,10 +2633,10 @@ _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 
-print("✅ [4/12] COSMIC HUB - ESP + Auto Parry + Moonwalk + Hitbox + Galaxy Fix Loaded")
-print("📦 Hitbox: TEXT ANGKA")
-print("🌈 ESP Galaxy: Animated Rainbow")
-print("🟠 ESP Generator: FIXED")-- =========================================================
+print("✅ [4/12] COSMIC - ESP + Auto Parry (13) + Moonwalk + Hitbox Loaded")
+print("🛡️ Auto Parry Distance: 13 (RADIUS CHECK!)")
+print("🌈 ESP Galaxy: Animated")
+print("📦 Hitbox: TEXT ANGKA")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -2734,9 +2705,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- KILL FEED (masih ada, tapi toggle-nya dihapus)
--- =========================================================
+-- KILL FEED
 killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "CosmicKillFeed"
 killFeedGui.ResetOnSpawn = false
@@ -2808,9 +2777,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- STUN NOTIFY (masih ada, toggle dihapus dari GUI)
--- =========================================================
+-- STUN NOTIFY
 stunIcons = {}
 
 function createStunIcon(killerChar)
@@ -2838,7 +2805,7 @@ function createStunIcon(killerChar)
         while billboard.Parent do
             billboard.StudsOffset = Vector3.new(0, 4 + math.sin(tick() * 5) * 0.5, 0)
             icon.Rotation = math.sin(tick() * 8) * 20
-            task.wait(0.05)
+            task.wait(0.08) -- OPTIMIZE
         end
     end)
     stunIcons[killerChar] = billboard
@@ -2853,7 +2820,7 @@ function removeStunIcon(killerChar)
 end
 
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.3) do -- OPTIMIZE: 0.2 → 0.3
         if not S.StunNotify then continue end
         local myRoot = getRoot()
         if not myRoot then continue end
@@ -2894,9 +2861,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- KILLER AUTO ATTACK
--- =========================================================
 lastAtk = 0
 task.spawn(function()
     while task.wait(0.2) do
@@ -2919,9 +2884,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO WIGGLE
--- =========================================================
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
@@ -2942,9 +2905,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO FLEE
--- =========================================================
 function GetNearestKillerForFlee()
     local root = getRoot()
     if not root then return nil, math.huge end
@@ -2998,9 +2959,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- FPS BOOST
--- =========================================================
 local ScreenEffectTypes = {
     "ColorCorrectionEffect", "DepthOfFieldEffect", "BlurEffect",
     "SunRaysEffect", "BloomEffect"
@@ -3043,9 +3002,7 @@ function applyCleanSky()
     end
 end
 
--- =========================================================
 -- AUTO CARRY + HOOK
--- =========================================================
 KillerBusy = false
 
 function GetDownedSurvivor()
@@ -3124,9 +3081,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- AUTO ESCAPE GATE
--- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if not S.AutoEscapeGate then continue end
@@ -3174,15 +3129,13 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- MAIN ESP LOOP
--- =========================================================
+-- MAIN ESP LOOP (OPTIMIZED)
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
     if not root then return end
     local now = tick()
-    if now - lastESPUpdate >= 0.1 then
+    if now - lastESPUpdate >= 0.12 then -- OPTIMIZE: 0.1 → 0.12
         lastESPUpdate = now
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
@@ -3224,11 +3177,9 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- =========================================================
 -- KILL EFFECT LOOP
--- =========================================================
 task.spawn(function()
-    while task.wait(0.8) do
+    while task.wait(1) do -- OPTIMIZE: 0.8 → 1
         if S.KillEffect then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LP and p.Character then
@@ -3260,9 +3211,10 @@ task.spawn(function()
     end
 end)
 
-print("✅ [5/12] COSMIC HUB - Fitur Aktif + Loop Utama Loaded")
-print("❌ Fly: DIHAPUS")-- =========================================================
--- SECTION 6/12 : GUI COSMIC HUB + TOMBOL + PANEL
+print("✅ [5/12] COSMIC - Fitur Aktif + Loop Utama Loaded")
+print("❌ Fly: DIHAPUS")
+print("⚡ Script: OPTIMIZED (ringan di HP)")-- =========================================================
+-- SECTION 6/12 : GUI COSMIC + TOMBOL + PANEL
 -- =========================================================
 
 gui = Instance.new("ScreenGui")
@@ -3357,7 +3309,7 @@ rnd(innerGlow, 999)
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
-        t = t + 0.03
+        t = t + 0.05 -- OPTIMIZE
         ringOuter.Rotation = t * 30
         ringOuterGrad.Rotation = t * 60
         ringInner.Rotation = -t * 50
@@ -3376,7 +3328,7 @@ task.spawn(function()
         mainBtn.TextSize = 14 + math.sin(t * 4) * 1
 
         innerGlow.BackgroundTransparency = 0.6 - pulse * 0.4
-        task.wait(0.03)
+        task.wait(0.05) -- OPTIMIZE
     end
 end)
 
@@ -3470,10 +3422,10 @@ neonGrad.Parent = neonLine
 
 task.spawn(function()
     while neonLine.Parent do
-        for i = 0, 1, 0.04 do
+        for i = 0, 1, 0.08 do -- OPTIMIZE
             if not neonLine.Parent then break end
             neonGrad.Rotation = i * 360
-            task.wait(0.08)
+            task.wait(0.1) -- OPTIMIZE
         end
     end
 end)
@@ -3482,7 +3434,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "✨ COSMIC HUB v4.0"
+hTitle.Text = "✨ COSMIC"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
@@ -3992,7 +3944,7 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [6/12] COSMIC HUB - GUI + Tombol + Panel Loaded")-- =========================================================
+print("✅ [6/12] COSMIC - GUI + Tombol + Panel Loaded")-- =========================================================
 -- SECTION 7/12 : TAB UI PART 1
 -- =========================================================
 
@@ -4014,9 +3966,9 @@ makeTab("Survivor", "🏃", 1, function()
         AutoParry.Enabled = s
         if s then AP_ScanKillers() end
     end)
-    lbl("Debounce 0.1-0.5 | Radius 14.3 ✅", C.GRN)
+    lbl("Radius 13 | Cuma parry kalo killer DALEM radius ✅", C.GRN)
 
-    sl("Parry Distance", 5, 40, 14.3, function(v)
+    sl("Parry Distance", 5, 40, 13, function(v)
         AutoParry.ParryDistance = v
     end)
 
@@ -4194,21 +4146,25 @@ makeTab("ESP", "👁️", 3, function()
     sl("Status Radius", 20, 1000, 1000, function(v) ESPStatus.Radius = v end)
 
     sec("Nama Mode", "✨")
-    drp("Name Mode", {"Text", "Galaxy"}, "Text", function(v)
+    drp("Name Mode", {"Text", "Galaxy"}, "Galaxy", function(v)
         S.ESPNameMode = v
     end)
-    sl("Name Size", 8, 30, 12, function(v)
+    lbl("🔥 Default: Galaxy (animated rainbow)", C.GRN)
+    sl("Name Size", 8, 30, 9.35, function(v)
         S.ESPNameSize = v
     end)
+    lbl("🔥 Default: 9.35", C.GRN)
 end)
 
 -- TAB 4: FIRE
 makeTab("Fire", "🔥", 4, function()
     sec("Fire Control", "⚙️")
-    tog("Enable Fire", false, function(s)
+    tog("Enable Fire", true, function(s)
         S.FireOn = s
         applyFire()
     end)
+    lbl("🔥 Default ON: CosmicFire", C.GRN)
+
     sl("Fire Size", 1, 15, 5, function(v)
         S.FireSize = v
         applyFire()
@@ -4322,9 +4278,10 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 end)
 
-print("✅ [7/12] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
-print("❌ Alert: DIHAPUS")
-print("❌ Fire Feet: DIHAPUS")-- =========================================================
+print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
+print("🔥 Fire Default: CosmicFire (ON)")
+print("🌈 ESP Default: Galaxy (9.35)")
+print("🛡️ Auto Parry Default: Distance 13")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 
@@ -4338,7 +4295,7 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- TAB 7: MISC (Fly dihapus)
+-- TAB 7: MISC (FOV PRESET + Fly Dihapus)
 makeTab("Misc", "⚙️", 7, function()
 
     sec("Movement", "🏃")
@@ -4350,6 +4307,128 @@ makeTab("Misc", "⚙️", 7, function()
 
     tog("No Clip", false, function(s) S.NoClip = s end)
     tog("No Clip Camera", false, function(s) S.NoClipCamera = s end)
+
+    -- 🔥 FOV PRESET (BARU — di Misc)
+    sec("FOV (Default 90)", "🎥")
+    lbl("🔥 Default FOV: 90 (auto ON)", C.GRN)
+    lbl("Klik preset buat ganti FOV", C.FIRE_BRIGHT)
+
+    local FOV70Btn = Instance.new("TextButton")
+    FOV70Btn.Size = UDim2.new(0.32, -3, 0, 30)
+    FOV70Btn.Position = UDim2.new(0, 0, 0, 0)
+    FOV70Btn.BackgroundColor3 = C.BG
+    FOV70Btn.BackgroundTransparency = 0.4
+    FOV70Btn.Text = "FOV 70"
+    FOV70Btn.TextColor3 = C.TXT
+    FOV70Btn.TextSize = 10
+    FOV70Btn.Font = Enum.Font.GothamBold
+    FOV70Btn.BorderSizePixel = 0
+    FOV70Btn.AutoButtonColor = false
+    FOV70Btn.Parent = cs
+    rnd(FOV70Btn, 8)
+    strk(FOV70Btn, C.ACC, 1, 0.5)
+
+    local FOV90Btn = Instance.new("TextButton")
+    FOV90Btn.Size = UDim2.new(0.32, -3, 0, 30)
+    FOV90Btn.Position = UDim2.new(0.34, 0, 0, 0)
+    FOV90Btn.BackgroundColor3 = C.BG
+    FOV90Btn.BackgroundTransparency = 0.4
+    FOV90Btn.Text = "FOV 90 ✅"
+    FOV90Btn.TextColor3 = C.GRN
+    FOV90Btn.TextSize = 10
+    FOV90Btn.Font = Enum.Font.GothamBold
+    FOV90Btn.BorderSizePixel = 0
+    FOV90Btn.AutoButtonColor = false
+    FOV90Btn.Parent = cs
+    rnd(FOV90Btn, 8)
+    strk(FOV90Btn, C.GRN, 1.5, 0.2)
+
+    local FOV120Btn = Instance.new("TextButton")
+    FOV120Btn.Size = UDim2.new(0.32, -3, 0, 30)
+    FOV120Btn.Position = UDim2.new(0.68, 0, 0, 0)
+    FOV120Btn.BackgroundColor3 = C.BG
+    FOV120Btn.BackgroundTransparency = 0.4
+    FOV120Btn.Text = "FOV 120"
+    FOV120Btn.TextColor3 = C.TXT
+    FOV120Btn.TextSize = 10
+    FOV120Btn.Font = Enum.Font.GothamBold
+    FOV120Btn.BorderSizePixel = 0
+    FOV120Btn.AutoButtonColor = false
+    FOV120Btn.Parent = cs
+    rnd(FOV120Btn, 8)
+    strk(FOV120Btn, C.ACC, 1, 0.5)
+
+    local function updateFOVButtons(activeFOV)
+        if activeFOV == 70 then
+            FOV70Btn.BackgroundColor3 = C.ACC
+            FOV70Btn.BackgroundTransparency = 0
+            FOV70Btn.TextColor3 = Color3.new(1, 1, 1)
+            strk(FOV70Btn, C.ACC2, 1.5, 0)
+
+            FOV90Btn.BackgroundColor3 = C.BG
+            FOV90Btn.BackgroundTransparency = 0.4
+            FOV90Btn.TextColor3 = C.TXT
+
+            FOV120Btn.BackgroundColor3 = C.BG
+            FOV120Btn.BackgroundTransparency = 0.4
+            FOV120Btn.TextColor3 = C.TXT
+        elseif activeFOV == 90 then
+            FOV90Btn.BackgroundColor3 = C.GRN
+            FOV90Btn.BackgroundTransparency = 0
+            FOV90Btn.TextColor3 = Color3.new(0, 0, 0)
+
+            FOV70Btn.BackgroundColor3 = C.BG
+            FOV70Btn.BackgroundTransparency = 0.4
+            FOV70Btn.TextColor3 = C.TXT
+
+            FOV120Btn.BackgroundColor3 = C.BG
+            FOV120Btn.BackgroundTransparency = 0.4
+            FOV120Btn.TextColor3 = C.TXT
+        elseif activeFOV == 120 then
+            FOV120Btn.BackgroundColor3 = C.ACC
+            FOV120Btn.BackgroundTransparency = 0
+            FOV120Btn.TextColor3 = Color3.new(1, 1, 1)
+            strk(FOV120Btn, C.ACC2, 1.5, 0)
+
+            FOV70Btn.BackgroundColor3 = C.BG
+            FOV70Btn.BackgroundTransparency = 0.4
+            FOV70Btn.TextColor3 = C.TXT
+
+            FOV90Btn.BackgroundColor3 = C.BG
+            FOV90Btn.BackgroundTransparency = 0.4
+            FOV90Btn.TextColor3 = C.TXT
+        end
+    end
+
+    FOV70Btn.MouseButton1Click:Connect(function()
+        S.FOV = 70
+        S.FOVEnabled = true
+        applyFOV()
+        updateFOVButtons(70)
+        playToggleSound()
+        print("[FOV] Set to 70")
+    end)
+
+    FOV90Btn.MouseButton1Click:Connect(function()
+        S.FOV = 90
+        S.FOVEnabled = true
+        applyFOV()
+        updateFOVButtons(90)
+        playToggleSound()
+        print("[FOV] Set to 90")
+    end)
+
+    FOV120Btn.MouseButton1Click:Connect(function()
+        S.FOV = 120
+        S.FOVEnabled = true
+        applyFOV()
+        updateFOVButtons(120)
+        playToggleSound()
+        print("[FOV] Set to 120")
+    end)
+
+    -- Init
+    updateFOVButtons(S.FOV or 90)
 
     sec("Character", "🎭")
     tog("Headless", true, function(s)
@@ -4384,7 +4463,7 @@ makeTab("Misc", "⚙️", 7, function()
     btn("🔄 Rejoin Server", function() rejoinServer() end)
 end)
 
--- TAB 9: VISUAL (+ FPS Boost + Info + Unload + HD Sky)
+-- TAB 9: VISUAL (FOV LAMA DIHAPUS, CAMERA DIGANTI ZOOM DOANG)
 makeTab("Visual", "✨", 9, function()
 
     sec("Fullbright & No Fog", "💡")
@@ -4402,7 +4481,7 @@ makeTab("Visual", "✨", 9, function()
         applyNoFog(s)
     end)
 
-    -- 🔷 HD SKY BARU
+    -- 🔷 HD SKY
     sec("HD Sky (Jernih + Ringan)", "🔷")
     tog("HD Sky (Clean)", false, function(s)
         S.HDSky = s
@@ -4423,22 +4502,22 @@ makeTab("Visual", "✨", 9, function()
 
     sec("Lighting", "💡")
     tog("Ultra HD", false, function(s) S.UltraHD = s; applyUltraHD() end)
-    tog("Contrast Boost", false, function(s) S.Contrast = s; applyContrast() end)
+    tog("Contrast Boost", true, function(s) S.Contrast = s; applyContrast() end)
+    lbl("🔥 Default: ON", C.GRN)
     sl("Contrast", 0, 1, 0.3, function(v) S.ContrastVal = v; applyContrast() end)
     sl("Saturation", 0, 1, 0.2, function(v) S.SaturationVal = v; applyContrast() end)
 
-    -- 🔷 SKY (18 PRESET)
+    -- 🔷 SKY 18 PRESET
     sec("Sky (18 Preset)", "🌌")
-    drp("Sky Preset", SkyList, "GalaxyPurple", function(v)
+    drp("Sky Preset", SkyList, "SunsetHD", function(v)
         S.SkyId = v
         applySky(v)
     end)
-    lbl("🔥 Default: GalaxyPurple", C.GRN)
-    lbl("Auto ON pas execute", C.FIRE_BRIGHT)
+    lbl("🔥 Default: SunsetHD (auto ON)", C.GRN)
 
+    -- 🔥 CAMERA (FOV DIHAPUS — pindah ke Misc)
     sec("Camera", "🎥")
-    tog("FOV Override", false, function(s) S.FOVEnabled = s; applyFOV() end)
-    sl("FOV Value", 40, 120, 70, function(v) S.FOV = v; if S.FOVEnabled then applyFOV() end end)
+    lbl("🎥 FOV pindah ke Tab Misc (70/90/120)", C.FIRE_BRIGHT)
     tog("Zoom Out", false, function(s) S.ZoomOut = s; applyZoomOut(s, S.ZoomOutValue) end)
     sl("Max Zoom Distance", 100, 1000, 500, function(v)
         S.ZoomOutValue = v
@@ -4552,7 +4631,7 @@ makeTab("Visual", "✨", 9, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
-    -- 🔥 FPS Boost (dari Tab Player lama)
+    -- 🔥 FPS Boost
     sec("FPS Boost", "🚀")
     tog("No Screen Effects", false, function(s)
         S.NoScreenEffects = s
@@ -4572,14 +4651,13 @@ makeTab("Visual", "✨", 9, function()
     end)
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
-    -- 🔥 Info
     sec("Info", "ℹ️")
     lbl("🕺 Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
     lbl("🛡️ Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
     lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
     lbl("🎯 Aimbot: Tab Aimbot → Enable", C.FIRE_BRIGHT)
+    lbl("🎥 FOV: Tab Misc (70/90/120)", C.GRN)
 
-    -- 🔥 Danger Zone
     sec("Danger Zone", "⚠️")
     btn("✨ UNLOAD COSMIC HUB", function()
         pcall(function()
@@ -4607,7 +4685,7 @@ makeTab("Visual", "✨", 9, function()
     end)
 end)
 
--- TAB 10: HITBOX (Text angka)
+-- TAB 10: HITBOX
 makeTab("Hitbox", "📦", 10, function()
 
     sec("Hitbox Control (TEXT ANGKA)", "📦")
@@ -4652,20 +4730,25 @@ makeTab("Hitbox", "📦", 10, function()
     end)
 end)
 
-print("✅ [8/12] COSMIC HUB - Misc + Visual + Hitbox Loaded")
-print("❌ Tab Player: DIHAPUS")
-print("❌ Fly: DIHAPUS")
-print("🔷 HD Sky: BARU")
-print("🔷 Sky: 18 PRESET")
-print("📦 Hitbox: TEXT ANGKA")-- =========================================================
+print("✅ [8/12] COSMIC - Misc + Visual + Hitbox Loaded")
+print("🎥 FOV Preset: 70/90/120 di Misc (Default 90)")
+print("❌ FOV lama di Visual: DIHAPUS")-- =========================================================
 -- SECTION 9/12 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
 
 -- =========================================================
--- 🔷 AUTO APPLY SKY SAAT EXECUTE (Gak perlu toggle lagi)
+-- 🔥 AUTO APPLY SEMUA SAAT EXECUTE (Fire, Sky, Contrast, FOV, ESP Galaxy)
 -- =========================================================
 task.spawn(function()
     task.wait(4)
+    
+    -- 🔥 Fire CosmicFire auto ON
+    if S.FireOn then
+        pcall(applyFire)
+        print("[AUTO] Fire applied:", S.FireType)
+    end
+    
+    -- 🔷 Sky SunsetHD auto ON
     if S.SkyId and S.SkyId ~= "Default" then
         pcall(function()
             applySky(S.SkyId)
@@ -4673,6 +4756,21 @@ task.spawn(function()
         S.SkyAutoApplied = true
         print("[AUTO] Sky applied:", S.SkyId)
     end
+    
+    -- 🎨 Contrast auto ON
+    if S.Contrast then
+        pcall(applyContrast)
+        print("[AUTO] Contrast applied")
+    end
+    
+    -- 🎥 FOV 90 auto ON
+    if S.FOVEnabled then
+        pcall(applyFOV)
+        print("[AUTO] FOV applied:", S.FOV)
+    end
+    
+    -- 🌈 ESP Galaxy auto
+    print("[AUTO] ESP Name Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
 end)
 
 -- AUTO RE-APPLY SAAT RESPAWN
@@ -4690,6 +4788,7 @@ LP.CharacterAdded:Connect(function(char)
     if S.Headless then pcall(function() applyHeadless(true) end) end
     if S.FOVEnabled then pcall(applyFOV) end
     if S.SkyId and S.SkyId ~= "Default" then pcall(function() applySky(S.SkyId) end) end
+    if S.Contrast then pcall(applyContrast) end
     if S.HDSky then pcall(function() applyHDSky(true) end) end
     if S.HDTexture then pcall(function() applyHDTexture(true) end) end
     if S.HDReflection then pcall(function() applyHDReflection(true) end) end
@@ -4753,7 +4852,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- AUTO APPLY ON EXECUTE
+-- AUTO APPLY ON EXECUTE (character stuff)
 task.spawn(function()
     task.wait(3)
     pcall(createFPSPingGui)
@@ -4773,8 +4872,12 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/12] COSMIC HUB - Auto Re-Apply + Keybind V + Sky Auto Loaded")
-print("🔷 Sky auto-applied saat execute:", S.SkyId)-- =========================================================
+print("✅ [9/12] COSMIC - Auto Re-Apply + Keybind V + Sky Auto Loaded")
+print("🔥 Fire:", S.FireType, "(auto ON)")
+print("🔷 Sky:", S.SkyId, "(auto ON)")
+print("🎨 Contrast:", S.Contrast, "(auto ON)")
+print("🎥 FOV:", S.FOV, "(auto ON)")
+print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)-- =========================================================
 -- SECTION 10/12 : LOGIC FITUR BARU
 -- =========================================================
 
@@ -4938,10 +5041,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🔷 SKY AUTO-REAPPLY (jaga sky tetap aktif)
+-- 🔷 SKY AUTO-REAPPLY (Jaga sky tetap aktif)
 -- =========================================================
 task.spawn(function()
-    while task.wait(3) do
+    while task.wait(4) do -- OPTIMIZE: 3 → 4
         if S.SkyId and S.SkyId ~= "Default" then
             local currentSky = nil
             for _, v in pairs(Lighting:GetChildren()) do
@@ -4950,7 +5053,7 @@ task.spawn(function()
                     break
                 end
             end
-            -- Kalo sky ilang (kehapus game / reset), pasang ulang
+            -- Kalo sky ilang (kehapus game) → pasang ulang
             if not currentSky or not currentSky.Name:find("CosmicSky_") then
                 pcall(function() applySky(S.SkyId) end)
             end
@@ -4958,21 +5061,59 @@ task.spawn(function()
     end
 end)
 
-print("✅ [10/12] COSMIC HUB - Logic Fitur Baru Loaded")
-print("🔷 Sky Auto-Reapply: Active")-- =========================================================
+-- =========================================================
+-- 🔥 FIRE AUTO-REAPPLY (Jaga fire tetap nempel)
+-- =========================================================
+task.spawn(function()
+    while task.wait(5) do -- OPTIMIZE
+        if S.FireOn and LP.Character then
+            local head = LP.Character:FindFirstChild("Head")
+            if head and not head:FindFirstChild("RoooorFire") then
+                pcall(applyFire)
+            end
+        end
+    end
+end)
+
+-- =========================================================
+-- 🎥 FOV AUTO-REAPPLY (Jaga FOV tetap 90)
+-- =========================================================
+task.spawn(function()
+    while task.wait(5) do -- OPTIMIZE
+        if S.FOVEnabled then
+            local cam = workspace.CurrentCamera
+            if cam and cam.FieldOfView ~= S.FOV then
+                pcall(applyFOV)
+            end
+        end
+    end
+end)
+
+print("✅ [10/12] COSMIC - Logic Fitur Baru Loaded")
+print("🔷 Sky Auto-Reapply: Active")
+print("🔥 Fire Auto-Reapply: Active")
+print("🎥 FOV Auto-Reapply: Active")-- =========================================================
 -- SECTION 11/12 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v4.1 ✨                   ║")
+print("║  ✨ COSMIC ✨                            ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
+print("║  🔥 AUTO ON SAAT EXECUTE:                ║")
+print("║     → Fire: CosmicFire                   ║")
+print("║     → ESP: Galaxy Mode (Size 9.35)       ║")
+print("║     → Contrast: ON                       ║")
+print("║     → Sky: SunsetHD                      ║")
+print("║     → FOV: 90 (Tab Misc)                 ║")
+print("║     → Auto Parry: Distance 13            ║")
+print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry CUSTOM                    ║")
-print("║     → Debounce 0.5                       ║")
-print("║     → Radius 14.3                        ║")
+print("║     → Radius 13                          ║")
 print("║     → Circle Rata Tanah                  ║")
 print("║     → Camera Auto Unlock                 ║")
+print("║     → NO PARRY kalo killer di luar radius║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
 print("║  🕺 Moonwalk (Tombol MW + LOCK)          ║")
 print("║  ⚡ Fast Vault                            ║")
@@ -4987,30 +5128,40 @@ print("║  🛡️ God Mode                             ║")
 print("║  👑 8-Bit Royal Crown (CLIENT)           ║")
 print("║  🦴 Korblox Pencil (CLIENT)              ║")
 print("║  🔷 HD Sky (Jernih + Ringan)             ║")
-print("║  🌌 Sky 18 PRESET (Galaxy dll)           ║")
+print("║  🌌 Sky 18 PRESET                        ║")
 print("║  🌈 ESP Galaxy (Animated Rainbow)        ║")
 print("║  🟠 ESP Generator (FIXED)                ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter                   ║")
 print("╠══════════════════════════════════════════╣")
+print("║  ⚡ OPTIMIZED:                           ║")
+print("║     → Loop 0.05 → 0.08 (loading)         ║")
+print("║     → Loop 0.1 → 0.12 (ESP)              ║")
+print("║     → Loop 0.8 → 1 (Kill Effect)         ║")
+print("║     → Starfield 80 → 50 bintang          ║")
+print("║     → Auto-Reapply Sky/Fire/FOV          ║")
+print("╠══════════════════════════════════════════╣")
 print("║  ❌ YANG DIHAPUS:                        ║")
 print("║     → Fire Feet                          ║")
 print("║     → Fly                                ║")
 print("║     → Alert (Safe Zone, dll)             ║")
 print("║     → Tab Player (digabung ke Visual)    ║")
+print("║     → FOV lama di Visual                 ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
-print("║  🔷 Sky: Auto ON (GalaxyPurple)          ║")
+print("║  🎥 FOV: Tab Misc (70/90/120)            ║")
 print("║  🎯 Aimbot: Tab Aimbot (Section 12)      ║")
 print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/12] COSMIC HUB v4.1 - FINAL LOADED! ✨")
-print("🔷 Sky Default: GalaxyPurple (auto ON)")
-print("📦 Hitbox: TEXT ANGKA")
-print("🌈 ESP Galaxy: Animated Rainbow")
-print("❌ Fire Feet, Fly, Alert: DIHAPUS")
+print("✅ [11/12] COSMIC - FINAL LOADED! ✨")
+print("🔥 Fire: CosmicFire (auto ON)")
+print("🌈 ESP: Galaxy Mode (Size 9.35)")
+print("🎨 Contrast: ON")
+print("🔷 Sky: SunsetHD (auto ON)")
+print("🎥 FOV: 90 (auto ON) | Tab Misc")
+print("🛡️ Auto Parry: Distance 13")
 print("➡️ Lanjut ke Section 12 (Aimbot)")-- =========================================================
 -- SECTION 12/12 : AIMBOT (TAB AIMBOT COSMIC)
 -- =========================================================
@@ -5172,7 +5323,7 @@ function Aimlock_StopLoop()
 end
 
 -- =========================================================
--- FLOATING GUI (muncul kalo toggle "Show Aimbot GUI" ON)
+-- FLOATING GUI (muncul kalo toggle ON)
 -- =========================================================
 Aimlock_Gui = nil
 Aimlock_FloatingBtn = nil
@@ -5187,7 +5338,6 @@ function Aimlock_CreateFloatingGUI()
     Aimlock_Gui.IgnoreGuiInset = true
     Aimlock_Gui.Parent = PG
     
-    -- TOMBOL FLOATING
     Aimlock_FloatingBtn = Instance.new("TextButton")
     Aimlock_FloatingBtn.Size = UDim2.new(0, 45, 0, 45)
     Aimlock_FloatingBtn.Position = UDim2.new(0, 20, 0, 90)
@@ -5210,7 +5360,6 @@ function Aimlock_CreateFloatingGUI()
     stroke1.Color = Color3.fromRGB(255, 100, 120)
     stroke1.Parent = Aimlock_FloatingBtn
     
-    -- PANEL
     Aimlock_FloatingPanel = Instance.new("Frame")
     Aimlock_FloatingPanel.Size = UDim2.new(0, 240, 0, 140)
     Aimlock_FloatingPanel.Position = UDim2.new(0.5, -120, 0.5, -70)
@@ -5229,7 +5378,6 @@ function Aimlock_CreateFloatingGUI()
     stroke2.Color = Color3.fromRGB(255, 100, 120)
     stroke2.Parent = Aimlock_FloatingPanel
     
-    -- HEADER
     local hdr = Instance.new("Frame")
     hdr.Size = UDim2.new(1, 0, 0, 28)
     hdr.BackgroundColor3 = Color3.fromRGB(60, 15, 25)
@@ -5274,7 +5422,6 @@ function Aimlock_CreateFloatingGUI()
     clsCorner.CornerRadius = UDim.new(0, 5)
     clsCorner.Parent = clsBtn
     
-    -- STATUS
     local statLbl = Instance.new("TextLabel")
     statLbl.Name = "StatusLabel"
     statLbl.Size = UDim2.new(1, -20, 0, 18)
@@ -5287,7 +5434,6 @@ function Aimlock_CreateFloatingGUI()
     statLbl.TextXAlignment = Enum.TextXAlignment.Left
     statLbl.Parent = Aimlock_FloatingPanel
     
-    -- RADIUS LABEL
     local radLbl = Instance.new("TextLabel")
     radLbl.Name = "RadiusLabel"
     radLbl.Size = UDim2.new(1, -20, 0, 14)
@@ -5300,7 +5446,6 @@ function Aimlock_CreateFloatingGUI()
     radLbl.TextXAlignment = Enum.TextXAlignment.Left
     radLbl.Parent = Aimlock_FloatingPanel
     
-    -- SLIDER BG
     local slBg = Instance.new("Frame")
     slBg.Name = "SliderBg"
     slBg.Size = UDim2.new(1, -20, 0, 6)
@@ -5336,7 +5481,6 @@ function Aimlock_CreateFloatingGUI()
     slKnobCorner.CornerRadius = UDim.new(1, 0)
     slKnobCorner.Parent = slKnob
     
-    -- INFO
     local infLbl = Instance.new("TextLabel")
     infLbl.Size = UDim2.new(1, -20, 0, 30)
     infLbl.Position = UDim2.new(0, 10, 0, 100)
@@ -5349,7 +5493,6 @@ function Aimlock_CreateFloatingGUI()
     infLbl.TextYAlignment = Enum.TextYAlignment.Top
     infLbl.Parent = Aimlock_FloatingPanel
     
-    -- TOMBOL OPEN/CLOSE PANEL
     Aimlock_FloatingBtn.MouseButton1Click:Connect(function()
         Aimlock_FloatingPanel.Visible = not Aimlock_FloatingPanel.Visible
     end)
@@ -5358,7 +5501,6 @@ function Aimlock_CreateFloatingGUI()
         Aimlock_FloatingPanel.Visible = false
     end)
     
-    -- SLIDER DRAG
     local draggingSl = false
     
     local function updateFloatingSlider(input)
@@ -5471,6 +5613,6 @@ makeTab("Aimbot", "🎯", 6, function()
     end)
 end)
 
-print("✅ [12/12] COSMIC HUB - AIMBOT TAB Loaded")
+print("✅ [12/12] COSMIC - AIMBOT TAB Loaded")
 print("🎯 Aimbot: Target Survivor | Radius max 100")
 print("👁️ Floating GUI: Toggle di tab Aimbot")

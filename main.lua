@@ -57,7 +57,6 @@ end
 
 local ToggleSoundId = "rbxassetid://6073491164"
 
--- OPT: Cache sound instance (gak bikin instance baru tiap toggle)
 local _toggleSoundInstance = nil
 function playToggleSound()
     task.spawn(function()
@@ -123,7 +122,6 @@ starContainer.Size = UDim2.new(1, 0, 1, 0)
 starContainer.BackgroundTransparency = 1
 starContainer.Parent = bg
 
--- OPT: 50 → 30 bintang
 local stars = {}
 for i = 1, 30 do
     local star = Instance.new("Frame")
@@ -466,7 +464,7 @@ _G.RoooorS = _G.RoooorS or {
     FireBeamColor = Color3.fromRGB(120, 60, 255),
     -- 🔥 ESP GALAXY + SIZE 9.35
     ESPNameMode = "Galaxy", ESPNameSize = 9.35,
-    -- 🔥 ESP GENERATOR MODE
+    -- 🔥 ESP GENERATOR MODE (Classic / Bar)
     ESPGenMode = "Classic",
     -- 🫥 HIDE NAME
     HideName = true,
@@ -517,7 +515,7 @@ HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false, ParryDistance = 11.5, ParryDelay = 0,
+    Enabled = false, ParryDistance = 13, ParryDelay = 0,
     Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
     Wiggle = false, WiggleSpam = 5,
 }
@@ -530,7 +528,7 @@ AP_ESPCircle = {
     ColorDanger = Color3.fromRGB(255, 50, 50),
     Thickness = 0.4, Segments = 36, YOffset = -2.5
 }
-AP_PARRY_DEBOUNCE = 0.10
+AP_PARRY_DEBOUNCE = 0.4
 
 PARRY_DEBOUNCE = 0.1
 ParryActive = false
@@ -594,11 +592,11 @@ print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🔷 Sky: SunsetHD (ON)")
 print("🎨 Contrast: ON")
 print("🎥 FOV: 90 (ON)")
-print("🛡️ Auto Parry: Distance 11.5 | Debounce 0.10")
+print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: ACTIVE")
 print("🎥 FOV Bind: ACTIVE")
 print("🫥 Hide Name: COSMIC HUB")
-print("⚡ ESP Gen Mode: Classic/Cosmic")-- =========================================================
+print("⚡ ESP Gen Mode: Classic / Bar")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1594,7 +1592,7 @@ function createStatusESP(player, char, root)
     end
 end
 
--- GALAXY NAME ANIMATOR (OPT: 0.08 → 0.1)
+-- GALAXY NAME ANIMATOR
 task.spawn(function()
     while task.wait(0.1) do
         if S.ESPNameMode == "Galaxy" then
@@ -1650,14 +1648,14 @@ function ApplyGenHighlight(object, color)
     h.Parent = object
 end
 
--- 🆕 UPDATE GENERATOR 2 MODE (Classic + Cosmic)
+-- 🆕 UPDATE GENERATOR 2 MODE (Classic + Bar)
 function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
 
     if not ESP.Generator then
         local a = generator:FindFirstChild("GenESP")
         if a then a:Destroy() end
-        local b = generator:FindFirstChild("GenESPCosmic")
+        local b = generator:FindFirstChild("GenESPBar")
         if b then b:Destroy() end
         local h = generator:FindFirstChild("GenHighlight")
         if h then h:Destroy() end
@@ -1668,10 +1666,12 @@ function UpdateGenerator(generator)
         or GetGameValue(generator, "Progress") or 0
     local cp = math.clamp(percent, 0, 100)
 
-    -- MODE CLASSIC
+    -- ============================
+    -- MODE CLASSIC (angka [%])
+    -- ============================
     if S.ESPGenMode == "Classic" then
-        local oldCosmic = generator:FindFirstChild("GenESPCosmic")
-        if oldCosmic then oldCosmic:Destroy() end
+        local oldBar = generator:FindFirstChild("GenESPBar")
+        if oldBar then oldBar:Destroy() end
 
         if percent >= 100 then
             local old = generator:FindFirstChild("GenESP")
@@ -1713,87 +1713,75 @@ function UpdateGenerator(generator)
         end
         ApplyGenHighlight(generator, color)
 
-    -- MODE COSMIC
-    elseif S.ESPGenMode == "Cosmic" then
+    -- ============================
+    -- MODE BAR (progress bar simpel + work)
+    -- ============================
+    elseif S.ESPGenMode == "Bar" then
         local oldClassic = generator:FindFirstChild("GenESP")
         if oldClassic then oldClassic:Destroy() end
 
         if percent >= 100 then
-            local old = generator:FindFirstChild("GenESPCosmic")
+            local old = generator:FindFirstChild("GenESPBar")
             if old then old:Destroy() end
             local h = generator:FindFirstChild("GenHighlight")
             if h then h:Destroy() end
             return
         end
 
-        local billboard = generator:FindFirstChild("GenESPCosmic")
+        local billboard = generator:FindFirstChild("GenESPBar")
         if not billboard then
             billboard = Instance.new("BillboardGui")
-            billboard.Name = "GenESPCosmic"
-            billboard.Size = UDim2.new(0, 120, 0, 45)
+            billboard.Name = "GenESPBar"
+            billboard.Size = UDim2.new(0, 110, 0, 34)
             billboard.AlwaysOnTop = true
             billboard.StudsOffset = Vector3.new(0, 2, 0)
             billboard.Adornee = generator
             billboard.Parent = generator
 
-            local container = Instance.new("Frame")
-            container.Name = "Container"
-            container.Size = UDim2.new(1, 0, 1, 0)
-            container.BackgroundTransparency = 1
-            container.Parent = billboard
-
-            local iconCircle = Instance.new("Frame")
-            iconCircle.Name = "IconCircle"
-            iconCircle.Size = UDim2.new(0, 28, 0, 28)
-            iconCircle.Position = UDim2.new(0, 2, 0.5, -14)
-            iconCircle.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
-            iconCircle.BorderSizePixel = 0
-            iconCircle.Parent = container
-
-            local ic = Instance.new("UICorner")
-            ic.CornerRadius = UDim.new(1, 0)
-            ic.Parent = iconCircle
-
-            local icStroke = Instance.new("UIStroke")
-            icStroke.Name = "IconStroke"
-            icStroke.Thickness = 2
-            icStroke.Color = Color3.fromRGB(255, 170, 0)
-            icStroke.Parent = iconCircle
-
-            local icoLabel = Instance.new("TextLabel")
-            icoLabel.Name = "IconText"
-            icoLabel.Size = UDim2.new(1, 0, 1, 0)
-            icoLabel.BackgroundTransparency = 1
-            icoLabel.Text = "⚡"
-            icoLabel.TextColor3 = Color3.fromRGB(255, 170, 0)
-            icoLabel.TextSize = 16
-            icoLabel.Font = Enum.Font.GothamBlack
-            icoLabel.Parent = iconCircle
+            local icon = Instance.new("TextLabel")
+            icon.Name = "Icon"
+            icon.Size = UDim2.new(0, 22, 0, 22)
+            icon.Position = UDim2.new(0, 2, 0, 0)
+            icon.BackgroundTransparency = 1
+            icon.Text = "⚡"
+            icon.TextColor3 = Color3.fromRGB(255, 170, 0)
+            icon.TextSize = 16
+            icon.Font = Enum.Font.GothamBlack
+            icon.TextStrokeTransparency = 0.2
+            icon.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            icon.Parent = billboard
 
             local pctLabel = Instance.new("TextLabel")
             pctLabel.Name = "PctText"
-            pctLabel.Size = UDim2.new(0, 85, 0, 20)
-            pctLabel.Position = UDim2.new(0, 34, 0, 0)
+            pctLabel.Size = UDim2.new(0, 80, 0, 20)
+            pctLabel.Position = UDim2.new(0, 24, 0, 0)
             pctLabel.BackgroundTransparency = 1
             pctLabel.Text = "0%"
             pctLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
-            pctLabel.TextSize = 16
+            pctLabel.TextSize = 15
             pctLabel.Font = Enum.Font.GothamBlack
             pctLabel.TextXAlignment = Enum.TextXAlignment.Left
             pctLabel.TextStrokeTransparency = 0.2
-            pctLabel.Parent = container
+            pctLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            pctLabel.Parent = billboard
 
             local barBg = Instance.new("Frame")
             barBg.Name = "BarBg"
-            barBg.Size = UDim2.new(0, 84, 0, 6)
-            barBg.Position = UDim2.new(0, 34, 0, 24)
-            barBg.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
+            barBg.Size = UDim2.new(0, 104, 0, 7)
+            barBg.Position = UDim2.new(0, 3, 0, 24)
+            barBg.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
             barBg.BorderSizePixel = 0
-            barBg.Parent = container
+            barBg.Parent = billboard
 
             local bbc = Instance.new("UICorner")
             bbc.CornerRadius = UDim.new(1, 0)
             bbc.Parent = barBg
+
+            local bbStroke = Instance.new("UIStroke")
+            bbStroke.Thickness = 1
+            bbStroke.Color = Color3.fromRGB(120, 70, 200)
+            bbStroke.Transparency = 0.4
+            bbStroke.Parent = barBg
 
             local barFill = Instance.new("Frame")
             barFill.Name = "BarFill"
@@ -1807,32 +1795,32 @@ function UpdateGenerator(generator)
             bfc.Parent = barFill
         end
 
-        local container = billboard:FindFirstChild("Container")
-        if container then
-            local pctLabel = container:FindFirstChild("PctText")
-            local barBg = container:FindFirstChild("BarBg")
-            local iconCircle = container:FindFirstChild("IconCircle")
-            local iconStroke = iconCircle and iconCircle:FindFirstChild("IconStroke")
-            local icoLabel = iconCircle and iconCircle:FindFirstChild("IconText")
+        local pctLabel = billboard:FindFirstChild("PctText")
+        local icon = billboard:FindFirstChild("Icon")
+        local barBg = billboard:FindFirstChild("BarBg")
 
-            local color
-            if cp < 50 then
-                color = Color3.fromRGB(255, 80, 0):Lerp(Color3.fromRGB(255, 220, 80), cp / 50)
-            else
-                color = Color3.fromRGB(255, 220, 80):Lerp(Color3.fromRGB(0, 255, 150), (cp - 50) / 50)
-            end
+        local color
+        if cp < 50 then
+            color = Color3.fromRGB(255, 80, 0):Lerp(Color3.fromRGB(255, 220, 80), cp / 50)
+        else
+            color = Color3.fromRGB(255, 220, 80):Lerp(Color3.fromRGB(0, 255, 150), (cp - 50) / 50)
+        end
 
-            if pctLabel then pctLabel.Text = string.format("%.0f%%", percent) end
-            if icoLabel then icoLabel.TextColor3 = color end
-            if iconStroke then iconStroke.Color = color end
-            if barBg then
-                local barFill = barBg:FindFirstChild("BarFill")
-                if barFill then
-                    barFill.Size = UDim2.new(cp / 100, 0, 1, 0)
-                    barFill.BackgroundColor3 = color
-                end
+        if pctLabel then
+            pctLabel.Text = string.format("%.0f%%", percent)
+            pctLabel.TextColor3 = color
+        end
+        if icon then
+            icon.TextColor3 = color
+        end
+        if barBg then
+            local barFill = barBg:FindFirstChild("BarFill")
+            if barFill then
+                barFill.Size = UDim2.new(cp / 100, 0, 1, 0)
+                barFill.BackgroundColor3 = color
             end
         end
+
         ApplyGenHighlight(generator, color)
     end
 end
@@ -1899,10 +1887,10 @@ AP_hookedKillers = _G.AP_HookedKillers or {}
 _G.AP_HookedKillers = AP_hookedKillers
 AP_wasLocked = false
 
--- Config (TIDAK DIUBAH — settingan lu)
+-- Config (SETTINGAN LU)
 AP_Config = {
-    Debounce = 0.10,
-    Radius = 11.5,
+    Debounce = 0.4,
+    Radius = 13,
     FaceSensitivity = 0.2,
     EnableFaceCheck = true,
     EnableAttributeCheck = true,
@@ -1962,7 +1950,7 @@ function AP_PressParryButton()
     end
 end
 
--- 🆕 FORCE RESET CAMERA PAS PARRY SUKSES
+-- FORCE RESET CAMERA PAS PARRY SUKSES
 local _oldAP_PressParryButton = AP_PressParryButton
 function AP_PressParryButton()
     _oldAP_PressParryButton()
@@ -2156,7 +2144,7 @@ task.spawn(function()
     end
 end)
 
--- 🆕 CAMERA FIX (Anti-Stuck abis Parry)
+-- CAMERA FIX (Anti-Stuck abis Parry)
 AP_CamLastForced = 0
 AP_CamLastCFrame = nil
 AP_CamStuckTime = 0
@@ -2323,9 +2311,9 @@ function AP_UpdateCircle()
     end
 end
 
--- ⚠️ AP_UpdateCircle RenderStepped DIPINDAH KE SECTION 5 (GABUNG 1)
-
--- AUTO SKILL CHECK
+-- =========================================================
+-- ⚡ AUTO SKILL CHECK 2 MODE (Support King's Scourge)
+-- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
     task.wait()
@@ -2358,48 +2346,78 @@ function TriggerMobileButton()
     end
 end
 
+-- 🆕 AUTO SKILL CHECK 2 MODE (Instant + Perfect) — King's Scourge Ready
 function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
+
     SkillHeartbeat = RunService.RenderStepped:Connect(function()
-        if not SkillCheck.Enabled or busy then return end
+        if not SkillCheck.Enabled then return end
+
         local prompt = PG:FindFirstChild("SkillCheckPromptGui")
         if not prompt then return end
+
         local check = prompt:FindFirstChild("Check")
         if not check or not check.Visible then return end
+
         local line = check:FindFirstChild("Line")
         local goal = check:FindFirstChild("Goal")
         if not line or not goal then return end
+
         local gr = goal.Rotation % 360
 
+        -- ============================
+        -- MODE 1: INSTANT (King's Scourge killer)
+        -- ============================
         if SkillCheck.Mode == "Instant" then
+            if busy then return end
+
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
+
             busy = true
             task.spawn(function()
-                if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
+                if UIS.TouchEnabled then
+                    TriggerMobileButton()
+                else
+                    pressSpace()
+                end
                 SkillCheck.Success += 1
                 SkillCheck.Total += 1
-                task.wait(0.05)
+                task.wait(0.02)
                 busy = false
             end)
             return
         end
 
-        local lr = line.Rotation % 360
-        local startRange = (gr + 102) % 360
-        local endRange = (gr + 116) % 360
-        local success =
-            (startRange > endRange and (lr >= startRange or lr <= endRange))
-            or (lr >= startRange and lr <= endRange)
-        if success then
-            busy = true
-            task.spawn(function()
-                if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
-                SkillCheck.Success += 1
-                SkillCheck.Total += 1
-                task.wait(0.05)
-                busy = false
-            end)
+        -- ============================
+        -- MODE 2: PERFECT (Timing akurat)
+        -- ============================
+        if SkillCheck.Mode == "Perfect" then
+            if busy then return end
+
+            local lr = line.Rotation % 360
+            local startRange = (gr + 102) % 360
+            local endRange = (gr + 116) % 360
+
+            local success =
+                (startRange > endRange and (lr >= startRange or lr <= endRange))
+                or (lr >= startRange and lr <= endRange)
+
+            if success then
+                busy = true
+                task.spawn(function()
+                    if UIS.TouchEnabled then
+                        TriggerMobileButton()
+                    else
+                        pressSpace()
+                    end
+                    SkillCheck.Success += 1
+                    SkillCheck.Total += 1
+                    task.wait(0.02)
+                    busy = false
+                end)
+            end
+            return
         end
     end)
 end
@@ -2425,8 +2443,6 @@ function mwResetSpeed()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if hum then hum.WalkSpeed = 16 end
 end
-
--- ⚠️ Moonwalk RenderStepped DIPINDAH KE SECTION 5 (GABUNG 1)
 
 function setMoonwalk(state)
     if Moonwalk.Locked and state ~= Moonwalk.Enabled then
@@ -3005,9 +3021,10 @@ _G.AP_GetCount = function() return AP_parryCount end
 _G.AP_Config = AP_Config
 
 print("✅ [4/12] COSMIC - ESP + Auto Parry + Moonwalk + Hitbox Loaded")
-print("🛡️ Auto Parry: MULTI-LAYER | Radius 11.5 | Debounce 0.10")
+print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: Anti-Stuck Active")
-print("⚡ ESP Gen: Classic + Cosmic Mode")-- =========================================================
+print("⚡ ESP Gen: Classic + Bar Mode")
+print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect) — King's Scourge Ready")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4392,20 +4409,20 @@ makeTab("Survivor", "🏃", 1, function()
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
     end)
-    lbl("Radius 11.5 | Multi-layer trigger ✅", C.GRN)
+    lbl("Radius 13 | Multi-layer trigger ✅", C.GRN)
     lbl("Face + Attribute + Velocity Check", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 40, 11.5, function(v)
+    sl("Parry Distance", 5, 40, 13, function(v)
         AutoParry.ParryDistance = v
         AP_Config.Radius = v
     end)
-    lbl("Default 11.5", C.GRN)
+    lbl("Default 13", C.GRN)
 
-    sl("Debounce", 0.05, 0.5, 0.10, function(v)
+    sl("Debounce", 0.05, 1, 0.4, function(v)
         AP_PARRY_DEBOUNCE = v
         AP_Config.Debounce = v
     end)
-    lbl("Default 0.10", C.FIRE_BRIGHT)
+    lbl("Default 0.4", C.FIRE_BRIGHT)
 
     sl("Face Sensitivity", 0, 1, 0.2, function(v)
         AP_Config.FaceSensitivity = v
@@ -4452,6 +4469,7 @@ makeTab("Survivor", "🏃", 1, function()
         SkillCheck.Mode = v
     end)
     lbl("Perfect = tunggu zona | Instant = paksa jarum", C.FIRE_BRIGHT)
+    lbl("⚡ Support King's Scourge (9/12/15 check)", C.GRN)
 
     tog("Hide Needle (Instant only)", false, function(s)
         SkillCheck.HideNeedle = s
@@ -4591,16 +4609,16 @@ makeTab("ESP", "👁️", 3, function()
     tog("ESP Generator", true, function(s) ESP.Generator = s end)
     cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
 
-    drp("Generator Mode", {"Classic", "Cosmic"}, "Classic", function(v)
+    drp("Generator Mode", {"Classic", "Bar"}, "Classic", function(v)
         S.ESPGenMode = v
         for gen in pairs(Cached.Generators) do
             local a = gen:FindFirstChild("GenESP")
             if a then a:Destroy() end
-            local b = gen:FindFirstChild("GenESPCosmic")
+            local b = gen:FindFirstChild("GenESPBar")
             if b then b:Destroy() end
         end
     end)
-    lbl("Classic = [%] angka | Cosmic = bar + ⚡", C.FIRE_BRIGHT)
+    lbl("Classic = [%] angka | Bar = progress bar ⚡", C.FIRE_BRIGHT)
 
     tog("ESP Pallet", true, function(s) ESP.Pallet = s end)
     cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
@@ -4754,8 +4772,10 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
+print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🫥 Hide Name: Tab Survivor")
-print("⚡ ESP Gen Mode: Classic/Cosmic")-- =========================================================
+print("⚡ ESP Gen Mode: Classic / Bar")
+print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 

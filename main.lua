@@ -466,6 +466,9 @@ _G.RoooorS = _G.RoooorS or {
     ESPNameMode = "Galaxy", ESPNameSize = 9.35,
     -- 🔥 ESP GENERATOR MODE (Classic / Bar)
     ESPGenMode = "Classic",
+    ESPGenBarSize = 80,
+    ESPGenBarHeight = 14,
+    ESPGenBarTextSize = 10,
     -- 🫥 HIDE NAME
     HideName = true,
     HideNameText = "COSMIC HUB",
@@ -596,7 +599,7 @@ print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: ACTIVE")
 print("🎥 FOV Bind: ACTIVE")
 print("🫥 Hide Name: COSMIC HUB")
-print("⚡ ESP Gen Mode: Classic / Bar")-- =========================================================
+print("⚡ ESP Gen Mode: Classic / Bar (angka di dalam bar)")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1623,7 +1626,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- ESP GENERATOR (Multi-Fallback Progress Detection)
+-- ESP GENERATOR (Multi-Fallback)
 -- =========================================================
 
 function GetGameValue(obj, name)
@@ -1638,7 +1641,6 @@ function GetGameValue(obj, name)
     return nil
 end
 
--- 🆕 FUNGSI KHUSUS BACA PROGRESS GENERATOR (Multi-Fallback)
 function GetGeneratorProgress(gen)
     if not gen then return 0 end
 
@@ -1693,7 +1695,7 @@ function ApplyGenHighlight(object, color)
     h.Parent = object
 end
 
--- 🆕 UPDATE GENERATOR 2 MODE
+-- 🆕 UPDATE GENERATOR 2 MODE (NO EMOJI)
 function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
 
@@ -1758,7 +1760,7 @@ function UpdateGenerator(generator)
         ApplyGenHighlight(generator, color)
 
     -- ============================
-    -- MODE BAR (kecil, angka di dalam, no icon)
+    -- MODE BAR (CUMA BAR + ANGKA, NO EMOJI)
     -- ============================
     elseif S.ESPGenMode == "Bar" then
         local oldClassic = generator:FindFirstChild("GenESP")
@@ -1772,17 +1774,21 @@ function UpdateGenerator(generator)
             return
         end
 
+        local barSize = S.ESPGenBarSize or 80
+        local barHeight = S.ESPGenBarHeight or 14
+        local textSize = S.ESPGenBarTextSize or 10
+
         local billboard = generator:FindFirstChild("GenESPBar")
         if not billboard then
             billboard = Instance.new("BillboardGui")
             billboard.Name = "GenESPBar"
-            billboard.Size = UDim2.new(0, 80, 0, 14)
+            billboard.Size = UDim2.new(0, barSize, 0, barHeight)
             billboard.AlwaysOnTop = true
             billboard.StudsOffset = Vector3.new(0, 1.5, 0)
             billboard.Adornee = generator
             billboard.Parent = generator
 
-            -- Bar background
+            -- Bar background (frame utama)
             local barBg = Instance.new("Frame")
             barBg.Name = "BarBg"
             barBg.Size = UDim2.new(1, 0, 1, 0)
@@ -1796,12 +1802,13 @@ function UpdateGenerator(generator)
             bbc.Parent = barBg
 
             local bbStroke = Instance.new("UIStroke")
+            bbStroke.Name = "Border"
             bbStroke.Thickness = 1
             bbStroke.Color = Color3.fromRGB(120, 70, 200)
             bbStroke.Transparency = 0.3
             bbStroke.Parent = barBg
 
-            -- Bar fill
+            -- Fill
             local barFill = Instance.new("Frame")
             barFill.Name = "BarFill"
             barFill.Size = UDim2.new(0, 0, 1, 0)
@@ -1813,7 +1820,7 @@ function UpdateGenerator(generator)
             bfc.CornerRadius = UDim.new(1, 0)
             bfc.Parent = barFill
 
-            -- Angka % DI DALAM bar (center)
+            -- Angka % DI DALAM bar
             local pctText = Instance.new("TextLabel")
             pctText.Name = "PctText"
             pctText.Size = UDim2.new(1, 0, 1, 0)
@@ -1821,27 +1828,35 @@ function UpdateGenerator(generator)
             pctText.BackgroundTransparency = 1
             pctText.Text = "0%"
             pctText.TextColor3 = Color3.fromRGB(255, 255, 255)
-            pctText.TextSize = 10
+            pctText.TextSize = textSize
             pctText.Font = Enum.Font.GothamBold
             pctText.TextXAlignment = Enum.TextXAlignment.Center
             pctText.TextYAlignment = Enum.TextYAlignment.Center
-            pctText.TextStrokeTransparency = 0.3
+            pctText.TextStrokeTransparency = 0.2
             pctText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            pctText.ZIndex = 5
-            pctText.Parent = billboard
+            pctText.ZIndex = 10
+            pctText.Parent = barBg
+        end
+
+        -- Update size billboard
+        if billboard.AbsoluteSize.X ~= barSize 
+           or billboard.AbsoluteSize.Y ~= barHeight then
+            billboard.Size = UDim2.new(0, barSize, 0, barHeight)
         end
 
         -- Update fill + text
         local barBg = billboard:FindFirstChild("BarBg")
-        local pctText = billboard:FindFirstChild("PctText")
         if barBg then
             local barFill = barBg:FindFirstChild("BarFill")
+            local pctText = barBg:FindFirstChild("PctText")
+
             if barFill then
                 barFill.Size = UDim2.new(cp / 100, 0, 1, 0)
             end
-        end
-        if pctText then
-            pctText.Text = string.format("%.0f%%", percent)
+            if pctText then
+                pctText.Text = string.format("%.0f%%", percent)
+                pctText.TextSize = textSize
+            end
         end
 
         local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
@@ -2044,7 +2059,7 @@ function AP_DoParry()
     if now - AP_lastParry < AP_Config.Debounce then return end
     AP_lastParry = now
     AP_parryCount = AP_parryCount + 1
-    print("[AP] 🔥 PARRY #" .. AP_parryCount)
+    print("[AP] PARRY #" .. AP_parryCount)
     AP_PressParryButton()
 end
 
@@ -2328,7 +2343,7 @@ function AP_UpdateCircle()
 end
 
 -- =========================================================
--- ⚡ AUTO SKILL CHECK 2 MODE (Support King's Scourge)
+-- AUTO SKILL CHECK 2 MODE (King's Scourge Ready)
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
@@ -2501,7 +2516,7 @@ mwLockBtn = Instance.new("TextButton")
 mwLockBtn.Size = UDim2.fromOffset(60, 22)
 mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
 mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
-mwLockBtn.Text = "🔓 UNLOCK"
+mwLockBtn.Text = "UNLOCK"
 mwLockBtn.TextColor3 = Color3.new(1, 1, 1)
 mwLockBtn.TextSize = 10
 mwLockBtn.Font = Enum.Font.GothamBold
@@ -2530,17 +2545,17 @@ function mwBtnUpdateUI()
     end
 
     if Moonwalk.Locked then
-        mwLockBtn.Text = "🔒 LOCKED"
+        mwLockBtn.Text = "LOCKED"
         mwLockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     else
-        mwLockBtn.Text = "🔓 UNLOCK"
+        mwLockBtn.Text = "UNLOCK"
         mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
     end
 end
 
 mwBtn.MouseButton1Click:Connect(function()
     if Moonwalk.Locked then
-        mwBtn.Text = "🔒"
+        mwBtn.Text = "X"
         task.delay(0.8, mwBtnUpdateUI)
         return
     end
@@ -3034,8 +3049,8 @@ _G.AP_Config = AP_Config
 print("✅ [4/12] COSMIC - ESP + Auto Parry + Moonwalk + Hitbox Loaded")
 print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: Anti-Stuck Active")
-print("⚡ ESP Gen: Classic + Bar (no icon, angka di dalam)")
-print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect) — King's Scourge Ready")-- =========================================================
+print("📊 ESP Gen: Classic + Bar (bar + angka, NO emoji)")
+print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -4420,7 +4435,7 @@ makeTab("Survivor", "🏃", 1, function()
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
     end)
-    lbl("Radius 13 | Multi-layer trigger ✅", C.GRN)
+    lbl("Radius 13 | Multi-layer trigger", C.GRN)
     lbl("Face + Attribute + Velocity Check", C.FIRE_BRIGHT)
 
     sl("Parry Distance", 5, 40, 13, function(v)
@@ -4464,9 +4479,9 @@ makeTab("Survivor", "🏃", 1, function()
         AP_ESPCircle.Enabled = s
         if not s then AP_ClearCircle() end
     end)
-    lbl("🟢 Aman | 🔴 Killer masuk", C.FIRE_BRIGHT)
+    lbl("Hijau aman | Merah killer masuk", C.FIRE_BRIGHT)
 
-    btn("🔄 Reset Parry Counter", function()
+    btn("Reset Parry Counter", function()
         AP_parryCount = 0
     end)
 
@@ -4480,13 +4495,13 @@ makeTab("Survivor", "🏃", 1, function()
         SkillCheck.Mode = v
     end)
     lbl("Perfect = tunggu zona | Instant = paksa jarum", C.FIRE_BRIGHT)
-    lbl("⚡ Support King's Scourge (9/12/15 check)", C.GRN)
+    lbl("Support King's Scourge (9/12/15 check)", C.GRN)
 
     tog("Hide Needle (Instant only)", false, function(s)
         SkillCheck.HideNeedle = s
     end)
 
-    btn("🔄 Reset Counter", function()
+    btn("Reset Counter", function()
         SkillCheck.Success = 0
         SkillCheck.Total = 0
     end)
@@ -4556,7 +4571,7 @@ makeTab("Survivor", "🏃", 1, function()
 
     -- 🫥 HIDE NAME (TAB SURVIVOR)
     sec("Hide Name", "🫥")
-    tog("Hide Name → COSMIC HUB", true, function(s)
+    tog("Hide Name -> COSMIC HUB", true, function(s)
         S.HideName = s
         applyHideName(s, S.HideNameText)
     end)
@@ -4629,7 +4644,44 @@ makeTab("ESP", "👁️", 3, function()
             if b then b:Destroy() end
         end
     end)
-    lbl("Classic = [%] angka | Bar = progress bar ⚡", C.FIRE_BRIGHT)
+    lbl("Classic = [%] di atas | Bar = angka di dalam bar", C.FIRE_BRIGHT)
+
+    sl("Bar Width", 40, 200, 80, function(v)
+        S.ESPGenBarSize = v
+        for gen in pairs(Cached.Generators) do
+            local b = gen:FindFirstChild("GenESPBar")
+            if b then
+                b.Size = UDim2.new(0, v, 0, S.ESPGenBarHeight or 14)
+            end
+        end
+    end)
+    lbl("Default 80", C.GRN)
+
+    sl("Bar Height", 8, 40, 14, function(v)
+        S.ESPGenBarHeight = v
+        for gen in pairs(Cached.Generators) do
+            local b = gen:FindFirstChild("GenESPBar")
+            if b then
+                b.Size = UDim2.new(0, S.ESPGenBarSize or 80, 0, v)
+            end
+        end
+    end)
+    lbl("Default 14", C.GRN)
+
+    sl("Text Size", 6, 30, 10, function(v)
+        S.ESPGenBarTextSize = v
+        for gen in pairs(Cached.Generators) do
+            local b = gen:FindFirstChild("GenESPBar")
+            if b then
+                local bg = b:FindFirstChild("BarBg")
+                if bg then
+                    local t = bg:FindFirstChild("PctText")
+                    if t then t.TextSize = v end
+                end
+            end
+        end
+    end)
+    lbl("Default 10", C.GRN)
 
     tog("ESP Pallet", true, function(s) ESP.Pallet = s end)
     cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
@@ -4653,11 +4705,11 @@ makeTab("ESP", "👁️", 3, function()
     drp("Name Mode", {"Text", "Galaxy"}, "Galaxy", function(v)
         S.ESPNameMode = v
     end)
-    lbl("🔥 Default: Galaxy (animated rainbow)", C.GRN)
+    lbl("Default: Galaxy (animated rainbow)", C.GRN)
     sl("Name Size", 8, 30, 9.35, function(v)
         S.ESPNameSize = v
     end)
-    lbl("🔥 Default: 9.35", C.GRN)
+    lbl("Default: 9.35", C.GRN)
 end)
 
 -- TAB 4: FIRE
@@ -4667,7 +4719,7 @@ makeTab("Fire", "🔥", 4, function()
         S.FireOn = s
         applyFire()
     end)
-    lbl("🔥 Default ON: CosmicFire", C.GRN)
+    lbl("Default ON: CosmicFire", C.GRN)
 
     sl("Fire Size", 1, 15, 5, function(v)
         S.FireSize = v
@@ -4694,7 +4746,7 @@ makeTab("Fire", "🔥", 4, function()
         btnLbl.Size = UDim2.new(1, -10, 1, 0)
         btnLbl.Position = UDim2.new(0, 8, 0, 0)
         btnLbl.BackgroundTransparency = 1
-        btnLbl.Text = "🔥 " .. fireName
+        btnLbl.Text = fireName
         btnLbl.TextColor3 = C.TXT
         btnLbl.TextSize = 9
         btnLbl.Font = Enum.Font.GothamMedium
@@ -4729,10 +4781,10 @@ end)
 makeTab("Moonwalk", "🕺", 5, function()
 
     sec("Moonwalk (TOMBOL MW ONLY)", "🕺")
-    lbl("🌙 Cukup tombol MW di pojok layar", C.FIRE_BRIGHT)
+    lbl("Cukup tombol MW di pojok layar", C.FIRE_BRIGHT)
     lbl("Klik MW = ON/OFF", C.GRN)
     lbl("Klik tombol LOCK = Lock state", C.ACC2)
-    lbl("⌨️ Tekan V juga bisa toggle", C.DIM)
+    lbl("Tekan V juga bisa toggle", C.DIM)
 
     tog("Enable Moonwalk", Moonwalk.Enabled, function(s)
         if setMoonwalk then
@@ -4744,7 +4796,7 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 
     sec("Lock", "🔒")
-    tog("🔒 Lock Moonwalk", Moonwalk.Locked, function(s)
+    tog("Lock Moonwalk", Moonwalk.Locked, function(s)
         Moonwalk.Locked = s
         if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
     end)
@@ -4755,7 +4807,7 @@ makeTab("Moonwalk", "🕺", 5, function()
         if mwBtnGui then mwBtnGui.Enabled = s end
     end)
 
-    btn("🎯 Reset Posisi Tombol MW", function()
+    btn("Reset Posisi Tombol MW", function()
         if mwBtn then
             mwBtn.Position = UDim2.new(0, 20, 1, -100)
         end
@@ -4783,10 +4835,10 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
-print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
-print("🫥 Hide Name: Tab Survivor")
-print("⚡ ESP Gen Mode: Classic / Bar")
-print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
+print("Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
+print("Hide Name: Tab Survivor")
+print("ESP Gen Mode: Classic / Bar (bar + angka, NO emoji)")
+print("Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 

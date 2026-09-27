@@ -1,5 +1,5 @@
 -- =========================================================
--- SECTION 1/12 : LOADING GALAXY + CONFIG + STATE (COSMIC)
+-- SECTION 1/12 : LOADING GALAXY + CONFIG + STATE
 -- =========================================================
 
 Players = game:GetService("Players")
@@ -112,11 +112,10 @@ task.spawn(function()
     while nebula.Parent do
         t = t + 0.005
         nebulaGrad.Rotation = (t * 20) % 360
-        task.wait(0.06) -- OPTIMIZE
+        task.wait(0.06)
     end
 end)
 
--- Starfield (OPTIMIZE: 50 bintang)
 local starContainer = Instance.new("Frame")
 starContainer.Size = UDim2.new(1, 0, 1, 0)
 starContainer.BackgroundTransparency = 1
@@ -161,7 +160,7 @@ task.spawn(function()
                 s.obj.BackgroundTransparency = base + math.sin(s.twinkle) * 0.3
             end
         end
-        task.wait(0.1) -- OPTIMIZE
+        task.wait(0.1)
     end
 end)
 
@@ -223,7 +222,7 @@ task.spawn(function()
         spiral2.Rotation = -t * 1.1
         spiral1Grad.Rotation = (t * 2) % 360
         spiral2Grad.Rotation = 180 + (t * 1.5) % 360
-        task.wait(0.06) -- OPTIMIZE
+        task.wait(0.06)
     end
 end)
 
@@ -272,7 +271,7 @@ task.spawn(function()
     while welcomeTitle.Parent do
         t = t + 1
         titleGrad.Rotation = (t * 2) % 360
-        task.wait(0.06) -- OPTIMIZE
+        task.wait(0.06)
     end
 end)
 
@@ -492,7 +491,6 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
--- 🔥 AUTO PARRY 13
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = false, ParryDistance = 13, ParryDelay = 0,
     Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
@@ -553,7 +551,6 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
--- AIMLOCK V2
 Aimlock = _G.RoooorAimlock or {
     Enabled = false,
     Radius = 80,
@@ -572,7 +569,9 @@ print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🔷 Sky: SunsetHD (ON)")
 print("🎨 Contrast: ON")
 print("🎥 FOV: 90 (ON)")
-print("🛡️ Auto Parry: Distance 13")-- =========================================================
+print("🛡️ Auto Parry: Distance 13")
+print("🎥 Camera Fix: ACTIVE")
+print("🎥 FOV Bind: ACTIVE")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1341,7 +1340,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
--- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX + GALAXY
+-- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX + FIX CAMERA
 -- =========================================================
 
 ESPObjects = {}
@@ -1502,9 +1501,9 @@ function createStatusESP(player, char, root)
     end
 end
 
--- 🔥 GALAXY NAME ANIMATOR (OPTIMIZED)
+-- GALAXY NAME ANIMATOR (OPTIMIZED)
 task.spawn(function()
-    while task.wait(0.08) do -- OPTIMIZE: 0.05 → 0.08
+    while task.wait(0.08) do
         if S.ESPNameMode == "Galaxy" then
             for char, billboard in pairs(StatusESP) do
                 if billboard and billboard.Parent then
@@ -1707,7 +1706,6 @@ function AP_PressParryButton()
     end
 end
 
--- 🔥 CEK RADIUS (Distance 13)
 function AP_IsInRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -1741,7 +1739,6 @@ function AP_HookKiller(char)
         local id = anim.AnimationId:match("%d+")
         if not id then return end
         if KillerAnims["rbxassetid://" .. id] then
-            -- 🔥 CEK RADIUS DULU
             if AP_IsInRange(char) then
                 AP_DoParry()
             end
@@ -1780,9 +1777,11 @@ task.spawn(function()
     end
 end)
 
--- CAMERA UNLOCK
+-- =========================================================
+-- 🎥 FIX CAMERA UNLOCK (Gak Freeze Pas Klik GUI)
+-- =========================================================
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.5) do -- 🔥 FIX: 0.05 → 0.5 (20x/detik → 2x/detik)
         if not AP_CameraFix.Enabled then continue end
 
         local cam = workspace.CurrentCamera
@@ -1790,17 +1789,32 @@ task.spawn(function()
 
         if cam and char then
             local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
+            if hum and hum.Health > 0 then
                 local isLocked = false
-                if cam.CameraType ~= Enum.CameraType.Custom then isLocked = true end
-                if cam.CameraSubject ~= hum then isLocked = true end
+                
+                -- Cek camera type
+                if cam.CameraType ~= Enum.CameraType.Custom then 
+                    isLocked = true 
+                end
+                
+                -- Cek camera subject
+                if cam.CameraSubject ~= hum then 
+                    isLocked = true 
+                end
 
+                -- Cek humanoid state
                 local state = hum:GetState()
                 if state == Enum.HumanoidStateType.FallingDown
                     or state == Enum.HumanoidStateType.Ragdoll
                     or state == Enum.HumanoidStateType.Dead
                     or state == Enum.HumanoidStateType.PlatformStanding then
                     isLocked = true
+                end
+
+                -- 🔥 GUARD: Skip reset kalo user lagi interact GUI (anti freeze)
+                local guiFocus = GuiService.SelectedObject
+                if guiFocus then
+                    isLocked = false
                 end
 
                 if isLocked then
@@ -2633,10 +2647,9 @@ _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 
-print("✅ [4/12] COSMIC - ESP + Auto Parry (13) + Moonwalk + Hitbox Loaded")
-print("🛡️ Auto Parry Distance: 13 (RADIUS CHECK!)")
-print("🌈 ESP Galaxy: Animated")
-print("📦 Hitbox: TEXT ANGKA")-- =========================================================
+print("✅ [4/12] COSMIC - ESP + Auto Parry (13) + Moonwalk + Hitbox + FIX CAMERA Loaded")
+print("🎥 Camera Fix: 0.5s loop + GUI guard (anti freeze)")
+print("🛡️ Auto Parry Distance: 13 (RADIUS CHECK)")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -2805,7 +2818,7 @@ function createStunIcon(killerChar)
         while billboard.Parent do
             billboard.StudsOffset = Vector3.new(0, 4 + math.sin(tick() * 5) * 0.5, 0)
             icon.Rotation = math.sin(tick() * 8) * 20
-            task.wait(0.08) -- OPTIMIZE
+            task.wait(0.08)
         end
     end)
     stunIcons[killerChar] = billboard
@@ -2820,7 +2833,7 @@ function removeStunIcon(killerChar)
 end
 
 task.spawn(function()
-    while task.wait(0.3) do -- OPTIMIZE: 0.2 → 0.3
+    while task.wait(0.3) do
         if not S.StunNotify then continue end
         local myRoot = getRoot()
         if not myRoot then continue end
@@ -3129,13 +3142,13 @@ task.spawn(function()
     end
 end)
 
--- MAIN ESP LOOP (OPTIMIZED)
+-- MAIN ESP LOOP
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
     if not root then return end
     local now = tick()
-    if now - lastESPUpdate >= 0.12 then -- OPTIMIZE: 0.1 → 0.12
+    if now - lastESPUpdate >= 0.12 then
         lastESPUpdate = now
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
@@ -3179,7 +3192,7 @@ end)
 
 -- KILL EFFECT LOOP
 task.spawn(function()
-    while task.wait(1) do -- OPTIMIZE: 0.8 → 1
+    while task.wait(1) do
         if S.KillEffect then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LP and p.Character then
@@ -3213,7 +3226,7 @@ end)
 
 print("✅ [5/12] COSMIC - Fitur Aktif + Loop Utama Loaded")
 print("❌ Fly: DIHAPUS")
-print("⚡ Script: OPTIMIZED (ringan di HP)")-- =========================================================
+print("⚡ Optimized loops: ACTIVE")-- =========================================================
 -- SECTION 6/12 : GUI COSMIC + TOMBOL + PANEL
 -- =========================================================
 
@@ -3309,7 +3322,7 @@ rnd(innerGlow, 999)
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
-        t = t + 0.05 -- OPTIMIZE
+        t = t + 0.05
         ringOuter.Rotation = t * 30
         ringOuterGrad.Rotation = t * 60
         ringInner.Rotation = -t * 50
@@ -3328,7 +3341,7 @@ task.spawn(function()
         mainBtn.TextSize = 14 + math.sin(t * 4) * 1
 
         innerGlow.BackgroundTransparency = 0.6 - pulse * 0.4
-        task.wait(0.05) -- OPTIMIZE
+        task.wait(0.05)
     end
 end)
 
@@ -3422,10 +3435,10 @@ neonGrad.Parent = neonLine
 
 task.spawn(function()
     while neonLine.Parent do
-        for i = 0, 1, 0.08 do -- OPTIMIZE
+        for i = 0, 1, 0.08 do
             if not neonLine.Parent then break end
             neonGrad.Rotation = i * 360
-            task.wait(0.1) -- OPTIMIZE
+            task.wait(0.1)
         end
     end
 end)
@@ -4363,7 +4376,6 @@ makeTab("Misc", "⚙️", 7, function()
             FOV70Btn.BackgroundColor3 = C.ACC
             FOV70Btn.BackgroundTransparency = 0
             FOV70Btn.TextColor3 = Color3.new(1, 1, 1)
-            strk(FOV70Btn, C.ACC2, 1.5, 0)
 
             FOV90Btn.BackgroundColor3 = C.BG
             FOV90Btn.BackgroundTransparency = 0.4
@@ -4388,7 +4400,6 @@ makeTab("Misc", "⚙️", 7, function()
             FOV120Btn.BackgroundColor3 = C.ACC
             FOV120Btn.BackgroundTransparency = 0
             FOV120Btn.TextColor3 = Color3.new(1, 1, 1)
-            strk(FOV120Btn, C.ACC2, 1.5, 0)
 
             FOV70Btn.BackgroundColor3 = C.BG
             FOV70Btn.BackgroundTransparency = 0.4
@@ -4427,7 +4438,6 @@ makeTab("Misc", "⚙️", 7, function()
         print("[FOV] Set to 120")
     end)
 
-    -- Init
     updateFOVButtons(S.FOV or 90)
 
     sec("Character", "🎭")
@@ -4463,7 +4473,7 @@ makeTab("Misc", "⚙️", 7, function()
     btn("🔄 Rejoin Server", function() rejoinServer() end)
 end)
 
--- TAB 9: VISUAL (FOV LAMA DIHAPUS, CAMERA DIGANTI ZOOM DOANG)
+-- TAB 9: VISUAL (FOV LAMA DIHAPUS)
 makeTab("Visual", "✨", 9, function()
 
     sec("Fullbright & No Fog", "💡")
@@ -4481,7 +4491,6 @@ makeTab("Visual", "✨", 9, function()
         applyNoFog(s)
     end)
 
-    -- 🔷 HD SKY
     sec("HD Sky (Jernih + Ringan)", "🔷")
     tog("HD Sky (Clean)", false, function(s)
         S.HDSky = s
@@ -4489,7 +4498,6 @@ makeTab("Visual", "✨", 9, function()
     end)
     lbl("Langit jernih + atmosphere tipis", C.FIRE_BRIGHT)
 
-    -- HD Visual Extra
     sec("HD Visual (Extra)", "🌟")
     tog("HD Texture", false, function(s) S.HDTexture = s; applyHDTexture(s) end)
     tog("HD Reflection", false, function(s) S.HDReflection = s; applyHDReflection(s) end)
@@ -4507,7 +4515,6 @@ makeTab("Visual", "✨", 9, function()
     sl("Contrast", 0, 1, 0.3, function(v) S.ContrastVal = v; applyContrast() end)
     sl("Saturation", 0, 1, 0.2, function(v) S.SaturationVal = v; applyContrast() end)
 
-    -- 🔷 SKY 18 PRESET
     sec("Sky (18 Preset)", "🌌")
     drp("Sky Preset", SkyList, "SunsetHD", function(v)
         S.SkyId = v
@@ -4515,7 +4522,6 @@ makeTab("Visual", "✨", 9, function()
     end)
     lbl("🔥 Default: SunsetHD (auto ON)", C.GRN)
 
-    -- 🔥 CAMERA (FOV DIHAPUS — pindah ke Misc)
     sec("Camera", "🎥")
     lbl("🎥 FOV pindah ke Tab Misc (70/90/120)", C.FIRE_BRIGHT)
     tog("Zoom Out", false, function(s) S.ZoomOut = s; applyZoomOut(s, S.ZoomOutValue) end)
@@ -4631,7 +4637,6 @@ makeTab("Visual", "✨", 9, function()
 
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 
-    -- 🔥 FPS Boost
     sec("FPS Boost", "🚀")
     tog("No Screen Effects", false, function(s)
         S.NoScreenEffects = s
@@ -4731,24 +4736,20 @@ makeTab("Hitbox", "📦", 10, function()
 end)
 
 print("✅ [8/12] COSMIC - Misc + Visual + Hitbox Loaded")
-print("🎥 FOV Preset: 70/90/120 di Misc (Default 90)")
+print("🎥 FOV Preset: 70/90/120 di Misc")
 print("❌ FOV lama di Visual: DIHAPUS")-- =========================================================
 -- SECTION 9/12 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
 
--- =========================================================
--- 🔥 AUTO APPLY SEMUA SAAT EXECUTE (Fire, Sky, Contrast, FOV, ESP Galaxy)
--- =========================================================
+-- 🔥 AUTO APPLY SEMUA SAAT EXECUTE
 task.spawn(function()
     task.wait(4)
     
-    -- 🔥 Fire CosmicFire auto ON
     if S.FireOn then
         pcall(applyFire)
         print("[AUTO] Fire applied:", S.FireType)
     end
     
-    -- 🔷 Sky SunsetHD auto ON
     if S.SkyId and S.SkyId ~= "Default" then
         pcall(function()
             applySky(S.SkyId)
@@ -4757,19 +4758,16 @@ task.spawn(function()
         print("[AUTO] Sky applied:", S.SkyId)
     end
     
-    -- 🎨 Contrast auto ON
     if S.Contrast then
         pcall(applyContrast)
         print("[AUTO] Contrast applied")
     end
     
-    -- 🎥 FOV 90 auto ON
     if S.FOVEnabled then
         pcall(applyFOV)
         print("[AUTO] FOV applied:", S.FOV)
     end
     
-    -- 🌈 ESP Galaxy auto
     print("[AUTO] ESP Name Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
 end)
 
@@ -4852,7 +4850,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- AUTO APPLY ON EXECUTE (character stuff)
+-- AUTO APPLY ON EXECUTE
 task.spawn(function()
     task.wait(3)
     pcall(createFPSPingGui)
@@ -4878,7 +4876,7 @@ print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
 print("🎥 FOV:", S.FOV, "(auto ON)")
 print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)-- =========================================================
--- SECTION 10/12 : LOGIC FITUR BARU
+-- SECTION 10/12 : LOGIC FITUR BARU + FIX FOV BIND
 -- =========================================================
 
 -- AUTO WIGGLE LOOP
@@ -5041,10 +5039,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🔷 SKY AUTO-REAPPLY (Jaga sky tetap aktif)
+-- 🔷 SKY AUTO-REAPPLY
 -- =========================================================
 task.spawn(function()
-    while task.wait(4) do -- OPTIMIZE: 3 → 4
+    while task.wait(4) do
         if S.SkyId and S.SkyId ~= "Default" then
             local currentSky = nil
             for _, v in pairs(Lighting:GetChildren()) do
@@ -5053,7 +5051,6 @@ task.spawn(function()
                     break
                 end
             end
-            -- Kalo sky ilang (kehapus game) → pasang ulang
             if not currentSky or not currentSky.Name:find("CosmicSky_") then
                 pcall(function() applySky(S.SkyId) end)
             end
@@ -5062,10 +5059,10 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🔥 FIRE AUTO-REAPPLY (Jaga fire tetap nempel)
+-- 🔥 FIRE AUTO-REAPPLY
 -- =========================================================
 task.spawn(function()
-    while task.wait(5) do -- OPTIMIZE
+    while task.wait(5) do
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             if head and not head:FindFirstChild("RoooorFire") then
@@ -5076,23 +5073,25 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🎥 FOV AUTO-REAPPLY (Jaga FOV tetap 90)
+-- 🎥 FIX FOV BIND (RenderStepped — Anti Override Game)
 -- =========================================================
 task.spawn(function()
-    while task.wait(5) do -- OPTIMIZE
+    RunService.RenderStepped:Connect(function()
         if S.FOVEnabled then
             local cam = workspace.CurrentCamera
-            if cam and cam.FieldOfView ~= S.FOV then
-                pcall(applyFOV)
+            if cam and math.abs(cam.FieldOfView - S.FOV) > 0.5 then
+                pcall(function()
+                    cam.FieldOfView = S.FOV
+                end)
             end
         end
-    end
+    end)
 end)
 
-print("✅ [10/12] COSMIC - Logic Fitur Baru Loaded")
+print("✅ [10/12] COSMIC - Logic Fitur Baru + FIX FOV BIND Loaded")
 print("🔷 Sky Auto-Reapply: Active")
 print("🔥 Fire Auto-Reapply: Active")
-print("🎥 FOV Auto-Reapply: Active")-- =========================================================
+print("🎥 FOV Bind: RenderStepped (Anti Override Game)")-- =========================================================
 -- SECTION 11/12 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
@@ -5112,7 +5111,7 @@ print("╠═══════════════════════�
 print("║  🛡️ Auto Parry CUSTOM                    ║")
 print("║     → Radius 13                          ║")
 print("║     → Circle Rata Tanah                  ║")
-print("║     → Camera Auto Unlock                 ║")
+print("║     → Camera Auto Unlock (FIX FREEZE)    ║")
 print("║     → NO PARRY kalo killer di luar radius║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
 print("║  🕺 Moonwalk (Tombol MW + LOCK)          ║")
@@ -5135,12 +5134,17 @@ print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter                   ║")
 print("╠══════════════════════════════════════════╣")
+print("║  🎥 FIX YANG UDAH DIPASANG:              ║")
+print("║     → Camera Freeze FIX (0.5s loop)      ║")
+print("║     → FOV Bind RenderStepped (anti      ║")
+print("║       override game)                     ║")
+print("╠══════════════════════════════════════════╣")
 print("║  ⚡ OPTIMIZED:                           ║")
-print("║     → Loop 0.05 → 0.08 (loading)         ║")
-print("║     → Loop 0.1 → 0.12 (ESP)              ║")
-print("║     → Loop 0.8 → 1 (Kill Effect)         ║")
+print("║     → Loading loop 0.05 → 0.06-0.1       ║")
 print("║     → Starfield 80 → 50 bintang          ║")
-print("║     → Auto-Reapply Sky/Fire/FOV          ║")
+print("║     → ESP loop 0.1 → 0.12                ║")
+print("║     → Kill Effect 0.8 → 1                ║")
+print("║     → Stun loop 0.2 → 0.3                ║")
 print("╠══════════════════════════════════════════╣")
 print("║  ❌ YANG DIHAPUS:                        ║")
 print("║     → Fire Feet                          ║")
@@ -5160,8 +5164,9 @@ print("🔥 Fire: CosmicFire (auto ON)")
 print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🎨 Contrast: ON")
 print("🔷 Sky: SunsetHD (auto ON)")
-print("🎥 FOV: 90 (auto ON) | Tab Misc")
+print("🎥 FOV: 90 (auto ON, FIX bind)")
 print("🛡️ Auto Parry: Distance 13")
+print("🎥 Camera Freeze: FIXED")
 print("➡️ Lanjut ke Section 12 (Aimbot)")-- =========================================================
 -- SECTION 12/12 : AIMBOT (TAB AIMBOT COSMIC)
 -- =========================================================
@@ -5319,11 +5324,25 @@ function Aimlock_StopLoop()
         Aimlock_CameraConn = nil
     end
     Aimlock.CurrentTarget = nil
+    
+    -- 🔥 FIX: Restore camera ke Custom
+    local cam = workspace.CurrentCamera
+    local char = LP.Character
+    if cam and char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            pcall(function()
+                cam.CameraType = Enum.CameraType.Custom
+                cam.CameraSubject = hum
+            end)
+        end
+    end
+    
     print("[AIMBOT] Aim loop stopped")
 end
 
 -- =========================================================
--- FLOATING GUI (muncul kalo toggle ON)
+-- FLOATING GUI
 -- =========================================================
 Aimlock_Gui = nil
 Aimlock_FloatingBtn = nil

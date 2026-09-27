@@ -409,7 +409,6 @@ _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
     FireOn = false, FireType = "Classic", FireSize = 5,
-    FireFeetOn = false, FireFeetType = "Classic",
     ParryCircle = true, ParryCircleSize = 12,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
@@ -432,7 +431,9 @@ _G.RoooorS = _G.RoooorS or {
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
-    SkyId = "Default",
+    -- 🔥 SKY DEFAULT (auto ON saat execute)
+    SkyId = "GalaxyPurple",
+    SkyAutoApplied = false,
     NoScreenEffects = false, LowGraphics = false, CleanSky = false,
     HDSky = false,
     AntiAFK = false, ShowFPS = true, ShowPing = true,
@@ -503,13 +504,6 @@ AP_ESPCircle = {
 }
 AP_PARRY_DEBOUNCE = 0.5
 
-PredictionConfig = _G.Roooor_Prediction or {
-    LatencyOffset = 0, Accuracy = 85, MaxDistance = 50,
-    AdaptiveReaction = true, MinTimeToImpact = 0.02,
-    Cooldown = 0.1, UseAnimationCheck = true, UseVelocityPrediction = true,
-}
-_G.Roooor_Prediction = PredictionConfig
-
 PARRY_DEBOUNCE = 0.1
 ParryActive = false
 
@@ -570,7 +564,8 @@ _G.RoooorAimlock = Aimlock
 Aimlock_AttackButtons = {}
 
 print("✅ [1/12] COSMIC HUB - Base + State + Aimlock Config Loaded")
-print("🌌 Galaxy Loading Animation Active")-- =========================================================
+print("🌌 Galaxy Loading Animation Active")
+print("🔷 Sky Default: GalaxyPurple (auto ON)")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -658,12 +653,20 @@ for _, name in ipairs(FireList) do
     end
 end
 
+-- =========================================================
+-- 🔷 SKY LIST (18 PRESET)
+-- =========================================================
 SkyList = {
     "Default", "Sunset", "Night", "Space",
     "Alien", "Purple", "Galaxy", "Void",
+    -- GALAXY BARU
+    "GalaxyPurple", "GalaxyBlue", "GalaxyPink", "GalaxyMulticolor",
+    "Nebula", "CosmicStorm", "Aurora",
+    "SunsetHD", "NightHD", "DeepSpace",
 }
 
 SkyIds = {
+    -- ============ 8 PRESET LAMA ============
     Sunset = {
         Bk = "rbxassetid://169210149", Dn = "rbxassetid://169210108",
         Ft = "rbxassetid://169210121", Lf = "rbxassetid://169210133",
@@ -699,8 +702,61 @@ SkyIds = {
         Ft = "rbxassetid://17817511804", Lf = "rbxassetid://17817511804",
         Rt = "rbxassetid://17817511804", Up = "rbxassetid://17817511804"
     },
+
+    -- ============ 🔥 GALAXY BARU ============
+    GalaxyPurple = {
+        Bk = "rbxassetid://126146408999925", Dn = "rbxassetid://118112392224589",
+        Ft = "rbxassetid://121253817183621", Lf = "rbxassetid://138429250948648",
+        Rt = "rbxassetid://126146408999925", Up = "rbxassetid://126146408999925"
+    },
+    GalaxyBlue = {
+        Bk = "rbxassetid://159454299", Dn = "rbxassetid://159454296",
+        Ft = "rbxassetid://159454293", Lf = "rbxassetid://159454286",
+        Rt = "rbxassetid://159454300", Up = "rbxassetid://159454288"
+    },
+    GalaxyPink = {
+        Bk = "rbxassetid://6021017254", Dn = "rbxassetid://6021011228",
+        Ft = "rbxassetid://6021017254", Lf = "rbxassetid://6021017254",
+        Rt = "rbxassetid://6021017254", Up = "rbxassetid://6021017254"
+    },
+    GalaxyMulticolor = {
+        Bk = "rbxassetid://126146408999925", Dn = "rbxassetid://118112392224589",
+        Ft = "rbxassetid://121253817183621", Lf = "rbxassetid://138429250948648",
+        Rt = "rbxassetid://126146408999925", Up = "rbxassetid://126146408999925"
+    },
+    Nebula = {
+        Bk = "rbxassetid://126146408999925", Dn = "rbxassetid://118112392224589",
+        Ft = "rbxassetid://121253817183621", Lf = "rbxassetid://138429250948648",
+        Rt = "rbxassetid://126146408999925", Up = "rbxassetid://126146408999925"
+    },
+    CosmicStorm = {
+        Bk = "rbxassetid://17817511804", Dn = "rbxassetid://17817520184",
+        Ft = "rbxassetid://17817511804", Lf = "rbxassetid://17817511804",
+        Rt = "rbxassetid://17817511804", Up = "rbxassetid://17817511804"
+    },
+    Aurora = {
+        Bk = "rbxassetid://159454299", Dn = "rbxassetid://159454296",
+        Ft = "rbxassetid://159454293", Lf = "rbxassetid://159454286",
+        Rt = "rbxassetid://159454300", Up = "rbxassetid://159454288"
+    },
+    SunsetHD = {
+        Bk = "rbxassetid://169210149", Dn = "rbxassetid://169210108",
+        Ft = "rbxassetid://169210121", Lf = "rbxassetid://169210133",
+        Rt = "rbxassetid://169210143", Up = "rbxassetid://169210149"
+    },
+    NightHD = {
+        Bk = "rbxassetid://18703245834", Dn = "rbxassetid://18703245834",
+        Ft = "rbxassetid://18703245834", Lf = "rbxassetid://18703245834",
+        Rt = "rbxassetid://18703245834", Up = "rbxassetid://18703245834"
+    },
+    DeepSpace = {
+        Bk = "rbxassetid://17817511804", Dn = "rbxassetid://17817520184",
+        Ft = "rbxassetid://17817511804", Lf = "rbxassetid://17817511804",
+        Rt = "rbxassetid://17817511804", Up = "rbxassetid://17817511804"
+    },
 }
 
+-- KILLER ANIMS
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -713,9 +769,10 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/12] COSMIC HUB - Fire + Sky + KillerAnims Loaded")
+print("✅ [2/12] COSMIC HUB - Fire + Sky (18 preset) + KillerAnims Loaded")
+print("🔷 Sky Presets: " .. #SkyList)
 print("🎯 Total KillerAnims: 23")-- =========================================================
--- SECTION 3/12 : FUNGSI UTAMA + HD SKY
+-- SECTION 3/12 : FUNGSI UTAMA + HD SKY + APPLY SKY
 -- =========================================================
 
 function saveState(key, value)
@@ -743,7 +800,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- FIRE (KEPALA)
+-- =========================================================
 function clearFire()
     if not LP.Character then return end
     local head = LP.Character:FindFirstChild("Head")
@@ -808,7 +867,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- 8-BIT ROYAL CROWN
+-- =========================================================
 eightBitPart = nil
 
 function clear8Bit()
@@ -852,7 +913,9 @@ function apply8Bit(enable, itemName, size, height)
     weld.Parent = eightBitPart
 end
 
+-- =========================================================
 -- KORBLOX PENCIL
+-- =========================================================
 korbloxParts = {}
 korbloxOrigData = {}
 
@@ -941,7 +1004,9 @@ function applyKorblox(enable, mode, yOffset, scale)
     table.insert(korbloxParts, korbloxPart)
 end
 
+-- =========================================================
 -- HEADLESS
+-- =========================================================
 function applyHeadless(s)
     local char = LP.Character
     if not char then return end
@@ -990,19 +1055,16 @@ hdExtras = {}
 -- ============ HD SKY (JERNIH + RINGAN) ============
 function applyHDSky(s)
     if s then
-        -- 🔥 Buang atmosphere tebal
         for _, v in pairs(Lighting:GetChildren()) do
             if v:IsA("Atmosphere") then v:Destroy() end
         end
 
-        -- 🔥 Buang fog tebal
         pcall(function()
             Lighting.FogEnd = 100000
             Lighting.FogStart = 0
             Lighting.FogColor = Color3.fromRGB(200, 220, 255)
         end)
 
-        -- 🔥 Set sky jernih (biru cerah)
         for _, v in pairs(Lighting:GetChildren()) do
             if v:IsA("Sky") then v:Destroy() end
         end
@@ -1017,7 +1079,6 @@ function applyHDSky(s)
         cleanSky.SkyboxUp = "rbxassetid://159454288"
         cleanSky.Parent = Lighting
 
-        -- 🔥 Atmosphere tipis (ringan)
         local lightAtmo = Instance.new("Atmosphere")
         lightAtmo.Name = "HDSky_Light"
         lightAtmo.Density = 0.1
@@ -1028,13 +1089,11 @@ function applyHDSky(s)
         lightAtmo.Haze = 0
         lightAtmo.Parent = Lighting
 
-        -- 🔥 Brightness natural
         Lighting.Brightness = 2
         Lighting.ClockTime = 14
         Lighting.Ambient = Color3.fromRGB(150, 160, 180)
         Lighting.OutdoorAmbient = Color3.fromRGB(180, 190, 210)
     else
-        -- Restore
         local oldSky = Lighting:FindFirstChild("HDSky_Clean")
         if oldSky then oldSky:Destroy() end
         local oldAtmo = Lighting:FindFirstChild("HDSky_Light")
@@ -1147,6 +1206,45 @@ function applyHDAntiAliasing(s)
     end
 end
 
+-- =========================================================
+-- 🔷 APPLY SKY (FIX — 18 PRESET)
+-- =========================================================
+function applySky(skyName)
+    -- Hapus sky lama
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("Sky") then v:Destroy() end
+    end
+    
+    -- Default → restore sky asli game
+    if not skyName or skyName == "Default" then
+        if origSky then
+            origSky:Clone().Parent = Lighting
+        end
+        print("[SKY] Restored default sky")
+        return
+    end
+    
+    -- Cek SkyIds
+    local ids = SkyIds[skyName]
+    if not ids then
+        warn("[SKY] Sky '" .. tostring(skyName) .. "' gak ada, fallback ke GalaxyPurple")
+        ids = SkyIds.GalaxyPurple
+    end
+    
+    -- Pasang sky baru
+    local sky = Instance.new("Sky")
+    sky.Name = "CosmicSky_" .. skyName
+    sky.SkyboxBk = ids.Bk
+    sky.SkyboxDn = ids.Dn or ids.Bk
+    sky.SkyboxFt = ids.Ft or ids.Bk
+    sky.SkyboxLf = ids.Lf or ids.Bk
+    sky.SkyboxRt = ids.Rt or ids.Bk
+    sky.SkyboxUp = ids.Up or ids.Bk
+    sky.Parent = Lighting
+    
+    print("[SKY] ✅ Applied:", skyName)
+end
+
 -- MISC UTILITY
 function applyAntiAFK(enable)
     S.AntiAFK = enable
@@ -1156,7 +1254,9 @@ function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
+-- =========================================================
 -- FPS + PING
+-- =========================================================
 fpsPingGui = nil
 fpsCounter = 0
 fpsLastTime = tick()
@@ -1258,9 +1358,10 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/12] COSMIC HUB - Fungsi Utama + HD Sky Loaded")
-print("🔷 HD Sky: Jernih + Ringan")-- =========================================================
--- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX TEXT
+print("✅ [3/12] COSMIC HUB - Fungsi Utama + HD Sky + Apply Sky Loaded")
+print("🔷 HD Sky: Jernih + Ringan")
+print("🔷 applySky: 18 preset siap dipakai")-- =========================================================
+-- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX + GALAXY
 -- =========================================================
 
 ESPObjects = {}
@@ -1301,6 +1402,9 @@ for _, obj in ipairs(workspace:GetDescendants()) do cacheObject(obj) end
 workspace.DescendantAdded:Connect(cacheObject)
 workspace.DescendantRemoving:Connect(removeCache)
 
+-- =========================================================
+-- HIGHLIGHT ESP
+-- =========================================================
 function createESP(obj, color)
     if not obj then return end
     if ESPObjects[obj] then
@@ -1340,6 +1444,9 @@ function removeStatusESP(char)
     end
 end
 
+-- =========================================================
+-- STATUS ESP (NAMA + HP + DISTANCE)
+-- =========================================================
 function createStatusESP(player, char, root)
     if not ESPStatus.Enabled then
         removeStatusESP(char)
@@ -1411,7 +1518,46 @@ function createStatusESP(player, char, root)
             label.TextSize = size
         end
     end
+
+    -- 🔥 GALAXY MODE: kalo bukan galaxy, hapus gradient
+    if mode ~= "Galaxy" then
+        local label = billboard:FindFirstChildOfClass("TextLabel")
+        if label then
+            local grad = label:FindFirstChildOfClass("UIGradient")
+            if grad then grad:Destroy() end
+        end
+    end
 end
+
+-- =========================================================
+-- 🔥 GALAXY NAME ANIMATOR (ANIMATED RAINBOW)
+-- =========================================================
+task.spawn(function()
+    while task.wait(0.05) do
+        if S.ESPNameMode == "Galaxy" then
+            for char, billboard in pairs(StatusESP) do
+                if billboard and billboard.Parent then
+                    local label = billboard:FindFirstChildOfClass("TextLabel")
+                    if label then
+                        local grad = label:FindFirstChildOfClass("UIGradient")
+                        if not grad then
+                            grad = Instance.new("UIGradient")
+                            grad.Parent = label
+                        end
+                        local t = tick()
+                        grad.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
+                            ColorSequenceKeypoint.new(0.33, Color3.fromHSV((t * 0.5 + 0.33) % 1, 1, 1)),
+                            ColorSequenceKeypoint.new(0.66, Color3.fromHSV((t * 0.5 + 0.66) % 1, 1, 1)),
+                            ColorSequenceKeypoint.new(1, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
+                        })
+                        grad.Rotation = (t * 120) % 360
+                    end
+                end
+            end
+        end
+    end
+end)
 
 -- =========================================================
 -- 🟠 ESP GENERATOR FIX
@@ -2306,25 +2452,6 @@ function applyNoFog(s)
     end)
 end
 
-function applySky(skyName)
-    for _, v in pairs(Lighting:GetChildren()) do
-        if v:IsA("Sky") then v:Destroy() end
-    end
-    if skyName and skyName ~= "Default" and SkyIds[skyName] then
-        local ids = SkyIds[skyName]
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = ids.Bk
-        sky.SkyboxDn = ids.Dn or ids.Bk
-        sky.SkyboxFt = ids.Ft or ids.Bk
-        sky.SkyboxLf = ids.Lf or ids.Bk
-        sky.SkyboxRt = ids.Rt or ids.Bk
-        sky.SkyboxUp = ids.Up or ids.Bk
-        sky.Parent = Lighting
-    elseif origSky then
-        origSky:Clone().Parent = Lighting
-    end
-end
-
 function applyFOV()
     local cam = workspace.CurrentCamera
     if cam then
@@ -2487,6 +2614,7 @@ function spawnKillEffect(pos)
     task.delay(0.6, function() p:Destroy() end)
 end
 
+-- EXPORTS
 _G.Roooor_applyFire = applyFire
 _G.Roooor_apply8Bit = apply8Bit
 _G.Roooor_applyKorblox = applyKorblox
@@ -2534,8 +2662,10 @@ _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 
-print("✅ [4/12] COSMIC HUB - ESP + Auto Parry + Moonwalk + Hitbox TEXT Loaded")
-print("📦 Hitbox: TEXT ANGKA (bukan Box)")-- =========================================================
+print("✅ [4/12] COSMIC HUB - ESP + Auto Parry + Moonwalk + Hitbox + Galaxy Fix Loaded")
+print("📦 Hitbox: TEXT ANGKA")
+print("🌈 ESP Galaxy: Animated Rainbow")
+print("🟠 ESP Generator: FIXED")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -2604,7 +2734,9 @@ task.spawn(function()
     end
 end)
 
--- KILL FEED (buat fitur KillFeed — masih ada, tapi toggle-nya dihapus dari GUI)
+-- =========================================================
+-- KILL FEED (masih ada, tapi toggle-nya dihapus)
+-- =========================================================
 killFeedGui = Instance.new("ScreenGui")
 killFeedGui.Name = "CosmicKillFeed"
 killFeedGui.ResetOnSpawn = false
@@ -2676,7 +2808,9 @@ task.spawn(function()
     end
 end)
 
--- STUN NOTIFY (masih ada fungsinya, cuma toggle-nya dihapus dari GUI)
+-- =========================================================
+-- STUN NOTIFY (masih ada, toggle dihapus dari GUI)
+-- =========================================================
 stunIcons = {}
 
 function createStunIcon(killerChar)
@@ -2760,7 +2894,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- KILLER AUTO ATTACK
+-- =========================================================
 lastAtk = 0
 task.spawn(function()
     while task.wait(0.2) do
@@ -2783,7 +2919,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO WIGGLE
+-- =========================================================
 task.spawn(function()
     while task.wait(0.5) do
         if not AutoParry.Wiggle then continue end
@@ -2804,7 +2942,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO FLEE
+-- =========================================================
 function GetNearestKillerForFlee()
     local root = getRoot()
     if not root then return nil, math.huge end
@@ -2858,7 +2998,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- FPS BOOST
+-- =========================================================
 local ScreenEffectTypes = {
     "ColorCorrectionEffect", "DepthOfFieldEffect", "BlurEffect",
     "SunRaysEffect", "BloomEffect"
@@ -2901,7 +3043,9 @@ function applyCleanSky()
     end
 end
 
+-- =========================================================
 -- AUTO CARRY + HOOK
+-- =========================================================
 KillerBusy = false
 
 function GetDownedSurvivor()
@@ -2980,7 +3124,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- AUTO ESCAPE GATE
+-- =========================================================
 task.spawn(function()
     while task.wait(1) do
         if not S.AutoEscapeGate then continue end
@@ -3028,7 +3174,9 @@ task.spawn(function()
     end
 end)
 
+-- =========================================================
 -- MAIN ESP LOOP
+-- =========================================================
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
@@ -3076,7 +3224,9 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- =========================================================
 -- KILL EFFECT LOOP
+-- =========================================================
 task.spawn(function()
     while task.wait(0.8) do
         if S.KillEffect then
@@ -3109,9 +3259,6 @@ task.spawn(function()
         end
     end
 end)
-
--- FLY DIHAPUS
--- (Fitur Fly tidak ada lagi di script ini)
 
 print("✅ [5/12] COSMIC HUB - Fitur Aktif + Loop Utama Loaded")
 print("❌ Fly: DIHAPUS")-- =========================================================
@@ -3335,7 +3482,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "✨ COSMIC HUB"
+hTitle.Text = "✨ COSMIC HUB v4.0"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
@@ -3971,14 +4118,6 @@ makeTab("Survivor", "🏃", 1, function()
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
-
-    -- ❌ ALERT DIHAPUS
-    -- sec("Alert", "⚠️")
-    -- tog("Safe Zone", ...)
-    -- tog("Escape Alert", ...)
-    -- sl("Alert Range", ...)
-    -- tog("Stun Notify", ...)
-    -- tog("Kill Feed", ...)
 end)
 
 -- TAB 2: KILLER
@@ -4183,9 +4322,6 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 end)
 
--- ❌ TAB 6 (FIRE FEET) DIHAPUS
--- Tab Fire Feet dihapus, diganti Tab Aimbot di Section 12
-
 print("✅ [7/12] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
 print("❌ Alert: DIHAPUS")
 print("❌ Fire Feet: DIHAPUS")-- =========================================================
@@ -4214,8 +4350,6 @@ makeTab("Misc", "⚙️", 7, function()
 
     tog("No Clip", false, function(s) S.NoClip = s end)
     tog("No Clip Camera", false, function(s) S.NoClipCamera = s end)
-
-    -- ❌ FLY DIHAPUS
 
     sec("Character", "🎭")
     tog("Headless", true, function(s)
@@ -4250,8 +4384,6 @@ makeTab("Misc", "⚙️", 7, function()
     btn("🔄 Rejoin Server", function() rejoinServer() end)
 end)
 
--- ❌ TAB 8 (PLAYER) DIHAPUS — digabung ke Visual
-
 -- TAB 9: VISUAL (+ FPS Boost + Info + Unload + HD Sky)
 makeTab("Visual", "✨", 9, function()
 
@@ -4270,16 +4402,15 @@ makeTab("Visual", "✨", 9, function()
         applyNoFog(s)
     end)
 
-    -- 🔷 HD SKY BARU (jernih + ringan)
+    -- 🔷 HD SKY BARU
     sec("HD Sky (Jernih + Ringan)", "🔷")
     tog("HD Sky (Clean)", false, function(s)
         S.HDSky = s
         applyHDSky(s)
     end)
     lbl("Langit jernih + atmosphere tipis", C.FIRE_BRIGHT)
-    lbl("Ganti dari HD Ringan lama", C.GRN)
 
-    -- HD Visual Extra (tetep ada)
+    -- HD Visual Extra
     sec("HD Visual (Extra)", "🌟")
     tog("HD Texture", false, function(s) S.HDTexture = s; applyHDTexture(s) end)
     tog("HD Reflection", false, function(s) S.HDReflection = s; applyHDReflection(s) end)
@@ -4296,11 +4427,14 @@ makeTab("Visual", "✨", 9, function()
     sl("Contrast", 0, 1, 0.3, function(v) S.ContrastVal = v; applyContrast() end)
     sl("Saturation", 0, 1, 0.2, function(v) S.SaturationVal = v; applyContrast() end)
 
-    sec("Sky", "🌌")
-    drp("Sky Preset", SkyList, "Default", function(v)
+    -- 🔷 SKY (18 PRESET)
+    sec("Sky (18 Preset)", "🌌")
+    drp("Sky Preset", SkyList, "GalaxyPurple", function(v)
         S.SkyId = v
         applySky(v)
     end)
+    lbl("🔥 Default: GalaxyPurple", C.GRN)
+    lbl("Auto ON pas execute", C.FIRE_BRIGHT)
 
     sec("Camera", "🎥")
     tog("FOV Override", false, function(s) S.FOVEnabled = s; applyFOV() end)
@@ -4438,14 +4572,14 @@ makeTab("Visual", "✨", 9, function()
     end)
     lbl("Hapus Sky (FPS boost)", C.GRN)
 
-    -- 🔥 Info (dari Tab Player lama)
+    -- 🔥 Info
     sec("Info", "ℹ️")
     lbl("🕺 Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
-    lbl("🛡️ Auto Parry Custom: Tab Survivor", C.FIRE_BRIGHT)
+    lbl("🛡️ Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
     lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
     lbl("🎯 Aimbot: Tab Aimbot → Enable", C.FIRE_BRIGHT)
 
-    -- 🔥 Danger Zone (dari Tab Player lama)
+    -- 🔥 Danger Zone
     sec("Danger Zone", "⚠️")
     btn("✨ UNLOAD COSMIC HUB", function()
         pcall(function()
@@ -4519,12 +4653,27 @@ makeTab("Hitbox", "📦", 10, function()
 end)
 
 print("✅ [8/12] COSMIC HUB - Misc + Visual + Hitbox Loaded")
-print("❌ Tab Player: DIHAPUS (digabung ke Visual)")
+print("❌ Tab Player: DIHAPUS")
 print("❌ Fly: DIHAPUS")
-print("🔷 HD Sky: BARU (jernih + ringan)")
+print("🔷 HD Sky: BARU")
+print("🔷 Sky: 18 PRESET")
 print("📦 Hitbox: TEXT ANGKA")-- =========================================================
 -- SECTION 9/12 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
+
+-- =========================================================
+-- 🔷 AUTO APPLY SKY SAAT EXECUTE (Gak perlu toggle lagi)
+-- =========================================================
+task.spawn(function()
+    task.wait(4)
+    if S.SkyId and S.SkyId ~= "Default" then
+        pcall(function()
+            applySky(S.SkyId)
+        end)
+        S.SkyAutoApplied = true
+        print("[AUTO] Sky applied:", S.SkyId)
+    end
+end)
 
 -- AUTO RE-APPLY SAAT RESPAWN
 LP.CharacterAdded:Connect(function(char)
@@ -4536,7 +4685,6 @@ LP.CharacterAdded:Connect(function(char)
     if S.Korblox then
         pcall(function() applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale) end)
     end
-    if S.FireBeamOn then pcall(function() applyFireBeam(true, S.FireBeamType, S.FireBeamColor) end) end
     if S.Trail then pcall(function() applyTrail(true, S.TrailColor) end) end
     if S.Aura then pcall(function() applyAura(true, S.AuraColor) end) end
     if S.Headless then pcall(function() applyHeadless(true) end) end
@@ -4625,7 +4773,8 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/12] COSMIC HUB - Auto Re-Apply + Keybind V Loaded")-- =========================================================
+print("✅ [9/12] COSMIC HUB - Auto Re-Apply + Keybind V + Sky Auto Loaded")
+print("🔷 Sky auto-applied saat execute:", S.SkyId)-- =========================================================
 -- SECTION 10/12 : LOGIC FITUR BARU
 -- =========================================================
 
@@ -4788,16 +4937,35 @@ task.spawn(function()
     end
 end)
 
--- ❌ FLY LOOP DIHAPUS
+-- =========================================================
+-- 🔷 SKY AUTO-REAPPLY (jaga sky tetap aktif)
+-- =========================================================
+task.spawn(function()
+    while task.wait(3) do
+        if S.SkyId and S.SkyId ~= "Default" then
+            local currentSky = nil
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("Sky") then
+                    currentSky = v
+                    break
+                end
+            end
+            -- Kalo sky ilang (kehapus game / reset), pasang ulang
+            if not currentSky or not currentSky.Name:find("CosmicSky_") then
+                pcall(function() applySky(S.SkyId) end)
+            end
+        end
+    end
+end)
 
 print("✅ [10/12] COSMIC HUB - Logic Fitur Baru Loaded")
-print("❌ Fly loop: DIHAPUS")-- =========================================================
+print("🔷 Sky Auto-Reapply: Active")-- =========================================================
 -- SECTION 11/12 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
 
 print("╔══════════════════════════════════════════╗")
-print("║  ✨ COSMIC HUB v4.0 ✨                   ║")
+print("║  ✨ COSMIC HUB v4.1 ✨                   ║")
 print("║  ✅ SEMUA FITUR LOADED                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🛡️ Auto Parry CUSTOM                    ║")
@@ -4806,7 +4974,7 @@ print("║     → Radius 14.3                        ║")
 print("║     → Circle Rata Tanah                  ║")
 print("║     → Camera Auto Unlock                 ║")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
-print("║  🕺 Moonwalk (Tombol MW + LOCK BUTTON)   ║")
+print("║  🕺 Moonwalk (Tombol MW + LOCK)          ║")
 print("║  ⚡ Fast Vault                            ║")
 print("║  🔓 Auto Wiggle                          ║")
 print("║  🏃 Auto Flee Killer                     ║")
@@ -4816,10 +4984,12 @@ print("║  🚀 FPS Boost (3 Mode)                   ║")
 print("║  🎯 Crosshair 8 Mode + 2 Warna           ║")
 print("║  📦 Hitbox (TEXT ANGKA + Size)           ║")
 print("║  🛡️ God Mode                             ║")
-print("║  👑 8-Bit Royal Crown (CLIENT-ONLY)      ║")
-print("║  🦴 Korblox Pencil (CLIENT-ONLY)         ║")
-print("║  💎 HD Sky (Jernih + Ringan)             ║")
-print("║  🌌 ESP Nama 2 Mode                      ║")
+print("║  👑 8-Bit Royal Crown (CLIENT)           ║")
+print("║  🦴 Korblox Pencil (CLIENT)              ║")
+print("║  🔷 HD Sky (Jernih + Ringan)             ║")
+print("║  🌌 Sky 18 PRESET (Galaxy dll)           ║")
+print("║  🌈 ESP Galaxy (Animated Rainbow)        ║")
+print("║  🟠 ESP Generator (FIXED)                ║")
 print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter                   ║")
@@ -4827,21 +4997,21 @@ print("╠═══════════════════════�
 print("║  ❌ YANG DIHAPUS:                        ║")
 print("║     → Fire Feet                          ║")
 print("║     → Fly                                ║")
-print("║     → Alert (Safe Zone, Escape, dll)     ║")
+print("║     → Alert (Safe Zone, dll)             ║")
 print("║     → Tab Player (digabung ke Visual)    ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎮 Buka menu: Klik tombol ✨           ║")
+print("║  🔷 Sky: Auto ON (GalaxyPurple)          ║")
 print("║  🎯 Aimbot: Tab Aimbot (Section 12)      ║")
 print("║  📦 Hitbox: Tab Hitbox → Enable          ║")
 print("╚══════════════════════════════════════════╝")
 
-print("✅ [11/12] COSMIC HUB v4.0 - FINAL LOADED! ✨")
-print("🎯 Auto Parry CUSTOM ACTIVE - Debounce 0.5 | Radius 14.3")
-print("🌌 Galaxy Loading Animation")
-print("🟠 ESP Generator FIXED (RepairProgress + Progress + Highlight)")
-print("📦 Hitbox: TEXT ANGKA (bukan Box)")
-print("🔷 HD Sky: Jernih + Ringan")
-print("❌ Fire Feet, Fly, Alert: DIHAPUS")-- =========================================================
+print("✅ [11/12] COSMIC HUB v4.1 - FINAL LOADED! ✨")
+print("🔷 Sky Default: GalaxyPurple (auto ON)")
+print("📦 Hitbox: TEXT ANGKA")
+print("🌈 ESP Galaxy: Animated Rainbow")
+print("❌ Fire Feet, Fly, Alert: DIHAPUS")
+print("➡️ Lanjut ke Section 12 (Aimbot)")-- =========================================================
 -- SECTION 12/12 : AIMBOT (TAB AIMBOT COSMIC)
 -- =========================================================
 
@@ -4877,19 +5047,19 @@ function Aimlock_ScanAttackButtons()
         end
     end
     print("[AIMBOT] Found " .. #Aimlock_AttackButtons .. " attack button(s)")
-    for i, btn in ipairs(Aimlock_AttackButtons) do
-        print("  [" .. i .. "] " .. btn.Name .. " | " .. btn:GetFullName())
+    for i, btnObj in ipairs(Aimlock_AttackButtons) do
+        print("  [" .. i .. "] " .. btnObj.Name .. " | " .. btnObj:GetFullName())
     end
 end
 
 function Aimlock_HookAttackButtons()
     Aimlock_ScanAttackButtons()
     
-    for _, btn in ipairs(Aimlock_AttackButtons) do
-        if not btn:GetAttribute("AimlockHooked") then
-            btn:SetAttribute("AimlockHooked", true)
+    for _, btnObj in ipairs(Aimlock_AttackButtons) do
+        if not btnObj:GetAttribute("AimlockHooked") then
+            btnObj:SetAttribute("AimlockHooked", true)
             
-            btn.InputBegan:Connect(function(input)
+            btnObj.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.Touch
                    or input.UserInputType == Enum.UserInputType.MouseButton1 then
                     Aimlock.Holding = true
@@ -4897,7 +5067,7 @@ function Aimlock_HookAttackButtons()
                 end
             end)
             
-            btn.InputEnded:Connect(function(input)
+            btnObj.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.Touch
                    or input.UserInputType == Enum.UserInputType.MouseButton1 then
                     Aimlock.Holding = false
@@ -5002,7 +5172,7 @@ function Aimlock_StopLoop()
 end
 
 -- =========================================================
--- FLOATING GUI (muncul kalo toggle ON)
+-- FLOATING GUI (muncul kalo toggle "Show Aimbot GUI" ON)
 -- =========================================================
 Aimlock_Gui = nil
 Aimlock_FloatingBtn = nil
@@ -5261,8 +5431,8 @@ makeTab("Aimbot", "🎯", 6, function()
             Aimlock_RemoveFloatingGUI()
         end
     end)
-    lbl("Kalo ON: tombol 🎯 muncul di layar", C.GRN)
-    lbl("Kalo OFF: gak keliatan", C.DIM)
+    lbl("ON = tombol 🎯 muncul di layar", C.GRN)
+    lbl("OFF = gak keliatan", C.DIM)
 
     sec("Radius Setting", "📏")
     sl("Aimbot Radius", 5, 100, 80, function(v)

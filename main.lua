@@ -1,5 +1,5 @@
 -- =========================================================
--- SECTION 1/11 : LOADING + CONFIG + STATE
+-- SECTION 1/11 : LOADING GALAXY + CONFIG + STATE
 -- =========================================================
 
 Players = game:GetService("Players")
@@ -73,7 +73,9 @@ end
 
 _G.Roooor_playSound = playToggleSound
 
--- LOADING GALAXY
+-- =========================================================
+-- 🌌 COSMIC HUB LOADING - GALAXY THEME
+-- =========================================================
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "CosmicLoading"
 loadingGui.ResetOnSpawn = false
@@ -83,25 +85,325 @@ loadingGui.Parent = PG
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(8, 4, 20)
+bg.BackgroundColor3 = Color3.fromRGB(5, 2, 15)
 bg.BorderSizePixel = 0
 bg.Parent = loadingGui
 
+local nebula = Instance.new("Frame")
+nebula.Size = UDim2.new(1, 0, 1, 0)
+nebula.BackgroundColor3 = Color3.fromRGB(20, 5, 50)
+nebula.BorderSizePixel = 0
+nebula.BackgroundTransparency = 0.3
+nebula.Parent = bg
+
+local nebulaGrad = Instance.new("UIGradient")
+nebulaGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(80, 20, 180)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(20, 5, 60)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 100, 180)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(40, 5, 90)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(120, 20, 200)),
+})
+nebulaGrad.Rotation = 45
+nebulaGrad.Parent = nebula
+
+task.spawn(function()
+    local t = 0
+    while nebula.Parent do
+        t = t + 0.005
+        nebulaGrad.Rotation = (t * 20) % 360
+        task.wait(0.03)
+    end
+end)
+
+local starContainer = Instance.new("Frame")
+starContainer.Size = UDim2.new(1, 0, 1, 0)
+starContainer.BackgroundTransparency = 1
+starContainer.Parent = bg
+
+local stars = {}
+for i = 1, 80 do
+    local star = Instance.new("Frame")
+    star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
+    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    star.BackgroundColor3 = Color3.fromRGB(
+        math.random(180, 255),
+        math.random(180, 255),
+        255
+    )
+    star.BorderSizePixel = 0
+    star.BackgroundTransparency = math.random(20, 60) / 100
+    star.Parent = starContainer
+    rnd(star, 999)
+
+    table.insert(stars, {
+        obj = star,
+        speed = math.random(10, 40) / 10000,
+        twinkle = math.random() * math.pi * 2
+    })
+end
+
+task.spawn(function()
+    while starContainer.Parent do
+        for _, s in ipairs(stars) do
+            if s.obj and s.obj.Parent then
+                local p = s.obj.Position
+                local newY = p.Y.Scale + s.speed
+                if newY > 1 then
+                    newY = 0
+                    s.obj.Position = UDim2.new(math.random(), 0, 0, 0)
+                else
+                    s.obj.Position = UDim2.new(p.X.Scale, 0, newY, 0)
+                end
+
+                s.twinkle = s.twinkle + 0.1
+                local base = 0.4
+                s.obj.BackgroundTransparency = base + math.sin(s.twinkle) * 0.3
+            end
+        end
+        task.wait(0.05)
+    end
+end)
+
+local galaxyHolder = Instance.new("Frame")
+galaxyHolder.Size = UDim2.new(0, 400, 0, 400)
+galaxyHolder.Position = UDim2.new(0.5, -200, 0.5, -200)
+galaxyHolder.BackgroundTransparency = 1
+galaxyHolder.Parent = bg
+
+local spiral1 = Instance.new("Frame")
+spiral1.Size = UDim2.new(0, 300, 0, 300)
+spiral1.Position = UDim2.new(0.5, -150, 0.5, -150)
+spiral1.BackgroundTransparency = 1
+spiral1.Parent = galaxyHolder
+
+local spiral1Stroke = Instance.new("UIStroke")
+spiral1Stroke.Thickness = 60
+spiral1Stroke.Transparency = 0.85
+spiral1Stroke.Color = Color3.fromRGB(140, 70, 255)
+spiral1Stroke.Parent = spiral1
+rnd(spiral1, 999)
+
+local spiral1Grad = Instance.new("UIGradient")
+spiral1Grad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(140, 70, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 100, 200)),
+})
+spiral1Grad.Rotation = 0
+spiral1Grad.Parent = spiral1Stroke
+
+local spiral2 = Instance.new("Frame")
+spiral2.Size = UDim2.new(0, 260, 0, 260)
+spiral2.Position = UDim2.new(0.5, -130, 0.5, -130)
+spiral2.BackgroundTransparency = 1
+spiral2.Parent = galaxyHolder
+
+local spiral2Stroke = Instance.new("UIStroke")
+spiral2Stroke.Thickness = 40
+spiral2Stroke.Transparency = 0.88
+spiral2Stroke.Color = Color3.fromRGB(255, 100, 200)
+spiral2Stroke.Parent = spiral2
+rnd(spiral2, 999)
+
+local spiral2Grad = Instance.new("UIGradient")
+spiral2Grad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 100, 200)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(140, 70, 255)),
+})
+spiral2Grad.Rotation = 180
+spiral2Grad.Parent = spiral2Stroke
+
+task.spawn(function()
+    local t = 0
+    while galaxyHolder.Parent do
+        t = t + 1
+        spiral1.Rotation = t * 0.8
+        spiral2.Rotation = -t * 1.1
+        spiral1Grad.Rotation = (t * 2) % 360
+        spiral2Grad.Rotation = 180 + (t * 1.5) % 360
+        task.wait(0.03)
+    end
+end)
+
+local titleGlow = Instance.new("Frame")
+titleGlow.Size = UDim2.new(0, 500, 0, 100)
+titleGlow.Position = UDim2.new(0.5, -250, 0.42, -50)
+titleGlow.BackgroundColor3 = Color3.fromRGB(140, 70, 255)
+titleGlow.BackgroundTransparency = 0.85
+titleGlow.BorderSizePixel = 0
+titleGlow.Parent = bg
+rnd(titleGlow, 999)
+
+local glowGrad = Instance.new("UIGradient")
+glowGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 200)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(140, 70, 255)),
+})
+glowGrad.Parent = titleGlow
+
 local welcomeTitle = Instance.new("TextLabel")
-welcomeTitle.Size = UDim2.new(1, 0, 0, 70)
-welcomeTitle.Position = UDim2.new(0, 0, 0.4, 0)
+welcomeTitle.Size = UDim2.new(1, 0, 0, 90)
+welcomeTitle.Position = UDim2.new(0, 0, 0.42, -20)
 welcomeTitle.BackgroundTransparency = 1
 welcomeTitle.Text = "COSMIC HUB"
-welcomeTitle.TextColor3 = C.ACC2
-welcomeTitle.TextSize = 60
+welcomeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+welcomeTitle.TextSize = 0
 welcomeTitle.Font = Enum.Font.GothamBlack
-welcomeTitle.TextStrokeTransparency = 0
-welcomeTitle.TextStrokeColor3 = C.ACC
+welcomeTitle.TextStrokeTransparency = 0.4
+welcomeTitle.TextStrokeColor3 = Color3.fromRGB(140, 70, 255)
+welcomeTitle.TextTransparency = 0
 welcomeTitle.Parent = bg
 
-task.delay(1.5, function()
+local titleGrad = Instance.new("UIGradient")
+titleGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(140, 70, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 200)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(140, 70, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 200, 255)),
+})
+titleGrad.Parent = welcomeTitle
+
+task.spawn(function()
+    local t = 0
+    while welcomeTitle.Parent do
+        t = t + 1
+        titleGrad.Rotation = (t * 2) % 360
+        task.wait(0.03)
+    end
+end)
+
+welcomeTitle.TextSize = 0
+welcomeTitle.TextTransparency = 1
+TweenService:Create(welcomeTitle, TweenInfo.new(1.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    TextSize = 68,
+    TextTransparency = 0
+}):Play()
+
+task.spawn(function()
+    task.wait(1.2)
+    while titleGlow.Parent do
+        TweenService:Create(titleGlow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            BackgroundTransparency = 0.6,
+            Size = UDim2.new(0, 560, 0, 120),
+            Position = UDim2.new(0.5, -280, 0.42, -60)
+        }):Play()
+        task.wait(1.3)
+        TweenService:Create(titleGlow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            BackgroundTransparency = 0.85,
+            Size = UDim2.new(0, 500, 0, 100),
+            Position = UDim2.new(0.5, -250, 0.42, -50)
+        }):Play()
+        task.wait(1.3)
+    end
+end)
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, 0, 0, 24)
+subtitle.Position = UDim2.new(0, 0, 0.42, 70)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "✦  L O A D I N G  ✦"
+subtitle.TextColor3 = Color3.fromRGB(180, 220, 255)
+subtitle.TextSize = 14
+subtitle.Font = Enum.Font.GothamBold
+subtitle.TextStrokeTransparency = 0.5
+subtitle.TextStrokeColor3 = Color3.fromRGB(0, 100, 180)
+subtitle.TextTransparency = 1
+subtitle.Parent = bg
+
+TweenService:Create(subtitle, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    TextTransparency = 0
+}):Play()
+
+task.spawn(function()
+    task.wait(1)
+    while subtitle.Parent do
+        TweenService:Create(subtitle, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+            TextTransparency = 0.4
+        }):Play()
+        task.wait(0.9)
+        TweenService:Create(subtitle, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+            TextTransparency = 0
+        }):Play()
+        task.wait(0.9)
+    end
+end)
+
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.new(0, 320, 0, 4)
+barBg.Position = UDim2.new(0.5, -160, 0.42, 110)
+barBg.BackgroundColor3 = Color3.fromRGB(30, 15, 60)
+barBg.BorderSizePixel = 0
+barBg.BackgroundTransparency = 0.4
+barBg.Parent = bg
+rnd(barBg, 999)
+
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+barFill.BorderSizePixel = 0
+barFill.Parent = barBg
+rnd(barFill, 999)
+
+local barFillGrad = Instance.new("UIGradient")
+barFillGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(140, 70, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 100, 200)),
+})
+barFillGrad.Parent = barFill
+
+TweenService:Create(barFill, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    Size = UDim2.new(1, 0, 1, 0)
+}):Play()
+
+local barGlow = Instance.new("Frame")
+barGlow.Size = UDim2.new(1, 12, 2, 12)
+barGlow.Position = UDim2.new(0, -6, 0, -6)
+barGlow.BackgroundColor3 = Color3.fromRGB(140, 70, 255)
+barGlow.BackgroundTransparency = 0.7
+barGlow.BorderSizePixel = 0
+barGlow.ZIndex = -1
+barGlow.Parent = barBg
+rnd(barGlow, 999)
+
+task.delay(1.6, function()
+    if not loadingGui then return end
+
+    TweenService:Create(bg, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        BackgroundTransparency = 1
+    }):Play()
+
+    TweenService:Create(welcomeTitle, TweenInfo.new(0.5), {
+        TextTransparency = 1,
+        TextStrokeTransparency = 1
+    }):Play()
+    TweenService:Create(subtitle, TweenInfo.new(0.5), {
+        TextTransparency = 1
+    }):Play()
+    TweenService:Create(nebula, TweenInfo.new(0.6), {
+        BackgroundTransparency = 1
+    }):Play()
+    TweenService:Create(titleGlow, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1
+    }):Play()
+    TweenService:Create(barBg, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1
+    }):Play()
+    TweenService:Create(barGlow, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1
+    }):Play()
+
+    task.wait(0.8)
     if loadingGui then loadingGui:Destroy() end
 end)
+
+-- =========================================================
+-- STATE
+-- =========================================================
 
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
@@ -255,7 +557,8 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-print("✅ [1/11] COSMIC HUB - Base + State Loaded")-- =========================================================
+print("✅ [1/11] COSMIC HUB - Base + State Loaded")
+print("🌌 Galaxy Loading Animation Active")-- =========================================================
 -- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -422,7 +725,7 @@ SkyIds = {
     },
 }
 
--- KILLER ANIMS (23 ID - FIXED)
+-- KILLER ANIMS (23 ID)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -1195,27 +1498,60 @@ function createStatusESP(player, char, root)
     end
 end
 
+-- =========================================================
+-- 🟠 FIX ESP GENERATOR
+-- =========================================================
 function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
     if attr ~= nil then return attr end
+    local child = obj:FindFirstChild(name)
+    if child then
+        local success, val = pcall(function() return child.Value end)
+        if success then return val end
+    end
     return nil
+end
+
+function ApplyGenHighlight(object, color)
+    if not object then return end
+    local h = object:FindFirstChild("GenHighlight") or Instance.new("Highlight")
+    h.Name = "GenHighlight"
+    h.Adornee = object
+    h.FillColor = color
+    h.OutlineColor = color
+    h.FillTransparency = 0.9
+    h.OutlineTransparency = 0.3
+    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    h.Parent = object
 end
 
 function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
+
     if not ESP.Generator then
         local old = generator:FindFirstChild("GenESP")
         if old then old:Destroy() end
+        local h = generator:FindFirstChild("GenHighlight")
+        if h then h:Destroy() end
         return
     end
-    local percent = GetGameValue(generator, "RepairProgress") or 0
+
+    local percent =
+        GetGameValue(generator, "RepairProgress") or
+        GetGameValue(generator, "Progress") or 0
+
     local billboard = generator:FindFirstChild("GenESP")
+
     if percent >= 100 then
         if billboard then billboard:Destroy() end
+        local h = generator:FindFirstChild("GenHighlight")
+        if h then h:Destroy() end
         return
     end
-    local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), percent / 100)
+
+    local cp = math.clamp(percent, 0, 100)
+    local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
     local text = string.format("[%.0f%%]", percent)
 
     if not billboard then
@@ -1223,14 +1559,17 @@ function UpdateGenerator(generator)
         billboard.Name = "GenESP"
         billboard.Size = UDim2.new(0, 100, 0, 30)
         billboard.AlwaysOnTop = true
+
         local label = Instance.new("TextLabel")
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = text
         label.TextColor3 = color
+        label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
         label.TextSize = 12
         label.Parent = billboard
+
         billboard.Adornee = generator
         billboard.Parent = generator
     else
@@ -1240,6 +1579,8 @@ function UpdateGenerator(generator)
             lbl.TextColor3 = color
         end
     end
+
+    ApplyGenHighlight(generator, color)
 end
 
 function UpdateMapESP(obj, root)
@@ -2316,9 +2657,6 @@ _G.Roooor_teleportToFinishLine = teleportToFinishLine
 _G.Roooor_spawnKillEffect = spawnKillEffect
 _G.Roooor_startFly = startFly
 _G.Roooor_stopFly = stopFly
-_G.Roooor_applyHDBoost = applyHDBoost
-_G.Roooor_applyHDShader = applyHDShader
-_G.Roooor_applyHDSky = applyHDSky
 _G.Roooor_applyAntiAFK = applyAntiAFK
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
@@ -2330,7 +2668,8 @@ _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 
-print("✅ [4/11] COSMIC HUB - ESP + AUTO PARRY CUSTOM + Moonwalk + Hitbox Loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB - ESP + AUTO PARRY CUSTOM + Moonwalk + Hitbox Loaded")
+print("🟠 ESP Generator FIXED (RepairProgress + Progress + Highlight)")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -3347,7 +3686,12 @@ function tog(name, def, cb)
     rnd(k, 6)
 
     local saved = _G.ToggleStates[name]
-    local state = (saved ~= nil) and saved or def
+    local state
+    if saved ~= nil then
+        state = saved
+    else
+        state = def
+    end
     _G.ToggleStates[name] = state
 
     t.BackgroundColor3 = state and C.ACC or C.PANEL
@@ -4761,3 +5105,5 @@ print("✅ [11/11] COSMIC HUB v3.6 - FINAL LOADED! ✨")
 print("🎯 Auto Parry CUSTOM ACTIVE - Debounce 0.5 | Radius 14.3")
 print("🟢 Circle Rata Tanah (YOffset -2.5)")
 print("🎥 Camera Auto Unlock")
+print("🌌 Galaxy Loading Animation")
+print("🟠 ESP Generator FIXED (RepairProgress + Progress + Highlight)")

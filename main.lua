@@ -1,21 +1,21 @@
 -- =========================================================
--- SECTION 1/11 : LOADING + CONFIG + STATE (UPDATED)
--- Auto Parry Custom Include
+-- SECTION 1/11 : LOADING + CONFIG + STATE
 -- =========================================================
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local Stats = game:GetService("Stats")
-local GuiService = game:GetService("GuiService")
-local SoundService = game:GetService("SoundService")
-local StarterGui = game:GetService("StarterGui")
 
-local LP = Players.LocalPlayer
-local PG = LP:WaitForChild("PlayerGui")
+Players = game:GetService("Players")
+UIS = game:GetService("UserInputService")
+RunService = game:GetService("RunService")
+TweenService = game:GetService("TweenService")
+Lighting = game:GetService("Lighting")
+ReplicatedStorage = game:GetService("ReplicatedStorage")
+VirtualInputManager = game:GetService("VirtualInputManager")
+Stats = game:GetService("Stats")
+GuiService = game:GetService("GuiService")
+SoundService = game:GetService("SoundService")
+StarterGui = game:GetService("StarterGui")
+
+LP = Players.LocalPlayer
+PG = LP:WaitForChild("PlayerGui")
 
 function getRoot()
     local c = LP.Character
@@ -87,171 +87,20 @@ bg.BackgroundColor3 = Color3.fromRGB(8, 4, 20)
 bg.BorderSizePixel = 0
 bg.Parent = loadingGui
 
-local bgGrad = Instance.new("UIGradient")
-bgGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 10, 55)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 5, 30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 10, 55)),
-})
-bgGrad.Parent = bg
-
-local ringContainer = Instance.new("Frame")
-ringContainer.Size = UDim2.new(0, 240, 0, 240)
-ringContainer.Position = UDim2.new(0.5, -120, 0.5, -180)
-ringContainer.BackgroundTransparency = 1
-ringContainer.Parent = bg
-
-local rings = {}
-for i = 1, 3 do
-    local ring = Instance.new("Frame")
-    local ringSize = 200 - (i - 1) * 50
-    ring.Size = UDim2.new(0, ringSize, 0, ringSize)
-    ring.Position = UDim2.new(0.5, -ringSize / 2, 0.5, -ringSize / 2)
-    ring.BackgroundTransparency = 1
-    ring.Parent = ringContainer
-
-    local rStrk = Instance.new("UIStroke")
-    rStrk.Thickness = 4 - (i - 1) * 0.5
-    rStrk.Color = C.ACC2
-    rStrk.Transparency = 0.05 + (i - 1) * 0.15
-    rStrk.Parent = ring
-
-    local rGrad = Instance.new("UIGradient")
-    rGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, C.ACC),
-        ColorSequenceKeypoint.new(0.5, C.ACC2),
-        ColorSequenceKeypoint.new(1, C.ACC3),
-    })
-    rGrad.Parent = rStrk
-
-    table.insert(rings, { ring = ring, grad = rGrad, speed = 40 + i * 25, dir = i % 2 == 0 and -1 or 1 })
-end
-
-local core = Instance.new("Frame")
-core.Size = UDim2.new(0, 80, 0, 80)
-core.Position = UDim2.new(0.5, -40, 0.5, -40)
-core.BackgroundColor3 = C.ACC2
-core.Parent = ringContainer
-rnd(core, 999)
-
-local coreGrad = Instance.new("UIGradient")
-coreGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-coreGrad.Rotation = 45
-coreGrad.Parent = core
-
-local coreIcon = Instance.new("TextLabel")
-coreIcon.Size = UDim2.new(1, 0, 1, 0)
-coreIcon.BackgroundTransparency = 1
-coreIcon.Text = "🌌"
-coreIcon.TextSize = 44
-coreIcon.Font = Enum.Font.GothamBlack
-coreIcon.Parent = core
-
 local welcomeTitle = Instance.new("TextLabel")
 welcomeTitle.Size = UDim2.new(1, 0, 0, 70)
-welcomeTitle.Position = UDim2.new(0, 0, 0.32, 0)
+welcomeTitle.Position = UDim2.new(0, 0, 0.4, 0)
 welcomeTitle.BackgroundTransparency = 1
-welcomeTitle.Text = "SELAMAT DATANG"
-welcomeTitle.TextColor3 = Color3.new(1, 1, 1)
-welcomeTitle.TextSize = 48
+welcomeTitle.Text = "COSMIC HUB"
+welcomeTitle.TextColor3 = C.ACC2
+welcomeTitle.TextSize = 60
 welcomeTitle.Font = Enum.Font.GothamBlack
 welcomeTitle.TextStrokeTransparency = 0
 welcomeTitle.TextStrokeColor3 = C.ACC
 welcomeTitle.Parent = bg
 
-local welcomeGrad = Instance.new("UIGradient")
-welcomeGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-welcomeGrad.Parent = welcomeTitle
-
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 100)
-subtitle.Position = UDim2.new(0, 0, 0.53, 0)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "COSMIC HUB"
-subtitle.TextColor3 = C.ACC2
-subtitle.TextSize = 68
-subtitle.Font = Enum.Font.GothamBlack
-subtitle.TextStrokeTransparency = 0
-subtitle.TextStrokeColor3 = C.ACC
-subtitle.Parent = bg
-
-local subGrad = Instance.new("UIGradient")
-subGrad.Color = ColorSequence.new(C.ACC2, Color3.fromRGB(255, 220, 255), C.ACC3)
-subGrad.Parent = subtitle
-
-local tagline = Instance.new("TextLabel")
-tagline.Size = UDim2.new(1, 0, 0, 30)
-tagline.Position = UDim2.new(0, 0, 0.73, 20)
-tagline.BackgroundTransparency = 1
-tagline.Text = "✨ COSMIC HUB ✨"
-tagline.TextColor3 = C.ACC2
-tagline.TextSize = 16
-tagline.Font = Enum.Font.GothamBold
-tagline.TextStrokeTransparency = 0.3
-tagline.TextStrokeColor3 = C.ACC
-tagline.Parent = bg
-
-local progressBar = Instance.new("Frame")
-progressBar.Size = UDim2.new(0, 420, 0, 6)
-progressBar.Position = UDim2.new(0.5, -210, 0.9, 20)
-progressBar.BackgroundColor3 = Color3.fromRGB(30, 15, 50)
-progressBar.BorderSizePixel = 0
-progressBar.Parent = bg
-rnd(progressBar, 3)
-strk(progressBar, C.ACC2, 1.5, 0.3)
-
-local progressFill = Instance.new("Frame")
-progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = C.ACC2
-progressFill.BorderSizePixel = 0
-progressFill.Parent = progressBar
-rnd(progressFill, 3)
-
-local progGrad = Instance.new("UIGradient")
-progGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-progGrad.Parent = progressFill
-
-task.spawn(function()
-    local t = 0
-    while bg.Parent do
-        t = t + 0.03
-        for _, data in ipairs(rings) do
-            data.ring.Rotation = t * data.speed * data.dir
-            data.grad.Rotation = t * 90 * data.dir
-        end
-        local pulse = 1 + math.sin(t * 4) * 0.15
-        core.Size = UDim2.new(0, 80 * pulse, 0, 80 * pulse)
-        core.Position = UDim2.new(0.5, -40 * pulse, 0.5, -40 * pulse)
-        core.Rotation = t * 50
-        welcomeTitle.TextSize = 48 + math.sin(t * 3) * 3
-        subtitle.TextSize = 68 + math.sin(t * 3 + 0.5) * 4
-        task.wait(0.03)
-    end
-end)
-
-task.spawn(function()
-    for i = 0, 1, 0.02 do
-        if not bg.Parent then break end
-        progressFill.Size = UDim2.new(i, 0, 1, 0)
-        task.wait(0.03)
-    end
-end)
-
 task.delay(1.5, function()
-    TweenService:Create(bg, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
-    for _, el in pairs(bg:GetDescendants()) do
-        pcall(function()
-            if el:IsA("TextLabel") then
-                TweenService:Create(el, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
-            elseif el:IsA("Frame") then
-                TweenService:Create(el, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
-            elseif el:IsA("UIStroke") then
-                TweenService:Create(el, TweenInfo.new(0.5), { Transparency = 1 }):Play()
-            end
-        end)
-    end
-    task.wait(0.5)
-    loadingGui:Destroy()
+    if loadingGui then loadingGui:Destroy() end
 end)
 
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
@@ -274,31 +123,23 @@ _G.RoooorS = _G.RoooorS or {
     KillEffect = false,
     Crosshair = false,
     CrosshairColor = Color3.fromRGB(0, 200, 255),
-    CrosshairSize = 8,
-    CrosshairThickness = 2,
-    CrosshairStyle = "Plus",
-    CrosshairColorMode = "Solid",
-    CrosshairOffsetX = 0,
-    CrosshairOffsetY = 0,
+    CrosshairSize = 8, CrosshairThickness = 2,
+    CrosshairStyle = "Plus", CrosshairColorMode = "Solid",
+    CrosshairOffsetX = 0, CrosshairOffsetY = 0,
     ZoomOut = false, ZoomOutValue = 500,
     FOV = 70, FOVEnabled = false,
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
     Contrast = false, ContrastVal = 0.3, SaturationVal = 0.2,
     SkyId = "Default",
-    NoScreenEffects = false,
-    LowGraphics = false,
-    CleanSky = false,
+    NoScreenEffects = false, LowGraphics = false, CleanSky = false,
     SafeZone = false, EscapeAlert = false, EscapeAlertRange = 60,
     KillFeed = false, StunNotify = false,
     AntiAFK = false, ShowFPS = true, ShowPing = true,
     Killer_AutoAtk = false, Killer_AtkDelay = 0.35,
-    Killer_KillAll = false,
-    MaskedPower = "Cobra",
+    Killer_KillAll = false, MaskedPower = "Cobra",
     InstantInteract = false,
-    AutoCarry = false,
-    AutoHook = false,
-    CarryRange = 60,
+    AutoCarry = false, AutoHook = false, CarryRange = 60,
     HDBoost = false, HDShader = false, HDSky = false,
     HDTexture = false, HDReflection = false, HDBloom = false,
     HDShadow = false, HDWater = false, HDSunRays = false,
@@ -306,10 +147,8 @@ _G.RoooorS = _G.RoooorS or {
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
     ESPNameMode = "Text", ESPNameSize = 12,
-    AutoEscapeGate = false,
-    AutoEscapeRange = 50,
-    AutoEscapeUseKillerCheck = true,
-    AutoEscapeUseGenCheck = true,
+    AutoEscapeGate = false, AutoEscapeRange = 50,
+    AutoEscapeUseKillerCheck = true, AutoEscapeUseGenCheck = true,
 }
 S = _G.RoooorS
 
@@ -321,17 +160,13 @@ _G.SliderStates = _G.SliderStates or {}
 
 ESP = _G.Roooor_ESP or {
     Survivor = true, Killer = true, Generator = true,
-    Pallet = true, Window = true, SCP = true,
-    Distance = 1000,
+    Pallet = true, Window = true, SCP = true, Distance = 1000,
 }
 _G.Roooor_ESP = ESP
 
 ESPStatus = _G.Roooor_ESPStatus or {
-    Enabled = true,
-    ShowName = true,
-    ShowDistance = true,
-    ShowHealth = true,
-    Radius = 1000,
+    Enabled = true, ShowName = true, ShowDistance = true,
+    ShowHealth = true, Radius = 1000,
 }
 _G.Roooor_ESPStatus = ESPStatus
 
@@ -341,60 +176,38 @@ TeamColors = _G.Roooor_TeamColors or {
 }
 _G.Roooor_TeamColors = TeamColors
 
--- 🆕 HITBOX (RADIUS 70 + ESP HIDE)
 Hitbox = _G.Roooor_Hitbox or {
-    Enabled = false,
-    Size = 70,
-    ESPShow = true,
-    HideESP = false,
+    Enabled = false, Size = 70, ESPShow = true, HideESP = false,
     Color = Color3.fromRGB(255, 60, 60),
     ColorKiller = Color3.fromRGB(255, 60, 60),
     ColorSurvivor = Color3.fromRGB(0, 200, 255),
-    Mode = "Auto",
-    WallBang = true,
+    Mode = "Auto", WallBang = true,
 }
 _G.Roooor_Hitbox = Hitbox
 
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
--- 🆕 AUTO PARRY CUSTOM (PENGGANTI COSMIC)
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false,
-    ParryDistance = 14.3,
-    ParryDelay = 0,
-    Cooldown = 0.5,
-    FaceSensitivity = -1,
-    RequireFacing = false,
-    Wiggle = false,
-    WiggleSpam = 5,
+    Enabled = false, ParryDistance = 14.3, ParryDelay = 0,
+    Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
+    Wiggle = false, WiggleSpam = 5,
 }
 _G.Roooor_AutoParry = AutoParry
 
--- AP CUSTOM CONFIG
 AP_CameraFix = { Enabled = true }
-
 AP_ESPCircle = {
     Enabled = true,
     ColorNormal = Color3.fromRGB(0, 255, 100),
     ColorDanger = Color3.fromRGB(255, 50, 50),
-    Thickness = 0.4,
-    Segments = 36,
-    YOffset = -2.5
+    Thickness = 0.4, Segments = 36, YOffset = -2.5
 }
-
 AP_PARRY_DEBOUNCE = 0.5
 
--- PREDICTION CONFIG (masih dipake fitur lain)
 PredictionConfig = _G.Roooor_Prediction or {
-    LatencyOffset = 0,
-    Accuracy = 85,
-    MaxDistance = 50,
-    AdaptiveReaction = true,
-    MinTimeToImpact = 0.02,
-    Cooldown = 0.1,
-    UseAnimationCheck = true,
-    UseVelocityPrediction = true,
+    LatencyOffset = 0, Accuracy = 85, MaxDistance = 50,
+    AdaptiveReaction = true, MinTimeToImpact = 0.02,
+    Cooldown = 0.1, UseAnimationCheck = true, UseVelocityPrediction = true,
 }
 _G.Roooor_Prediction = PredictionConfig
 
@@ -402,28 +215,19 @@ PARRY_DEBOUNCE = 0.1
 ParryActive = false
 
 SkillCheck = _G.Roooor_SkillCheck or {
-    Enabled = true,
-    Mode = "Perfect",
-    HideNeedle = false,
-    Success = 0,
-    Total = 0,
+    Enabled = true, Mode = "Perfect", HideNeedle = false,
+    Success = 0, Total = 0,
 }
 _G.Roooor_SkillCheck = SkillCheck
 
 Moonwalk = _G.Roooor_Moonwalk or {
-    Enabled = false,
-    Locked = false,
-    SpamSpeed = 30,
-    Intensity = 35,
-    SlowSpeed = 13,
-    UseSlow = true,
-    ShowButton = true,
+    Enabled = false, Locked = false, SpamSpeed = 30,
+    Intensity = 35, SlowSpeed = 13, UseSlow = true, ShowButton = true,
 }
 _G.Roooor_Moonwalk = Moonwalk
 
 FastVault = _G.Roooor_FastVault or {
-    Enabled = false,
-    Speed = 1.2,
+    Enabled = false, Speed = 1.2,
     ReplaceMap = {
         ["rbxassetid://83873880822918"] = "rbxassetid://136962284480779",
     },
@@ -433,16 +237,12 @@ _G.Roooor_FastVault = FastVault
 VaultTracks = {}
 
 AutoFlee = _G.Roooor_AutoFlee or {
-    Enabled = false,
-    DetectDistance = 50,
-    Cooldown = 0.1,
-    LastFlee = 0,
+    Enabled = false, DetectDistance = 50, Cooldown = 0.1, LastFlee = 0,
 }
 _G.Roooor_AutoFlee = AutoFlee
 
 EightBitList = { "Royal Crown" }
 EightBitIds = { ["Royal Crown"] = 10138606900 }
-
 KorbloxList = { "Pencil" }
 KorbloxIds = { ["Pencil"] = 902942093 }
 
@@ -455,23 +255,23 @@ FireBeamList = {
 GodMode = _G.Roooor_GodMode or { Enabled = false }
 _G.Roooor_GodMode = GodMode
 
-print("✅ [1/11] COSMIC HUB v3.6 - Base + State + Auto Parry Custom loaded")-- =========================================================
--- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS (FIXED)
+print("✅ [1/11] COSMIC HUB - Base + State Loaded")-- =========================================================
+-- SECTION 2/11 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
 FireList = {
-    "Classic", "HellFire", "IceFire", "ToxicFire", "VoidFire",
-    "GoldenKing", "SakuraFire", "EmeraldFire", "BloodFire", "ShadowFire",
-    "HolyFire", "OceanFire", "Firework", "Lava", "GhostFire",
-    "CosmicFire", "DragonFire", "MysteryFire", "RainbowFire", "LightningFire",
-    "GalaxyFire", "NebulaFire", "AuroraFire", "PhoenixFire", "DemonFire",
-    "AngelFire", "CrystalFire", "NeonFire", "PlasmaFire", "QuantumFire",
-    "LegendaryFire", "MythicFire", "DivineFire", "CursedFire", "AncientFire",
-    "EternalFire", "InfernoFire", "BifrostFire", "ChaosFire", "OmegaFire",
-    "SolarFire", "LunarFire", "EclipseFire", "SolarFlare", "VoidStorm",
-    "StarFire", "SupernovaFire", "BlackHoleFire", "MeteorFire", "CometFire",
-    "FrostFire", "BlizzardFire", "ThunderFire", "StormFire", "TornadoFire",
-    "SoulFire", "SpiritFire", "PhantomFire", "WraithFire", "ReaperFire"
+    "Classic","HellFire","IceFire","ToxicFire","VoidFire",
+    "GoldenKing","SakuraFire","EmeraldFire","BloodFire","ShadowFire",
+    "HolyFire","OceanFire","Firework","Lava","GhostFire",
+    "CosmicFire","DragonFire","MysteryFire","RainbowFire","LightningFire",
+    "GalaxyFire","NebulaFire","AuroraFire","PhoenixFire","DemonFire",
+    "AngelFire","CrystalFire","NeonFire","PlasmaFire","QuantumFire",
+    "LegendaryFire","MythicFire","DivineFire","CursedFire","AncientFire",
+    "EternalFire","InfernoFire","BifrostFire","ChaosFire","OmegaFire",
+    "SolarFire","LunarFire","EclipseFire","SolarFlare","VoidStorm",
+    "StarFire","SupernovaFire","BlackHoleFire","MeteorFire","CometFire",
+    "FrostFire","BlizzardFire","ThunderFire","StormFire","TornadoFire",
+    "SoulFire","SpiritFire","PhantomFire","WraithFire","ReaperFire"
 }
 
 FireConfig = {
@@ -544,10 +344,10 @@ for _, name in ipairs(FireList) do
 end
 
 FireFeetList = {
-    "Classic", "Blue", "Green", "Purple", "Rainbow",
-    "Golden", "Pink", "Cyan", "RedFire", "Ice",
-    "Toxic", "Electric", "Blood", "Ghost", "Cosmic",
-    "Dragon", "Divine", "Demon", "Shadow", "Phoenix"
+    "Classic","Blue","Green","Purple","Rainbow",
+    "Golden","Pink","Cyan","RedFire","Ice",
+    "Toxic","Electric","Blood","Ghost","Cosmic",
+    "Dragon","Divine","Demon","Shadow","Phoenix"
 }
 
 FireFeetConfig = {
@@ -580,8 +380,8 @@ for _, name in ipairs(FireFeetList) do
 end
 
 SkyList = {
-    "Default", "Sunset", "Night", "Space", "Alien",
-    "Purple", "Galaxy", "Void",
+    "Default", "Sunset", "Night", "Space",
+    "Alien", "Purple", "Galaxy", "Void",
 }
 
 SkyIds = {
@@ -622,7 +422,7 @@ SkyIds = {
     },
 }
 
--- KILLER ANIMS (FIXED - 23 ID)
+-- KILLER ANIMS (23 ID - FIXED)
 KillerAnims = {}
 for _, id in ipairs({
     "105374834496520","113255068724446","118907603246885","129784271201071",
@@ -635,8 +435,8 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims loaded (FIXED)")
-print("🎯 Total KillerAnims:", 23)
+print("✅ [2/11] COSMIC HUB - Fire + Sky + KillerAnims Loaded")
+print("🎯 Total KillerAnims: 23")
 print("✅ ID 139369275981139 (BENER)")-- =========================================================
 -- SECTION 3/11 : FUNGSI UTAMA
 -- =========================================================
@@ -738,7 +538,6 @@ function applyFireFeet()
     local lLeg = char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftUpperLeg")
     local rLeg = char:FindFirstChild("Right Leg") or char:FindFirstChild("RightUpperLeg")
     local cfg = FireFeetConfig[S.FireFeetType] or FireFeetConfig.Classic
-
     for _, leg in pairs({lLeg, rLeg}) do
         if leg then
             local fire = Instance.new("Fire")
@@ -1002,48 +801,11 @@ function applyFireBeam(enable, beamType, color)
     elseif beamType == "Laser Beam" then
         createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
         createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), Color3.fromRGB(0, 230, 255))
-    elseif beamType == "Rainbow Beam" then
-        createBeamAttachment(head, Vector3.new(0.3, 0.2, -0.5), color)
-        createBeamAttachment(head, Vector3.new(-0.3, 0.2, -0.5), color)
-        table.insert(fireBeamConns, RunService.RenderStepped:Connect(function()
-            local t = tick()
-            for _, beam in pairs(head:GetChildren()) do
-                if beam:IsA("Beam") then
-                    beam.Color = ColorSequence.new(Color3.fromHSV((t * 0.5) % 1, 1, 1))
-                end
-            end
-        end))
-    elseif beamType == "Fire Wings" then
-        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
-        if torso then
-            createBeamAttachment(torso, Vector3.new(1, 1, 0), color)
-            createBeamAttachment(torso, Vector3.new(-1, 1, 0), color)
-        end
-    elseif beamType == "Fire Halo" then
-        for i = 1, 12 do
-            local angle = (i / 12) * math.pi * 2
-            createBeamAttachment(head, Vector3.new(math.cos(angle) * 1.5, 1.5, math.sin(angle) * 1.5), color)
-        end
     elseif beamType == "Fire Hands" then
         local lHand = char:FindFirstChild("LeftHand") or char:FindFirstChild("Left Arm")
         local rHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
         if lHand then createBeamAttachment(lHand, Vector3.new(0, -0.5, 0), color) end
         if rHand then createBeamAttachment(rHand, Vector3.new(0, -0.5, 0), color) end
-    elseif beamType == "Fire Foot Trail" then
-        local lFoot = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg")
-        local rFoot = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg")
-        if lFoot then createBeamAttachment(lFoot, Vector3.new(0, -0.5, 0), color) end
-        if rFoot then createBeamAttachment(rFoot, Vector3.new(0, -0.5, 0), color) end
-    elseif beamType == "Fire Body Aura" then
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for i = 1, 8 do
-                local angle = (i / 8) * math.pi * 2
-                createBeamAttachment(hrp, Vector3.new(math.cos(angle) * 1, 0, math.sin(angle) * 1), color)
-            end
-        end
-    elseif beamType == "Fire Mouth" then
-        createBeamAttachment(head, Vector3.new(0, -0.3, -0.6), color)
     elseif beamType == "Fire Eyes Glow" then
         createBeamAttachment(head, Vector3.new(0.3, 0.3, -0.5), color)
         createBeamAttachment(head, Vector3.new(-0.3, 0.3, -0.5), color)
@@ -1152,39 +914,11 @@ function applyAntiAFK(enable)
     S.AntiAFK = enable
 end
 
-function serverHop()
-    local HttpService = game:GetService("HttpService")
-    task.spawn(function()
-        local servers = {}
-        pcall(function()
-            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-            local response = HttpService:JSONDecode(game:HttpGet(url))
-            if response and response.data then
-                for _, server in ipairs(response.data) do
-                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                        table.insert(servers, server.id)
-                    end
-                end
-            end
-        end)
-        if #servers > 0 then
-            local randomServer = servers[math.random(1, #servers)]
-            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, randomServer, LP)
-        else
-            StarterGui:SetCore("SendNotification", {
-                Title = "Server Hop",
-                Text = "Nggak ada server lain 😐",
-                Duration = 3
-            })
-        end
-    end)
-end
-
 function rejoinServer()
     game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
 end
 
--- FPS + PING COUNTER
+-- FPS + PING
 fpsPingGui = nil
 fpsCounter = 0
 fpsLastTime = tick()
@@ -1199,41 +933,37 @@ function createFPSPingGui()
     fpsPingGui.IgnoreGuiInset = true
     fpsPingGui.Parent = PG
 
-    local sizeScale = FPSPingConfig.Size or 1
-
     local frame = Instance.new("Frame")
     frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, math.floor(110 * sizeScale), 0, math.floor(42 * sizeScale))
-    frame.Position = UDim2.new(1, -math.floor(120 * sizeScale) + (FPSPingConfig.X or 0), 0, 5 + (FPSPingConfig.Y or 0))
+    frame.Size = UDim2.new(0, 110, 0, 42)
+    frame.Position = UDim2.new(1, -120, 0, 5)
     frame.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
     frame.BackgroundTransparency = 0.3
     frame.BorderSizePixel = 0
-    frame.Active = true
-    frame.Draggable = true
     frame.Parent = fpsPingGui
     rnd(frame, 8)
     strk(frame, C.ACC, 1.5, 0.3)
 
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
-    fpsLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
+    fpsLabel.Size = UDim2.new(1, -8, 0, 18)
     fpsLabel.Position = UDim2.new(0, 4, 0, 3)
     fpsLabel.BackgroundTransparency = 1
     fpsLabel.Text = "FPS: 0"
     fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    fpsLabel.TextSize = math.floor(11 * sizeScale)
+    fpsLabel.TextSize = 11
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
     fpsLabel.Parent = frame
 
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
-    pingLabel.Size = UDim2.new(1, -8, 0, 18 * sizeScale)
-    pingLabel.Position = UDim2.new(0, 4, 0, 21 * sizeScale)
+    pingLabel.Size = UDim2.new(1, -8, 0, 18)
+    pingLabel.Position = UDim2.new(0, 4, 0, 21)
     pingLabel.BackgroundTransparency = 1
     pingLabel.Text = "Ping: 0 ms"
     pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    pingLabel.TextSize = math.floor(11 * sizeScale)
+    pingLabel.TextSize = 11
     pingLabel.Font = Enum.Font.GothamBold
     pingLabel.TextXAlignment = Enum.TextXAlignment.Left
     pingLabel.Parent = frame
@@ -1290,8 +1020,8 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/11] COSMIC HUB - Fungsi utama loaded")-- =========================================================
--- SECTION 4/11 : ESP + AUTO PARRY CUSTOM + MOONWALK + HITBOX + CAMERA FIX + CROSSHAIR
+print("✅ [3/11] COSMIC HUB - Fungsi Utama Loaded")-- =========================================================
+-- SECTION 4/11 : ESP + AUTO PARRY CUSTOM + MOONWALK + HITBOX
 -- =========================================================
 
 ESPObjects = {}
@@ -1469,11 +1199,6 @@ function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
     if attr ~= nil then return attr end
-    local child = obj:FindFirstChild(name)
-    if child then
-        local success, val = pcall(function() return child.Value end)
-        if success then return val end
-    end
     return nil
 end
 
@@ -1482,19 +1207,15 @@ function UpdateGenerator(generator)
     if not ESP.Generator then
         local old = generator:FindFirstChild("GenESP")
         if old then old:Destroy() end
-        local h = generator:FindFirstChild("GenHighlight")
-        if h then h:Destroy() end
         return
     end
-    local percent = GetGameValue(generator, "RepairProgress")
-        or GetGameValue(generator, "Progress") or 0
+    local percent = GetGameValue(generator, "RepairProgress") or 0
     local billboard = generator:FindFirstChild("GenESP")
     if percent >= 100 then
         if billboard then billboard:Destroy() end
         return
     end
-    local cp = math.clamp(percent, 0, 100)
-    local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
+    local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), percent / 100)
     local text = string.format("[%.0f%%]", percent)
 
     if not billboard then
@@ -1507,7 +1228,6 @@ function UpdateGenerator(generator)
         label.BackgroundTransparency = 1
         label.Text = text
         label.TextColor3 = color
-        label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
         label.TextSize = 12
         label.Parent = billboard
@@ -1520,16 +1240,6 @@ function UpdateGenerator(generator)
             lbl.TextColor3 = color
         end
     end
-
-    local h = generator:FindFirstChild("GenHighlight") or Instance.new("Highlight")
-    h.Name = "GenHighlight"
-    h.Adornee = generator
-    h.FillColor = color
-    h.OutlineColor = color
-    h.FillTransparency = 0.9
-    h.OutlineTransparency = 0.3
-    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    h.Parent = generator
 end
 
 function UpdateMapESP(obj, root)
@@ -1586,7 +1296,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- 🛡️ AUTO PARRY CUSTOM (DEBOUNCE 0.5 | RADIUS 14.3 | CIRCLE TANAH)
+-- 🛡️ AUTO PARRY CUSTOM
 -- =========================================================
 AP_lastParry = 0
 AP_parryCount = 0
@@ -1649,7 +1359,6 @@ function AP_HookKiller(char)
 
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
@@ -1698,9 +1407,7 @@ task.spawn(function()
     end
 end)
 
--- ═══════════════════════════════════════════════════════
--- 🎥 AP CAMERA UNLOCK
--- ═══════════════════════════════════════════════════════
+-- CAMERA UNLOCK
 task.spawn(function()
     while task.wait(0.05) do
         if not AP_CameraFix.Enabled then continue end
@@ -1754,9 +1461,7 @@ LP.CharacterAdded:Connect(function(char)
     end
 end)
 
--- ═══════════════════════════════════════════════════════
--- ⭕ AP CIRCLE RATA TANAH
--- ═══════════════════════════════════════════════════════
+-- AP CIRCLE
 AP_parryCirclePart = nil
 AP_parryCircleAttachments = {}
 AP_parryCircleBeams = {}
@@ -1916,9 +1621,6 @@ function startSkillCheck()
         if SkillCheck.Mode == "Instant" then
             local targetRot = (gr + 109) % 360
             pcall(function() line.Rotation = targetRot end)
-            if SkillCheck.HideNeedle then
-                pcall(function() line.Visible = false end)
-            end
             busy = true
             task.spawn(function()
                 if UIS.TouchEnabled then TriggerMobileButton() else pressSpace() end
@@ -1926,9 +1628,6 @@ function startSkillCheck()
                 SkillCheck.Total += 1
                 task.wait(0.05)
                 busy = false
-                if SkillCheck.HideNeedle then
-                    pcall(function() line.Visible = true end)
-                end
             end)
             return
         end
@@ -1968,9 +1667,6 @@ function mwIsDowned()
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
     return hum.Health <= 0 or hum.Health < 2
-        or char:GetAttribute("Downed") == true
-        or char:GetAttribute("IsDown") == true
-        or char:GetAttribute("Knocked") == true
 end
 
 function mwResetSpeed()
@@ -2015,7 +1711,7 @@ function setMoonwalk(state)
     return true
 end
 
--- TOMBOL MW + LOCK BUTTON
+-- MW BUTTON
 if PG:FindFirstChild("MW_BottomBtn") then
     PG.MW_BottomBtn:Destroy()
 end
@@ -2128,26 +1824,6 @@ function hitboxCreateESP(targetPart, color)
     box.Color3 = color
     box.Parent = targetPart
 
-    local label = Instance.new("BillboardGui")
-    label.Name = "CosmicHitboxLabel"
-    label.Size = UDim2.new(0, 120, 0, 30)
-    label.AlwaysOnTop = true
-    label.StudsOffset = Vector3.new(0, targetPart.Size.Y / 2 + 2, 0)
-    label.Adornee = targetPart
-    label.Enabled = not Hitbox.HideESP
-    label.Parent = targetPart
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.BackgroundTransparency = 1
-    txt.Text = "🎯 Hitbox: " .. Hitbox.Size
-    txt.TextColor3 = color
-    txt.TextStrokeTransparency = 0
-    txt.TextStrokeColor3 = Color3.new(0, 0, 0)
-    txt.Font = Enum.Font.GothamBlack
-    txt.TextSize = 14
-    txt.Parent = label
-
     HitboxESPObjects[targetPart] = box
 end
 
@@ -2155,8 +1831,6 @@ function hitboxRemoveESP(targetPart)
     if not targetPart then return end
     local box = targetPart:FindFirstChild("CosmicHitboxESP")
     if box then box:Destroy() end
-    local label = targetPart:FindFirstChild("CosmicHitboxLabel")
-    if label then label:Destroy() end
     HitboxESPObjects[targetPart] = nil
 end
 
@@ -2178,10 +1852,6 @@ function hitboxUpdateVisibility()
     for part, box in pairs(HitboxESPObjects) do
         if box and box.Parent then
             box.Transparency = Hitbox.HideESP and 1 or 0.7
-        end
-        local label = part and part:FindFirstChild("CosmicHitboxLabel")
-        if label then
-            label.Enabled = not Hitbox.HideESP
         end
     end
 end
@@ -2236,18 +1906,6 @@ task.spawn(function()
                             hitboxRemoveESP(hrp)
                         end
                     end
-                else
-                    if p.Character then
-                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            if HitboxOriginalSizes[hrp] then
-                                hrp.Size = HitboxOriginalSizes[hrp]
-                                HitboxOriginalSizes[hrp] = nil
-                            end
-                            hrp.Transparency = 0
-                            hitboxRemoveESP(hrp)
-                        end
-                    end
                 end
             end
         end
@@ -2255,7 +1913,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- FAST VAULT
+-- FAST VAULT + TELEPORT + NOCLIP + VISUAL
 -- =========================================================
 function normalizeVaultId(id)
     local num = tostring(id):match("%d+")
@@ -2300,9 +1958,6 @@ if LP.Character then
     hookVault(LP.Character)
 end
 
--- =========================================================
--- TELEPORT FINISH LINE
--- =========================================================
 function teleportToFinishLine()
     local root = getRoot()
     if not root then return end
@@ -2315,14 +1970,9 @@ function teleportToFinishLine()
     end
     if found then
         root.CFrame = found.CFrame + Vector3.new(0, 5, 0)
-    else
-        warn("[COSMIC HUB] Finish line gak ketemu")
     end
 end
 
--- =========================================================
--- NO CLIP
--- =========================================================
 task.spawn(function()
     while task.wait(0.2) do
         if S.NoClip and LP.Character then
@@ -2335,9 +1985,7 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
 -- VISUAL FUNCTIONS
--- =========================================================
 origLighting = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
@@ -2389,17 +2037,6 @@ function applyNoFog(s)
     end)
 end
 
-task.spawn(function()
-    while task.wait(1) do
-        if S.NoFog then
-            pcall(function()
-                Lighting.FogEnd = 9e9
-                Lighting.FogStart = 9e9
-            end)
-        end
-    end
-end)
-
 origSky = nil
 for _, v in pairs(Lighting:GetChildren()) do
     if v:IsA("Sky") then
@@ -2442,17 +2079,6 @@ function applyUltraHD()
         Lighting.GlobalShadows = true
         Lighting.Brightness = 2
         Lighting.ClockTime = 14
-        if not _G.RoooorHD then
-            _G.RoooorHD = Instance.new("ColorCorrectionEffect")
-            _G.RoooorHD.Parent = Lighting
-        end
-        _G.RoooorHD.Contrast = 0.2
-        _G.RoooorHD.Saturation = 0.15
-    else
-        if _G.RoooorHD then
-            _G.RoooorHD:Destroy()
-            _G.RoooorHD = nil
-        end
     end
 end
 
@@ -2472,176 +2098,24 @@ function applyContrast()
     end
 end
 
-hdBoostOrig = nil
-hdShaderObj = nil
-hdSkyOrig = nil
-
-function applyHDBoost(s)
-    if s then
-        if not hdBoostOrig then
-            hdBoostOrig = {
-                QualityLevel = settings().Rendering.QualityLevel,
-                GlobalShadows = Lighting.GlobalShadows,
-            }
-        end
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
-        end)
-        Lighting.GlobalShadows = true
+function applyZoomOut(enable, value)
+    if enable then
+        LP.CameraMaxZoomDistance = value or 500
+        LP.CameraMinZoomDistance = 0.5
     else
-        if hdBoostOrig then
-            pcall(function()
-                settings().Rendering.QualityLevel = hdBoostOrig.QualityLevel
-            end)
-            Lighting.GlobalShadows = hdBoostOrig.GlobalShadows
-        end
+        LP.CameraMaxZoomDistance = 128
+        LP.CameraMinZoomDistance = 0.5
     end
-end
-
-function applyHDShader(s)
-    if s then
-        if not hdShaderObj then
-            hdShaderObj = Instance.new("ColorCorrectionEffect")
-            hdShaderObj.Name = "CosmicHDShader"
-            hdShaderObj.Parent = Lighting
-        end
-        hdShaderObj.Contrast = 0.15
-        hdShaderObj.Saturation = 0.12
-        hdShaderObj.Brightness = 0.02
-        if not _G.CosmicHDBloom then
-            _G.CosmicHDBloom = Instance.new("BloomEffect")
-            _G.CosmicHDBloom.Name = "CosmicHDBloom"
-            _G.CosmicHDBloom.Intensity = 0.4
-            _G.CosmicHDBloom.Size = 20
-            _G.CosmicHDBloom.Threshold = 1.2
-            _G.CosmicHDBloom.Parent = Lighting
-        end
-    else
-        if hdShaderObj then hdShaderObj:Destroy(); hdShaderObj = nil end
-        if _G.CosmicHDBloom then _G.CosmicHDBloom:Destroy(); _G.CosmicHDBloom = nil end
-    end
-end
-
-function applyHDSky(s)
-    if s then
-        if not hdSkyOrig then
-            for _, v in pairs(Lighting:GetChildren()) do
-                if v:IsA("Sky") then
-                    hdSkyOrig = v:Clone()
-                    break
-                end
-            end
-        end
-        for _, v in pairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") then v:Destroy() end
-        end
-        if not _G.CosmicHDAtmosphere then
-            _G.CosmicHDAtmosphere = Instance.new("Atmosphere")
-            _G.CosmicHDAtmosphere.Name = "CosmicHDAtmosphere"
-            _G.CosmicHDAtmosphere.Density = 0.3
-            _G.CosmicHDAtmosphere.Offset = 0.25
-            _G.CosmicHDAtmosphere.Color = Color3.fromRGB(199, 199, 199)
-            _G.CosmicHDAtmosphere.Decay = Color3.fromRGB(106, 112, 125)
-            _G.CosmicHDAtmosphere.Glare = 0.2
-            _G.CosmicHDAtmosphere.Haze = 1.5
-            _G.CosmicHDAtmosphere.Parent = Lighting
-        end
-    else
-        if _G.CosmicHDAtmosphere then
-            _G.CosmicHDAtmosphere:Destroy()
-            _G.CosmicHDAtmosphere = nil
-        end
-    end
-end
-
-trailFireObj = nil
-function applyTrail(enable, color)
-    local char = LP.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    if trailFireObj then
-        trailFireObj:Destroy()
-        trailFireObj = nil
-    end
-    if not enable then return end
-    trailFireObj = Instance.new("Part")
-    trailFireObj.Name = "RoooorTrailFire"
-    trailFireObj.Size = Vector3.new(1, 1, 1)
-    trailFireObj.Transparency = 1
-    trailFireObj.CanCollide = false
-    trailFireObj.Massless = true
-    trailFireObj.Parent = char
-    local weld = Instance.new("Weld")
-    weld.Part0 = hrp
-    weld.Part1 = trailFireObj
-    weld.C0 = CFrame.new(0, -2, 2)
-    weld.Parent = trailFireObj
-    local fire = Instance.new("Fire")
-    fire.Size = 8
-    fire.Heat = 20
-    fire.Color = color or Color3.fromRGB(120, 60, 255)
-    fire.SecondaryColor = Color3.fromRGB(0, 230, 255)
-    fire.Parent = trailFireObj
-    local spark = Instance.new("Sparkles")
-    spark.SparkleColor = color or Color3.fromRGB(0, 230, 255)
-    spark.SparkleSize = 2
-    spark.Parent = trailFireObj
-end
-
-auraObj = nil
-function applyAura(enable, color)
-    local char = LP.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    if auraObj then
-        auraObj:Destroy()
-        auraObj = nil
-    end
-    if not enable then return end
-    auraObj = Instance.new("ParticleEmitter")
-    auraObj.Texture = "rbxassetid://243660364"
-    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(120, 60, 255))
-    auraObj.Size = NumberSequence.new(2)
-    auraObj.Lifetime = NumberRange.new(0.5, 1)
-    auraObj.Rate = 30
-    auraObj.Speed = NumberRange.new(2)
-    auraObj.SpreadAngle = Vector2.new(180, 180)
-    auraObj.Parent = hrp
-end
-
-function spawnKillEffect(pos)
-    local p = Instance.new("Part")
-    p.Anchored = true
-    p.CanCollide = false
-    p.Material = Enum.Material.Neon
-    p.Shape = Enum.PartType.Ball
-    p.Size = Vector3.new(2, 2, 2)
-    p.Position = pos
-    p.Color = Color3.fromRGB(120, 60, 255)
-    p.Transparency = 0.3
-    p.Parent = workspace
-    TweenService:Create(p, TweenInfo.new(0.5), {
-        Size = Vector3.new(15, 15, 15),
-        Transparency = 1
-    }):Play()
-    task.delay(0.6, function() p:Destroy() end)
 end
 
 -- CROSSHAIR
 crosshairGui = nil
 crosshairParts = {}
-crosshairGalaxyConn = nil
 
 function clearCrosshair()
     if crosshairGui then
         crosshairGui:Destroy()
         crosshairGui = nil
-    end
-    if crosshairGalaxyConn then
-        crosshairGalaxyConn:Disconnect()
-        crosshairGalaxyConn = nil
     end
     crosshairParts = {}
 end
@@ -2650,7 +2124,6 @@ function applyCrosshair(enable, color, size)
     clearCrosshair()
     if not enable then return end
     local style = S.CrosshairStyle or "Plus"
-    local colorMode = S.CrosshairColorMode or "Solid"
     local thickness = S.CrosshairThickness or 2
     local offX = S.CrosshairOffsetX or 0
     local offY = S.CrosshairOffsetY or 0
@@ -2663,7 +2136,6 @@ function applyCrosshair(enable, color, size)
     crosshairGui.Parent = PG
 
     local container = Instance.new("Frame")
-    container.Name = "Container"
     container.Size = UDim2.new(0, 0, 0, 0)
     container.Position = UDim2.new(0.5, offX, 0.5, offY)
     container.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -2672,47 +2144,15 @@ function applyCrosshair(enable, color, size)
 
     local baseColor = color or S.CrosshairColor or C.ACC2
 
-    local function mkBar(w, h, x, y, rot)
+    local function mkBar(w, h, x, y)
         local f = Instance.new("Frame")
         f.Size = UDim2.new(0, w, 0, h)
         f.Position = UDim2.new(0, x, 0, y)
         f.AnchorPoint = Vector2.new(0.5, 0.5)
         f.BackgroundColor3 = baseColor
         f.BorderSizePixel = 0
-        f.Rotation = rot or 0
         f.Parent = container
         table.insert(crosshairParts, f)
-        return f
-    end
-
-    local function mkDot(r)
-        local f = Instance.new("Frame")
-        f.Size = UDim2.new(0, r, 0, r)
-        f.Position = UDim2.new(0, 0, 0, 0)
-        f.AnchorPoint = Vector2.new(0.5, 0.5)
-        f.BackgroundColor3 = baseColor
-        f.BorderSizePixel = 0
-        f.Parent = container
-        rnd(f, 999)
-        table.insert(crosshairParts, f)
-        return f
-    end
-
-    local function mkOutline(w, h, r)
-        local c = Instance.new("Frame")
-        c.Size = UDim2.new(0, w, 0, h)
-        c.AnchorPoint = Vector2.new(0.5, 0.5)
-        c.Position = UDim2.new(0, 0, 0, 0)
-        c.BackgroundTransparency = 1
-        c.Rotation = r or 0
-        c.Parent = container
-        local s = Instance.new("UIStroke")
-        s.Thickness = thickness
-        s.Color = baseColor
-        s.Parent = c
-        rnd(c, 999)
-        table.insert(crosshairParts, c)
-        return c
     end
 
     if style == "Plus" then
@@ -2720,48 +2160,6 @@ function applyCrosshair(enable, color, size)
         mkBar(size, thickness,  size/2 + 2, 0)
         mkBar(thickness, size, 0, -size/2 - 2)
         mkBar(thickness, size, 0,  size/2 + 2)
-    elseif style == "Dot" then
-        mkDot(size)
-    elseif style == "Circle" then
-        mkOutline(size*2, size*2)
-    elseif style == "X" then
-        mkBar(size, thickness, 0, 0, 45)
-        mkBar(size, thickness, 0, 0, -45)
-    elseif style == "Square" then
-        mkOutline(size*2, size*2)
-    elseif style == "Diamond" then
-        mkOutline(size*2, size*2, 45)
-    elseif style == "TShape" then
-        mkBar(size*1.5, thickness, 0, -size/2 - 2)
-        mkBar(thickness, size, 0, size/2)
-    elseif style == "CrossDot" then
-        mkBar(size, thickness, -size/2 - 2, 0)
-        mkBar(size, thickness,  size/2 + 2, 0)
-        mkBar(thickness, size, 0, -size/2 - 2)
-        mkBar(thickness, size, 0,  size/2 + 2)
-        mkDot(thickness + 2)
-    end
-
-    if colorMode == "Galaxy" then
-        for _, part in ipairs(crosshairParts) do
-            local grad = Instance.new("UIGradient")
-            grad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 230, 255)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 200)),
-            })
-            grad.Parent = part
-        end
-        crosshairGalaxyConn = RunService.RenderStepped:Connect(function()
-            if not crosshairGui then return end
-            local t = tick() * 60
-            for _, part in ipairs(crosshairParts) do
-                local grad = part:FindFirstChildOfClass("UIGradient")
-                if grad then
-                    grad.Rotation = (t + (part.AbsolutePosition.X % 100)) % 360
-                end
-            end
-        end)
     end
 end
 
@@ -2816,22 +2214,69 @@ function stopFly()
     if flyBG then flyBG:Destroy(); flyBG = nil end
 end
 
--- ZOOM OUT
-origZoom = nil
-function applyZoomOut(enable, value)
-    if enable then
-        if not origZoom then
-            origZoom = LP.CameraMaxZoomDistance
-        end
-        LP.CameraMaxZoomDistance = value or 500
-        LP.CameraMinZoomDistance = 0.5
-    else
-        LP.CameraMaxZoomDistance = origZoom or 128
-        LP.CameraMinZoomDistance = 0.5
-    end
+-- Character Effects
+trailFireObj = nil
+function applyTrail(enable, color)
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if trailFireObj then trailFireObj:Destroy(); trailFireObj = nil end
+    if not enable then return end
+    trailFireObj = Instance.new("Part")
+    trailFireObj.Size = Vector3.new(1, 1, 1)
+    trailFireObj.Transparency = 1
+    trailFireObj.CanCollide = false
+    trailFireObj.Massless = true
+    trailFireObj.Parent = char
+    local weld = Instance.new("Weld")
+    weld.Part0 = hrp
+    weld.Part1 = trailFireObj
+    weld.C0 = CFrame.new(0, -2, 2)
+    weld.Parent = trailFireObj
+    local fire = Instance.new("Fire")
+    fire.Size = 8
+    fire.Color = color or Color3.fromRGB(120, 60, 255)
+    fire.Parent = trailFireObj
 end
 
--- EXPORT
+auraObj = nil
+function applyAura(enable, color)
+    local char = LP.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if auraObj then auraObj:Destroy(); auraObj = nil end
+    if not enable then return end
+    auraObj = Instance.new("ParticleEmitter")
+    auraObj.Texture = "rbxassetid://243660364"
+    auraObj.Color = ColorSequence.new(color or Color3.fromRGB(120, 60, 255))
+    auraObj.Size = NumberSequence.new(2)
+    auraObj.Lifetime = NumberRange.new(0.5, 1)
+    auraObj.Rate = 30
+    auraObj.Speed = NumberRange.new(2)
+    auraObj.SpreadAngle = Vector2.new(180, 180)
+    auraObj.Parent = hrp
+end
+
+function spawnKillEffect(pos)
+    local p = Instance.new("Part")
+    p.Anchored = true
+    p.CanCollide = false
+    p.Material = Enum.Material.Neon
+    p.Shape = Enum.PartType.Ball
+    p.Size = Vector3.new(2, 2, 2)
+    p.Position = pos
+    p.Color = Color3.fromRGB(120, 60, 255)
+    p.Transparency = 0.3
+    p.Parent = workspace
+    TweenService:Create(p, TweenInfo.new(0.5), {
+        Size = Vector3.new(15, 15, 15),
+        Transparency = 1
+    }):Play()
+    task.delay(0.6, function() p:Destroy() end)
+end
+
 _G.Roooor_applyFire = applyFire
 _G.Roooor_applyFireFeet = applyFireFeet
 _G.Roooor_apply8Bit = apply8Bit
@@ -2875,19 +2320,17 @@ _G.Roooor_applyHDBoost = applyHDBoost
 _G.Roooor_applyHDShader = applyHDShader
 _G.Roooor_applyHDSky = applyHDSky
 _G.Roooor_applyAntiAFK = applyAntiAFK
-_G.Roooor_serverHop = serverHop
 _G.Roooor_rejoinServer = rejoinServer
 _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
 _G.Roooor_hitboxClearAll = hitboxClearAll
 _G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
 
--- AP EXPORT
 _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 
-print("✅ [4/11] COSMIC HUB - ESP + AUTO PARRY CUSTOM + Moonwalk + Hitbox + Camera Fix loaded")-- =========================================================
+print("✅ [4/11] COSMIC HUB - ESP + AUTO PARRY CUSTOM + Moonwalk + Hitbox Loaded")-- =========================================================
 -- SECTION 5/11 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -3209,62 +2652,6 @@ task.spawn(function()
     end
 end)
 
--- KILLER KILL ALL
-task.spawn(function()
-    while task.wait(0.4) do
-        if S.Killer_KillAll and LP.Character then
-            local myHum = LP.Character:FindFirstChildOfClass("Humanoid")
-            if not myHum or myHum.Health <= 0 then continue end
-            local isCarried = LP.Character:GetAttribute("IsCarried")
-                or LP.Character:GetAttribute("IsCarrying")
-                or LP.Character:GetAttribute("Hooked")
-                or LP.Character:GetAttribute("Hook")
-            if isCarried then continue end
-            local myRoot = getRoot()
-            if not myRoot then continue end
-            local myPos = myRoot.Position
-            local closest, shortest = nil, 60
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LP and p.Character and p.Team and p.Team.Name == "Survivors" then
-                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    if hrp and hum and hum.Health > 0 then
-                        local survivorHooked = p.Character:GetAttribute("Hooked")
-                            or p.Character:GetAttribute("IsCarried")
-                            or p.Character:GetAttribute("IsHooked")
-                        if survivorHooked then continue end
-                        if hrp.Position.Y > 30 then continue end
-                        local dist = (hrp.Position - myPos).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = hrp
-                        end
-                    end
-                end
-            end
-            if closest then
-                local targetPos = closest.Position + (closest.AssemblyLinearVelocity * 0.15)
-                local behind = closest.CFrame.LookVector * -3
-                local newPos = targetPos + behind
-                pcall(function()
-                    myRoot.CFrame = CFrame.new(newPos, targetPos)
-                    myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                end)
-                pcall(function()
-                    local r = ReplicatedStorage:FindFirstChild("Remotes")
-                    if r then
-                        local a = r:FindFirstChild("Attacks")
-                        if a then
-                            local atk = a:FindFirstChild("BasicAttack")
-                            if atk then atk:FireServer(false) end
-                        end
-                    end
-                end)
-            end
-        end
-    end
-end)
-
 -- AUTO WIGGLE
 task.spawn(function()
     while task.wait(0.5) do
@@ -3364,17 +2751,6 @@ function applyNoScreenEffects()
         DisabledEffects = {}
     end
 end
-
-Lighting.ChildAdded:Connect(function(v)
-    if not S.NoScreenEffects then return end
-    task.wait()
-    for _, t in pairs(ScreenEffectTypes) do
-        if v:IsA(t) then
-            DisabledEffects[v] = v.Enabled
-            v.Enabled = false
-        end
-    end
-end)
 
 function applyLowGraphics()
     pcall(function()
@@ -3603,9 +2979,10 @@ task.spawn(function()
     end
 end)
 
-print("✅ [5/11] COSMIC HUB - Fitur aktif + Loop utama loaded")-- =========================================================
+print("✅ [5/11] COSMIC HUB - Fitur Aktif + Loop Utama Loaded")-- =========================================================
 -- SECTION 6/11 : GUI COSMIC HUB + TOMBOL + PANEL
 -- =========================================================
+
 gui = Instance.new("ScreenGui")
 gui.Name = "CosmicHub"
 gui.ResetOnSpawn = false
@@ -3721,31 +3098,6 @@ task.spawn(function()
     end
 end)
 
-for i = 1, 6 do
-    local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, 2, 0, 2)
-    particle.BorderSizePixel = 0
-    particle.ZIndex = 4
-    particle.Parent = btnContainer
-    rnd(particle, 999)
-
-    local angle = (i / 6) * math.pi * 2
-    local orbitSpeed = 1.5 + math.random() * 1.5
-    local radius = 20
-
-    task.spawn(function()
-        while btnContainer.Parent do
-            local t = tick()
-            local x = math.cos(t * orbitSpeed + angle) * radius
-            local y = math.sin(t * orbitSpeed + angle) * radius
-            particle.Position = UDim2.new(0.5, x - 1, 0.5, y - 1)
-            particle.BackgroundColor3 = Color3.fromHSV((t * 0.15 + i * 0.1) % 1, 0.7, 1)
-            particle.BackgroundTransparency = 0.2 + math.sin(t * 4 + i) * 0.3
-            task.wait(0.04)
-        end
-    end)
-end
-
 dragging = false
 dragStart = nil
 startPos = nil
@@ -3782,7 +3134,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- PANEL MENU COSMIC
+-- PANEL MENU
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -3896,13 +3248,6 @@ local sbL = Instance.new("UIListLayout")
 sbL.Padding = UDim.new(0, 4)
 sbL.Parent = sb
 
-local sbP = Instance.new("UIPadding")
-sbP.PaddingTop = UDim.new(0, 6)
-sbP.PaddingLeft = UDim.new(0, 4)
-sbP.PaddingRight = UDim.new(0, 4)
-sbP.PaddingBottom = UDim.new(0, 6)
-sbP.Parent = sb
-
 ct = Instance.new("Frame")
 ct.Size = UDim2.new(1, -135, 1, -58)
 ct.Position = UDim2.new(0, 122, 0, 50)
@@ -3942,10 +3287,6 @@ function sec(title, icon)
     deco.BorderSizePixel = 0
     deco.Parent = f
     rnd(deco, 2)
-
-    local decoGrad = Instance.new("UIGradient")
-    decoGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-    decoGrad.Parent = deco
 
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1, -20, 1, 0)
@@ -4022,8 +3363,6 @@ function tog(name, def, cb)
     cB.MouseButton1Click:Connect(function()
         state = not state
         _G.ToggleStates[name] = state
-        _G.RoooorSavedStates = _G.RoooorSavedStates or {}
-        _G.RoooorSavedStates[name] = state
         TweenService:Create(k, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
             Position = state and UDim2.new(1, -14, 0.5, -5.5) or UDim2.new(0, 3, 0.5, -5.5),
             BackgroundColor3 = state and Color3.new(1, 1, 1) or C.DIM
@@ -4058,11 +3397,7 @@ function sl(name, min, max, def, cb)
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
 
-    _G.RoooorSavedStates = _G.RoooorSavedStates or {}
     local curVal = _G.SliderStates[name] or def
-    if _G.RoooorSavedStates[name] ~= nil then
-        curVal = _G.RoooorSavedStates[name]
-    end
     _G.SliderStates[name] = curVal
 
     local v = Instance.new("TextLabel")
@@ -4091,10 +3426,6 @@ function sl(name, min, max, def, cb)
     fill.Parent = bg
     rnd(fill, 3)
 
-    local fillGrad = Instance.new("UIGradient")
-    fillGrad.Color = ColorSequence.new(C.ACC, C.ACC2, C.ACC3)
-    fillGrad.Parent = fill
-
     local kn = Instance.new("Frame")
     kn.Size = UDim2.new(0, 11, 0, 11)
     kn.Position = UDim2.new((curVal - min) / (max - min), -5.5, 0.5, -5.5)
@@ -4113,8 +3444,6 @@ function sl(name, min, max, def, cb)
         )
         local val = math.floor((min + (max - min) * pos) * 100 + 0.5) / 100
         _G.SliderStates[name] = val
-        _G.RoooorSavedStates = _G.RoooorSavedStates or {}
-        _G.RoooorSavedStates[name] = val
         fill.Size = UDim2.new(pos, 0, 1, 0)
         kn.Position = UDim2.new(pos, -5.5, 0.5, -5.5)
         v.Text = tostring(val)
@@ -4376,9 +3705,10 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [6/11] COSMIC HUB - GUI + Tombol + Panel loaded")-- =========================================================
--- SECTION 7/11 : TAB UI PART 1 (FIXED DEBOUNCE LIMIT 0.1)
+print("✅ [6/11] COSMIC HUB - GUI + Tombol + Panel Loaded")-- =========================================================
+-- SECTION 7/11 : TAB UI PART 1
 -- =========================================================
+
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
 tog = _G.Roooor_tog
@@ -4389,9 +3719,7 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- ============================================================
 -- TAB 1: SURVIVOR
--- ============================================================
 makeTab("Survivor", "🏃", 1, function()
 
     sec("Auto Parry (CUSTOM)", "🛡️")
@@ -4512,9 +3840,7 @@ makeTab("Survivor", "🏃", 1, function()
     tog("Kill Feed", false, function(s) S.KillFeed = s end)
 end)
 
--- ============================================================
 -- TAB 2: KILLER
--- ============================================================
 makeTab("Killer", "🔪", 2, function()
 
     sec("Auto Attack", "⚔️")
@@ -4558,9 +3884,7 @@ makeTab("Killer", "🔪", 2, function()
     end)
 end)
 
--- ============================================================
 -- TAB 3: ESP
--- ============================================================
 makeTab("ESP", "👁️", 3, function()
     sec("Player ESP", "🟢")
     tog("ESP Survivor", true, function(s) ESP.Survivor = s end)
@@ -4596,12 +3920,9 @@ makeTab("ESP", "👁️", 3, function()
     sl("Name Size", 8, 30, 12, function(v)
         S.ESPNameSize = v
     end)
-    lbl("Text = biasa | Galaxy = gradient muter", C.FIRE_BRIGHT)
 end)
 
--- ============================================================
 -- TAB 4: FIRE
--- ============================================================
 makeTab("Fire", "🔥", 4, function()
     sec("Fire Control", "⚙️")
     tog("Enable Fire", false, function(s)
@@ -4664,9 +3985,7 @@ makeTab("Fire", "🔥", 4, function()
     end
 end)
 
--- ============================================================
 -- TAB 5: MOONWALK
--- ============================================================
 makeTab("Moonwalk", "🕺", 5, function()
 
     sec("Moonwalk (TOMBOL MW ONLY)", "🕺")
@@ -4689,14 +4008,12 @@ makeTab("Moonwalk", "🕺", 5, function()
         Moonwalk.Locked = s
         if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
     end)
-    lbl("Lock = anti berubah gak sengaja", C.DIM)
 
     sec("Tombol MW", "🎯")
     tog("Show MW Button", Moonwalk.ShowButton, function(s)
         Moonwalk.ShowButton = s
         if mwBtnGui then mwBtnGui.Enabled = s end
     end)
-    lbl("Tombol MW + tombol LOCK", C.FIRE_BRIGHT)
 
     btn("🎯 Reset Posisi Tombol MW", function()
         if mwBtn then
@@ -4719,16 +4036,16 @@ makeTab("Moonwalk", "🕺", 5, function()
     sl("Slow Speed", 5, 20, Moonwalk.SlowSpeed, function(v)
         Moonwalk.SlowSpeed = v
     end)
-    lbl("Kecepatan jalan saat moonwalk", C.DIM)
 
     tog("Use Slow Speed", Moonwalk.UseSlow, function(s)
         Moonwalk.UseSlow = s
     end)
 end)
 
-print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk loaded (Debounce limit 0.1-0.5)")-- =========================================================
+print("✅ [7/11] COSMIC HUB - Survivor + Killer + ESP + Fire + Moonwalk Loaded")-- =========================================================
 -- SECTION 8/11 : TAB UI PART 2
 -- =========================================================
+
 sec = _G.Roooor_sec
 lbl = _G.Roooor_lbl
 tog = _G.Roooor_tog
@@ -4739,9 +4056,7 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- ============================================================
 -- TAB 6: FIRE FEET
--- ============================================================
 makeTab("Fire Feet", "👟", 6, function()
     sec("Fire Feet Control", "👟")
     tog("Enable Fire Feet", false, function(s)
@@ -4800,9 +4115,7 @@ makeTab("Fire Feet", "👟", 6, function()
     end
 end)
 
--- ============================================================
 -- TAB 7: MISC
--- ============================================================
 makeTab("Misc", "⚙️", 7, function()
 
     sec("Movement", "🏃")
@@ -4836,7 +4149,6 @@ makeTab("Misc", "⚙️", 7, function()
         S.AntiAFK = s
         applyAntiAFK(s)
     end)
-    lbl("Biar nggak kena kick AFK", C.GRN)
 
     tog("Show FPS Counter", true, function(s) S.ShowFPS = s end)
     tog("Show Ping Counter", true, function(s) S.ShowPing = s end)
@@ -4857,12 +4169,9 @@ makeTab("Misc", "⚙️", 7, function()
     end)
 
     btn("🔄 Rejoin Server", function() rejoinServer() end)
-    btn("🌐 Server Hop", function() serverHop() end)
 end)
 
--- ============================================================
 -- TAB 8: PLAYER (FPS Boost)
--- ============================================================
 makeTab("Player", "👤", 8, function()
 
     sec("FPS Boost", "🚀")
@@ -4917,9 +4226,7 @@ makeTab("Player", "👤", 8, function()
     end)
 end)
 
--- ============================================================
 -- TAB 9: VISUAL
--- ============================================================
 makeTab("Visual", "✨", 9, function()
 
     sec("Fullbright & No Fog", "💡")
@@ -5068,65 +4375,6 @@ makeTab("Visual", "✨", 9, function()
         end
     end)
 
-    sec("Fire Beam (10 Efek)", "🔥")
-    tog("Enable Fire Beam", false, function(s)
-        S.FireBeamOn = s
-        applyFireBeam(s, S.FireBeamType, S.FireBeamColor)
-    end)
-
-    for _, beamName in ipairs(FireBeamList) do
-        local btn3 = Instance.new("TextButton")
-        btn3.Size = UDim2.new(1, -4, 0, 24)
-        btn3.BackgroundColor3 = C.BG
-        btn3.BackgroundTransparency = 0.4
-        btn3.BorderSizePixel = 0
-        btn3.Text = ""
-        btn3.AutoButtonColor = false
-        btn3.Parent = cs
-        rnd(btn3, 7)
-        strk(btn3, C.ACC, 1, 0.6)
-
-        local btnLbl3 = Instance.new("TextLabel")
-        btnLbl3.Size = UDim2.new(1, -10, 1, 0)
-        btnLbl3.Position = UDim2.new(0, 8, 0, 0)
-        btnLbl3.BackgroundTransparency = 1
-        btnLbl3.Text = "🔥 " .. beamName
-        btnLbl3.TextColor3 = C.TXT
-        btnLbl3.TextSize = 9
-        btnLbl3.Font = Enum.Font.GothamMedium
-        btnLbl3.TextXAlignment = Enum.TextXAlignment.Left
-        btnLbl3.Parent = btn3
-
-        if S.FireBeamType == beamName then
-            btn3.BackgroundColor3 = C.ACC
-            btn3.BackgroundTransparency = 0
-            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
-        end
-
-        btn3.MouseButton1Click:Connect(function()
-            S.FireBeamType = beamName
-            applyFireBeam(S.FireBeamOn, beamName, S.FireBeamColor)
-            for _, c in pairs(cs:GetChildren()) do
-                if c:IsA("TextButton") and c:FindFirstChildOfClass("TextLabel") then
-                    local lx = c:FindFirstChildOfClass("TextLabel")
-                    if lx and string.sub(lx.Text, 1, 4) == "🔥 " then
-                        c.BackgroundColor3 = C.BG
-                        c.BackgroundTransparency = 0.4
-                        lx.TextColor3 = C.TXT
-                    end
-                end
-            end
-            btn3.BackgroundColor3 = C.ACC
-            btn3.BackgroundTransparency = 0
-            btnLbl3.TextColor3 = Color3.new(1, 1, 1)
-        end)
-    end
-
-    cpk("Beam Color", S.FireBeamColor, function(c)
-        S.FireBeamColor = c
-        if S.FireBeamOn then applyFireBeam(true, S.FireBeamType, c) end
-    end)
-
     sec("Character Effects", "✨")
     tog("Fire Trail", false, function(s)
         S.Trail = s
@@ -5149,9 +4397,7 @@ makeTab("Visual", "✨", 9, function()
     tog("Kill Effect", false, function(s) S.KillEffect = s end)
 end)
 
--- ============================================================
 -- TAB 10: HITBOX
--- ============================================================
 makeTab("Hitbox", "📦", 10, function()
 
     sec("Hitbox Control (RADIUS 70)", "📦")
@@ -5200,7 +4446,7 @@ makeTab("Hitbox", "📦", 10, function()
     end)
 end)
 
-print("✅ [8/11] COSMIC HUB - Fire Feet + Misc + Player + Visual + Hitbox loaded")-- =========================================================
+print("✅ [8/11] COSMIC HUB - Fire Feet + Misc + Player + Visual + Hitbox Loaded")-- =========================================================
 -- SECTION 9/11 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
 
@@ -5258,9 +4504,7 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 
--- =========================================================
 -- KEYBIND V UNTUK MOONWALK
--- =========================================================
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.V then
@@ -5288,9 +4532,7 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- =========================================================
 -- AUTO APPLY ON EXECUTE
--- =========================================================
 task.spawn(function()
     task.wait(3)
     pcall(createFPSPingGui)
@@ -5310,7 +4552,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/11] COSMIC HUB v3.6 - Auto Re-Apply + Keybind V loaded")-- =========================================================
+print("✅ [9/11] COSMIC HUB - Auto Re-Apply + Keybind V Loaded")-- =========================================================
 -- SECTION 10/11 : LOGIC FITUR BARU
 -- =========================================================
 
@@ -5473,7 +4715,7 @@ task.spawn(function()
     end
 end)
 
-print("✅ [10/11] COSMIC HUB - Logic fitur baru loaded")-- =========================================================
+print("✅ [10/11] COSMIC HUB - Logic Fitur Baru Loaded")-- =========================================================
 -- SECTION 11/11 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
@@ -5519,7 +4761,3 @@ print("✅ [11/11] COSMIC HUB v3.6 - FINAL LOADED! ✨")
 print("🎯 Auto Parry CUSTOM ACTIVE - Debounce 0.5 | Radius 14.3")
 print("🟢 Circle Rata Tanah (YOffset -2.5)")
 print("🎥 Camera Auto Unlock")
-print("❌ Auto Parry Cosmic REMOVED")
-print("❌ Parry Circle Cosmic REMOVED")
-print("❌ Camera Fix Cosmic REMOVED")
-print("✅ Auto Parry CUSTOM INSTALLED")

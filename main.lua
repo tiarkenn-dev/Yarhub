@@ -408,13 +408,14 @@ _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 _G.DropdownStates = _G.DropdownStates or {}
 
 _G.RoooorS = _G.RoooorS or {
-    FireOn = true, FireType = "CosmicFire", FireSize = 5,
-    ParryCircle = true, ParryCircleSize = 12,
     -- 🕺 MOONWALK AUTO ON
     MoonwalkEnabled = true,
     MoonwalkSpamSpeed = 24.81,
     MoonwalkIntensity = 32.84,
     MoonwalkSlowSpeed = 12.81,
+    -- 🔥 FIRE AUTO ON
+    FireOn = true, FireType = "CosmicFire", FireSize = 5,
+    ParryCircle = true, ParryCircleSize = 12,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
     SpeedHack = false, SpeedHackVal = 40,
     NoClip = false, NoClipCamera = false,
@@ -450,6 +451,7 @@ _G.RoooorS = _G.RoooorS or {
     HDDepthField = false, HDAntiAliasing = false,
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
+    -- 🔥 ESP GALAXY + SIZE 9.35
     ESPNameMode = "Galaxy", ESPNameSize = 9.35,
     AutoEscapeGate = false, AutoEscapeRange = 50,
     AutoEscapeUseKillerCheck = true, AutoEscapeUseGenCheck = true,
@@ -492,6 +494,7 @@ _G.Roooor_Hitbox = Hitbox
 HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
+-- 🛡️ AUTO PARRY AUTO ON (13.69)
 AutoParry = _G.Roooor_AutoParry or {
     Enabled = true, ParryDistance = 13.69, ParryDelay = 0,
     Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
@@ -517,6 +520,7 @@ SkillCheck = _G.Roooor_SkillCheck or {
 }
 _G.Roooor_SkillCheck = SkillCheck
 
+-- 🕺 MOONWALK AUTO ON
 Moonwalk = _G.Roooor_Moonwalk or {
     Enabled = true, Locked = false, SpamSpeed = 24.81,
     Intensity = 32.84, SlowSpeed = 12.81, UseSlow = true, ShowButton = true,
@@ -564,9 +568,14 @@ _G.RoooorAimlock = Aimlock
 
 Aimlock_AttackButtons = {}
 
-print("✅ [1/12] COSMIC - Base + State + Moonwalk Auto ON Loaded")
+print("✅ [1/12] COSMIC - Base + State Loaded")
 print("🕺 Moonwalk: Auto ON (Spam 24.81 | Intensity 32.84 | Slow 12.81)")
-print("🛡️ Auto Parry: Radius 13.69 | Auto ON")-- =========================================================
+print("🛡️ Auto Parry: Auto ON (Radius 13.69)")
+print("🔥 Fire: CosmicFire (Auto ON)")
+print("🌈 ESP: Galaxy Mode (Size 9.35)")
+print("🔷 Sky: SunsetHD (Auto ON)")
+print("🎨 Contrast: ON")
+print("🎥 FOV: 90 (Auto ON)")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1335,7 +1344,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
--- SECTION 4/12 : ESP + AUTO PARRY GACOR + MOONWALK KECE + HITBOX
+-- SECTION 4/12 : ESP + AUTO PARRY ANTI-MISS + MOONWALK + HITBOX
 -- =========================================================
 
 ESPObjects = {}
@@ -1661,7 +1670,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- 🛡️ AUTO PARRY GACOR (MULTI-LAYER)
+-- 🛡️ AUTO PARRY ANTI-MISS (MULTI-LAYER + DYNAMIC)
 -- =========================================================
 AP_lastParry = 0
 AP_parryCount = 0
@@ -1677,6 +1686,13 @@ AP_Config = {
     EnableAttributeCheck = true,
     EnableVelocityCheck = true,
     RadiusProximity = 15,
+    EnableAntiMiss = true,
+    DynamicDebounce = true,
+    PingCompensation = true,
+    MaxDebounce = 0.25,
+    MinDebounce = 0.1,
+    PingThreshold = 100,
+    EnableExtraTrigger = true,
 }
 
 function AP_GetParryButton()
@@ -1777,12 +1793,41 @@ function AP_IsMovingTowardsMe(killerChar)
     return dot >= 0
 end
 
+function AP_GetCurrentPing()
+    local ping = 0
+    pcall(function()
+        ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    end)
+    return ping
+end
+
+function AP_GetDynamicDebounce()
+    if not AP_Config.DynamicDebounce then
+        return AP_Config.Debounce
+    end
+    
+    local ping = AP_GetCurrentPing()
+    local debounce = AP_Config.Debounce
+    
+    if AP_Config.PingCompensation then
+        if ping > AP_Config.PingThreshold then
+            local extra = (ping - AP_Config.PingThreshold) / 1000
+            debounce = math.min(AP_Config.MaxDebounce, debounce + extra)
+        elseif ping < 50 then
+            debounce = math.max(AP_Config.MinDebounce, debounce - 0.02)
+        end
+    end
+    
+    return debounce
+end
+
 function AP_DoParry()
     local now = tick()
-    if now - AP_lastParry < AP_Config.Debounce then return end
+    local dynamicDebounce = AP_GetDynamicDebounce()
+    if now - AP_lastParry < dynamicDebounce then return end
     AP_lastParry = now
     AP_parryCount = AP_parryCount + 1
-    print("[AP] 🔥 PARRY #" .. AP_parryCount)
+    print("[AP] 🔥 PARRY #" .. AP_parryCount .. " | Ping: " .. AP_GetCurrentPing() .. "ms")
     AP_PressParryButton()
 end
 
@@ -1795,6 +1840,7 @@ function AP_HookKiller(char)
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
+    -- TRIGGER 1: ANIMASI
     animator.AnimationPlayed:Connect(function(track)
         if not AutoParry.Enabled then return end
         local anim = track.Animation
@@ -1811,6 +1857,7 @@ function AP_HookKiller(char)
         end
     end)
     
+    -- TRIGGER 2: ATTRIBUTE CHANGE
     char.AttributeChanged:Connect(function(attr)
         if not AutoParry.Enabled then return end
         local attackingAttrs = {
@@ -1825,6 +1872,45 @@ function AP_HookKiller(char)
                 AP_DoParry()
                 return
             end
+        end
+    end)
+    
+    -- TRIGGER 3: ANTI-MISS VELOCITY
+    task.spawn(function()
+        while char.Parent do
+            if not AutoParry.Enabled then
+                task.wait(0.2)
+                continue
+            end
+            if not AP_Config.EnableExtraTrigger then
+                task.wait(0.2)
+                continue
+            end
+            
+            local myRoot = getRoot()
+            if not myRoot then
+                task.wait(0.1)
+                continue
+            end
+            
+            local enemyRoot = char:FindFirstChild("HumanoidRootPart")
+            if enemyRoot then
+                local dist = (enemyRoot.Position - myRoot.Position).Magnitude
+                if dist <= AP_Config.RadiusProximity then
+                    local velocity = enemyRoot.AssemblyLinearVelocity
+                    if velocity.Magnitude > 10 then
+                        local moveDir = velocity.Unit
+                        local toMe = (myRoot.Position - enemyRoot.Position).Unit
+                        local dot = moveDir:Dot(toMe)
+                        
+                        if dot >= 0.3 then
+                            AP_DoParry()
+                        end
+                    end
+                end
+            end
+            
+            task.wait(0.05)
         end
     end)
 end
@@ -2138,7 +2224,7 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🕺 MOONWALK + TOMBOL KECE
+-- 🕺 MOONWALK
 -- =========================================================
 function mwIsDowned()
     local char = LP.Character
@@ -2190,7 +2276,7 @@ function setMoonwalk(state)
     return true
 end
 
--- 🕺 MOONWALK BUTTON KECE (NEON GLOW)
+-- 🕺 MOONWALK BUTTON (KECIL 60x60 + LOCK + TEXT PUTIH BIASA)
 if PG:FindFirstChild("MW_BottomBtn") then
     PG.MW_BottomBtn:Destroy()
 end
@@ -2201,188 +2287,39 @@ mwBtnGui.ResetOnSpawn = false
 mwBtnGui.IgnoreGuiInset = true
 mwBtnGui.Parent = PG
 
-mwContainer = Instance.new("Frame")
-mwContainer.Size = UDim2.fromOffset(80, 80)
-mwContainer.Position = UDim2.new(0, 20, 1, -110)
-mwContainer.BackgroundTransparency = 1
-mwContainer.Parent = mwBtnGui
-
-mwGlow = Instance.new("Frame")
-mwGlow.Size = UDim2.new(1, 20, 1, 20)
-mwGlow.Position = UDim2.new(0, -10, 0, -10)
-mwGlow.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
-mwGlow.BackgroundTransparency = 0.6
-mwGlow.BorderSizePixel = 0
-mwGlow.ZIndex = -2
-mwGlow.Parent = mwContainer
-rnd(mwGlow, 999)
-
-mwRingOuter = Instance.new("Frame")
-mwRingOuter.Size = UDim2.new(1, 6, 1, 6)
-mwRingOuter.Position = UDim2.new(0, -3, 0, -3)
-mwRingOuter.BackgroundTransparency = 1
-mwRingOuter.Parent = mwContainer
-
-mwRingOuterStroke = Instance.new("UIStroke")
-mwRingOuterStroke.Thickness = 3
-mwRingOuterStroke.Color = Color3.fromRGB(180, 100, 255)
-mwRingOuterStroke.Parent = mwRingOuter
-
-mwRingOuterGrad = Instance.new("UIGradient")
-mwRingOuterGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 60, 255)),
-    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 230, 255)),
-    ColorSequenceKeypoint.new(0.66, Color3.fromRGB(255, 80, 200)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 60, 255)),
-})
-mwRingOuterGrad.Parent = mwRingOuterStroke
-rnd(mwRingOuter, 999)
-
-mwRingInner = Instance.new("Frame")
-mwRingInner.Size = UDim2.new(1, -4, 1, -4)
-mwRingInner.Position = UDim2.new(0, 2, 0, 2)
-mwRingInner.BackgroundTransparency = 1
-mwRingInner.Parent = mwContainer
-
-mwRingInnerStroke = Instance.new("UIStroke")
-mwRingInnerStroke.Thickness = 1.5
-mwRingInnerStroke.Color = Color3.fromRGB(0, 230, 255)
-mwRingInnerStroke.Transparency = 0.3
-mwRingInnerStroke.Parent = mwRingInner
-rnd(mwRingInner, 999)
-
+-- TOMBOL UTAMA MW (60x60)
 mwBtn = Instance.new("TextButton")
-mwBtn.Size = UDim2.new(1, -12, 1, -12)
-mwBtn.Position = UDim2.new(0, 6, 0, 6)
-mwBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 50)
-mwBtn.Text = "🕺"
-mwBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
-mwBtn.TextSize = 26
+mwBtn.Size = UDim2.fromOffset(60, 60)
+mwBtn.Position = UDim2.new(0, 20, 1, -100)
+mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mwBtn.Text = "MW"
+mwBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+mwBtn.TextSize = 16
 mwBtn.Font = Enum.Font.GothamBlack
-mwBtn.BorderSizePixel = 0
 mwBtn.AutoButtonColor = false
 mwBtn.Active = true
-mwBtn.Parent = mwContainer
+mwBtn.Draggable = true
+mwBtn.Parent = mwBtnGui
 rnd(mwBtn, 999)
 
-mwBtnGrad = Instance.new("UIGradient")
-mwBtnGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 30, 120)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 15, 50)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 30, 120)),
-})
-mwBtnGrad.Rotation = 45
-mwBtnGrad.Parent = mwBtn
+mwBtnStroke = Instance.new("UIStroke")
+mwBtnStroke.Thickness = 2
+mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
+mwBtnStroke.Transparency = 0.5
+mwBtnStroke.Parent = mwBtn
 
-mwLabel = Instance.new("TextLabel")
-mwLabel.Size = UDim2.new(0, 140, 0, 22)
-mwLabel.Position = UDim2.new(0.5, -70, 0, -28)
-mwLabel.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
-mwLabel.BackgroundTransparency = 0.3
-mwLabel.Text = "🕺 MOONWALK"
-mwLabel.TextColor3 = Color3.fromRGB(220, 180, 255)
-mwLabel.TextSize = 11
-mwLabel.Font = Enum.Font.GothamBlack
-mwLabel.TextStrokeTransparency = 0
-mwLabel.TextStrokeColor3 = Color3.fromRGB(120, 60, 255)
-mwLabel.Parent = mwContainer
-rnd(mwLabel, 6)
-
-mwLabelStroke = Instance.new("UIStroke")
-mwLabelStroke.Color = Color3.fromRGB(180, 100, 255)
-mwLabelStroke.Thickness = 1.5
-mwLabelStroke.Parent = mwLabel
-
-local mwDragging = false
-local mwDragStart = nil
-local mwStartPos = nil
-local mwWasDragged = false
-
-mwBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        mwDragging = true
-        mwWasDragged = false
-        mwDragStart = input.Position
-        mwStartPos = mwContainer.Position
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if mwDragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - mwDragStart
-        if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
-            mwWasDragged = true
-        end
-        mwContainer.Position = UDim2.new(
-            mwStartPos.X.Scale, mwStartPos.X.Offset + delta.X,
-            mwStartPos.Y.Scale, mwStartPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        mwDragging = false
-    end
-end)
-
-task.spawn(function()
-    local t = 0
-    while mwContainer.Parent do
-        t = t + 0.05
-        mwRingOuter.Rotation = t * 30
-        mwRingOuterGrad.Rotation = t * 60
-        mwRingInner.Rotation = -t * 50
-
-        local pulse = (math.sin(t * 3) + 1) / 2
-
-        if Moonwalk.Enabled then
-            mwGlow.BackgroundTransparency = 0.4 - pulse * 0.2
-            mwGlow.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
-        else
-            mwGlow.BackgroundTransparency = 0.8 - pulse * 0.15
-            mwGlow.BackgroundColor3 = Color3.fromRGB(60, 30, 100)
-        end
-
-        mwGlow.Size = UDim2.new(1, 20 + pulse * 10, 1, 20 + pulse * 10)
-        mwGlow.Position = UDim2.new(0, -10 - pulse * 5, 0, -10 - pulse * 5)
-
-        if Moonwalk.Enabled then
-            mwBtn.TextColor3 = Color3.fromHSV((t * 0.15) % 1, 0.6, 1)
-            mwBtn.Text = "🕺"
-        else
-            mwBtn.TextColor3 = Color3.fromRGB(150, 130, 180)
-            mwBtn.Text = "💤"
-        end
-
-        if Moonwalk.Enabled then
-            mwLabel.Text = "🕺 MOONWALK"
-            mwLabel.TextColor3 = Color3.fromHSV((t * 0.2) % 1, 0.7, 1)
-        else
-            mwLabel.Text = "💤 MOONWALK"
-            mwLabel.TextColor3 = Color3.fromRGB(150, 130, 180)
-        end
-
-        mwBtnGrad.Rotation = t * 30
-
-        task.wait(0.05)
-    end
-end)
-
+-- LOCK BUTTON
 mwLockBtn = Instance.new("TextButton")
-mwLockBtn.Size = UDim2.fromOffset(80, 22)
-mwLockBtn.Position = UDim2.new(0.5, -40, 1, 5)
+mwLockBtn.Size = UDim2.fromOffset(60, 22)
+mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
 mwLockBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
 mwLockBtn.Text = "🔓 UNLOCK"
 mwLockBtn.TextColor3 = Color3.new(1, 1, 1)
 mwLockBtn.TextSize = 10
 mwLockBtn.Font = Enum.Font.GothamBold
 mwLockBtn.AutoButtonColor = false
-mwLockBtn.Parent = mwContainer
-rnd(mwLockBtn, 8)
+mwLockBtn.Parent = mwBtnGui
+rnd(mwLockBtn, 999)
 
 mwLockStroke = Instance.new("UIStroke")
 mwLockStroke.Thickness = 1.5
@@ -2391,6 +2328,18 @@ mwLockStroke.Transparency = 0.5
 mwLockStroke.Parent = mwLockBtn
 
 function mwBtnUpdateUI()
+    if Moonwalk.Enabled then
+        mwBtnStroke.Color = Color3.fromRGB(170, 0, 255)
+        mwBtn.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
+        mwBtn.Text = "MW"
+        mwBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        mwBtnStroke.Color = Color3.fromRGB(255, 255, 255)
+        mwBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        mwBtn.Text = "MW"
+        mwBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+
     if Moonwalk.Locked then
         mwLockBtn.Text = "🔒 LOCKED"
         mwLockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -2401,11 +2350,9 @@ function mwBtnUpdateUI()
 end
 
 mwBtn.MouseButton1Click:Connect(function()
-    if mwWasDragged then
-        mwWasDragged = false
-        return
-    end
     if Moonwalk.Locked then
+        mwBtn.Text = "🔒"
+        task.delay(0.8, mwBtnUpdateUI)
         return
     end
     setMoonwalk(not Moonwalk.Enabled)
@@ -2895,10 +2842,11 @@ _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 _G.AP_Config = AP_Config
+_G.AP_GetPing = AP_GetCurrentPing
 
-print("✅ [4/12] COSMIC - ESP + Auto Parry GACOR + Moonwalk KECE + Hitbox Loaded")
-print("🛡️ Auto Parry: MULTI-LAYER | Radius 13.69")
-print("🕺 Moonwalk: Tombol KECE (Neon Glow)")-- =========================================================
+print("✅ [4/12] COSMIC - ESP + Auto Parry ANTI-MISS + Moonwalk + Hitbox Loaded")
+print("🛡️ Auto Parry: ANTI-MISS (Dynamic Debounce + Ping)")
+print("🕺 Moonwalk: Tombol Kecil + Lock Button + Text Putih")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -3487,7 +3435,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = PG
 
 -- =========================================================
--- ✨ TOMBOL MENU COSMIC (KECE VERSION - ORB + PARTICLE)
+-- ✨ TOMBOL MENU COSMIC (KECE - ORB + PARTICLE)
 -- =========================================================
 btnContainer = Instance.new("Frame")
 btnContainer.Size = UDim2.new(0, 44, 0, 44)
@@ -3495,7 +3443,6 @@ btnContainer.Position = UDim2.new(0, 15, 0.3, 0)
 btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = gui
 
--- OUTER GLOW PULSE
 local outerGlow = Instance.new("Frame")
 outerGlow.Size = UDim2.new(1, 20, 1, 20)
 outerGlow.Position = UDim2.new(0, -10, 0, -10)
@@ -3506,7 +3453,6 @@ outerGlow.ZIndex = -3
 outerGlow.Parent = btnContainer
 rnd(outerGlow, 999)
 
--- SECOND GLOW LAYER
 local outerGlow2 = Instance.new("Frame")
 outerGlow2.Size = UDim2.new(1, 10, 1, 10)
 outerGlow2.Position = UDim2.new(0, -5, 0, -5)
@@ -3517,7 +3463,6 @@ outerGlow2.ZIndex = -2
 outerGlow2.Parent = btnContainer
 rnd(outerGlow2, 999)
 
--- RING OUTER (rotating)
 local ringOuter = Instance.new("Frame")
 ringOuter.Size = UDim2.new(1, 8, 1, 8)
 ringOuter.Position = UDim2.new(0, -4, 0, -4)
@@ -3539,7 +3484,6 @@ ringOuterGrad.Color = ColorSequence.new({
 })
 ringOuterGrad.Parent = ringOuterStroke
 
--- RING INNER
 local ringInner = Instance.new("Frame")
 ringInner.Size = UDim2.new(1, 2, 1, 2)
 ringInner.Position = UDim2.new(0, -1, 0, -1)
@@ -3553,7 +3497,6 @@ ringInnerStroke.Transparency = 0.3
 ringInnerStroke.Parent = ringInner
 rnd(ringInner, 999)
 
--- MAIN BUTTON (ORB)
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(1, -8, 1, -8)
 mainBtn.Position = UDim2.new(0, 4, 0, 4)
@@ -3576,7 +3519,6 @@ btnGrad.Color = ColorSequence.new({
 btnGrad.Rotation = 45
 btnGrad.Parent = mainBtn
 
--- INNER GLOW (pulse)
 local innerGlow = Instance.new("Frame")
 innerGlow.Size = UDim2.new(0.6, 0, 0.6, 0)
 innerGlow.Position = UDim2.new(0.2, 0, 0.2, 0)
@@ -3587,7 +3529,6 @@ innerGlow.ZIndex = -1
 innerGlow.Parent = mainBtn
 rnd(innerGlow, 999)
 
--- PARTICLE EFFECT (bintang keliling)
 local particleContainer = Instance.new("Frame")
 particleContainer.Size = UDim2.new(1, 0, 1, 0)
 particleContainer.BackgroundTransparency = 1
@@ -3609,7 +3550,6 @@ for i = 1, 6 do
     })
 end
 
--- ANIMASI LOOP
 task.spawn(function()
     local t = 0
     while btnContainer.Parent do
@@ -3689,9 +3629,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- =========================================================
 -- PANEL MENU
--- =========================================================
 panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 420, 0, 340)
 panel.Position = UDim2.new(0.5, -210, 0.5, -170)
@@ -4242,7 +4180,9 @@ function makeTab(name, icon, order, cb)
             if c:IsA("TextLabel") then
                 TweenService:Create(c, TweenInfo.new(0.2), {TextColor3 = C.TXT}):Play()
             end
-        end        for _, c in pairs(cs:GetChildren()) do
+        end
+
+        for _, c in pairs(cs:GetChildren()) do
             if not c:IsA("UIListLayout") then
                 c:Destroy()
             end
@@ -4295,13 +4235,13 @@ cs = _G.Roooor_cs
 -- TAB 1: SURVIVOR
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry (GACOR MULTI-LAYER)", "🛡️")
+    sec("Auto Parry (ANTI-MISS)", "🛡️")
     tog("Enable Auto Parry", true, function(s)
         AutoParry.Enabled = s
         if s then AP_ScanKillers() end
     end)
-    lbl("Radius 13.69 | Multi-layer trigger ✅", C.GRN)
-    lbl("Face + Attribute + Velocity Check", C.FIRE_BRIGHT)
+    lbl("Radius 13.69 | Multi-layer + Anti-Miss ✅", C.GRN)
+    lbl("Dynamic Debounce + Ping Compensation", C.FIRE_BRIGHT)
 
     sl("Parry Distance", 5, 40, 13.69, function(v)
         AutoParry.ParryDistance = v
@@ -4313,7 +4253,7 @@ makeTab("Survivor", "🏃", 1, function()
         AP_PARRY_DEBOUNCE = v
         AP_Config.Debounce = v
     end)
-    lbl("0.15 = GACOR | 0.5 = santai", C.FIRE_BRIGHT)
+    lbl("0.15 = GACOR | Auto adjust by ping", C.FIRE_BRIGHT)
 
     sl("Face Sensitivity", 0, 1, 0.3, function(v)
         AP_Config.FaceSensitivity = v
@@ -4334,6 +4274,35 @@ makeTab("Survivor", "🏃", 1, function()
         AP_Config.EnableVelocityCheck = s
     end)
     lbl("Cek killer gerak ke arah lo", C.DIM)
+
+    sec("Anti-Miss Advanced", "🎯")
+    tog("Dynamic Debounce", true, function(s)
+        AP_Config.DynamicDebounce = s
+    end)
+    lbl("Auto adjust debounce by ping", C.GRN)
+
+    tog("Ping Compensation", true, function(s)
+        AP_Config.PingCompensation = s
+    end)
+    lbl("Anti miss walaupun ping jumping", C.FIRE_BRIGHT)
+
+    tog("Extra Trigger (Velocity)", true, function(s)
+        AP_Config.EnableExtraTrigger = s
+    end)
+    lbl("Trigger tambahan — anti miss", C.GRN)
+
+    sl("Max Debounce (ping jelek)", 0.1, 0.5, 0.25, function(v)
+        AP_Config.MaxDebounce = v
+    end)
+
+    sl("Min Debounce (ping bagus)", 0.05, 0.2, 0.1, function(v)
+        AP_Config.MinDebounce = v
+    end)
+
+    sl("Ping Threshold", 50, 300, 100, function(v)
+        AP_Config.PingThreshold = v
+    end)
+    lbl("Ping di atas ini = debounce naik", C.DIM)
 
     sl("Circle Height", -5, 15, -2.5, function(v)
         AP_ESPCircle.YOffset = v
@@ -4586,8 +4555,8 @@ end)
 -- TAB 5: MOONWALK
 makeTab("Moonwalk", "🕺", 5, function()
 
-    sec("Moonwalk (TOMBOL KECE)", "🕺")
-    lbl("🌙 Tombol neon glow di pojok layar", C.FIRE_BRIGHT)
+    sec("Moonwalk (TOMBOL KECIL)", "🕺")
+    lbl("🌙 Tombol MW di pojok layar", C.FIRE_BRIGHT)
     lbl("Klik tombol = ON/OFF", C.GRN)
     lbl("Drag = pindah posisi", C.ACC2)
     lbl("⌨️ Tekan V juga bisa toggle", C.DIM)
@@ -4615,8 +4584,11 @@ makeTab("Moonwalk", "🕺", 5, function()
     end)
 
     btn("🎯 Reset Posisi Tombol MW", function()
-        if mwContainer then
-            mwContainer.Position = UDim2.new(0, 20, 1, -110)
+        if mwBtn then
+            mwBtn.Position = UDim2.new(0, 20, 1, -100)
+        end
+        if mwLockBtn then
+            mwLockBtn.Position = UDim2.new(0, 20, 1, -128)
         end
     end)
 
@@ -4642,8 +4614,8 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
-print("🛡️ Auto Parry: Radius 13.69 | GACOR")
-print("🕺 Moonwalk: Tombol KECE + Auto ON")-- =========================================================
+print("🛡️ Auto Parry: ANTI-MISS (Radius 13.69)")
+print("🕺 Moonwalk: Tombol Kecil + Auto ON")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 
@@ -5098,14 +5070,14 @@ task.spawn(function()
     Moonwalk.Intensity = 32.84
     Moonwalk.SlowSpeed = 12.81
     if _G.Roooor_mwBtnUpdateUI then pcall(_G.Roooor_mwBtnUpdateUI) end
-    print("[AUTO] Moonwalk: ON")
+    print("[AUTO] Moonwalk: ON (Spam 24.81 | Intensity 32.84 | Slow 12.81)")
     
     -- 🛡️ AUTO ON AUTO PARRY
     AutoParry.Enabled = true
     AutoParry.ParryDistance = 13.69
     AP_Config.Radius = 13.69
     pcall(AP_ScanKillers)
-    print("[AUTO] Auto Parry: ON (Radius 13.69)")
+    print("[AUTO] Auto Parry: ON (Radius 13.69 | Anti-Miss)")
     
     -- 🔥 Fire CosmicFire
     if S.FireOn then
@@ -5238,7 +5210,7 @@ end)
 
 print("✅ [9/12] COSMIC - Auto Re-Apply + Keybind V + Auto ON Loaded")
 print("🕺 Moonwalk: ON (Spam 24.81 | Intensity 32.84 | Slow 12.81)")
-print("🛡️ Auto Parry: ON (Radius 13.69)")
+print("🛡️ Auto Parry: ON (Radius 13.69 | Anti-Miss)")
 print("🔥 Fire:", S.FireType, "(auto ON)")
 print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
@@ -5473,22 +5445,24 @@ print("║     → ESP: Galaxy Mode (Size 9.35)       ║")
 print("║     → Contrast: ON                       ║")
 print("║     → Sky: SunsetHD                      ║")
 print("║     → FOV: 90 (Tab Misc)                 ║")
-print("║     → Auto Parry: Distance 13.69         ║")
-print("║     → Moonwalk: Spam 24.81 | Int 32.84   ║")
+print("║     → Auto Parry: 13.69 + ANTI-MISS      ║")
+print("║     → Moonwalk: KECIL + Spam 24.81       ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ AUTO PARRY GACOR (MULTI-LAYER)       ║")
+print("║  🛡️ AUTO PARRY ANTI-MISS                 ║")
 print("║     → Radius 13.69                       ║")
 print("║     → Face Check (dot product)           ║")
 print("║     → Attribute Check                    ║")
 print("║     → Velocity Check                     ║")
 print("║     → Proximity Pre-Trigger              ║")
-print("║     → Debounce 0.15 (Responsif)          ║")
+print("║     → Dynamic Debounce (Ping-based)      ║")
+print("║     → Extra Trigger (Velocity)           ║")
+print("║     → Debounce 0.15 + Auto Adjust        ║")
 print("║     → Camera Freeze FIX                  ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🕺 MOONWALK KECE                        ║")
-print("║     → Tombol Neon Glow + Ring Muter      ║")
-print("║     → Label 'MOONWALK' Animated          ║")
-print("║     → Drag posisi                        ║")
+print("║  🕺 MOONWALK                             ║")
+print("║     → Tombol KECIL 60x60                 ║")
+print("║     → Text 'MW' PUTIH BIASA              ║")
+print("║     → Lock Button                        ║")
 print("║     → Auto ON (Spam 24.81)               ║")
 print("║     → Intensity 32.84 | Slow 12.81       ║")
 print("╠══════════════════════════════════════════╣")
@@ -5512,17 +5486,11 @@ print("║  🎵 Sound: Android Notif                 ║")
 print("║  🛠️ Anti-AFK + Rejoin + Server Hop       ║")
 print("║  📊 FPS + Ping Counter                   ║")
 print("╠══════════════════════════════════════════╣")
-print("║  ✨ TOMBOL COSMIC KECE:                  ║")
-print("║     → Orb + 2 Glow Layer                 ║")
-print("║     → Ring Muter (Rainbow)               ║")
-print("║     → Particle Bintang Keliling          ║")
-print("║     → Text Rainbow                       ║")
-print("╠══════════════════════════════════════════╣")
 print("║  🎥 FIX YANG UDAH DIPASANG:              ║")
 print("║     → Camera Freeze FIX                  ║")
 print("║     → FOV Bind RenderStepped             ║")
 print("║     → Dropdown Reset Bug FIXED           ║")
-print("║     → Auto Parry GACOR (multi-layer)     ║")
+print("║     → Auto Parry ANTI-MISS               ║")
 print("╠══════════════════════════════════════════╣")
 print("║  ❌ YANG DIHAPUS:                        ║")
 print("║     → Fire Feet                          ║")
@@ -5543,9 +5511,8 @@ print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🎨 Contrast: ON")
 print("🔷 Sky: SunsetHD (auto ON)")
 print("🎥 FOV: 90 (auto ON, FIX bind)")
-print("🛡️ Auto Parry: GACOR MULTI-LAYER (Radius 13.69)")
-print("🕺 Moonwalk: KECE + Auto ON")
-print("✨ Tombol Cosmic: KECE (Orb + Particle)")
+print("🛡️ Auto Parry: ANTI-MISS (Radius 13.69)")
+print("🕺 Moonwalk: Tombol KECIL + Auto ON")
 print("➡️ Lanjut ke Section 12 (Aimbot)")-- =========================================================
 -- SECTION 12/12 : AIMBOT (TAB AIMBOT COSMIC)
 -- =========================================================

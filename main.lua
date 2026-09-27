@@ -1622,17 +1622,62 @@ task.spawn(function()
     end
 end)
 
--- ESP GENERATOR FIX
+-- =========================================================
+-- ESP GENERATOR (Multi-Fallback Progress Detection)
+-- =========================================================
+
 function GetGameValue(obj, name)
     if not obj then return nil end
     local attr = obj:GetAttribute(name)
     if attr ~= nil then return attr end
     local child = obj:FindFirstChild(name)
-    if child then
-        local success, val = pcall(function() return child.Value end)
-        if success then return val end
+    if child and child:IsA("ValueBase") then
+        local ok, val = pcall(function() return child.Value end)
+        if ok then return val end
     end
     return nil
+end
+
+-- 🆕 FUNGSI KHUSUS BACA PROGRESS GENERATOR (Multi-Fallback)
+function GetGeneratorProgress(gen)
+    if not gen then return 0 end
+
+    local names = {
+        "RepairProgress", "Progress", "Value", "RepairValue",
+        "ProgressValue", "GenProgress", "Repaired", "Repair",
+        "Percent", "Percentage", "RepairPercent"
+    }
+
+    for _, n in ipairs(names) do
+        local v = GetGameValue(gen, n)
+        if v ~= nil and type(v) == "number" then
+            return v
+        end
+    end
+
+    for _, d in ipairs(gen:GetDescendants()) do
+        if d:IsA("ValueBase") then
+            local ln = string.lower(d.Name)
+            if ln:find("progress") or ln:find("repair") 
+               or ln:find("percent") or ln:find("value") then
+                local ok, val = pcall(function() return d.Value end)
+                if ok and type(val) == "number" then return val end
+            end
+        end
+    end
+
+    for _, attrName in ipairs(gen:GetAttributes()) do
+        local v = gen:GetAttribute(attrName)
+        if type(v) == "number" and v >= 0 and v <= 100 then
+            local lower = string.lower(attrName)
+            if lower:find("progress") or lower:find("repair") 
+               or lower:find("value") or lower:find("percent") then
+                return v
+            end
+        end
+    end
+
+    return 0
 end
 
 function ApplyGenHighlight(object, color)
@@ -1648,7 +1693,7 @@ function ApplyGenHighlight(object, color)
     h.Parent = object
 end
 
--- 🆕 UPDATE GENERATOR 2 MODE (Classic + Bar)
+-- 🆕 UPDATE GENERATOR 2 MODE
 function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
 
@@ -1662,12 +1707,11 @@ function UpdateGenerator(generator)
         return
     end
 
-    local percent = GetGameValue(generator, "RepairProgress")
-        or GetGameValue(generator, "Progress") or 0
+    local percent = GetGeneratorProgress(generator)
     local cp = math.clamp(percent, 0, 100)
 
     -- ============================
-    -- MODE CLASSIC (angka [%])
+    -- MODE CLASSIC (angka [%] di atas)
     -- ============================
     if S.ESPGenMode == "Classic" then
         local oldBar = generator:FindFirstChild("GenESPBar")
@@ -1714,7 +1758,7 @@ function UpdateGenerator(generator)
         ApplyGenHighlight(generator, color)
 
     -- ============================
-    -- MODE BAR (progress bar simpel + work)
+    -- MODE BAR (kecil, angka di dalam, no icon)
     -- ============================
     elseif S.ESPGenMode == "Bar" then
         local oldClassic = generator:FindFirstChild("GenESP")
@@ -1732,43 +1776,17 @@ function UpdateGenerator(generator)
         if not billboard then
             billboard = Instance.new("BillboardGui")
             billboard.Name = "GenESPBar"
-            billboard.Size = UDim2.new(0, 110, 0, 34)
+            billboard.Size = UDim2.new(0, 80, 0, 14)
             billboard.AlwaysOnTop = true
-            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.StudsOffset = Vector3.new(0, 1.5, 0)
             billboard.Adornee = generator
             billboard.Parent = generator
 
-            local icon = Instance.new("TextLabel")
-            icon.Name = "Icon"
-            icon.Size = UDim2.new(0, 22, 0, 22)
-            icon.Position = UDim2.new(0, 2, 0, 0)
-            icon.BackgroundTransparency = 1
-            icon.Text = "⚡"
-            icon.TextColor3 = Color3.fromRGB(255, 170, 0)
-            icon.TextSize = 16
-            icon.Font = Enum.Font.GothamBlack
-            icon.TextStrokeTransparency = 0.2
-            icon.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            icon.Parent = billboard
-
-            local pctLabel = Instance.new("TextLabel")
-            pctLabel.Name = "PctText"
-            pctLabel.Size = UDim2.new(0, 80, 0, 20)
-            pctLabel.Position = UDim2.new(0, 24, 0, 0)
-            pctLabel.BackgroundTransparency = 1
-            pctLabel.Text = "0%"
-            pctLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
-            pctLabel.TextSize = 15
-            pctLabel.Font = Enum.Font.GothamBlack
-            pctLabel.TextXAlignment = Enum.TextXAlignment.Left
-            pctLabel.TextStrokeTransparency = 0.2
-            pctLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            pctLabel.Parent = billboard
-
+            -- Bar background
             local barBg = Instance.new("Frame")
             barBg.Name = "BarBg"
-            barBg.Size = UDim2.new(0, 104, 0, 7)
-            barBg.Position = UDim2.new(0, 3, 0, 24)
+            barBg.Size = UDim2.new(1, 0, 1, 0)
+            barBg.Position = UDim2.new(0, 0, 0, 0)
             barBg.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
             barBg.BorderSizePixel = 0
             barBg.Parent = billboard
@@ -1780,9 +1798,10 @@ function UpdateGenerator(generator)
             local bbStroke = Instance.new("UIStroke")
             bbStroke.Thickness = 1
             bbStroke.Color = Color3.fromRGB(120, 70, 200)
-            bbStroke.Transparency = 0.4
+            bbStroke.Transparency = 0.3
             bbStroke.Parent = barBg
 
+            -- Bar fill
             local barFill = Instance.new("Frame")
             barFill.Name = "BarFill"
             barFill.Size = UDim2.new(0, 0, 1, 0)
@@ -1793,34 +1812,39 @@ function UpdateGenerator(generator)
             local bfc = Instance.new("UICorner")
             bfc.CornerRadius = UDim.new(1, 0)
             bfc.Parent = barFill
+
+            -- Angka % DI DALAM bar (center)
+            local pctText = Instance.new("TextLabel")
+            pctText.Name = "PctText"
+            pctText.Size = UDim2.new(1, 0, 1, 0)
+            pctText.Position = UDim2.new(0, 0, 0, 0)
+            pctText.BackgroundTransparency = 1
+            pctText.Text = "0%"
+            pctText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pctText.TextSize = 10
+            pctText.Font = Enum.Font.GothamBold
+            pctText.TextXAlignment = Enum.TextXAlignment.Center
+            pctText.TextYAlignment = Enum.TextYAlignment.Center
+            pctText.TextStrokeTransparency = 0.3
+            pctText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            pctText.ZIndex = 5
+            pctText.Parent = billboard
         end
 
-        local pctLabel = billboard:FindFirstChild("PctText")
-        local icon = billboard:FindFirstChild("Icon")
+        -- Update fill + text
         local barBg = billboard:FindFirstChild("BarBg")
-
-        local color
-        if cp < 50 then
-            color = Color3.fromRGB(255, 80, 0):Lerp(Color3.fromRGB(255, 220, 80), cp / 50)
-        else
-            color = Color3.fromRGB(255, 220, 80):Lerp(Color3.fromRGB(0, 255, 150), (cp - 50) / 50)
-        end
-
-        if pctLabel then
-            pctLabel.Text = string.format("%.0f%%", percent)
-            pctLabel.TextColor3 = color
-        end
-        if icon then
-            icon.TextColor3 = color
-        end
+        local pctText = billboard:FindFirstChild("PctText")
         if barBg then
             local barFill = barBg:FindFirstChild("BarFill")
             if barFill then
                 barFill.Size = UDim2.new(cp / 100, 0, 1, 0)
-                barFill.BackgroundColor3 = color
             end
         end
+        if pctText then
+            pctText.Text = string.format("%.0f%%", percent)
+        end
 
+        local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
         ApplyGenHighlight(generator, color)
     end
 end
@@ -1887,7 +1911,6 @@ AP_hookedKillers = _G.AP_HookedKillers or {}
 _G.AP_HookedKillers = AP_hookedKillers
 AP_wasLocked = false
 
--- Config (SETTINGAN LU)
 AP_Config = {
     Debounce = 0.4,
     Radius = 13,
@@ -1898,7 +1921,6 @@ AP_Config = {
     RadiusProximity = 15,
 }
 
--- Cari tombol Parry
 function AP_GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
@@ -1950,7 +1972,6 @@ function AP_PressParryButton()
     end
 end
 
--- FORCE RESET CAMERA PAS PARRY SUKSES
 local _oldAP_PressParryButton = AP_PressParryButton
 function AP_PressParryButton()
     _oldAP_PressParryButton()
@@ -1970,7 +1991,6 @@ function AP_PressParryButton()
     end)
 end
 
--- LAYER 1: RADIUS
 function AP_IsInRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
@@ -1979,7 +1999,6 @@ function AP_IsInRange(killerChar)
     return (enemyRoot.Position - myRoot.Position).Magnitude <= AP_Config.Radius
 end
 
--- LAYER 2: FACE CHECK
 function AP_IsFacingMe(killerChar)
     if not AP_Config.EnableFaceCheck then return true end
     local myRoot = getRoot()
@@ -1992,7 +2011,6 @@ function AP_IsFacingMe(killerChar)
     return dot >= AP_Config.FaceSensitivity
 end
 
--- LAYER 3: ATTRIBUTE CHECK
 function AP_IsAttacking(killerChar)
     if not AP_Config.EnableAttributeCheck then return true end
     local checks = {
@@ -2007,7 +2025,6 @@ function AP_IsAttacking(killerChar)
     return true
 end
 
--- LAYER 4: VELOCITY CHECK
 function AP_IsMovingTowardsMe(killerChar)
     if not AP_Config.EnableVelocityCheck then return true end
     local myRoot = getRoot()
@@ -2105,7 +2122,6 @@ task.spawn(function()
     end
 end)
 
--- PROXIMITY PRE-TRIGGER
 task.spawn(function()
     while task.wait(0.05) do
         if not AutoParry.Enabled then continue end
@@ -2346,7 +2362,6 @@ function TriggerMobileButton()
     end
 end
 
--- 🆕 AUTO SKILL CHECK 2 MODE (Instant + Perfect) — King's Scourge Ready
 function startSkillCheck()
     if SkillHeartbeat then SkillHeartbeat:Disconnect() end
 
@@ -2365,9 +2380,7 @@ function startSkillCheck()
 
         local gr = goal.Rotation % 360
 
-        -- ============================
-        -- MODE 1: INSTANT (King's Scourge killer)
-        -- ============================
+        -- MODE 1: INSTANT
         if SkillCheck.Mode == "Instant" then
             if busy then return end
 
@@ -2389,9 +2402,7 @@ function startSkillCheck()
             return
         end
 
-        -- ============================
-        -- MODE 2: PERFECT (Timing akurat)
-        -- ============================
+        -- MODE 2: PERFECT
         if SkillCheck.Mode == "Perfect" then
             if busy then return end
 
@@ -2453,7 +2464,6 @@ function setMoonwalk(state)
     return true
 end
 
--- MW BUTTON
 if PG:FindFirstChild("MW_BottomBtn") then
     PG.MW_BottomBtn:Destroy()
 end
@@ -3014,6 +3024,7 @@ _G.Roooor_updateFPSPing = updateFPSPing
 _G.Roooor_hookVault = hookVault
 _G.Roooor_hitboxClearAll = hitboxClearAll
 _G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
+_G.Roooor_GetGeneratorProgress = GetGeneratorProgress
 
 _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
@@ -3023,7 +3034,7 @@ _G.AP_Config = AP_Config
 print("✅ [4/12] COSMIC - ESP + Auto Parry + Moonwalk + Hitbox Loaded")
 print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: Anti-Stuck Active")
-print("⚡ ESP Gen: Classic + Bar Mode")
+print("⚡ ESP Gen: Classic + Bar (no icon, angka di dalam)")
 print("⚡ Auto Skill Check: 2 Mode (Instant + Perfect) — King's Scourge Ready")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================

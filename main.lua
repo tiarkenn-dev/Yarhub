@@ -57,16 +57,18 @@ end
 
 local ToggleSoundId = "rbxassetid://6073491164"
 
+-- OPT: Cache sound instance (gak bikin instance baru tiap toggle)
+local _toggleSoundInstance = nil
 function playToggleSound()
     task.spawn(function()
         pcall(function()
-            local s = Instance.new("Sound")
-            s.SoundId = ToggleSoundId
-            s.Volume = 0.5
-            s.Parent = SoundService
-            s:Play()
-            task.wait(2)
-            s:Destroy()
+            if not _toggleSoundInstance or not _toggleSoundInstance.Parent then
+                _toggleSoundInstance = Instance.new("Sound")
+                _toggleSoundInstance.SoundId = ToggleSoundId
+                _toggleSoundInstance.Volume = 0.5
+                _toggleSoundInstance.Parent = SoundService
+            end
+            _toggleSoundInstance:Play()
         end)
     end)
 end
@@ -112,7 +114,7 @@ task.spawn(function()
     while nebula.Parent do
         t = t + 0.005
         nebulaGrad.Rotation = (t * 20) % 360
-        task.wait(0.06)
+        task.wait(0.08)
     end
 end)
 
@@ -121,8 +123,9 @@ starContainer.Size = UDim2.new(1, 0, 1, 0)
 starContainer.BackgroundTransparency = 1
 starContainer.Parent = bg
 
+-- OPT: 50 → 30 bintang
 local stars = {}
-for i = 1, 50 do
+for i = 1, 30 do
     local star = Instance.new("Frame")
     star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
     star.Position = UDim2.new(math.random(), 0, math.random(), 0)
@@ -160,7 +163,7 @@ task.spawn(function()
                 s.obj.BackgroundTransparency = base + math.sin(s.twinkle) * 0.3
             end
         end
-        task.wait(0.1)
+        task.wait(0.12)
     end
 end)
 
@@ -222,7 +225,7 @@ task.spawn(function()
         spiral2.Rotation = -t * 1.1
         spiral1Grad.Rotation = (t * 2) % 360
         spiral2Grad.Rotation = 180 + (t * 1.5) % 360
-        task.wait(0.06)
+        task.wait(0.08)
     end
 end)
 
@@ -271,7 +274,7 @@ task.spawn(function()
     while welcomeTitle.Parent do
         t = t + 1
         titleGrad.Rotation = (t * 2) % 360
-        task.wait(0.06)
+        task.wait(0.08)
     end
 end)
 
@@ -372,29 +375,42 @@ rnd(barGlow, 999)
 task.delay(1.6, function()
     if not loadingGui then return end
 
-    TweenService:Create(bg, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        BackgroundTransparency = 1
-    }):Play()
-
-    TweenService:Create(welcomeTitle, TweenInfo.new(0.5), {
-        TextTransparency = 1,
-        TextStrokeTransparency = 1
-    }):Play()
-    TweenService:Create(subtitle, TweenInfo.new(0.5), {
-        TextTransparency = 1
-    }):Play()
-    TweenService:Create(nebula, TweenInfo.new(0.6), {
-        BackgroundTransparency = 1
-    }):Play()
-    TweenService:Create(titleGlow, TweenInfo.new(0.5), {
-        BackgroundTransparency = 1
-    }):Play()
-    TweenService:Create(barBg, TweenInfo.new(0.5), {
-        BackgroundTransparency = 1
-    }):Play()
-    TweenService:Create(barGlow, TweenInfo.new(0.5), {
-        BackgroundTransparency = 1
-    }):Play()
+    if bg and bg.Parent then
+        TweenService:Create(bg, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
+        }):Play()
+    end
+    if welcomeTitle and welcomeTitle.Parent then
+        TweenService:Create(welcomeTitle, TweenInfo.new(0.5), {
+            TextTransparency = 1,
+            TextStrokeTransparency = 1
+        }):Play()
+    end
+    if subtitle and subtitle.Parent then
+        TweenService:Create(subtitle, TweenInfo.new(0.5), {
+            TextTransparency = 1
+        }):Play()
+    end
+    if nebula and nebula.Parent then
+        TweenService:Create(nebula, TweenInfo.new(0.6), {
+            BackgroundTransparency = 1
+        }):Play()
+    end
+    if titleGlow and titleGlow.Parent then
+        TweenService:Create(titleGlow, TweenInfo.new(0.5), {
+            BackgroundTransparency = 1
+        }):Play()
+    end
+    if barBg and barBg.Parent then
+        TweenService:Create(barBg, TweenInfo.new(0.5), {
+            BackgroundTransparency = 1
+        }):Play()
+    end
+    if barGlow and barGlow.Parent then
+        TweenService:Create(barGlow, TweenInfo.new(0.5), {
+            BackgroundTransparency = 1
+        }):Play()
+    end
 
     task.wait(0.8)
     if loadingGui then loadingGui:Destroy() end
@@ -450,6 +466,15 @@ _G.RoooorS = _G.RoooorS or {
     FireBeamColor = Color3.fromRGB(120, 60, 255),
     -- 🔥 ESP GALAXY + SIZE 9.35
     ESPNameMode = "Galaxy", ESPNameSize = 9.35,
+    -- 🔥 ESP GENERATOR MODE
+    ESPGenMode = "Classic",
+    -- 🫥 HIDE NAME
+    HideName = true,
+    HideNameText = "COSMIC HUB",
+    HideNameOriginal = nil,
+    -- MISC
+    KillFeed = false,
+    StunNotify = false,
     AutoEscapeGate = false, AutoEscapeRange = 50,
     AutoEscapeUseKillerCheck = true, AutoEscapeUseGenCheck = true,
 }
@@ -492,7 +517,7 @@ HitboxESPObjects = {}
 HitboxOriginalSizes = {}
 
 AutoParry = _G.Roooor_AutoParry or {
-    Enabled = false, ParryDistance = 13, ParryDelay = 0,
+    Enabled = false, ParryDistance = 11.5, ParryDelay = 0,
     Cooldown = 0.5, FaceSensitivity = -1, RequireFacing = false,
     Wiggle = false, WiggleSpam = 5,
 }
@@ -505,7 +530,7 @@ AP_ESPCircle = {
     ColorDanger = Color3.fromRGB(255, 50, 50),
     Thickness = 0.4, Segments = 36, YOffset = -2.5
 }
-AP_PARRY_DEBOUNCE = 0.5
+AP_PARRY_DEBOUNCE = 0.10
 
 PARRY_DEBOUNCE = 0.1
 ParryActive = false
@@ -569,9 +594,11 @@ print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🔷 Sky: SunsetHD (ON)")
 print("🎨 Contrast: ON")
 print("🎥 FOV: 90 (ON)")
-print("🛡️ Auto Parry: Distance 13")
+print("🛡️ Auto Parry: Distance 11.5 | Debounce 0.10")
 print("🎥 Camera Fix: ACTIVE")
-print("🎥 FOV Bind: ACTIVE")-- =========================================================
+print("🎥 FOV Bind: ACTIVE")
+print("🫥 Hide Name: COSMIC HUB")
+print("⚡ ESP Gen Mode: Classic/Cosmic")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -848,8 +875,9 @@ function applyFire()
     end
 end
 
+-- OPT: 0.4 → 0.6 (rainbow fire tetep smooth)
 task.spawn(function()
-    while task.wait(0.4) do
+    while task.wait(0.6) do
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             local fire = head and head:FindFirstChild("RoooorFire")
@@ -922,13 +950,12 @@ function clearKorblox()
     korbloxParts = {}
 
     local char = LP.Character
-    if char then
-        for legName, data in pairs(korbloxOrigData) do
-            local leg = char:FindFirstChild(legName)
-            if leg then
-                leg.Transparency = data.trans
-                leg.CanCollide = data.collide
-            end
+    if not char then return end
+    for legName, data in pairs(korbloxOrigData) do
+        local leg = char:FindFirstChild(legName)
+        if leg then
+            leg.Transparency = data.trans
+            leg.CanCollide = data.collide
         end
     end
     korbloxOrigData = {}
@@ -1039,6 +1066,63 @@ task.spawn(function()
     end
 end)
 
+-- 🫥 HIDE NAME (Nama jadi "COSMIC HUB")
+function applyHideName(enable, text)
+    text = text or "COSMIC HUB"
+    if not S.HideNameOriginal then
+        S.HideNameOriginal = LP.DisplayName
+    end
+
+    pcall(function()
+        if enable then
+            LP.DisplayName = text
+        else
+            LP.DisplayName = S.HideNameOriginal
+        end
+    end)
+
+    local char = LP.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if enable then
+                hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            else
+                hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            end
+        end
+        local head = char:FindFirstChild("Head")
+        if head then
+            for _, v in pairs(head:GetChildren()) do
+                if v:IsA("BillboardGui") then
+                    v.Enabled = not enable
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        if not S.HideName then continue end
+        local char = LP.Character
+        if not char then continue end
+        if LP.DisplayName ~= S.HideNameText then
+            pcall(function() LP.DisplayName = S.HideNameText end)
+        end
+        local head = char:FindFirstChild("Head")
+        if head then
+            for _, v in pairs(head:GetChildren()) do
+                if v:IsA("BillboardGui") and v.Enabled then
+                    v.Enabled = false
+                end
+            end
+        end
+    end
+end)
+
+_G.Roooor_applyHideName = applyHideName
+
 -- HD VISUAL EXTRAS
 hdExtras = {}
 
@@ -1088,15 +1172,22 @@ function applyHDSky(s)
         local oldAtmo = Lighting:FindFirstChild("HDSky_Light")
         if oldAtmo then oldAtmo:Destroy() end
 
-        Lighting.FogEnd = origLighting.FogEnd or 100000
-        Lighting.FogStart = origLighting.FogStart or 0
-        Lighting.Brightness = origLighting.Brightness
-        Lighting.ClockTime = origLighting.ClockTime
-        Lighting.Ambient = origLighting.Ambient
-        Lighting.OutdoorAmbient = origLighting.OutdoorAmbient
+        pcall(function()
+            Lighting.FogEnd = origLighting.FogEnd or 100000
+            Lighting.FogStart = origLighting.FogStart or 0
+            Lighting.Brightness = origLighting.Brightness
+            Lighting.ClockTime = origLighting.ClockTime
+            Lighting.Ambient = origLighting.Ambient
+            Lighting.OutdoorAmbient = origLighting.OutdoorAmbient
+        end)
 
         if origSky then
-            origSky:Clone().Parent = Lighting
+            local existing = Lighting:FindFirstChild("OrigSky_Clone")
+            if not existing then
+                local c = origSky:Clone()
+                c.Name = "OrigSky_Clone"
+                c.Parent = Lighting
+            end
         end
     end
 end
@@ -1200,21 +1291,23 @@ function applySky(skyName)
     for _, v in pairs(Lighting:GetChildren()) do
         if v:IsA("Sky") then v:Destroy() end
     end
-    
+
     if not skyName or skyName == "Default" then
         if origSky then
-            origSky:Clone().Parent = Lighting
+            local c = origSky:Clone()
+            c.Name = "OrigSky_Clone"
+            c.Parent = Lighting
         end
         print("[SKY] Restored default sky")
         return
     end
-    
+
     local ids = SkyIds[skyName]
     if not ids then
         warn("[SKY] Sky '" .. tostring(skyName) .. "' gak ada, fallback")
         ids = SkyIds.SunsetHD
     end
-    
+
     local sky = Instance.new("Sky")
     sky.Name = "CosmicSky_" .. skyName
     sky.SkyboxBk = ids.Bk
@@ -1224,7 +1317,7 @@ function applySky(skyName)
     sky.SkyboxRt = ids.Rt or ids.Bk
     sky.SkyboxUp = ids.Up or ids.Bk
     sky.Parent = Lighting
-    
+
     print("[SKY] ✅ Applied:", skyName)
 end
 
@@ -1501,28 +1594,30 @@ function createStatusESP(player, char, root)
     end
 end
 
--- GALAXY NAME ANIMATOR
+-- GALAXY NAME ANIMATOR (OPT: 0.08 → 0.1)
 task.spawn(function()
-    while task.wait(0.08) do
+    while task.wait(0.1) do
         if S.ESPNameMode == "Galaxy" then
             for char, billboard in pairs(StatusESP) do
-                if billboard and billboard.Parent then
-                    local label = billboard:FindFirstChildOfClass("TextLabel")
-                    if label then
-                        local grad = label:FindFirstChildOfClass("UIGradient")
-                        if not grad then
-                            grad = Instance.new("UIGradient")
-                            grad.Parent = label
-                        end
-                        local t = tick()
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
-                            ColorSequenceKeypoint.new(0.33, Color3.fromHSV((t * 0.5 + 0.33) % 1, 1, 1)),
-                            ColorSequenceKeypoint.new(0.66, Color3.fromHSV((t * 0.5 + 0.66) % 1, 1, 1)),
-                            ColorSequenceKeypoint.new(1, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
-                        })
-                        grad.Rotation = (t * 120) % 360
+                if not billboard or not billboard.Parent then
+                    StatusESP[char] = nil
+                    continue
+                end
+                local label = billboard:FindFirstChildOfClass("TextLabel")
+                if label then
+                    local grad = label:FindFirstChildOfClass("UIGradient")
+                    if not grad then
+                        grad = Instance.new("UIGradient")
+                        grad.Parent = label
                     end
+                    local t = tick()
+                    grad.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
+                        ColorSequenceKeypoint.new(0.33, Color3.fromHSV((t * 0.5 + 0.33) % 1, 1, 1)),
+                        ColorSequenceKeypoint.new(0.66, Color3.fromHSV((t * 0.5 + 0.66) % 1, 1, 1)),
+                        ColorSequenceKeypoint.new(1, Color3.fromHSV((t * 0.5) % 1, 1, 1)),
+                    })
+                    grad.Rotation = (t * 120) % 360
                 end
             end
         end
@@ -1555,61 +1650,191 @@ function ApplyGenHighlight(object, color)
     h.Parent = object
 end
 
+-- 🆕 UPDATE GENERATOR 2 MODE (Classic + Cosmic)
 function UpdateGenerator(generator)
     if not generator or not generator.Parent then return end
 
     if not ESP.Generator then
-        local old = generator:FindFirstChild("GenESP")
-        if old then old:Destroy() end
+        local a = generator:FindFirstChild("GenESP")
+        if a then a:Destroy() end
+        local b = generator:FindFirstChild("GenESPCosmic")
+        if b then b:Destroy() end
         local h = generator:FindFirstChild("GenHighlight")
         if h then h:Destroy() end
         return
     end
 
-    local percent =
-        GetGameValue(generator, "RepairProgress") or
-        GetGameValue(generator, "Progress") or 0
-
-    local billboard = generator:FindFirstChild("GenESP")
-
-    if percent >= 100 then
-        if billboard then billboard:Destroy() end
-        local h = generator:FindFirstChild("GenHighlight")
-        if h then h:Destroy() end
-        return
-    end
-
+    local percent = GetGameValue(generator, "RepairProgress")
+        or GetGameValue(generator, "Progress") or 0
     local cp = math.clamp(percent, 0, 100)
-    local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
-    local text = string.format("[%.0f%%]", percent)
 
-    if not billboard then
-        billboard = Instance.new("BillboardGui")
-        billboard.Name = "GenESP"
-        billboard.Size = UDim2.new(0, 100, 0, 30)
-        billboard.AlwaysOnTop = true
+    -- MODE CLASSIC
+    if S.ESPGenMode == "Classic" then
+        local oldCosmic = generator:FindFirstChild("GenESPCosmic")
+        if oldCosmic then oldCosmic:Destroy() end
 
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.Text = text
-        label.TextColor3 = color
-        label.TextStrokeTransparency = 0
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 12
-        label.Parent = billboard
-
-        billboard.Adornee = generator
-        billboard.Parent = generator
-    else
-        local lbl = billboard:FindFirstChildOfClass("TextLabel")
-        if lbl then
-            lbl.Text = text
-            lbl.TextColor3 = color
+        if percent >= 100 then
+            local old = generator:FindFirstChild("GenESP")
+            if old then old:Destroy() end
+            local h = generator:FindFirstChild("GenHighlight")
+            if h then h:Destroy() end
+            return
         end
-    end
 
-    ApplyGenHighlight(generator, color)
+        local color = GeneratorColor:Lerp(Color3.fromRGB(0, 255, 120), cp / 100)
+        local text = string.format("[%.0f%%]", percent)
+
+        local billboard = generator:FindFirstChild("GenESP")
+        if not billboard then
+            billboard = Instance.new("BillboardGui")
+            billboard.Name = "GenESP"
+            billboard.Size = UDim2.new(0, 100, 0, 30)
+            billboard.AlwaysOnTop = true
+
+            local label = Instance.new("TextLabel")
+            label.Name = "GenLabel"
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = text
+            label.TextColor3 = color
+            label.TextStrokeTransparency = 0
+            label.Font = Enum.Font.GothamBold
+            label.TextSize = 12
+            label.Parent = billboard
+
+            billboard.Adornee = generator
+            billboard.Parent = generator
+        else
+            local lbl2 = billboard:FindFirstChild("GenLabel")
+            if lbl2 then
+                lbl2.Text = text
+                lbl2.TextColor3 = color
+            end
+        end
+        ApplyGenHighlight(generator, color)
+
+    -- MODE COSMIC
+    elseif S.ESPGenMode == "Cosmic" then
+        local oldClassic = generator:FindFirstChild("GenESP")
+        if oldClassic then oldClassic:Destroy() end
+
+        if percent >= 100 then
+            local old = generator:FindFirstChild("GenESPCosmic")
+            if old then old:Destroy() end
+            local h = generator:FindFirstChild("GenHighlight")
+            if h then h:Destroy() end
+            return
+        end
+
+        local billboard = generator:FindFirstChild("GenESPCosmic")
+        if not billboard then
+            billboard = Instance.new("BillboardGui")
+            billboard.Name = "GenESPCosmic"
+            billboard.Size = UDim2.new(0, 120, 0, 45)
+            billboard.AlwaysOnTop = true
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.Adornee = generator
+            billboard.Parent = generator
+
+            local container = Instance.new("Frame")
+            container.Name = "Container"
+            container.Size = UDim2.new(1, 0, 1, 0)
+            container.BackgroundTransparency = 1
+            container.Parent = billboard
+
+            local iconCircle = Instance.new("Frame")
+            iconCircle.Name = "IconCircle"
+            iconCircle.Size = UDim2.new(0, 28, 0, 28)
+            iconCircle.Position = UDim2.new(0, 2, 0.5, -14)
+            iconCircle.BackgroundColor3 = Color3.fromRGB(15, 10, 30)
+            iconCircle.BorderSizePixel = 0
+            iconCircle.Parent = container
+
+            local ic = Instance.new("UICorner")
+            ic.CornerRadius = UDim.new(1, 0)
+            ic.Parent = iconCircle
+
+            local icStroke = Instance.new("UIStroke")
+            icStroke.Name = "IconStroke"
+            icStroke.Thickness = 2
+            icStroke.Color = Color3.fromRGB(255, 170, 0)
+            icStroke.Parent = iconCircle
+
+            local icoLabel = Instance.new("TextLabel")
+            icoLabel.Name = "IconText"
+            icoLabel.Size = UDim2.new(1, 0, 1, 0)
+            icoLabel.BackgroundTransparency = 1
+            icoLabel.Text = "⚡"
+            icoLabel.TextColor3 = Color3.fromRGB(255, 170, 0)
+            icoLabel.TextSize = 16
+            icoLabel.Font = Enum.Font.GothamBlack
+            icoLabel.Parent = iconCircle
+
+            local pctLabel = Instance.new("TextLabel")
+            pctLabel.Name = "PctText"
+            pctLabel.Size = UDim2.new(0, 85, 0, 20)
+            pctLabel.Position = UDim2.new(0, 34, 0, 0)
+            pctLabel.BackgroundTransparency = 1
+            pctLabel.Text = "0%"
+            pctLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+            pctLabel.TextSize = 16
+            pctLabel.Font = Enum.Font.GothamBlack
+            pctLabel.TextXAlignment = Enum.TextXAlignment.Left
+            pctLabel.TextStrokeTransparency = 0.2
+            pctLabel.Parent = container
+
+            local barBg = Instance.new("Frame")
+            barBg.Name = "BarBg"
+            barBg.Size = UDim2.new(0, 84, 0, 6)
+            barBg.Position = UDim2.new(0, 34, 0, 24)
+            barBg.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
+            barBg.BorderSizePixel = 0
+            barBg.Parent = container
+
+            local bbc = Instance.new("UICorner")
+            bbc.CornerRadius = UDim.new(1, 0)
+            bbc.Parent = barBg
+
+            local barFill = Instance.new("Frame")
+            barFill.Name = "BarFill"
+            barFill.Size = UDim2.new(0, 0, 1, 0)
+            barFill.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+            barFill.BorderSizePixel = 0
+            barFill.Parent = barBg
+
+            local bfc = Instance.new("UICorner")
+            bfc.CornerRadius = UDim.new(1, 0)
+            bfc.Parent = barFill
+        end
+
+        local container = billboard:FindFirstChild("Container")
+        if container then
+            local pctLabel = container:FindFirstChild("PctText")
+            local barBg = container:FindFirstChild("BarBg")
+            local iconCircle = container:FindFirstChild("IconCircle")
+            local iconStroke = iconCircle and iconCircle:FindFirstChild("IconStroke")
+            local icoLabel = iconCircle and iconCircle:FindFirstChild("IconText")
+
+            local color
+            if cp < 50 then
+                color = Color3.fromRGB(255, 80, 0):Lerp(Color3.fromRGB(255, 220, 80), cp / 50)
+            else
+                color = Color3.fromRGB(255, 220, 80):Lerp(Color3.fromRGB(0, 255, 150), (cp - 50) / 50)
+            end
+
+            if pctLabel then pctLabel.Text = string.format("%.0f%%", percent) end
+            if icoLabel then icoLabel.TextColor3 = color end
+            if iconStroke then iconStroke.Color = color end
+            if barBg then
+                local barFill = barBg:FindFirstChild("BarFill")
+                if barFill then
+                    barFill.Size = UDim2.new(cp / 100, 0, 1, 0)
+                    barFill.BackgroundColor3 = color
+                end
+            end
+        end
+        ApplyGenHighlight(generator, color)
+    end
 end
 
 function UpdateMapESP(obj, root)
@@ -1674,11 +1899,11 @@ AP_hookedKillers = _G.AP_HookedKillers or {}
 _G.AP_HookedKillers = AP_hookedKillers
 AP_wasLocked = false
 
--- Config
+-- Config (TIDAK DIUBAH — settingan lu)
 AP_Config = {
-    Debounce = 0.15,
-    Radius = 13,
-    FaceSensitivity = 0.3,
+    Debounce = 0.10,
+    Radius = 11.5,
+    FaceSensitivity = 0.2,
     EnableFaceCheck = true,
     EnableAttributeCheck = true,
     EnableVelocityCheck = true,
@@ -1699,7 +1924,7 @@ function AP_FindParryButton()
     if btn and btn:IsA("GuiObject") and btn.Visible then
         return btn
     end
-    
+
     for _, obj in pairs(PG:GetDescendants()) do
         if obj:IsA("GuiObject") and obj.Visible then
             local n = string.lower(obj.Name)
@@ -1735,6 +1960,26 @@ function AP_PressParryButton()
     else
         AP_PressRightClick()
     end
+end
+
+-- 🆕 FORCE RESET CAMERA PAS PARRY SUKSES
+local _oldAP_PressParryButton = AP_PressParryButton
+function AP_PressParryButton()
+    _oldAP_PressParryButton()
+    task.delay(0.05, function()
+        local cam = workspace.CurrentCamera
+        local char = LP.Character
+        if cam and char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 then
+                pcall(function()
+                    cam.CameraType = Enum.CameraType.Custom
+                    cam.CameraSubject = hum
+                    cam.Focus = CFrame.new(cam.CFrame.Position)
+                end)
+            end
+        end
+    end)
 end
 
 -- LAYER 1: RADIUS
@@ -1807,14 +2052,13 @@ function AP_HookKiller(char)
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
-    -- Trigger 1: Animasi
     animator.AnimationPlayed:Connect(function(track)
         if not AutoParry.Enabled then return end
         local anim = track.Animation
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
         if not id then return end
-        
+
         if KillerAnims["rbxassetid://" .. id] then
             if not AP_IsInRange(char) then return end
             if not AP_IsFacingMe(char) then return end
@@ -1823,8 +2067,7 @@ function AP_HookKiller(char)
             AP_DoParry()
         end
     end)
-    
-    -- Trigger 2: Attribute change
+
     char.AttributeChanged:Connect(function(attr)
         if not AutoParry.Enabled then return end
         local attackingAttrs = {
@@ -1880,14 +2123,14 @@ task.spawn(function()
         if not AutoParry.Enabled then continue end
         local myRoot = getRoot()
         if not myRoot then continue end
-        
+
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
                 local killerRoot = p.Character:FindFirstChild("HumanoidRootPart")
                 if killerRoot then
                     local dist = (killerRoot.Position - myRoot.Position).Magnitude
                     if dist <= AP_Config.RadiusProximity then
-                        if AP_IsFacingMe(p.Character) 
+                        if AP_IsFacingMe(p.Character)
                            and AP_IsMovingTowardsMe(p.Character) then
                             local hum = p.Character:FindFirstChildOfClass("Humanoid")
                             if hum then
@@ -1913,46 +2156,67 @@ task.spawn(function()
     end
 end)
 
--- CAMERA FIX (Gak Freeze Pas Klik GUI)
+-- 🆕 CAMERA FIX (Anti-Stuck abis Parry)
+AP_CamLastForced = 0
+AP_CamLastCFrame = nil
+AP_CamStuckTime = 0
+
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.2) do
         if not AP_CameraFix.Enabled then continue end
 
         local cam = workspace.CurrentCamera
         local char = LP.Character
+        if not cam or not char then continue end
 
-        if cam and char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 then
-                local isLocked = false
-                
-                if cam.CameraType ~= Enum.CameraType.Custom then 
-                    isLocked = true 
-                end
-                
-                if cam.CameraSubject ~= hum then 
-                    isLocked = true 
-                end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0 then continue end
 
-                local state = hum:GetState()
-                if state == Enum.HumanoidStateType.FallingDown
-                    or state == Enum.HumanoidStateType.Ragdoll
-                    or state == Enum.HumanoidStateType.Dead
-                    or state == Enum.HumanoidStateType.PlatformStanding then
-                    isLocked = true
-                end
+        local isStuck = false
 
-                local guiFocus = GuiService.SelectedObject
-                if guiFocus then
-                    isLocked = false
-                end
+        if cam.CameraType ~= Enum.CameraType.Custom then
+            isStuck = true
+        end
+        if cam.CameraSubject ~= hum then
+            isStuck = true
+        end
 
-                if isLocked then
-                    pcall(function()
-                        cam.CameraType = Enum.CameraType.Custom
-                        cam.CameraSubject = hum
-                    end)
+        local state = hum:GetState()
+        if state == Enum.HumanoidStateType.FallingDown
+            or state == Enum.HumanoidStateType.Ragdoll
+            or state == Enum.HumanoidStateType.Dead
+            or state == Enum.HumanoidStateType.PlatformStanding then
+            isStuck = true
+        end
+
+        if not AP_CamLastCFrame then
+            AP_CamLastCFrame = cam.CFrame
+            AP_CamStuckTime = tick()
+        else
+            local diff = (cam.CFrame.Position - AP_CamLastCFrame.Position).Magnitude
+            if diff < 0.01 then
+                if tick() - AP_CamStuckTime > 1.2 then
+                    isStuck = true
                 end
+            else
+                AP_CamStuckTime = tick()
+                AP_CamLastCFrame = cam.CFrame
+            end
+        end
+
+        local guiFocus = GuiService.SelectedObject
+        if guiFocus then isStuck = false end
+
+        if isStuck then
+            local now = tick()
+            if now - AP_CamLastForced > 0.3 then
+                AP_CamLastForced = now
+                pcall(function()
+                    cam.CameraType = Enum.CameraType.Custom
+                    cam.CameraSubject = hum
+                    cam.CameraMode = Enum.CameraMode.Classic
+                    cam.Focus = CFrame.new(cam.CFrame.Position)
+                end)
             end
         end
     end
@@ -2059,11 +2323,7 @@ function AP_UpdateCircle()
     end
 end
 
-RunService.RenderStepped:Connect(function()
-    if AutoParry.Enabled then
-        AP_UpdateCircle()
-    end
-end)
+-- ⚠️ AP_UpdateCircle RenderStepped DIPINDAH KE SECTION 5 (GABUNG 1)
 
 -- AUTO SKILL CHECK
 function pressSpace()
@@ -2166,32 +2426,7 @@ function mwResetSpeed()
     if hum then hum.WalkSpeed = 16 end
 end
 
-RunService.RenderStepped:Connect(function()
-    if not Moonwalk.Enabled then return end
-    if ParryActive then return end
-    if mwIsDowned() then return end
-
-    local char = LP.Character
-    if not char or not char.Parent then return end
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local cam = workspace.CurrentCamera
-
-    if humanoid and hrp and cam then
-        if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
-            humanoid.WalkSpeed = Moonwalk.SlowSpeed
-        end
-        local look = cam.CFrame.LookVector
-        local flatLook = Vector3.new(look.X, 0, look.Z)
-        if flatLook.Magnitude > 0 then
-            flatLook = flatLook.Unit
-            local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
-            local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
-            hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
-            humanoid:Move(Vector3.new(0, 0, 1), true)
-        end
-    end
-end)
+-- ⚠️ Moonwalk RenderStepped DIPINDAH KE SECTION 5 (GABUNG 1)
 
 function setMoonwalk(state)
     if Moonwalk.Locked and state ~= Moonwalk.Enabled then
@@ -2302,7 +2537,7 @@ function hitboxCreateText(targetPart, sizeValue, color)
     if not targetPart then return end
     local char = targetPart.Parent
     if not char then return end
-    
+
     local existing = char:FindFirstChild("CosmicHitboxText")
     if existing then
         local lbl = existing:FindFirstChildOfClass("TextLabel")
@@ -2313,7 +2548,7 @@ function hitboxCreateText(targetPart, sizeValue, color)
         end
         return
     end
-    
+
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "CosmicHitboxText"
     billboard.Size = UDim2.new(0, 60, 0, 30)
@@ -2321,7 +2556,7 @@ function hitboxCreateText(targetPart, sizeValue, color)
     billboard.StudsOffset = Vector3.new(0, 3.5, 0)
     billboard.Adornee = targetPart
     billboard.Parent = char
-    
+
     local lbl = Instance.new("TextLabel")
     lbl.Name = "HitboxLabel"
     lbl.Size = UDim2.new(1, 0, 1, 0)
@@ -2333,7 +2568,7 @@ function hitboxCreateText(targetPart, sizeValue, color)
     lbl.Font = Enum.Font.GothamBold
     lbl.TextSize = Hitbox.TextSize or 10
     lbl.Parent = billboard
-    
+
     HitboxTextObjects[targetPart] = billboard
 end
 
@@ -2414,11 +2649,11 @@ task.spawn(function()
                             hrp.Transparency = 1
                             hrp.CanCollide = not Hitbox.WallBang
                         end
-                        
+
                         local color = (targetTeam == "Killer")
                             and Hitbox.ColorKiller
                             or Hitbox.ColorSurvivor
-                        
+
                         hitboxCreateText(hrp, Hitbox.Size, color)
                     end
                 end
@@ -2769,15 +3004,52 @@ _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
 _G.AP_Config = AP_Config
 
-print("✅ [4/12] COSMIC - ESP + Auto Parry GACOR + Moonwalk + Hitbox Loaded")
-print("🛡️ Auto Parry: MULTI-LAYER (Intelius Style)")
-print("   → Radius: " .. AP_Config.Radius)
-print("   → Debounce: " .. AP_Config.Debounce)
-print("   → Face Check: " .. tostring(AP_Config.EnableFaceCheck))
-print("   → Attribute Check: " .. tostring(AP_Config.EnableAttributeCheck))
-print("   → Velocity Check: " .. tostring(AP_Config.EnableVelocityCheck))-- =========================================================
+print("✅ [4/12] COSMIC - ESP + Auto Parry + Moonwalk + Hitbox Loaded")
+print("🛡️ Auto Parry: MULTI-LAYER | Radius 11.5 | Debounce 0.10")
+print("🎥 Camera Fix: Anti-Stuck Active")
+print("⚡ ESP Gen: Classic + Cosmic Mode")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
+
+-- ⚡ GABUNGAN RENDERSTEPPED (Optimasi: 3 → 1)
+RunService.RenderStepped:Connect(function()
+    -- Auto Parry Circle
+    if AutoParry.Enabled then
+        pcall(AP_UpdateCircle)
+    end
+
+    -- FOV Anti-Override
+    if S.FOVEnabled then
+        local cam = workspace.CurrentCamera
+        if cam and math.abs(cam.FieldOfView - S.FOV) > 0.5 then
+            pcall(function() cam.FieldOfView = S.FOV end)
+        end
+    end
+
+    -- Moonwalk
+    if Moonwalk.Enabled and not ParryActive and not mwIsDowned() then
+        local char = LP.Character
+        if char and char.Parent then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            local cam = workspace.CurrentCamera
+            if humanoid and hrp and cam then
+                if Moonwalk.UseSlow and humanoid.WalkSpeed ~= Moonwalk.SlowSpeed then
+                    humanoid.WalkSpeed = Moonwalk.SlowSpeed
+                end
+                local look = cam.CFrame.LookVector
+                local flatLook = Vector3.new(look.X, 0, look.Z)
+                if flatLook.Magnitude > 0 then
+                    flatLook = flatLook.Unit
+                    local baseCF = CFrame.new(hrp.Position, hrp.Position + flatLook)
+                    local angle = math.sin(tick() * Moonwalk.SpamSpeed) * Moonwalk.Intensity
+                    hrp.CFrame = baseCF * CFrame.Angles(0, math.rad(angle), 0)
+                    humanoid:Move(Vector3.new(0, 0, 1), true)
+                end
+            end
+        end
+    end
+end)
 
 task.spawn(function()
     while task.wait(0.3) do
@@ -2832,8 +3104,9 @@ task.spawn(function()
     end
 end)
 
+-- OPT: Anti-AFK 60 → 120s
 task.spawn(function()
-    while task.wait(60) do
+    while task.wait(120) do
         if S.AntiAFK then
             pcall(function()
                 local VirtualUser = game:GetService("VirtualUser")
@@ -3064,11 +3337,25 @@ function GetNearestKillerForFlee()
     return closest, shortest
 end
 
+-- OPT: Cache GeneratorPoints (3s)
+_G.CachedGenPoints = nil
+_G.CachedGenPointsTime = 0
+
 function GetFarthestGeneratorPoint(killerRoot)
     if not killerRoot then return nil end
+    if not _G.CachedGenPoints or tick() - _G.CachedGenPointsTime > 3 then
+        _G.CachedGenPoints = {}
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and string.match(obj.Name, "^GeneratorPoint%d+$") then
+                table.insert(_G.CachedGenPoints, obj)
+            end
+        end
+        _G.CachedGenPointsTime = tick()
+    end
+
     local bestPoint, farthestDistance = nil, 0
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and string.match(obj.Name, "^GeneratorPoint%d+$") then
+    for _, obj in ipairs(_G.CachedGenPoints) do
+        if obj and obj.Parent then
             local dist = (obj.Position - killerRoot.Position).Magnitude
             if dist > farthestDistance then
                 farthestDistance = dist
@@ -3251,7 +3538,7 @@ task.spawn(function()
             for _, obj in ipairs(workspace:GetDescendants()) do
                 if obj:IsA("BasePart") then
                     local n = string.lower(obj.Name)
-                    if n == "fininshline" or n == "finishline" 
+                    if n == "fininshline" or n == "finishline"
                        or n == "escape" or n == "escapegate"
                        or string.find(n, "escape") then
                         found = obj
@@ -3268,13 +3555,13 @@ task.spawn(function()
     end
 end)
 
--- MAIN ESP LOOP
+-- MAIN ESP LOOP (OPT: 0.12 → 0.15)
 local lastESPUpdate = 0
 RunService.Heartbeat:Connect(function()
     local root = getRoot()
     if not root then return end
     local now = tick()
-    if now - lastESPUpdate >= 0.12 then
+    if now - lastESPUpdate >= 0.15 then
         lastESPUpdate = now
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LP and p.Character then
@@ -3351,8 +3638,9 @@ task.spawn(function()
 end)
 
 print("✅ [5/12] COSMIC - Fitur Aktif + Loop Utama Loaded")
-print("❌ Fly: DIHAPUS")
-print("⚡ Script: OPTIMIZED")-- =========================================================
+print("⚡ RenderStepped: 3 → 1 (Optimized)")
+print("⚡ ESP Loop: 0.15s | Anti-AFK: 120s")
+print("⚡ Gen Cache: 3s")-- =========================================================
 -- SECTION 6/12 : GUI COSMIC + TOMBOL + PANEL
 -- =========================================================
 
@@ -4103,27 +4391,26 @@ makeTab("Survivor", "🏃", 1, function()
     sec("Auto Parry (GACOR MULTI-LAYER)", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
-        if s then AP_ScanKillers() end
     end)
-    lbl("Radius 13 | Multi-layer trigger ✅", C.GRN)
+    lbl("Radius 11.5 | Multi-layer trigger ✅", C.GRN)
     lbl("Face + Attribute + Velocity Check", C.FIRE_BRIGHT)
 
-    sl("Parry Distance", 5, 40, 13, function(v)
+    sl("Parry Distance", 5, 40, 11.5, function(v)
         AutoParry.ParryDistance = v
         AP_Config.Radius = v
     end)
-    lbl("Default 13 (recommended)", C.GRN)
+    lbl("Default 11.5", C.GRN)
 
-    sl("Debounce", 0.1, 0.5, 0.15, function(v)
+    sl("Debounce", 0.05, 0.5, 0.10, function(v)
         AP_PARRY_DEBOUNCE = v
         AP_Config.Debounce = v
     end)
-    lbl("0.15 = GACOR | 0.5 = santai", C.FIRE_BRIGHT)
+    lbl("Default 0.10", C.FIRE_BRIGHT)
 
-    sl("Face Sensitivity", 0, 1, 0.3, function(v)
+    sl("Face Sensitivity", 0, 1, 0.2, function(v)
         AP_Config.FaceSensitivity = v
     end)
-    lbl("0.3 = cone 72° | 0 = arah mana aja", C.GRN)
+    lbl("Default 0.2", C.GRN)
 
     tog("Enable Face Check", true, function(s)
         AP_Config.EnableFaceCheck = s
@@ -4237,6 +4524,15 @@ makeTab("Survivor", "🏃", 1, function()
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
+
+    -- 🫥 HIDE NAME (TAB SURVIVOR)
+    sec("Hide Name", "🫥")
+    tog("Hide Name → COSMIC HUB", true, function(s)
+        S.HideName = s
+        applyHideName(s, S.HideNameText)
+    end)
+    lbl("Nama lu keliatan 'COSMIC HUB'", C.FIRE_BRIGHT)
+    lbl("Client-side only (layar lu doang)", C.DIM)
 end)
 
 -- TAB 2: KILLER
@@ -4294,6 +4590,18 @@ makeTab("ESP", "👁️", 3, function()
     sec("Object ESP", "⚡")
     tog("ESP Generator", true, function(s) ESP.Generator = s end)
     cpk("Gen Color", GeneratorColor, function(c) GeneratorColor = c end)
+
+    drp("Generator Mode", {"Classic", "Cosmic"}, "Classic", function(v)
+        S.ESPGenMode = v
+        for gen in pairs(Cached.Generators) do
+            local a = gen:FindFirstChild("GenESP")
+            if a then a:Destroy() end
+            local b = gen:FindFirstChild("GenESPCosmic")
+            if b then b:Destroy() end
+        end
+    end)
+    lbl("Classic = [%] angka | Cosmic = bar + ⚡", C.FIRE_BRIGHT)
+
     tog("ESP Pallet", true, function(s) ESP.Pallet = s end)
     cpk("Pallet Color", PalletColor, function(c) PalletColor = c end)
     tog("ESP Window", true, function(s) ESP.Window = s end)
@@ -4446,9 +4754,8 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
-print("🛡️ Auto Parry: GACOR MULTI-LAYER")
-print("🔥 Fire Default: CosmicFire (ON)")
-print("🌈 ESP Default: Galaxy (9.35)")-- =========================================================
+print("🫥 Hide Name: Tab Survivor")
+print("⚡ ESP Gen Mode: Classic/Cosmic")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 
@@ -4896,12 +5203,12 @@ print("🎥 FOV Preset: 70/90/120 di Misc")-- ==================================
 -- 🔥 AUTO APPLY SEMUA SAAT EXECUTE
 task.spawn(function()
     task.wait(4)
-    
+
     if S.FireOn then
         pcall(applyFire)
         print("[AUTO] Fire applied:", S.FireType)
     end
-    
+
     if S.SkyId and S.SkyId ~= "Default" then
         pcall(function()
             applySky(S.SkyId)
@@ -4909,19 +5216,25 @@ task.spawn(function()
         S.SkyAutoApplied = true
         print("[AUTO] Sky applied:", S.SkyId)
     end
-    
+
     if S.Contrast then
         pcall(applyContrast)
         print("[AUTO] Contrast applied")
     end
-    
+
     if S.FOVEnabled then
         pcall(applyFOV)
         print("[AUTO] FOV applied:", S.FOV)
     end
-    
+
+    if S.HideName then
+        pcall(function() applyHideName(true, S.HideNameText) end)
+        print("[AUTO] Hide Name applied:", S.HideNameText)
+    end
+
     print("[AUTO] ESP Name Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
-    print("[AUTO] Auto Parry: Multi-Layer Gacor")
+    print("[AUTO] ESP Gen Mode:", S.ESPGenMode)
+    print("[AUTO] Auto Parry: Multi-Layer | Radius 11.5 | Debounce 0.10")
 end)
 
 -- AUTO RE-APPLY SAAT RESPAWN
@@ -4949,6 +5262,7 @@ LP.CharacterAdded:Connect(function(char)
     if S.HDSunRays then pcall(function() applyHDSunRays(true) end) end
     if S.HDDepthField then pcall(function() applyHDDepthField(true) end) end
     if S.HDAntiAliasing then pcall(function() applyHDAntiAliasing(true) end) end
+    if S.HideName then pcall(function() applyHideName(true, S.HideNameText) end) end
     if S.NoClip then
         task.wait(0.3)
         for _, v in pairs(char:GetDescendants()) do
@@ -5015,6 +5329,9 @@ task.spawn(function()
         if S.EightBitOn then
             pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
         end
+        if S.HideName then
+            pcall(function() applyHideName(true, S.HideNameText) end)
+        end
         if AutoParry.Enabled then pcall(AP_ScanKillers) end
         if SkillCheck.Enabled then pcall(startSkillCheck) end
         if FastVault.Enabled then
@@ -5023,13 +5340,15 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/12] COSMIC - Auto Re-Apply + Keybind V + Sky Auto Loaded")
+print("✅ [9/12] COSMIC - Auto Re-Apply + Keybind V + Auto Apply Loaded")
 print("🔥 Fire:", S.FireType, "(auto ON)")
 print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
 print("🎥 FOV:", S.FOV, "(auto ON)")
+print("🫥 Hide Name:", S.HideNameText)
 print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
-print("🛡️ Auto Parry: GACOR MULTI-LAYER")-- =========================================================
+print("⚡ ESP Gen Mode:", S.ESPGenMode)
+print("🛡️ Auto Parry: Radius 11.5 | Debounce 0.10")-- =========================================================
 -- SECTION 10/12 : LOGIC FITUR BARU + FIX FOV BIND
 -- =========================================================
 
@@ -5108,7 +5427,7 @@ task.spawn(function()
             for _, obj in ipairs(workspace:GetDescendants()) do
                 if obj:IsA("BasePart") then
                     local n = string.lower(obj.Name)
-                    if n == "fininshline" or n == "finishline" 
+                    if n == "fininshline" or n == "finishline"
                        or n == "escape" or n == "escapegate"
                        or string.find(n, "escape") then
                         found = obj
@@ -5193,10 +5512,11 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🔷 SKY AUTO-REAPPLY
+-- ⚡ GABUNG SKY + FIRE AUTO-REAPPLY (Optimasi 2 → 1)
 -- =========================================================
 task.spawn(function()
-    while task.wait(4) do
+    while task.wait(8) do
+        -- Sky check
         if S.SkyId and S.SkyId ~= "Default" then
             local currentSky = nil
             for _, v in pairs(Lighting:GetChildren()) do
@@ -5209,14 +5529,7 @@ task.spawn(function()
                 pcall(function() applySky(S.SkyId) end)
             end
         end
-    end
-end)
-
--- =========================================================
--- 🔥 FIRE AUTO-REAPPLY
--- =========================================================
-task.spawn(function()
-    while task.wait(5) do
+        -- Fire check
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             if head and not head:FindFirstChild("RoooorFire") then
@@ -5227,25 +5540,12 @@ task.spawn(function()
 end)
 
 -- =========================================================
--- 🎥 FIX FOV BIND (RenderStepped — Anti Override Game)
+-- 🎥 FIX FOV BIND (DIPINDAH KE SECTION 5 GABUNGAN RENDERSTEPPED)
 -- =========================================================
-task.spawn(function()
-    RunService.RenderStepped:Connect(function()
-        if S.FOVEnabled then
-            local cam = workspace.CurrentCamera
-            if cam and math.abs(cam.FieldOfView - S.FOV) > 0.5 then
-                pcall(function()
-                    cam.FieldOfView = S.FOV
-                end)
-            end
-        end
-    end)
-end)
 
-print("✅ [10/12] COSMIC - Logic Fitur Baru + FIX FOV BIND Loaded")
-print("🔷 Sky Auto-Reapply: Active")
-print("🔥 Fire Auto-Reapply: Active")
-print("🎥 FOV Bind: RenderStepped (Anti Override)")-- =========================================================
+print("✅ [10/12] COSMIC - Logic Fitur Baru Loaded")
+print("⚡ Sky+Fire Auto-Reapply: 1 loop (8s)")
+print("🎥 FOV Bind: Section 5 (Gabungan)")-- =========================================================
 -- SECTION 11/12 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)

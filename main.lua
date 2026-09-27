@@ -1340,7 +1340,7 @@ end
 _G.Roooor_updateFPSPing = updateFPSPing
 
 print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
--- SECTION 4/12 : ESP + AUTO PARRY + MOONWALK + HITBOX + FIX CAMERA
+-- SECTION 4/12 : ESP + AUTO PARRY GACOR + MOONWALK + HITBOX
 -- =========================================================
 
 ESPObjects = {}
@@ -1501,7 +1501,7 @@ function createStatusESP(player, char, root)
     end
 end
 
--- GALAXY NAME ANIMATOR (OPTIMIZED)
+-- GALAXY NAME ANIMATOR
 task.spawn(function()
     while task.wait(0.08) do
         if S.ESPNameMode == "Galaxy" then
@@ -1666,7 +1666,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- 🛡️ AUTO PARRY CUSTOM (Distance 13 + RADIUS CHECK)
+-- 🛡️ AUTO PARRY GACOR (MULTI-LAYER + INTELIUS STYLE)
 -- =========================================================
 AP_lastParry = 0
 AP_parryCount = 0
@@ -1674,12 +1674,42 @@ AP_hookedKillers = _G.AP_HookedKillers or {}
 _G.AP_HookedKillers = AP_hookedKillers
 AP_wasLocked = false
 
+-- ============ CONFIG ============
+AP_Config = {
+    Debounce = 0.15,
+    Radius = 13,
+    FaceSensitivity = 0.3,
+    EnableFaceCheck = true,
+    EnableAttributeCheck = true,
+    EnableVelocityCheck = true,
+    RadiusProximity = 15,
+}
+
+-- ============ HELPER ============
 function AP_GetParryButton()
     local current = PG
     for segment in string.gmatch("Survivor-mob.Controls.Gui-mob", "[^%.]+") do
         current = current and current:FindFirstChild(segment)
     end
     return current
+end
+
+function AP_FindParryButton()
+    local btn = AP_GetParryButton()
+    if btn and btn:IsA("GuiObject") and btn.Visible then
+        return btn
+    end
+    
+    for _, obj in pairs(PG:GetDescendants()) do
+        if obj:IsA("GuiObject") and obj.Visible then
+            local n = string.lower(obj.Name)
+            if n:find("parry") or n:find("block") or n:find("guard") then
+                return obj
+            end
+        end
+    end
+    
+    return nil
 end
 
 function AP_PressRightClick()
@@ -1690,7 +1720,7 @@ end
 
 function AP_PressParryButton()
     if UIS.TouchEnabled then
-        local btn = AP_GetParryButton()
+        local btn = AP_FindParryButton()
         if btn and btn:IsA("GuiObject") then
             local pos = btn.AbsolutePosition
             local size = btn.AbsoluteSize
@@ -1700,29 +1730,89 @@ function AP_PressParryButton()
             VirtualInputManager:SendTouchEvent(8823, 0, x, y)
             task.wait(0.01)
             VirtualInputManager:SendTouchEvent(8823, 2, x, y)
+        else
+            AP_PressRightClick()
         end
     else
         AP_PressRightClick()
     end
 end
 
+-- ============ LAYER 1: RADIUS ============
 function AP_IsInRange(killerChar)
     local myRoot = getRoot()
     if not myRoot or not killerChar then return false end
     local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
     if not enemyRoot then return false end
-    return (enemyRoot.Position - myRoot.Position).Magnitude <= AutoParry.ParryDistance
+    return (enemyRoot.Position - myRoot.Position).Magnitude <= AP_Config.Radius
 end
 
+-- ============ LAYER 2: FACE CHECK ============
+function AP_IsFacingMe(killerChar)
+    if not AP_Config.EnableFaceCheck then return true end
+    
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    
+    local toMe = (myRoot.Position - enemyRoot.Position).Unit
+    local killerLook = enemyRoot.CFrame.LookVector
+    local dot = killerLook:Dot(toMe)
+    
+    return dot >= AP_Config.FaceSensitivity
+end
+
+-- ============ LAYER 3: ATTRIBUTE ============
+function AP_IsAttacking(killerChar)
+    if not AP_Config.EnableAttributeCheck then return true end
+    
+    local checks = {
+        "IsAttacking", "Attacking", "IsSwinging",
+        "Swinging", "AttackActive", "IsParrying",
+    }
+    
+    for _, attr in ipairs(checks) do
+        if killerChar:GetAttribute(attr) == true then
+            return true
+        end
+    end
+    
+    return true
+end
+
+-- ============ LAYER 4: VELOCITY ============
+function AP_IsMovingTowardsMe(killerChar)
+    if not AP_Config.EnableVelocityCheck then return true end
+    
+    local myRoot = getRoot()
+    if not myRoot or not killerChar then return false end
+    
+    local enemyRoot = killerChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then return false end
+    
+    local velocity = enemyRoot.AssemblyLinearVelocity
+    if velocity.Magnitude < 5 then return true end
+    
+    local moveDir = velocity.Unit
+    local toMe = (myRoot.Position - enemyRoot.Position).Unit
+    local dot = moveDir:Dot(toMe)
+    
+    return dot >= 0
+end
+
+-- ============ MAIN PARRY ============
 function AP_DoParry()
     local now = tick()
-    if now - AP_lastParry < AP_PARRY_DEBOUNCE then return end
+    if now - AP_lastParry < AP_Config.Debounce then return end
     AP_lastParry = now
     AP_parryCount = AP_parryCount + 1
     print("[AP] 🔥 PARRY #" .. AP_parryCount)
     AP_PressParryButton()
 end
 
+-- ============ HOOK KILLER ============
 function AP_HookKiller(char)
     if AP_hookedKillers[char] then return end
     AP_hookedKillers[char] = true
@@ -1732,15 +1822,38 @@ function AP_HookKiller(char)
     local animator = hum:FindFirstChildOfClass("Animator")
     if not animator then return end
 
+    -- TRIGGER 1: ANIMASI
     animator.AnimationPlayed:Connect(function(track)
         if not AutoParry.Enabled then return end
         local anim = track.Animation
         if not anim then return end
         local id = anim.AnimationId:match("%d+")
         if not id then return end
+        
         if KillerAnims["rbxassetid://" .. id] then
-            if AP_IsInRange(char) then
+            if not AP_IsInRange(char) then return end
+            if not AP_IsFacingMe(char) then return end
+            if not AP_IsAttacking(char) then return end
+            if not AP_IsMovingTowardsMe(char) then return end
+            
+            AP_DoParry()
+        end
+    end)
+    
+    -- TRIGGER 2: ATTRIBUTE CHANGE
+    char.AttributeChanged:Connect(function(attr)
+        if not AutoParry.Enabled then return end
+        local attackingAttrs = {
+            "IsAttacking", "Attacking", "IsSwinging",
+            "Swinging", "AttackActive"
+        }
+        for _, a in ipairs(attackingAttrs) do
+            if attr == a and char:GetAttribute(a) == true then
+                if not AP_IsInRange(char) then return end
+                if not AP_IsFacingMe(char) then return end
+                if not AP_IsMovingTowardsMe(char) then return end
                 AP_DoParry()
+                return
             end
         end
     end)
@@ -1777,11 +1890,50 @@ task.spawn(function()
     end
 end)
 
--- =========================================================
--- 🎥 FIX CAMERA UNLOCK (Gak Freeze Pas Klik GUI)
--- =========================================================
+-- PROXIMITY PRE-TRIGGER
 task.spawn(function()
-    while task.wait(0.5) do -- 🔥 FIX: 0.05 → 0.5 (20x/detik → 2x/detik)
+    while task.wait(0.05) do
+        if not AutoParry.Enabled then continue end
+        
+        local myRoot = getRoot()
+        if not myRoot then continue end
+        
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Team and p.Team.Name == "Killer" then
+                local killerRoot = p.Character:FindFirstChild("HumanoidRootPart")
+                if killerRoot then
+                    local dist = (killerRoot.Position - myRoot.Position).Magnitude
+                    
+                    if dist <= AP_Config.RadiusProximity then
+                        if AP_IsFacingMe(p.Character) 
+                           and AP_IsMovingTowardsMe(p.Character) then
+                            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                            if hum then
+                                local animator = hum:FindFirstChildOfClass("Animator")
+                                if animator then
+                                    for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                                        local a = track.Animation
+                                        if a and a.AnimationId then
+                                            local id = a.AnimationId:match("%d+")
+                                            if KillerAnims["rbxassetid://" .. id] then
+                                                AP_DoParry()
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- CAMERA FIX (Gak Freeze Pas Klik GUI)
+task.spawn(function()
+    while task.wait(0.5) do
         if not AP_CameraFix.Enabled then continue end
 
         local cam = workspace.CurrentCamera
@@ -1792,17 +1944,14 @@ task.spawn(function()
             if hum and hum.Health > 0 then
                 local isLocked = false
                 
-                -- Cek camera type
                 if cam.CameraType ~= Enum.CameraType.Custom then 
                     isLocked = true 
                 end
                 
-                -- Cek camera subject
                 if cam.CameraSubject ~= hum then 
                     isLocked = true 
                 end
 
-                -- Cek humanoid state
                 local state = hum:GetState()
                 if state == Enum.HumanoidStateType.FallingDown
                     or state == Enum.HumanoidStateType.Ragdoll
@@ -1811,7 +1960,6 @@ task.spawn(function()
                     isLocked = true
                 end
 
-                -- 🔥 GUARD: Skip reset kalo user lagi interact GUI (anti freeze)
                 local guiFocus = GuiService.SelectedObject
                 if guiFocus then
                     isLocked = false
@@ -2646,10 +2794,12 @@ _G.Roooor_hitboxUpdateVisibility = hitboxUpdateVisibility
 _G.AP_ScanKillers = AP_ScanKillers
 _G.AP_ClearCircle = AP_ClearCircle
 _G.AP_GetCount = function() return AP_parryCount end
+_G.AP_Config = AP_Config
 
-print("✅ [4/12] COSMIC - ESP + Auto Parry (13) + Moonwalk + Hitbox + FIX CAMERA Loaded")
-print("🎥 Camera Fix: 0.5s loop + GUI guard (anti freeze)")
-print("🛡️ Auto Parry Distance: 13 (RADIUS CHECK)")-- =========================================================
+print("✅ [4/12] COSMIC - ESP + AUTO PARRY GACOR + Moonwalk + Hitbox Loaded")
+print("🛡️ Auto Parry GACOR: Multi-Layer (Animasi + Radius + Face + Attr + Velocity)")
+print("🎥 Camera Fix: 0.5s loop + GUI guard")
+print("📦 Hitbox: TEXT ANGKA")-- =========================================================
 -- SECTION 5/12 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -3226,7 +3376,7 @@ end)
 
 print("✅ [5/12] COSMIC - Fitur Aktif + Loop Utama Loaded")
 print("❌ Fly: DIHAPUS")
-print("⚡ Optimized loops: ACTIVE")-- =========================================================
+print("⚡ Script: OPTIMIZED")-- =========================================================
 -- SECTION 6/12 : GUI COSMIC + TOMBOL + PANEL
 -- =========================================================
 
@@ -3974,21 +4124,45 @@ cs = _G.Roooor_cs
 -- TAB 1: SURVIVOR
 makeTab("Survivor", "🏃", 1, function()
 
-    sec("Auto Parry (CUSTOM)", "🛡️")
+    sec("Auto Parry (GACOR MULTI-LAYER)", "🛡️")
     tog("Enable Auto Parry", false, function(s)
         AutoParry.Enabled = s
         if s then AP_ScanKillers() end
     end)
-    lbl("Radius 13 | Cuma parry kalo killer DALEM radius ✅", C.GRN)
+    lbl("Radius 13 | Multi-layer trigger ✅", C.GRN)
+    lbl("Face + Attribute + Velocity Check", C.FIRE_BRIGHT)
 
     sl("Parry Distance", 5, 40, 13, function(v)
         AutoParry.ParryDistance = v
+        AP_Config.Radius = v
     end)
+    lbl("Default 13 (recommended)", C.GRN)
 
-    sl("Debounce", 0.1, 0.5, 0.5, function(v)
+    sl("Debounce", 0.1, 0.5, 0.15, function(v)
         AP_PARRY_DEBOUNCE = v
+        AP_Config.Debounce = v
     end)
-    lbl("0.1 = cepet | 0.5 = settingan lo", C.GRN)
+    lbl("0.15 = GACOR | 0.5 = santai", C.FIRE_BRIGHT)
+
+    sl("Face Sensitivity", 0, 1, 0.3, function(v)
+        AP_Config.FaceSensitivity = v
+    end)
+    lbl("0.3 = cone 72° | 0 = arah mana aja", C.GRN)
+
+    tog("Enable Face Check", true, function(s)
+        AP_Config.EnableFaceCheck = s
+    end)
+    lbl("Wajib killer ngadep lo", C.DIM)
+
+    tog("Enable Attribute Check", true, function(s)
+        AP_Config.EnableAttributeCheck = s
+    end)
+    lbl("Cek IsAttacking attribute", C.DIM)
+
+    tog("Enable Velocity Check", true, function(s)
+        AP_Config.EnableVelocityCheck = s
+    end)
+    lbl("Cek killer gerak ke arah lo", C.DIM)
 
     sl("Circle Height", -5, 15, -2.5, function(v)
         AP_ESPCircle.YOffset = v
@@ -4000,6 +4174,10 @@ makeTab("Survivor", "🏃", 1, function()
         if not s then AP_ClearCircle() end
     end)
     lbl("🟢 Aman | 🔴 Killer masuk", C.FIRE_BRIGHT)
+
+    btn("🔄 Reset Parry Counter", function()
+        AP_parryCount = 0
+    end)
 
     sec("Auto Skill Check (2 MODE)", "⚡")
     tog("Enable Auto Skill Check", true, function(s)
@@ -4292,9 +4470,9 @@ makeTab("Moonwalk", "🕺", 5, function()
 end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
+print("🛡️ Auto Parry: GACOR MULTI-LAYER")
 print("🔥 Fire Default: CosmicFire (ON)")
-print("🌈 ESP Default: Galaxy (9.35)")
-print("🛡️ Auto Parry Default: Distance 13")-- =========================================================
+print("🌈 ESP Default: Galaxy (9.35)")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
 
@@ -4308,7 +4486,7 @@ drp = _G.Roooor_drp
 makeTab = _G.Roooor_makeTab
 cs = _G.Roooor_cs
 
--- TAB 7: MISC (FOV PRESET + Fly Dihapus)
+-- TAB 7: MISC (FOV PRESET)
 makeTab("Misc", "⚙️", 7, function()
 
     sec("Movement", "🏃")
@@ -4321,9 +4499,8 @@ makeTab("Misc", "⚙️", 7, function()
     tog("No Clip", false, function(s) S.NoClip = s end)
     tog("No Clip Camera", false, function(s) S.NoClipCamera = s end)
 
-    -- 🔥 FOV PRESET (BARU — di Misc)
     sec("FOV (Default 90)", "🎥")
-    lbl("🔥 Default FOV: 90 (auto ON)", C.GRN)
+    lbl("🔥 Default FOV: 90 (auto ON + bind)", C.GRN)
     lbl("Klik preset buat ganti FOV", C.FIRE_BRIGHT)
 
     local FOV70Btn = Instance.new("TextButton")
@@ -4473,7 +4650,7 @@ makeTab("Misc", "⚙️", 7, function()
     btn("🔄 Rejoin Server", function() rejoinServer() end)
 end)
 
--- TAB 9: VISUAL (FOV LAMA DIHAPUS)
+-- TAB 9: VISUAL
 makeTab("Visual", "✨", 9, function()
 
     sec("Fullbright & No Fog", "💡")
@@ -4658,7 +4835,7 @@ makeTab("Visual", "✨", 9, function()
 
     sec("Info", "ℹ️")
     lbl("🕺 Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
-    lbl("🛡️ Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
+    lbl("🛡️ Auto Parry GACOR: Tab Survivor", C.FIRE_BRIGHT)
     lbl("📦 Hitbox: Tab Hitbox → Enable", C.FIRE_BRIGHT)
     lbl("🎯 Aimbot: Tab Aimbot → Enable", C.FIRE_BRIGHT)
     lbl("🎥 FOV: Tab Misc (70/90/120)", C.GRN)
@@ -4736,8 +4913,7 @@ makeTab("Hitbox", "📦", 10, function()
 end)
 
 print("✅ [8/12] COSMIC - Misc + Visual + Hitbox Loaded")
-print("🎥 FOV Preset: 70/90/120 di Misc")
-print("❌ FOV lama di Visual: DIHAPUS")-- =========================================================
+print("🎥 FOV Preset: 70/90/120 di Misc")-- =========================================================
 -- SECTION 9/12 : AUTO RE-APPLY + KEYBIND + AUTO APPLY
 -- =========================================================
 
@@ -4769,6 +4945,7 @@ task.spawn(function()
     end
     
     print("[AUTO] ESP Name Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
+    print("[AUTO] Auto Parry: Multi-Layer Gacor")
 end)
 
 -- AUTO RE-APPLY SAAT RESPAWN
@@ -4875,7 +5052,8 @@ print("🔥 Fire:", S.FireType, "(auto ON)")
 print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
 print("🎥 FOV:", S.FOV, "(auto ON)")
-print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)-- =========================================================
+print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
+print("🛡️ Auto Parry: GACOR MULTI-LAYER")-- =========================================================
 -- SECTION 10/12 : LOGIC FITUR BARU + FIX FOV BIND
 -- =========================================================
 
@@ -5091,7 +5269,7 @@ end)
 print("✅ [10/12] COSMIC - Logic Fitur Baru + FIX FOV BIND Loaded")
 print("🔷 Sky Auto-Reapply: Active")
 print("🔥 Fire Auto-Reapply: Active")
-print("🎥 FOV Bind: RenderStepped (Anti Override Game)")-- =========================================================
+print("🎥 FOV Bind: RenderStepped (Anti Override)")-- =========================================================
 -- SECTION 11/12 : PRINT FINAL
 -- =========================================================
 task.wait(0.5)
@@ -5108,11 +5286,16 @@ print("║     → Sky: SunsetHD                      ║")
 print("║     → FOV: 90 (Tab Misc)                 ║")
 print("║     → Auto Parry: Distance 13            ║")
 print("╠══════════════════════════════════════════╣")
-print("║  🛡️ Auto Parry CUSTOM                    ║")
-print("║     → Radius 13                          ║")
-print("║     → Circle Rata Tanah                  ║")
-print("║     → Camera Auto Unlock (FIX FREEZE)    ║")
-print("║     → NO PARRY kalo killer di luar radius║")
+print("║  🛡️ AUTO PARRY GACOR (MULTI-LAYER)       ║")
+print("║     → Animasi Killer                     ║")
+print("║     → Radius + Jarak                     ║")
+print("║     → Face Check (dot product)           ║")
+print("║     → Attribute Check                    ║")
+print("║     → Velocity Check                     ║")
+print("║     → Proximity Pre-Trigger              ║")
+print("║     → Debounce 0.15 (Responsif)          ║")
+print("║     → Camera Freeze FIX                  ║")
+print("╠══════════════════════════════════════════╣")
 print("║  ⚡ Auto Skill Check (2 MODE)            ║")
 print("║  🕺 Moonwalk (Tombol MW + LOCK)          ║")
 print("║  ⚡ Fast Vault                            ║")
@@ -5136,8 +5319,8 @@ print("║  📊 FPS + Ping Counter                   ║")
 print("╠══════════════════════════════════════════╣")
 print("║  🎥 FIX YANG UDAH DIPASANG:              ║")
 print("║     → Camera Freeze FIX (0.5s loop)      ║")
-print("║     → FOV Bind RenderStepped (anti      ║")
-print("║       override game)                     ║")
+print("║     → FOV Bind RenderStepped             ║")
+print("║     → Auto Parry GACOR (multi-layer)     ║")
 print("╠══════════════════════════════════════════╣")
 print("║  ⚡ OPTIMIZED:                           ║")
 print("║     → Loading loop 0.05 → 0.06-0.1       ║")
@@ -5165,7 +5348,7 @@ print("🌈 ESP: Galaxy Mode (Size 9.35)")
 print("🎨 Contrast: ON")
 print("🔷 Sky: SunsetHD (auto ON)")
 print("🎥 FOV: 90 (auto ON, FIX bind)")
-print("🛡️ Auto Parry: Distance 13")
+print("🛡️ Auto Parry: GACOR MULTI-LAYER (Distance 13)")
 print("🎥 Camera Freeze: FIXED")
 print("➡️ Lanjut ke Section 12 (Aimbot)")-- =========================================================
 -- SECTION 12/12 : AIMBOT (TAB AIMBOT COSMIC)
@@ -5325,7 +5508,7 @@ function Aimlock_StopLoop()
     end
     Aimlock.CurrentTarget = nil
     
-    -- 🔥 FIX: Restore camera ke Custom
+    -- Restore camera ke Custom
     local cam = workspace.CurrentCamera
     local char = LP.Character
     if cam and char then

@@ -1752,7 +1752,7 @@ function UpdateSCPEsp(root)
 end
 
 -- =========================================================
--- AUTO PARRY GACOR (SETTING BARU: 15/0.2/0.7)
+-- AUTO PARRY GACOR (SETTING: 15/0.2/0.7)
 -- =========================================================
 AP_lastParry = 0
 AP_parryCount = 0
@@ -1820,10 +1820,15 @@ function AP_PressParryButton()
     end
 end
 
+-- 🆕 CAMERA RESET (skip kalau GUI focus / baru parry)
 local _oldAP_PressParryButton = AP_PressParryButton
 function AP_PressParryButton()
     _oldAP_PressParryButton()
-    task.delay(0.05, function()
+
+    task.delay(0.3, function()
+        -- Skip kalau user lagi buka menu
+        if GuiService.SelectedObject then return end
+
         local cam = workspace.CurrentCamera
         local char = LP.Character
         if cam and char then
@@ -2009,7 +2014,7 @@ task.spawn(function()
     end
 end)
 
--- CAMERA FIX
+-- 🆕 CAMERA FIX (ANTI-LOCK)
 AP_CamLastForced = 0
 AP_CamLastCFrame = nil
 AP_CamStuckTime = 0
@@ -2053,8 +2058,20 @@ task.spawn(function()
             end
         end
 
-        local guiFocus = GuiService.SelectedObject
-        if guiFocus then isStuck = false end
+        -- 🆕 SKIP kalau GUI di-focus (user klik menu)
+        if GuiService.SelectedObject then
+            isStuck = false
+        end
+
+        -- 🆕 SKIP kalau baru parry (0.5s)
+        if AP_lastParry > 0 and tick() - AP_lastParry < 0.5 then
+            isStuck = false
+        end
+
+        -- 🆕 SKIP kalau user lagi gerak kamera (mouse lock center)
+        if UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then
+            isStuck = false
+        end
 
         if isStuck then
             local now = tick()
@@ -2069,7 +2086,9 @@ task.spawn(function()
             end
         end
     end
-end)-- AP CIRCLE
+end)
+
+-- AP CIRCLE
 AP_parryCirclePart = nil
 AP_parryCircleAttachments = {}
 AP_parryCircleBeams = {}
@@ -2171,15 +2190,13 @@ function AP_UpdateCircle()
 end
 
 -- =========================================================
--- AUTO SKILL CHECK (FALLENS STYLE — Perfect + King's Scourge)
+-- AUTO SKILL CHECK (FALLENS STYLE)
 -- =========================================================
 function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
     task.wait()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-end
-
-TouchID = 8822
+endTouchID = 8822
 ActionPath = "Survivor-mob.Controls.action.check"
 SkillHeartbeat = nil
 busy = false
@@ -2244,7 +2261,7 @@ function startSkillCheck()
             return
         end
 
-        -- PERFECT MODE (Fallens Style, King's Scourge Ready)
+        -- PERFECT MODE (Fallens Style)
         if SkillCheck.Mode == "Perfect" then
             local startRange = (gr + 102) % 360
             local endRange   = (gr + 116) % 360
@@ -2874,7 +2891,8 @@ _G.AP_Config = AP_Config
 print("✅ [4/13] COSMIC - ESP + Auto Parry + Moonwalk + Hitbox Loaded")
 print("🛡️ Auto Parry: Radius 15 | Debounce 0.2 | Face 0.7")
 print("📊 ESP Gen: Classic + Bar")
-print("⚡ Auto Skill Check: Fallens Style (Perfect 102-116°)")-- =========================================================
+print("⚡ Auto Skill Check: Fallens Style")
+print("🎥 Camera Fix: Anti-Lock Active")-- =========================================================
 -- SECTION 5/13 : FITUR AKTIF + LOOP UTAMA
 -- =========================================================
 
@@ -5081,7 +5099,6 @@ print("✅ [8/13] COSMIC - Misc + Visual + Hitbox Loaded")-- ===================
 -- SECTION 9/13 : AUTO RE-APPLY + KEYBIND
 -- =========================================================
 
--- AUTO APPLY SEMUA SAAT EXECUTE
 task.spawn(function()
     task.wait(4)
 
@@ -5113,7 +5130,6 @@ task.spawn(function()
     print("[AUTO] Auto Parry: Radius 15 | Debounce 0.2 | Face 0.7")
 end)
 
--- AUTO RE-APPLY SAAT RESPAWN
 LP.CharacterAdded:Connect(function(char)
     task.wait(1.5)
     if S.FireOn then pcall(applyFire) end
@@ -5192,6 +5208,36 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- 🆕 KEYBIND K = UNLOCK KAMERA
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.K then
+        local cam = workspace.CurrentCamera
+        local char = LP.Character
+        if cam and char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                pcall(function()
+                    cam.CameraType = Enum.CameraType.Custom
+                    cam.CameraSubject = hum
+                    cam.Focus = CFrame.new(cam.CFrame.Position)
+                    GuiService.SelectedObject = nil
+                end)
+
+                pcall(function()
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Camera Unlock",
+                        Text = "Kamera di-reset",
+                        Duration = 1.5
+                    })
+                end)
+            end
+        end
+    end
+end)
+
+print("[KEYBIND] V = Moonwalk | K = Unlock Camera")
+
 -- AUTO APPLY ON EXECUTE
 task.spawn(function()
     task.wait(3)
@@ -5212,12 +5258,13 @@ task.spawn(function()
     end
 end)
 
-print("✅ [9/13] COSMIC - Auto Re-Apply + Keybind V Loaded")
+print("✅ [9/13] COSMIC - Auto Re-Apply + Keybind Loaded")
 print("🔥 Fire:", S.FireType, "(auto ON)")
 print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
 print("🎥 FOV:", S.FOV, "(auto ON)")
-print("🛡️ Auto Parry: Radius 15 | Debounce 0.2")-- =========================================================
+print("🛡️ Auto Parry: Radius 15 | Debounce 0.2")
+print("⌨️ Keybind: V = Moonwalk | K = Unlock Camera")-- =========================================================
 -- SECTION 10/13 : LOGIC FITUR BARU + FIX FOV BIND
 -- =========================================================
 
@@ -5937,6 +5984,26 @@ pcall(function()
     if Aimlock_Gui then Aimlock_Gui.ResetOnSpawn = false end
 end)
 
+-- 🆕 Force ResetOnSpawn = false di SEMUA GUI
+local function ForceResetOnSpawnFalse()
+    for _, g in ipairs(PG:GetChildren()) do
+        if g:IsA("ScreenGui") then
+            pcall(function()
+                g.ResetOnSpawn = false
+            end)
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(2) do
+        pcall(ForceResetOnSpawnFalse)
+    end
+end)
+
+print("[ANTI-HILANG] Force ResetOnSpawn = false aktif")
+
+-- Function recreate semua GUI kalau ilang
 function RecreateAllGUI()
     if not gui or not gui.Parent then
         local existing = PG:FindFirstChild("CosmicHub")
@@ -5944,7 +6011,7 @@ function RecreateAllGUI()
             gui = existing
             gui.ResetOnSpawn = false
         else
-            warn("[RECREATE] CosmicHub ilang total!")
+            warn("[RECOVERY] CosmicHub ilang, tunggu re-execute")
         end
     end
 
@@ -5983,12 +6050,14 @@ function RecreateAllGUI()
     end
 end
 
+-- Loop cek tiap 1 detik
 task.spawn(function()
     while task.wait(1) do
         pcall(RecreateAllGUI)
     end
 end)
 
+-- Respawn — re-apply semua fitur
 LP.CharacterAdded:Connect(function(char)
     task.wait(2)
     print("[RESPAWN] Re-apply fitur...")
@@ -6018,6 +6087,7 @@ LP.CharacterAdded:Connect(function(char)
     print("[RESPAWN] Selesai!")
 end)
 
+-- Detect place change
 local _lastPlaceId = game.PlaceId
 task.spawn(function()
     while task.wait(2) do
@@ -6056,7 +6126,8 @@ print("")
 print("═══════════════════════════════════════════")
 print("  SECTION 13 - ANTI-ILANG MENU")
 print("═══════════════════════════════════════════")
-print("  ResetOnSpawn = false")
+print("  ResetOnSpawn = false (semua GUI)")
+print("  Force loop tiap 2 detik")
 print("  Recovery loop tiap 1 detik")
 print("  Auto re-apply pas respawn")
 print("  Detect place change")

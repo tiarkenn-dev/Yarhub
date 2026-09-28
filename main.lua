@@ -469,8 +469,8 @@ _G.RoooorS = _G.RoooorS or {
     ESPGenBarSize = 80,
     ESPGenBarHeight = 14,
     ESPGenBarTextSize = 10,
-    -- 🫥 HIDE NAME
-    HideName = true,
+    -- 🫥 HIDE NAME (OFF default)
+    HideName = false,
     HideNameText = "COSMIC HUB",
     HideNameOriginal = nil,
     -- MISC
@@ -486,6 +486,7 @@ _G.Roooor_FPSPing = FPSPingConfig
 
 _G.ToggleStates = _G.ToggleStates or {}
 _G.SliderStates = _G.SliderStates or {}
+_G.DropdownStates = _G.DropdownStates or {}
 
 ESP = _G.Roooor_ESP or {
     Survivor = true, Killer = true, Generator = true,
@@ -598,7 +599,7 @@ print("🎥 FOV: 90 (ON)")
 print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: ACTIVE")
 print("🎥 FOV Bind: ACTIVE")
-print("🫥 Hide Name: COSMIC HUB")
+print("🫥 Hide Name: OFF (default)")
 print("⚡ ESP Gen Mode: Classic / Bar (angka di dalam bar)")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
@@ -876,7 +877,6 @@ function applyFire()
     end
 end
 
--- OPT: 0.4 → 0.6 (rainbow fire tetep smooth)
 task.spawn(function()
     while task.wait(0.6) do
         if S.FireOn and LP.Character then
@@ -1067,38 +1067,58 @@ task.spawn(function()
     end
 end)
 
--- 🫥 HIDE NAME (Nama jadi "COSMIC HUB")
+-- 🫥 HIDE NAME (Cuma visual di layar lu, gak ngaruh ke orang lain)
 function applyHideName(enable, text)
     text = text or "COSMIC HUB"
-    if not S.HideNameOriginal then
-        S.HideNameOriginal = LP.DisplayName
-    end
-
-    pcall(function()
-        if enable then
-            LP.DisplayName = text
-        else
-            LP.DisplayName = S.HideNameOriginal
-        end
-    end)
 
     local char = LP.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
+    if not char then return end
+
+    local head = char:FindFirstChild("Head")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+
+    if enable then
         if hum then
-            if enable then
-                hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-            else
-                hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
-            end
+            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
         end
-        local head = char:FindFirstChild("Head")
+
         if head then
             for _, v in pairs(head:GetChildren()) do
-                if v:IsA("BillboardGui") then
-                    v.Enabled = not enable
+                if v:IsA("BillboardGui") and v.Name ~= "CosmicHideNameTag" then
+                    v.Enabled = false
                 end
             end
+
+            local existing = head:FindFirstChild("CosmicHideNameTag")
+            if existing then existing:Destroy() end
+
+            local bb = Instance.new("BillboardGui")
+            bb.Name = "CosmicHideNameTag"
+            bb.Size = UDim2.new(0, 120, 0, 30)
+            bb.AlwaysOnTop = true
+            bb.StudsOffset = Vector3.new(0, 2.5, 0)
+            bb.Adornee = head
+            bb.Parent = head
+
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(1, 0, 1, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+            lbl.TextStrokeTransparency = 0
+            lbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            lbl.Font = Enum.Font.GothamBold
+            lbl.TextSize = 14
+            lbl.Parent = bb
+        end
+    else
+        if hum then
+            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+        end
+
+        if head then
+            local existing = head:FindFirstChild("CosmicHideNameTag")
+            if existing then existing:Destroy() end
         end
     end
 end
@@ -1108,15 +1128,19 @@ task.spawn(function()
         if not S.HideName then continue end
         local char = LP.Character
         if not char then continue end
-        if LP.DisplayName ~= S.HideNameText then
-            pcall(function() LP.DisplayName = S.HideNameText end)
-        end
+
         local head = char:FindFirstChild("Head")
         if head then
             for _, v in pairs(head:GetChildren()) do
-                if v:IsA("BillboardGui") and v.Enabled then
+                if v:IsA("BillboardGui")
+                   and v.Name ~= "CosmicHideNameTag"
+                   and v.Enabled then
                     v.Enabled = false
                 end
+            end
+
+            if not head:FindFirstChild("CosmicHideNameTag") then
+                pcall(function() applyHideName(true, S.HideNameText) end)
             end
         end
     end
@@ -1319,7 +1343,7 @@ function applySky(skyName)
     sky.SkyboxUp = ids.Up or ids.Bk
     sky.Parent = Lighting
 
-    print("[SKY] ✅ Applied:", skyName)
+    print("[SKY] Applied:", skyName)
 end
 
 -- MISC UTILITY
@@ -1433,7 +1457,8 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
+print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")
+print("🫥 Hide Name: local only (gak ngaruh orang lain)")-- =========================================================
 -- SECTION 4/12 : ESP + AUTO PARRY GACOR + MOONWALK + HITBOX
 -- =========================================================
 
@@ -3904,7 +3929,7 @@ local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(1, -80, 1, 0)
 hTitle.Position = UDim2.new(0, 16, 0, 0)
 hTitle.BackgroundTransparency = 1
-hTitle.Text = "✨ COSMIC"
+hTitle.Text = "COSMIC"
 hTitle.TextColor3 = C.FIRE_BRIGHT
 hTitle.TextSize = 13
 hTitle.Font = Enum.Font.GothamBlack
@@ -3917,7 +3942,7 @@ local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -30, 0.5, -11)
 closeBtn.BackgroundColor3 = C.PANEL2
-closeBtn.Text = "✕"
+closeBtn.Text = "X"
 closeBtn.TextColor3 = C.RED
 closeBtn.TextSize = 11
 closeBtn.Font = Enum.Font.GothamBlack
@@ -4255,6 +4280,7 @@ function btn(name, cb)
     end)
 end
 
+-- 🆕 DROPDOWN DENGAN PERSISTENT STATE
 function drp(name, options, def, cb)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, -4, 0, 28)
@@ -4276,9 +4302,15 @@ function drp(name, options, def, cb)
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = f
 
-    local idx = 1
-    for i, o in ipairs(options) do
-        if o == def then idx = i end
+    -- 🆕 Persistent dropdown state
+    _G.DropdownStates = _G.DropdownStates or {}
+    local savedIdx = _G.DropdownStates[name]
+    local idx = savedIdx or 1
+    if not savedIdx then
+        for i, o in ipairs(options) do
+            if o == def then idx = i end
+        end
+        _G.DropdownStates[name] = idx
     end
     local cur = options[idx]
 
@@ -4286,7 +4318,7 @@ function drp(name, options, def, cb)
     v.Size = UDim2.new(0.5, -24, 1, 0)
     v.Position = UDim2.new(0.5, 0, 0, 0)
     v.BackgroundTransparency = 1
-    v.Text = tostring(cur) .. " ▶"
+    v.Text = tostring(cur) .. " >"
     v.TextColor3 = C.ACC2
     v.TextSize = 8
     v.Font = Enum.Font.GothamBold
@@ -4303,9 +4335,17 @@ function drp(name, options, def, cb)
         idx = idx + 1
         if idx > #options then idx = 1 end
         cur = options[idx]
-        v.Text = tostring(cur) .. " ▶"
+        _G.DropdownStates[name] = idx
+        v.Text = tostring(cur) .. " >"
         if cb then pcall(cb, cur) end
     end)
+
+    -- 🆕 Pas re-create, panggil callback biar state sinkron
+    if cb and savedIdx then
+        task.defer(function()
+            pcall(cb, cur)
+        end)
+    end
 end
 
 activeTab = nil
@@ -4414,7 +4454,8 @@ closeBtn.MouseButton1Click:Connect(function()
     playToggleSound()
 end)
 
-print("✅ [6/12] COSMIC - GUI + Tombol + Panel Loaded")-- =========================================================
+print("✅ [6/12] COSMIC - GUI + Tombol + Panel Loaded")
+print("🆕 Dropdown persistent (gak reset pas ganti tab)")-- =========================================================
 -- SECTION 7/12 : TAB UI PART 1
 -- =========================================================
 
@@ -4569,14 +4610,14 @@ makeTab("Survivor", "🏃", 1, function()
         teleportToFinishLine()
     end)
 
-    -- 🫥 HIDE NAME (TAB SURVIVOR)
+    -- 🫥 HIDE NAME (TAB SURVIVOR) - DEFAULT OFF
     sec("Hide Name", "🫥")
-    tog("Hide Name -> COSMIC HUB", true, function(s)
+    tog("Hide Name -> COSMIC HUB", false, function(s)
         S.HideName = s
         applyHideName(s, S.HideNameText)
     end)
     lbl("Nama lu keliatan 'COSMIC HUB'", C.FIRE_BRIGHT)
-    lbl("Client-side only (layar lu doang)", C.DIM)
+    lbl("Cuma di layar lu (client-side)", C.DIM)
 end)
 
 -- TAB 2: KILLER
@@ -4836,7 +4877,7 @@ end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
 print("Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
-print("Hide Name: Tab Survivor")
+print("Hide Name: Tab Survivor (default OFF)")
 print("ESP Gen Mode: Classic / Bar (bar + angka, NO emoji)")
 print("Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2

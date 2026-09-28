@@ -421,7 +421,6 @@ end)
 _G.RoooorSavedStates = _G.RoooorSavedStates or {}
 
 _G.RoooorS = _G.RoooorS or {
-    -- 🔥 AUTO ON
     FireOn = true, FireType = "CosmicFire", FireSize = 5,
     ParryCircle = true, ParryCircleSize = 12,
     WalkSpeed = false, WalkSpeedVal = 16, WalkSpeedBoost = 0,
@@ -441,13 +440,10 @@ _G.RoooorS = _G.RoooorS or {
     CrosshairStyle = "Plus", CrosshairColorMode = "Solid",
     CrosshairOffsetX = 0, CrosshairOffsetY = 0,
     ZoomOut = false, ZoomOutValue = 500,
-    -- 🔥 FOV AUTO ON 90
     FOV = 90, FOVEnabled = true,
     Fullbright = false, FullbrightVal = 50,
     NoFog = false, UltraHD = false,
-    -- 🔥 CONTRAST ON
     Contrast = true, ContrastVal = 0.3, SaturationVal = 0.2,
-    -- 🔥 SKY SUNSET HD
     SkyId = "SunsetHD",
     SkyAutoApplied = false,
     NoScreenEffects = false, LowGraphics = false, CleanSky = false,
@@ -462,18 +458,11 @@ _G.RoooorS = _G.RoooorS or {
     HDDepthField = false, HDAntiAliasing = false,
     FireBeamOn = false, FireBeamType = "Classic Beam",
     FireBeamColor = Color3.fromRGB(120, 60, 255),
-    -- 🔥 ESP GALAXY + SIZE 9.35
     ESPNameMode = "Galaxy", ESPNameSize = 9.35,
-    -- 🔥 ESP GENERATOR MODE (Classic / Bar)
     ESPGenMode = "Classic",
     ESPGenBarSize = 80,
     ESPGenBarHeight = 14,
     ESPGenBarTextSize = 10,
-    -- 🫥 HIDE NAME (OFF default)
-    HideName = false,
-    HideNameText = "COSMIC HUB",
-    HideNameOriginal = nil,
-    -- MISC
     KillFeed = false,
     StunNotify = false,
     AutoEscapeGate = false, AutoEscapeRange = 50,
@@ -598,9 +587,7 @@ print("🎨 Contrast: ON")
 print("🎥 FOV: 90 (ON)")
 print("🛡️ Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
 print("🎥 Camera Fix: ACTIVE")
-print("🎥 FOV Bind: ACTIVE")
-print("🫥 Hide Name: OFF (default)")
-print("⚡ ESP Gen Mode: Classic / Bar (angka di dalam bar)")-- =========================================================
+print("📊 ESP Gen Mode: Classic / Bar")-- =========================================================
 -- SECTION 2/12 : FIRE CONFIG + SKY + KILLER ANIMS
 -- =========================================================
 
@@ -1067,87 +1054,6 @@ task.spawn(function()
     end
 end)
 
--- 🫥 HIDE NAME (Cuma visual di layar lu, gak ngaruh ke orang lain)
-function applyHideName(enable, text)
-    text = text or "COSMIC HUB"
-
-    local char = LP.Character
-    if not char then return end
-
-    local head = char:FindFirstChild("Head")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-
-    if enable then
-        if hum then
-            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-        end
-
-        if head then
-            for _, v in pairs(head:GetChildren()) do
-                if v:IsA("BillboardGui") and v.Name ~= "CosmicHideNameTag" then
-                    v.Enabled = false
-                end
-            end
-
-            local existing = head:FindFirstChild("CosmicHideNameTag")
-            if existing then existing:Destroy() end
-
-            local bb = Instance.new("BillboardGui")
-            bb.Name = "CosmicHideNameTag"
-            bb.Size = UDim2.new(0, 120, 0, 30)
-            bb.AlwaysOnTop = true
-            bb.StudsOffset = Vector3.new(0, 2.5, 0)
-            bb.Adornee = head
-            bb.Parent = head
-
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, 0, 1, 0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = text
-            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-            lbl.TextStrokeTransparency = 0
-            lbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            lbl.Font = Enum.Font.GothamBold
-            lbl.TextSize = 14
-            lbl.Parent = bb
-        end
-    else
-        if hum then
-            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
-        end
-
-        if head then
-            local existing = head:FindFirstChild("CosmicHideNameTag")
-            if existing then existing:Destroy() end
-        end
-    end
-end
-
-task.spawn(function()
-    while task.wait(1) do
-        if not S.HideName then continue end
-        local char = LP.Character
-        if not char then continue end
-
-        local head = char:FindFirstChild("Head")
-        if head then
-            for _, v in pairs(head:GetChildren()) do
-                if v:IsA("BillboardGui")
-                   and v.Name ~= "CosmicHideNameTag"
-                   and v.Enabled then
-                    v.Enabled = false
-                end
-            end
-
-            if not head:FindFirstChild("CosmicHideNameTag") then
-                pcall(function() applyHideName(true, S.HideNameText) end)
-            end
-        end
-    end
-end)
-
-_G.Roooor_applyHideName = applyHideName
-
 -- HD VISUAL EXTRAS
 hdExtras = {}
 
@@ -1311,7 +1217,7 @@ function applyHDAntiAliasing(s)
     end
 end
 
--- APPLY SKY (FIX)
+-- APPLY SKY
 function applySky(skyName)
     for _, v in pairs(Lighting:GetChildren()) do
         if v:IsA("Sky") then v:Destroy() end
@@ -1457,8 +1363,7 @@ end
 
 _G.Roooor_updateFPSPing = updateFPSPing
 
-print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")
-print("🫥 Hide Name: local only (gak ngaruh orang lain)")-- =========================================================
+print("✅ [3/12] COSMIC - Fungsi Utama + HD Sky + Apply Sky Loaded")-- =========================================================
 -- SECTION 4/12 : ESP + AUTO PARRY GACOR + MOONWALK + HITBOX
 -- =========================================================
 
@@ -4609,15 +4514,6 @@ makeTab("Survivor", "🏃", 1, function()
     btn("TP ke Finish Line", function()
         teleportToFinishLine()
     end)
-
-    -- 🫥 HIDE NAME (TAB SURVIVOR) - DEFAULT OFF
-    sec("Hide Name", "🫥")
-    tog("Hide Name -> COSMIC HUB", false, function(s)
-        S.HideName = s
-        applyHideName(s, S.HideNameText)
-    end)
-    lbl("Nama lu keliatan 'COSMIC HUB'", C.FIRE_BRIGHT)
-    lbl("Cuma di layar lu (client-side)", C.DIM)
 end)
 
 -- TAB 2: KILLER
@@ -4877,8 +4773,7 @@ end)
 
 print("✅ [7/12] COSMIC - Survivor + Killer + ESP + Fire + Moonwalk Loaded")
 print("Auto Parry: Radius 13 | Debounce 0.4 | Face 0.2")
-print("Hide Name: Tab Survivor (default OFF)")
-print("ESP Gen Mode: Classic / Bar (bar + angka, NO emoji)")
+print("ESP Gen Mode: Classic / Bar")
 print("Auto Skill Check: 2 Mode (Instant + Perfect)")-- =========================================================
 -- SECTION 8/12 : TAB UI PART 2
 -- =========================================================
@@ -5351,14 +5246,9 @@ task.spawn(function()
         print("[AUTO] FOV applied:", S.FOV)
     end
 
-    if S.HideName then
-        pcall(function() applyHideName(true, S.HideNameText) end)
-        print("[AUTO] Hide Name applied:", S.HideNameText)
-    end
-
     print("[AUTO] ESP Name Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
     print("[AUTO] ESP Gen Mode:", S.ESPGenMode)
-    print("[AUTO] Auto Parry: Multi-Layer | Radius 11.5 | Debounce 0.10")
+    print("[AUTO] Auto Parry: Radius 13 | Debounce 0.4")
 end)
 
 -- AUTO RE-APPLY SAAT RESPAWN
@@ -5386,7 +5276,6 @@ LP.CharacterAdded:Connect(function(char)
     if S.HDSunRays then pcall(function() applyHDSunRays(true) end) end
     if S.HDDepthField then pcall(function() applyHDDepthField(true) end) end
     if S.HDAntiAliasing then pcall(function() applyHDAntiAliasing(true) end) end
-    if S.HideName then pcall(function() applyHideName(true, S.HideNameText) end) end
     if S.NoClip then
         task.wait(0.3)
         for _, v in pairs(char:GetDescendants()) do
@@ -5421,7 +5310,7 @@ UIS.InputBegan:Connect(function(input, gpe)
             pcall(function()
                 StarterGui:SetCore("SendNotification", {
                     Title = "Moonwalk",
-                    Text = "🔒 LOCKED!",
+                    Text = "LOCKED!",
                     Duration = 1
                 })
             end)
@@ -5434,7 +5323,7 @@ UIS.InputBegan:Connect(function(input, gpe)
         pcall(function()
             StarterGui:SetCore("SendNotification", {
                 Title = "Moonwalk",
-                Text = Moonwalk.Enabled and "🕺 ON" or "OFF",
+                Text = Moonwalk.Enabled and "ON" or "OFF",
                 Duration = 1.5
             })
         end)
@@ -5453,9 +5342,6 @@ task.spawn(function()
         if S.EightBitOn then
             pcall(function() apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight) end)
         end
-        if S.HideName then
-            pcall(function() applyHideName(true, S.HideNameText) end)
-        end
         if AutoParry.Enabled then pcall(AP_ScanKillers) end
         if SkillCheck.Enabled then pcall(startSkillCheck) end
         if FastVault.Enabled then
@@ -5469,10 +5355,7 @@ print("🔥 Fire:", S.FireType, "(auto ON)")
 print("🔷 Sky:", S.SkyId, "(auto ON)")
 print("🎨 Contrast:", S.Contrast, "(auto ON)")
 print("🎥 FOV:", S.FOV, "(auto ON)")
-print("🫥 Hide Name:", S.HideNameText)
-print("🌈 ESP Mode:", S.ESPNameMode, "| Size:", S.ESPNameSize)
-print("⚡ ESP Gen Mode:", S.ESPGenMode)
-print("🛡️ Auto Parry: Radius 11.5 | Debounce 0.10")-- =========================================================
+print("🛡️ Auto Parry: Radius 13 | Debounce 0.4")-- =========================================================
 -- SECTION 10/12 : LOGIC FITUR BARU + FIX FOV BIND
 -- =========================================================
 
@@ -6217,4 +6100,125 @@ end)
 
 print("✅ [12/12] COSMIC - AIMBOT TAB Loaded")
 print("🎯 Aimbot: Target Survivor | Radius max 100")
-print("👁️ Floating GUI: Toggle di tab Aimbot")
+print("👁️ Floating GUI: Toggle di tab Aimbot")-- =========================================================
+-- SECTION 13/13 : ANTI-ILANG MENU + AUTO RECREATE
+-- =========================================================
+
+pcall(function()
+    if gui then gui.ResetOnSpawn = false end
+    if killFeedGui then killFeedGui.ResetOnSpawn = false end
+    if mwBtnGui then mwBtnGui.ResetOnSpawn = false end
+    if crosshairGui then crosshairGui.ResetOnSpawn = false end
+    if fpsPingGui then fpsPingGui.ResetOnSpawn = false end
+    if loadingGui then loadingGui.ResetOnSpawn = false end
+end)
+
+function RecreateAllGUI()
+    if not gui or not gui.Parent then
+        local existing = PG:FindFirstChild("CosmicHub")
+        if existing then
+            gui = existing
+            gui.ResetOnSpawn = false
+        else
+            warn("[RECREATE] CosmicHub ilang total!")
+        end
+    end
+
+    if not fpsPingGui or not fpsPingGui.Parent then
+        local existing = PG:FindFirstChild("CosmicFPSPing")
+        if existing then
+            fpsPingGui = existing
+            fpsPingGui.ResetOnSpawn = false
+        else
+            pcall(createFPSPingGui)
+        end
+    end
+
+    if not mwBtnGui or not mwBtnGui.Parent then
+        local existing = PG:FindFirstChild("MW_BottomBtn")
+        if existing then
+            mwBtnGui = existing
+            mwBtnGui.ResetOnSpawn = false
+        end
+    end
+
+    if not killFeedGui or not killFeedGui.Parent then
+        local existing = PG:FindFirstChild("CosmicKillFeed")
+        if existing then
+            killFeedGui = existing
+            killFeedGui.ResetOnSpawn = false
+        end
+    end
+
+    if crosshairGui and not crosshairGui.Parent then
+        crosshairGui = nil
+    end
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        pcall(RecreateAllGUI)
+    end
+end)
+
+LP.CharacterAdded:Connect(function(char)
+    task.wait(2)
+    pcall(function()
+        if S.FireOn then applyFire() end
+        if S.Korblox then
+            applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale)
+        end
+        if S.EightBitOn then
+            apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight)
+        end
+        if S.Headless then applyHeadless(true) end
+        if S.FOVEnabled then applyFOV() end
+        if S.SkyId and S.SkyId ~= "Default" then applySky(S.SkyId) end
+        if S.Contrast then applyContrast() end
+        if AutoParry.Enabled then AP_ScanKillers() end
+        if SkillCheck.Enabled then startSkillCheck() end
+        if FastVault.Enabled then hookVault(char) end
+    end)
+
+    task.wait(0.5)
+    pcall(function()
+        if gui then gui.ResetOnSpawn = false end
+        if killFeedGui then killFeedGui.ResetOnSpawn = false end
+        if mwBtnGui then mwBtnGui.ResetOnSpawn = false end
+    end)
+end)
+
+local _lastPlaceId = game.PlaceId
+task.spawn(function()
+    while task.wait(2) do
+        pcall(function()
+            if game.PlaceId ~= _lastPlaceId then
+                print("[PLACE-CHANGE] Pindah place!")
+                _lastPlaceId = game.PlaceId
+
+                task.wait(3)
+                pcall(RecreateAllGUI)
+
+                pcall(function()
+                    if S.FireOn then applyFire() end
+                    if S.Korblox then
+                        applyKorblox(true, "Pencil", S.KorbloxYOffset, S.KorbloxScale)
+                    end
+                    if S.EightBitOn then
+                        apply8Bit(true, "Royal Crown", S.EightBitSize, S.EightBitHeight)
+                    end
+                    if S.Headless then applyHeadless(true) end
+                    if S.FOVEnabled then applyFOV() end
+                    if S.SkyId and S.SkyId ~= "Default" then applySky(S.SkyId) end
+                    if S.Contrast then applyContrast() end
+                    if AutoParry.Enabled then AP_ScanKillers() end
+                    if SkillCheck.Enabled then startSkillCheck() end
+                end)
+
+                print("[PLACE-CHANGE] Re-apply selesai!")
+            end
+        end)
+    end
+end)
+
+print("✅ [13/13] ANTI-ILANG MENU LOADED")

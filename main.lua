@@ -709,8 +709,7 @@ for _, id in ipairs({
     KillerAnims["rbxassetid://"..id] = true
 end
 
-print("✅ [2/13] COSMIC - Fire + Sky (18) + KillerAnims (28) Loaded")
-print("🎯 KillerAnims: 23 Original + 5 Fallens")-- =========================================================
+print("✅ [2/13] COSMIC - Fire + Sky (18) + KillerAnims (28) Loaded")-- =========================================================
 -- SECTION 3/13 : FUNGSI UTAMA + HD SKY + APPLY SKY
 -- =========================================================
 
@@ -1826,7 +1825,6 @@ function AP_PressParryButton()
     _oldAP_PressParryButton()
 
     task.delay(0.3, function()
-        -- Skip kalau user lagi buka menu
         if GuiService.SelectedObject then return end
 
         local cam = workspace.CurrentCamera
@@ -2058,7 +2056,7 @@ task.spawn(function()
             end
         end
 
-        -- 🆕 SKIP kalau GUI di-focus (user klik menu)
+        -- 🆕 SKIP kalau GUI di-focus
         if GuiService.SelectedObject then
             isStuck = false
         end
@@ -2068,7 +2066,7 @@ task.spawn(function()
             isStuck = false
         end
 
-        -- 🆕 SKIP kalau user lagi gerak kamera (mouse lock center)
+        -- 🆕 SKIP kalau user lagi gerak kamera
         if UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then
             isStuck = false
         end
@@ -2086,9 +2084,7 @@ task.spawn(function()
             end
         end
     end
-end)
-
--- AP CIRCLE
+end)-- AP CIRCLE
 AP_parryCirclePart = nil
 AP_parryCircleAttachments = {}
 AP_parryCircleBeams = {}
@@ -2196,7 +2192,9 @@ function pressSpace()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
     task.wait()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-endTouchID = 8822
+end
+
+TouchID = 8822
 ActionPath = "Survivor-mob.Controls.action.check"
 SkillHeartbeat = nil
 busy = false
@@ -5019,6 +5017,7 @@ makeTab("Visual", "✨", 9, function()
 
     sec("Info", "ℹ️")
     lbl("Moonwalk: Tombol MW / Tekan V", C.FIRE_BRIGHT)
+    lbl("Unlock Camera: Tekan K", C.FIRE_BRIGHT)
     lbl("Auto Parry: Tab Survivor", C.FIRE_BRIGHT)
     lbl("Hitbox: Tab Hitbox", C.FIRE_BRIGHT)
     lbl("Aimbot: Tab Aimbot", C.FIRE_BRIGHT)
@@ -5430,7 +5429,6 @@ end)
 -- GABUNG SKY + FIRE AUTO-REAPPLY (2 → 1)
 task.spawn(function()
     while task.wait(8) do
-        -- Sky check
         if S.SkyId and S.SkyId ~= "Default" then
             local currentSky = nil
             for _, v in pairs(Lighting:GetChildren()) do
@@ -5443,7 +5441,6 @@ task.spawn(function()
                 pcall(function() applySky(S.SkyId) end)
             end
         end
-        -- Fire check
         if S.FireOn and LP.Character then
             local head = LP.Character:FindFirstChild("Head")
             if head and not head:FindFirstChild("RoooorFire") then
@@ -5507,8 +5504,15 @@ print("║     -> ESP Generator (Classic + Bar)     ║")
 print("║     -> Anti-AFK + Rejoin                 ║")
 print("║     -> FPS + Ping Counter                ║")
 print("╠══════════════════════════════════════════╣")
+print("║  CAMERA FIX (ANTI-LOCK)                  ║")
+print("║     -> Skip GUI Focus                    ║")
+print("║     -> Skip Parry Delay                  ║")
+print("║     -> Skip Mouse Movement               ║")
+print("║     -> Keybind K = Unlock                ║")
+print("╠══════════════════════════════════════════╣")
 print("║  ANTI-ILANG MENU (Section 13)            ║")
 print("║     -> ResetOnSpawn = false              ║")
+print("║     -> Force loop 2s                     ║")
 print("║     -> Recovery Loop                     ║")
 print("║     -> Respawn Re-apply                  ║")
 print("║     -> Place Change Detect               ║")
@@ -5526,7 +5530,8 @@ print("🎨 Contrast: ON")
 print("🔷 Sky: SunsetHD (auto ON)")
 print("🎥 FOV: 90 (auto ON)")
 print("🛡️ Auto Parry: Radius 15 | Debounce 0.2 | Face 0.7")
-print("⚡ Auto Skill Check: Fallens Style")-- =========================================================
+print("⚡ Auto Skill Check: Fallens Style")
+print("🎥 Camera Fix: Anti-Lock Active")-- =========================================================
 -- SECTION 12/13 : AIMBOT (TAB AIMBOT COSMIC)
 -- =========================================================
 
@@ -6050,7 +6055,6 @@ function RecreateAllGUI()
     end
 end
 
--- Loop cek tiap 1 detik
 task.spawn(function()
     while task.wait(1) do
         pcall(RecreateAllGUI)
